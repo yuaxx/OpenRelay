@@ -19,14 +19,14 @@ Please **do not open public GitHub issues or discussions for credential leaks, a
 
 Report privately through GitHub private vulnerability reporting:
 
-**<https://github.com/lidge-jun/opencodex/security/advisories/new>**
+**<https://github.com/yuaxx/OpenRelay/security/advisories/new>**
 
 Use GitHub Security Advisories or a private vulnerability report through the repository security page. Do not disclose vulnerabilities in public issues.
 
 ### Providing Reproducible Reports Without Secrets
 
 - **Never paste live credentials, API keys, OAuth session tokens, admin tokens, cookies, or account identifiers** into issue reports or communication channels.
-- Demonstrate the vulnerability with synthetic placeholders (e.g. `sk-ant-api03-sample-placeholder`, `test-account-id`).
+- Demonstrate the vulnerability with synthetic placeholders (e.g. `<synthetic-api-key>`, `test-account-id`).
 - Include exact affected version or commit SHA, minimal configuration shape, and reproduction steps.
 
 ## Credential Rotation Guidance
