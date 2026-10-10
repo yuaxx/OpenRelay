@@ -14,7 +14,7 @@ description: 기본 provider 선택, model 해석 순서, combo 별칭, 대상 �
 
 ## 모델 해석 순서
 
-opencodex는 요청된 model을 다음 순서로 해석합니다:
+OpenRelay는 요청된 model을 다음 순서로 해석합니다:
 
 1. 설정된 `policy/<id>` 또는 routing-profile 별칭입니다. policy evaluator를 실행해 선택된 후보로 routing합니다. 해석되지 않은 `policy/<id>`는 후속 규칙으로 넘어갑니다.
 2. 설정된 `<account-selector>/<native-openai-model>` 네임스페이스입니다. 매핑된 저장 Codex 계정으로만 routing하며, exact target이 잘못되었거나 사용할 수 없으면 fail closed합니다.
@@ -57,7 +57,7 @@ selector는 표시되지 않습니다. selector 검증, 충돌 규칙, privacy g
 Codex Auth 페이지에서 이 picker 동작을 opt-in할 수 있습니다. 비활성화하면 selector-qualified row를
 숨기고 일반 GPT row를 복원하지만 mapping과 exact `<selector>/<model>` routing은 유지되므로 다시
 활성화할 때 같은 공개 label이 돌아옵니다. mutation은 bounded catalog refresh보다 먼저 저장되며,
-`ocx sync` warning은 picker catalog convergence만 보류 중이고 routing 변경은 손실되지 않았음을 뜻합니다.
+`orl sync` warning은 picker catalog convergence만 보류 중이고 routing 변경은 손실되지 않았음을 뜻합니다.
 
 ## Combos (`config.combos`)
 
@@ -95,7 +95,7 @@ Codex Auth 페이지에서 이 picker 동작을 opt-in할 수 있습니다. 비�
 
 ### 카탈로그 적격성
 
-combo는 목록에 오를 수 없더라도 계속 직접 라우팅할 수 있습니다. `ocx sync`, `/v1/models`, 그리고 Codex picker는 다음 조건을 모두 만족할 때만 이를 나열합니다:
+combo는 목록에 오를 수 없더라도 계속 직접 라우팅할 수 있습니다. `orl sync`, `/v1/models`, 그리고 Codex picker는 다음 조건을 모두 만족할 때만 이를 나열합니다:
 
 - live metadata, registry hint, 또는 provider의 `modelContextWindows` / `contextWindow`에서 얻은 양수 `contextWindow`
 - 비어 있지 않은 `inputModalities` 교집합. 생략된 member value는 `["text"]`로 취급합니다.
@@ -106,7 +106,7 @@ context metadata가 없는 bare relay id이거나 modalities가 서로 겹치지
 
 명시적으로 요청된 `policy/<id>`(또는 설정된 별칭)가 고정된 후보 허용 목록에서 하드 능력 요구사항과 결정적·설명 가능한 점수로 선택합니다. 기존 모델 ID가 암시적으로 프로필을 통과하지 않습니다. `candidates`(명시적 허용 목록), 선택적 `alias`, `require`(`minContextWindow`, `minQuotaHeadroom`, `tools`, `imageInput`, `structuredOutput`, `localOnly`, `remoteAllowed`, `encryptedCodexTasks`, `reasoningEffort`, `serviceTier`), `optimize`(latency/health/cost/quota 가중치), `limits.maxEstimatedCostUsd`, `unknownEvidence`(allow/penalize/exclude)를 지원합니다. 알 수 없음은 0이나 무료가 되지 않습니다.
 
-CLI: `ocx route policy list`, `ocx route policy show <id>`, `ocx route policy dry-run <id> --model-context <tokens> --tools`, `ocx route policy evaluate <id>`.
+CLI: `orl route policy list`, `orl route policy show <id>`, `orl route policy dry-run <id> --model-context <tokens> --tools`, `orl route policy evaluate <id>`.
 
 콤보는 선택 가능한 전략(순서가 있는 `failover`, 부드러운 가중 `round-robin` 또는 `random` 분산, `least-used`, `reset-window`)을 사용하는 명시적인 대상 라우팅입니다. 구성된 전략이 대상을 결정하고, 재시도 가능한 실패가 발생하면 목록의 다음 대상으로 넘어갑니다. 정책 프로필은 후보 간 증거 기반 선택입니다.
 
@@ -119,7 +119,7 @@ CLI: `ocx route policy list`, `ocx route policy show <id>`, `ocx route policy dr
 
 반환되는 히스토리와 라우트 결정 페이로드는 마스킹된 요청 메타데이터만 노출합니다(예: 불투명한 `apiKeyId` 라벨). 자격 증명, 원본 프롬프트 본문, 공급자 시크릿은 포함하지 않습니다.
 
-CLI: `ocx logs explain <request-id>`, `ocx logs rebuild-index`, `ocx logs index-status`.
+CLI: `orl logs explain <request-id>`, `orl logs rebuild-index`, `orl logs index-status`.
 
 ## 마이그레이션
 

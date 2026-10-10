@@ -1,9 +1,9 @@
 ---
 title: 為什麼 v1 是預設子代理介面
-description: v2 加密任務限制會造成什麼問題、OpenCodex 為何改以 v1 發布，以及仍想使用 v2 時的選擇。
+description: v2 加密任務限制會造成什麼問題、OpenRelay 為何改以 v1 發布，以及仍想使用 v2 時的選擇。
 ---
 
-OpenCodex 安裝後，子代理介面預設為 **v1**。Dashboard、Models 與 Subagents 頁面在切換至 **base** 或 **v2** 前都會要求確認，並連結至本頁說明。CLI 不會提示。
+OpenRelay 安裝後，子代理介面預設為 **v1**。Dashboard、Models 與 Subagents 頁面在切換至 **base** 或 **v2** 前都會要求確認，並連結至本頁說明。CLI 不會提示。
 
 原因很明確：在 v2 上，由 ChatGPT 原生模型交給路由模型的任務，路由模型無法讀取。這恰好是最常見的委派方式，即 GPT 父代理啟動 Grok、Claude 或 GLM 子代理，而在 v2 上每次都會失敗。
 
@@ -24,11 +24,11 @@ OpenCodex 安裝後，子代理介面預設為 **v1**。Dashboard、Models 與 S
 
 ## 原因
 
-![兩條路徑比較相同的委派。v1 中 ChatGPT 父代理透過 OpenCodex 傳送明文任務，跨過供應商邊界後，路由子代理能讀取。v2 中父代理傳送由 ChatGPT 後端產生的 encrypted_content；OpenCodex 無法解密，任務停在供應商邊界，請求以 unreadable_encrypted_agent_task 失敗。](../../../../assets/subagent-v2-encrypted-task.svg)
+![兩條路徑比較相同的委派。v1 中 ChatGPT 父代理透過 OpenRelay 傳送明文任務，跨過供應商邊界後，路由子代理能讀取。v2 中父代理傳送由 ChatGPT 後端產生的 encrypted_content；OpenRelay 無法解密，任務停在供應商邊界，請求以 unreadable_encrypted_agent_task 失敗。](../../../../assets/subagent-v2-encrypted-task.svg)
 
-在 v1 上，父代理會以純文字送出子代理任務。OpenCodex 能讀取並路由，子代理也能收到可執行的內容。
+在 v1 上，父代理會以純文字送出子代理任務。OpenRelay 能讀取並路由，子代理也能收到可執行的內容。
 
-在 v2 上，父代理送出的任務是由 ChatGPT 後端產生的 `encrypted_content`。金鑰留在該後端；OpenCodex 從未持有，所以代理無從解密或重寫。這個值是真正的密文，而非旗標掩蓋下的明文。因此這是結構性限制，不是設定錯誤，也無法靠代理端設定修復。
+在 v2 上，父代理送出的任務是由 ChatGPT 後端產生的 `encrypted_content`。金鑰留在該後端；OpenRelay 從未持有，所以代理無從解密或重寫。這個值是真正的密文，而非旗標掩蓋下的明文。因此這是結構性限制，不是設定錯誤，也無法靠代理端設定修復。
 
 有三種拓撲不受影響；了解它們有助於釐清失敗範圍：
 
@@ -46,7 +46,7 @@ OpenCodex 安裝後，子代理介面預設為 **v1**。Dashboard、Models 與 S
 
 傳送端問題仍未解決：[＃36376](https://github.com/openai/codex/issues/36376) 已在 Windows、macOS 與 Linux 的 CLI 0.146 至 0.151 版本重現；[＃37197](https://github.com/openai/codex/issues/37197) 直接指出缺少的部分是傳送端的交付政策。維護者尚未承諾修復，也沒有預計完成時間。
 
-OpenCodex 將影響記錄於 [＃92](https://github.com/lidge-jun/opencodex/issues/92)，並以不規劃處理結案：這個儲存庫無法修復，因此該 issue 用來指向上游工作，而非等待本專案維護者處理的任務。
+OpenRelay 將影響記錄於 [＃92](https://github.com/lidge-jun/opencodex/issues/92)，並以不規劃處理結案：這個儲存庫無法修復，因此該 issue 用來指向上游工作，而非等待本專案維護者處理的任務。
 
 ## 三種模式目前的行為
 
@@ -67,7 +67,7 @@ base 排在第二而非第一，因為其釘選讓大多數人用來*發起*委�
 
 兩種選擇都會被記錄，通知不會再出現。若未回答就關閉通知，下次開啟儀表板時仍會顯示。
 
-模式變更只適用於**新的** Codex 工作階段。選擇後請啟動新工作階段；若長時間執行的 App host 仍顯示舊介面，請執行 `ocx sync` 並重新啟動該介面。
+模式變更只適用於**新的** Codex 工作階段。選擇後請啟動新工作階段；若長時間執行的 App host 仍顯示舊介面，請執行 `orl sync` 並重新啟動該介面。
 
 ## 如果仍想使用 v2
 
@@ -89,8 +89,8 @@ base 排在第二而非第一，因為其釘選讓大多數人用來*發起*委�
 Dashboard、Models 與 Subagents 都提供同一個 v1/base/v2 開關，三個頁面在選擇 base 或 v2 前都會詢問。CLI 指令如下：
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
+orl v2 status
+orl v2 mode v1
 ```
 
 CLI 不會提示。這是同一項設定；選擇前請理解本頁所述的影響。

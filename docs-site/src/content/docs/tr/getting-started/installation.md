@@ -1,9 +1,9 @@
 ---
 title: Kurulum
-description: opencodex (ocx) proxy'sini ve ön koşullarını kurun, çalıştığını doğrulayın.
+description: OpenRelay (ocx) proxy'sini ve ön koşullarını kurun, çalıştığını doğrulayın.
 ---
 
-opencodex, `ocx` ve `opencodex` olmak üzere iki eşdeğer komut adı kurar. Her
+OpenRelay, `ocx` ve `opencodex` olmak üzere iki eşdeğer komut adı kurar. Her
 ikisi de aynı küçük yerel HTTP sunucusunu (Bun üzerinde oluşturulmuştur)
 başlatır. Model istekleri yönlendirme tarafından seçilen sağlayıcıya gider;
 isteğe bağlı vizyon ve web araması sidecar'ları, yönlendirilen bir model ihtiyaç
@@ -14,7 +14,7 @@ duyduğunda ChatGPT oturumunuzu da kullanabilir.
 | Gereksinim | Neden |
 | --- | --- |
 | **[Node](https://nodejs.org) ≥ 18** | `ocx` Bun çalışma zamanı üzerinde çalışır, ancak çalışma zamanı `npm install` sırasında otomatik olarak paketlenir — Bun'ı kendiniz kurmanız **gerekmez**. |
-| **[OpenAI Codex](https://openai.com/codex)** (CLI, App veya SDK) | opencodex'in önünde durduğu istemci. opencodex `$CODEX_HOME/config.toml` (varsayılan `~/.codex/config.toml`) dosyasına yazar. |
+| **[OpenAI Codex](https://openai.com/codex)** (CLI, App veya SDK) | OpenRelay'in önünde durduğu istemci. OpenRelay `$CODEX_HOME/config.toml` (varsayılan `~/.codex/config.toml`) dosyasına yazar. |
 | Bir sağlayıcı hesabı veya API anahtarı | Anthropic, xAI, Kimi, Ollama Cloud, OpenRouter, OpenAI uyumlu bir uç nokta veya ChatGPT oturumunuz. |
 
 ## Kurulum
@@ -41,7 +41,7 @@ sudo npm install -g --allow-scripts=bun @bitkyc08/opencodex
 Her iki komut takma adının da `PATH` üzerinde olduğunu doğrulayın:
 
 ```bash
-ocx --version
+orl --version
 opencodex --version
 ```
 
@@ -50,17 +50,17 @@ opencodex --version
 Kararlı `latest` kanalı; ChatGPT, OpenAI API anahtarı, OpenRouter ve deneysel
 Cursor rotaları için GPT-5.6 Sol/Terra/Luna katalog desteğini zaten içerir.
 Yukarı akış erişimi hala hesap geçişlidir; katalog girdileri tek başlarına
-erişim sağlamaz. Önizleme kanalını yalnızca yayınlanmamış opencodex
+erişim sağlamaz. Önizleme kanalını yalnızca yayınlanmamış OpenRelay
 derlemelerini test etmek için kullanın:
 
 ```bash
 npm install -g @bitkyc08/opencodex@preview
-ocx update --tag preview
+orl update --tag preview
 ```
 
 ## Kaynaktan çalıştırma
 
-opencodex'in kendisi üzerinde geliştirmeler yapmak için:
+OpenRelay'in kendisi üzerinde geliştirmeler yapmak için:
 
 ```bash
 git clone https://github.com/lidge-jun/opencodex.git
@@ -78,7 +78,7 @@ olarak `bun run dev:gui` ile çalıştırın.
 
 ## Neler oluşturulur?
 
-opencodex durumu `$OPENCODEX_HOME` (varsayılan `~/.opencodex`) altında tutulur.
+OpenRelay durumu `$OPENCODEX_HOME` (varsayılan `~/.opencodex`) altında tutulur.
 Codex entegrasyon dosyaları `$CODEX_HOME` (varsayılan `~/.codex`) altında yer
 alır.
 
@@ -87,16 +87,16 @@ alır.
 | `$OPENCODEX_HOME/config.json` | Sağlayıcılarınız, varsayılan sağlayıcı, port ve seçenekler. |
 | `$OPENCODEX_HOME/ocx.pid` | Çalışan proxy'nin PID'si (tek örnek koruması). |
 | `$OPENCODEX_HOME/runtime-port.json` | Canlı PID, ana bilgisayar adı ve port; `config.port` `0` olduğunda işletim sistemi tarafından atanan port da buna dahildir. |
-| `$OPENCODEX_HOME/auth.json` | Saklanan OAuth kimlik bilgileri (`ocx login` yaptığınızda). |
-| `$OPENCODEX_HOME/catalog-backup*.json` | opencodex düzenlemeden önce alınan Codex model kataloğu yedekleri. |
-| `$CODEX_HOME/config.toml` | Geri döngüde opencodex işaretçi sahipliğindeki kök `openai_base_url` ekler; geri döngü olmayan bağlantılar `model_provider = "opencodex"` artı `[model_providers.opencodex]` kullanır, böylece Codex API kimlik doğrulama başlığını gönderebilir. |
+| `$OPENCODEX_HOME/auth.json` | Saklanan OAuth kimlik bilgileri (`orl login` yaptığınızda). |
+| `$OPENCODEX_HOME/catalog-backup*.json` | OpenRelay düzenlemeden önce alınan Codex model kataloğu yedekleri. |
+| `$CODEX_HOME/config.toml` | Geri döngüde OpenRelay işaretçi sahipliğindeki kök `openai_base_url` ekler; geri döngü olmayan bağlantılar `model_provider = "opencodex"` artı `[model_providers.opencodex]` kullanır, böylece Codex API kimlik doğrulama başlığını gönderebilir. |
 | `$CODEX_HOME/opencodex.config.toml` | Ana Codex yapılandırmasının yanında yazılan yedek/referans profili. |
 | `$CODEX_HOME/opencodex-catalog.json` | Codex tarafından kullanılan senkronize edilmiş yerel ve yönlendirilen model kataloğu. |
 
 :::note
-opencodex asla Codex yapılandırmanızı silmez. Her enjeksiyon tersine
-çevrilebilir — `ocx stop`, `ocx restore` veya `ocx eject`, tam olarak
-opencodex'in eklediği satırları kaldırır ve yerel Codex'i geri yükler.
+OpenRelay asla Codex yapılandırmanızı silmez. Her enjeksiyon tersine
+çevrilebilir — `orl stop`, `orl restore` veya `orl eject`, tam olarak
+OpenRelay'in eklediği satırları kaldırır ve yerel Codex'i geri yükler.
 :::
 
 ## Sonraki Adımlar

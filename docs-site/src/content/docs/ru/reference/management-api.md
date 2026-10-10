@@ -14,7 +14,7 @@ Management API — это control plane opencodex. Дашборд на `http://l
 ## Модель аутентификации
 
 У Management API свой admin credential, независимый от data-plane API-key'ов. При старте
-opencodex разрешает его в таком порядке:
+OpenRelay разрешает его в таком порядке:
 
 1. `OPENCODEX_ADMIN_AUTH_TOKEN`, если переменная задана.
 2. Сгенерированный токен `ocx_admin_*` в hardened secret file.
@@ -93,7 +93,7 @@ GUI-сессия в стиле loopback не выпускается.
 открывает диалог, который показывает окна действия и обменивает купон, ближайший
 к истечению срока. Диалог отправляет сгенерированный клиентом `operationId` и после
 таймаута прекращает отправку вместо повторной попытки, потому что обмен, запись
-журнала которого ещё открыта, выполнился бы снова. `ocx account grok-reset-coupons`
+журнала которого ещё открыта, выполнился бы снова. `orl account grok-reset-coupons`
 остаётся эквивалентом в терминале.
 
 Сбросы лимитов Claude аналогично доступны в **Providers > Anthropic > Accounts**. В строке каждого вошедшего аккаунта значок-билет показывает число оставшихся сбросов, а диалог использует один сброс после дополнительного подтверждения. Сброс восстанавливает 5-часовой и недельный лимиты, не меняя день недельного сброса. Если ответ на запрос не приходит, диалог сохраняет `operationId` и в течение десяти минут предлагает повторить попытку с тем же идентификатором — так восстанавливает запрос и сам клиент Claude Code. До этого момента новая операция с тем же грантом отклоняется. Использовать сброс можно только через дашборд: одного токена администратора недостаточно — ответом будет `403 session_required`.
@@ -344,7 +344,7 @@ Management-аутентификация доказывает доступ к п�
 | --- | --- | --- |
 | `GET /api/system/memory` | Вернуть скалярные метрики процесса, heap, stream, response-state, watchdog и active-turn | — |
 | `POST /api/system/restart` | Начать restart процесса с учётом drain, не снимая client injection | Возвращает 202; повторные вызовы сообщают о текущем drain |
-| `POST /api/stop` | Остановить службу, восстановить native Codex, убрать managed Grok injection и выполнить drain прокси | 409 service ownership conflict; 409 `respawnable_service`, когда обёртка планировщика заданий Windows может перезапустить прокси, а вызывающая сторона — не `ocx stop` (ничего не изменяется); 409, когда установленный менеджер отказывается останавливаться; 409 `service_state_unknown`, когда состояние планировщика заданий не удаётся прочитать (ничего не изменяется; исправьте запрос и повторите) |
+| `POST /api/stop` | Остановить службу, восстановить native Codex, убрать managed Grok injection и выполнить drain прокси | 409 service ownership conflict; 409 `respawnable_service`, когда обёртка планировщика заданий Windows может перезапустить прокси, а вызывающая сторона — не `orl stop` (ничего не изменяется); 409, когда установленный менеджер отказывается останавливаться; 409 `service_state_unknown`, когда состояние планировщика заданий не удаётся прочитать (ничего не изменяется; исправьте запрос и повторите) |
 
 ### Делегирование аутентификации Codex
 
@@ -429,7 +429,7 @@ HTTP: 400 invalid/unsupported; 404 missing account; `oauth_mutation_busy` on loc
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

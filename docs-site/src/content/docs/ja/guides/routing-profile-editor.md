@@ -1,9 +1,9 @@
 ---
 title: ルーティングプロファイルエディター
-description: OpenCodex ダッシュボードでルーティングポリシーのプロファイルを作成、編集、検証、試行、削除します。
+description: OpenRelay ダッシュボードでルーティングポリシーのプロファイルを作成、編集、検証、試行、削除します。
 ---
 
-OpenCodex ダッシュボードの **Models → Routing** タブでは、`config.json` を手動編集せずに `config.routingProfiles` を管理できます。
+OpenRelay ダッシュボードの **Models → Routing** タブでは、`config.json` を手動編集せずに `config.routingProfiles` を管理できます。
 
 ## プロファイルを作成する
 

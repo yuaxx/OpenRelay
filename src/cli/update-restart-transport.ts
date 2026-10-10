@@ -115,7 +115,7 @@ class AttestedSession {
             throw new Error(FAILURE);
           }
           // No end/flushHeaders/write, or credential header, before this socket check.
-          if (adminToken !== undefined) req.setHeader("X-OpenCodex-API-Key", adminToken);
+          if (adminToken !== undefined) req.setHeader("X-OpenRelay-API-Key", adminToken);
           req.end();
         } catch { req.destroy(new Error(FAILURE)); }
       });

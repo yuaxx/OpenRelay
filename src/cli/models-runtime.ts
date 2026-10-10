@@ -24,30 +24,30 @@ import { MAX_COST4_RATE } from "../usage/expected-prices";
 import { isValidCost4Rate } from "../usage/user-cost-overlays";
 
 const USAGE = `Usage:
-  ocx models display-name <provider/raw-model> (--set <text> | --clear) [--json]
-  ocx models order status|reset [--json]
-  ocx models order set (--models <csv> | --mode <default|alphabetical|provider|most-used>) [--json]
-  ocx models live [--provider <name>] [--free-only] [--json]
-  ocx models price <provider/model> [--json]
-  ocx models set-price <provider/model> --input N --output N [--cache-read N] [--cache-write N] [--json]
-  ocx models set-price <provider/model> --auto [--json]
-  ocx models edit <custom-id> [--model-id <id>] [--display-name <name|->]
+  orl models display-name <provider/raw-model> (--set <text> | --clear) [--json]
+  orl models order status|reset [--json]
+  orl models order set (--models <csv> | --mode <default|alphabetical|provider|most-used>) [--json]
+  orl models live [--provider <name>] [--free-only] [--json]
+  orl models price <provider/model> [--json]
+  orl models set-price <provider/model> --input N --output N [--cache-read N] [--cache-write N] [--json]
+  orl models set-price <provider/model> --auto [--json]
+  orl models edit <custom-id> [--model-id <id>] [--display-name <name|->]
       [--context-window <tokens|0>] [--modalities <text,image,audio|->]
       [--reasoning-efforts <none,minimal,low,medium,high,xhigh,max,ultra|->]
       [--default-reasoning-effort <level|->] [--json]
-  ocx models set <provider/model> [--context-window <tokens|0|->]
+  orl models set <provider/model> [--context-window <tokens|0|->]
       [--modalities <text,image,audio|->]
       [--reasoning-efforts <none,minimal,low,medium,high,xhigh,max,ultra|"">|->]
       [--default-reasoning-effort <level|->] [--reset] [--json]
-  ocx models <enable|disable> <provider/model|native-model> [--native] [--json]
-  ocx models provider <name> <on|off> [--json]
-  ocx models selected <provider> [--set <id,id...>|--clear] [--json]
-  ocx models preset show [--provider <name>] [--json]
-  ocx models preset apply <provider> [--all] [--json]
-  ocx models new-policy [on|off] [--provider <name>] [--json]
-  ocx models new-arrivals [--json]
+  orl models <enable|disable> <provider/model|native-model> [--native] [--json]
+  orl models provider <name> <on|off> [--json]
+  orl models selected <provider> [--set <id,id...>|--clear] [--json]
+  orl models preset show [--provider <name>] [--json]
+  orl models preset apply <provider> [--all] [--json]
+  orl models new-policy [on|off] [--provider <name>] [--json]
+  orl models new-arrivals [--json]
 ${MODELS_CONTEXT_USAGE}
-  ocx models shadow <status|set> [model|-] [--enabled <on|off>] [--json]
+  orl models shadow <status|set> [model|-] [--enabled <on|off>] [--json]
 
 Prices are USD per 1M tokens. Omitted cache rates default to 0.
 Price selectors use the exact upstream model ID after the first slash.`;
@@ -243,7 +243,7 @@ async function edit(argv: string[], deps: RuntimeApiDeps): Promise<void> {
   } catch (error) {
     if (error instanceof RuntimeApiError && error.status === 404 && unknownCustomModelId(error.body)) {
       throw new RuntimeApiError(
-        `No custom model has id ${id}. Edits address the custom-model id, not the provider/model slug; list the ids with: ocx models list-custom`,
+        `No custom model has id ${id}. Edits address the custom-model id, not the provider/model slug; list the ids with: orl models list-custom`,
         404,
         error.body,
       );
@@ -341,7 +341,7 @@ async function setModelSettings(argv: string[], deps: RuntimeApiDeps): Promise<v
     // A non-retryable skip means there is no managed Codex catalog to refresh, which is normal.
     ...(result?.saved && (result.catalogRefresh?.status === "failed"
       || (result.catalogRefresh?.status === "skipped" && result.catalogRefresh.retryable === true))
-      ? ["Settings saved, but the Codex model catalog did not refresh. Run `ocx sync` so Codex picks up the change."] : []),
+      ? ["Settings saved, but the Codex model catalog did not refresh. Run `orl sync` so Codex picks up the change."] : []),
   ]);
 }
 

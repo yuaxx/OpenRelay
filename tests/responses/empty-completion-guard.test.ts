@@ -452,7 +452,7 @@ describe("#2472 an empty turn is observable even when the retry guard is off", (
     // fabricate log records it never produced.
     const notice = emptyCompletionNotice(
       "fixture",
-      "model\r\n[opencodex] forged: injected\u001b[31m",
+      "model\r\n[openrelay] forged: injected\u001b[31m",
     );
 
     expect(notice).not.toContain("\n");

@@ -21,7 +21,7 @@ export function parseInitPort(raw: string): number | null {
 
 class InitCancelledError extends Error {
   constructor(readonly exitCode: 1 | 130) {
-    super(exitCode === 130 ? "Setup cancelled." : "stdin reached EOF while waiting for input. Re-run `ocx init` in an interactive terminal.");
+    super(exitCode === 130 ? "Setup cancelled." : "stdin reached EOF while waiting for input. Re-run `orl init` in an interactive terminal.");
   }
 }
 
@@ -88,7 +88,7 @@ export function buildInitProviders(): InitProvider[] {
 
 const KIND_HEADING: Record<InitKind, string> = {
   forward: "ChatGPT login",
-  oauth: "Account login (OAuth — then run: ocx login <id>)",
+  oauth: "Account login (OAuth — then run: orl login <id>)",
   key: "API key (paste a key from the provider's dashboard)",
   local: "Local servers (usually no key)",
 };
@@ -123,7 +123,7 @@ export function cleanupOpenAiTierBackupAfterInit(configPath = getConfigPath()): 
 export async function runInit(): Promise<void> {
   const initial = observeInitialConfigState();
   if (initial === "exists") {
-    console.log(`Keeping existing config at ${redactUserPath(getConfigPath())}. Use \`ocx config\` or the dashboard to update it.`);
+    console.log(`Keeping existing config at ${redactUserPath(getConfigPath())}. Use \`orl config\` or the dashboard to update it.`);
     return;
   }
   if (initial === "invalid") {
@@ -134,7 +134,7 @@ export async function runInit(): Promise<void> {
   const prompt = createPrompt();
   let configCreated = false;
   try {
-    console.log("\n🔧 opencodex (ocx) setup\n");
+    console.log("\n🔧 OpenRelay (orl) setup\n");
 
     const providers = pinSponsorsWithinKind(buildInitProviders());
     printMenu(providers);
@@ -236,7 +236,7 @@ export async function runInit(): Promise<void> {
     // preserved by renaming it out of the collision path (sol review 260722).
     cleanupOpenAiTierBackupAfterInit();
     console.log(`\n✅ Config saved to ${redactUserPath(getConfigPath())}`);
-    if (oauthHint) console.log(`🔐 Authenticate this provider with:  ocx login ${providerName}`);
+    if (oauthHint) console.log(`🔐 Authenticate this provider with:  orl login ${providerName}`);
 
     const injectAnswer = await prompt.ask("Inject into Codex config.toml? [Y/n]: ");
     prompt.throwIfCancelled();
@@ -267,7 +267,7 @@ export async function runInit(): Promise<void> {
       }
     }
 
-    console.log(`\n🚀 Setup complete! Run 'ocx start' to start the proxy.`);
+    console.log(`\n🚀 Setup complete! Run 'orl start' to start the proxy.`);
     // Said after the autostart choice, because the choice is what decides whether it applies.
     // Setup otherwise ends on a success line while leaving a restart dependency unmentioned.
     try {

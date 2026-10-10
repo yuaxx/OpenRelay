@@ -384,8 +384,11 @@ export default function App() {
       title={t("nav.goHome")}
       {...(page === "dashboard" ? { "aria-current": "page" as const } : {})}
     >
-      <span className="brand-logo" role="img" aria-label={t("app.logoAria")} />
-      <span className="name">opencodex</span>
+      <svg className="brand-logo or-relay-mark" viewBox="0 0 28 28" role="img" aria-label={t("app.logoAria")}>
+        <path d="M7 7h9a5 5 0 0 1 0 10h-4M21 21h-9a5 5 0 0 1 0-10h4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="7" cy="7" r="3" fill="currentColor" /><circle cx="21" cy="21" r="3" fill="currentColor" />
+      </svg>
+      <span className="name">OpenRelay</span>
       <span className="ver" title={displayedVersion}>v{displayedVersion}</span>
     </button>
   );
@@ -397,7 +400,7 @@ export default function App() {
   );
 
   return (
-    <div ref={appRef} className={`app${desktopShell ? " app--desktop" : ""}${desktopMac ? " app--macos" : ""}${navCollapsed ? " app--nav-collapsed" : ""}`}>
+    <div ref={appRef} className={`app openrelay-app${desktopShell ? " app--desktop" : ""}${desktopMac ? " app--macos" : ""}${navCollapsed ? " app--nav-collapsed" : ""}`}>
       <DesktopStarOnboarding apiBase={sharedBase} enabled={targetsSettled && !targets.connected} />
       {actionFeedback && (
         <ToastNotice tone={actionFeedback.tone} onDismiss={() => setActionFeedback(null)} dismissLabel={t("common.close")}>
@@ -542,6 +545,7 @@ export default function App() {
               openDesktopCliPage();
             }}
           />
+          <a className="or-attribution" href="https://github.com/lidge-jun/opencodex" target="_blank" rel="noopener noreferrer">{t("app.attribution")}</a>
         </div>
       </aside>
 

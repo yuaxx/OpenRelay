@@ -167,7 +167,7 @@ export async function resolveBaseUrl(deps: AccountDeps): Promise<string | null> 
 }
 
 export function proxyUnreachable(transportError?: string): number {
-  console.error("Proxy not reachable. Start it with 'ocx start' or 'ocx ensure'.");
+  console.error("Proxy not reachable. Start it with 'orl start' or 'orl ensure'.");
   // Naming the transport cause distinguishes "nothing is listening" from a refused
   // or reset connection, which is what made #2696-class breakage undiagnosable.
   if (transportError) console.error(`reason: ${transportError}`);
@@ -200,7 +200,7 @@ export function apiError(json: Record<string, unknown>, fallback: string, status
   if (hint && hint !== primary) lines.push(`hint: ${hint}`);
   for (const line of lines) console.error(line);
   if (json.cleanupRequired === true) {
-    console.error("Warning: native-login staging cleanup is still required; run 'ocx account main doctor'.");
+    console.error("Warning: native-login staging cleanup is still required; run 'orl account main doctor'.");
   }
   return status === 404 ? 4 : status === 409 ? 5 : 1;
 }

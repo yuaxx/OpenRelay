@@ -1,9 +1,9 @@
 ---
 title: 配置参考
-description: opencodex 配置的存放位置、如何应用编辑，以及各配置域的链接。
+description: OpenRelay 配置的存放位置、如何应用编辑，以及各配置域的链接。
 ---
 
-opencodex 会把持久化配置存放在 `$OPENCODEX_HOME/config.json`，通常是
+OpenRelay 会把持久化配置存放在 `$OPENCODEX_HOME/config.json`，通常是
 `~/.opencodex/config.json`。在 Windows 上，默认路径是
 `%USERPROFILE%\.opencodex\config.json`。
 
@@ -12,8 +12,8 @@ opencodex 会把持久化配置存放在 `$OPENCODEX_HOME/config.json`，通常�
 按任务选择合适的编辑渠道：
 
 - **仪表盘：** 使用 Web UI 进行有引导的 provider、model、agent、access 和 storage 设置。
-- **CLI：** `ocx init` 会创建初始文件，而 `ocx provider`、`ocx models`、
-  `ocx combo`、`ocx agent` 和 `ocx config` 等命令会更新或检查它们所负责的设置。
+- **CLI：** `orl init` 会创建初始文件，而 `orl provider`、`orl models`、
+  `orl combo`、`orl agent` 和 `orl config` 等命令会更新或检查它们所负责的设置。
 - **文件：** 对没有专门 UI 或 CLI 命令的字段，直接编辑 `config.json`。该文件必须保持为有效 JSON。
 
 仪表盘、管理 API 和所有会修改配置的 CLI 命令都会把内容写回同一个文件。优先使用这些
@@ -21,7 +21,7 @@ opencodex 会把持久化配置存放在 `$OPENCODEX_HOME/config.json`，通常�
 可能会用快照覆盖你在磁盘上的手工修改。在线保存会在这些路径有明确冲突保护时，合并外部修改过的
 `claudeCode` 和监听绑定字段，但这种保护并不覆盖所有子树。
 
-如果文件无法解析，opencodex 会将其备份为
+如果文件无法解析，OpenRelay 会将其备份为
 `config.json.invalid-<timestamp>`，在控制台警告，并以默认值启动。文件缺失时也会使用新安装默认值：
 一个 `openai` forward provider。
 
@@ -49,6 +49,6 @@ API key 请优先使用 `${ENV_VAR}` 引用。字面量 `apiKey`、`apiKeyPool[]
 在支持的地方请使用公开的 selector alias。
 
 :::note[原子写入]
-opencodex 会通过临时文件再重命名（`atomicWriteFile`）的方式写入托管的 `config.toml` 和 `opencodex-catalog.json` 文件。
-这可以避免在并发写入时留下半写入文件，例如 `ocx stop` 和代理 shutdown handler 同时恢复 Codex 的情况。
+OpenRelay 会通过临时文件再重命名（`atomicWriteFile`）的方式写入托管的 `config.toml` 和 `opencodex-catalog.json` 文件。
+这可以避免在并发写入时留下半写入文件，例如 `orl stop` 和代理 shutdown handler 同时恢复 Codex 的情况。
 :::

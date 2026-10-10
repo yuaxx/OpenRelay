@@ -96,9 +96,9 @@ ultérieurement.
 Ces avertissements ne bloquent jamais l’enregistrement. Si vous souhaitez remplacer le comportement
 de Codex, vous le pouvez ; l’avertissement permet simplement d’en faire une décision plutôt qu’un accident.
 
-## Instructions écrites en dehors d’opencodex
+## Instructions écrites en dehors d’OpenRelay
 
-Si `developer_instructions` existe déjà et n’a pas été écrit par opencodex, le panneau ne le
+Si `developer_instructions` existe déjà et n’a pas été écrit par OpenRelay, le panneau ne le
 remplacera pas. Il propose à la place d’importer le texte comme une couche : vous voyez d’abord la
 valeur existante, et rien n’est écrit avant votre confirmation.
 
@@ -116,7 +116,7 @@ paramètres de prompt avec lesquels elle a démarré.
 
 ## Ce que cette page lit, et ce qu’elle ne lit pas
 
-opencodex lit un seul fichier de configuration : votre `config.toml`. Codex résout ses paramètres à
+OpenRelay lit un seul fichier de configuration : votre `config.toml`. Codex résout ses paramètres à
 partir de plusieurs couches ; une valeur affichée ici correspond donc à ce que dit VOTRE fichier,
 et pas nécessairement à ce que Codex calcule finalement.
 
@@ -133,6 +133,6 @@ Elles se trouvent dans le `config.toml` de Codex, pas dans la configuration prop
 | `skills.include_instructions` | `true` | Compétences |
 | `developer_instructions` | non défini | Vos couches personnalisées, jointes dans l'ordre |
 
-L'écriture se fait ligne par ligne : vos commentaires et votre mise en forme sont conservés, et une clé qu'opencodex ne connaît pas est laissée telle quelle plutôt que supprimée.
+L'écriture se fait ligne par ligne : vos commentaires et votre mise en forme sont conservés, et une clé qu'OpenRelay ne connaît pas est laissée telle quelle plutôt que supprimée.
 
 Une clé absente est lue comme sa valeur par défaut, et non comme `false`. Le panneau affiche la valeur réellement présente dans votre fichier et indique lorsqu'une clé n'est pas définie.

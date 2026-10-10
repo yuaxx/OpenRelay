@@ -507,10 +507,10 @@ export function trackProviderRequestSlotBody(
       const who = slot.providerName === undefined ? "" : ` for provider ${JSON.stringify(redactSecretString(slot.providerName))}`;
       console.warn(
         expiryKind === "inactive"
-          ? `[opencodex] requestPacing${who} released a concurrency lease after `
+          ? `[openrelay] requestPacing${who} released a concurrency lease after `
             + REQUEST_PACING_BODY_INACTIVITY_MS
             + "ms of response body inactivity; the body was cancelled."
-          : `[opencodex] requestPacing${who} released a concurrency lease after `
+          : `[openrelay] requestPacing${who} released a concurrency lease after `
             + REQUEST_PACING_UNCONSUMED_BODY_MS
             + "ms because the provider response body was neither read nor cancelled; the body was cancelled.",
       );
@@ -539,7 +539,7 @@ export function trackProviderRequestSlotBody(
           // The deadline cancelled the source mid-stream; report the truncation as an
           // error instead of letting the cancelled read's done flag close the stream.
           controller.error(new Error(
-            "[opencodex] requestPacing cancelled the response body after its lease deadline",
+            "[openrelay] requestPacing cancelled the response body after its lease deadline",
           ));
           return;
         }

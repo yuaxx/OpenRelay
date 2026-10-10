@@ -3,7 +3,7 @@ title: 子代理介面（v1 / base / v2）
 description: 全域控制 Codex 在所有模型上生成和管理子代理的方式。
 ---
 
-opencodex 允許你為目錄中的所有模型選擇多代理協作介面。儀表板和 Models 頁面中的 **Sub-agent** 開關會全域控制這一設定。
+OpenRelay 允許你為目錄中的所有模型選擇多代理協作介面。儀表板和 Models 頁面中的 **Sub-agent** 開關會全域控制這一設定。
 
 :::note
 在 v2 介面（`multi_agent_v2`）上，子代理**預設**繼承父會話的模型：`fork_turns` 預設為 `all`，而全量歷史 fork 會拒絕覆蓋。自 v2.7.2 起，opencodex 注入的指引會教模型如何打破繼承 —— 將 `fork_turns` 設為 `"none"`（或如 `"3"` 的部分 fork）的 `spawn_agent` 呼叫可以傳入 `model` / `reasoning_effort` 引數；即使公開的工具 schema 中看不到這些引數，Codex 執行環境也會解析並應用。已知傳輸限制：當**原生**父代理 spawn 一個路由到**非原生** provider 的子代理時，Codex 用戶端可能只以後端加密的 `encrypted_content` 傳送 `NEW_TASK` 載荷（[#92](https://github.com/lidge-jun/opencodex/issues/92)）。opencodex 不會把這種無法讀取的任務轉發給任意外部 provider：直接路由通常回傳 HTTP 400 和錯誤碼 `unreadable_encrypted_agent_task`，但以 `allowEncryptedV2AgentTasks: true` 明確信任的直接金鑰驗證 Responses 路由可以原樣接收；組合路由仍會跳過無法解密的目標，並在存在可用目標時選擇規範的原生 ChatGPT 目標。恢復方法：異構 provider 委派改用 v1、選擇原生 ChatGPT 子代理、使用明確信任的 Responses relay，或將任務重新作為明文 v2 `agent_message` 內容傳送。另有預設停用的實驗性 `agentTaskRecovery`；它會增加 ChatGPT 配額用量與延遲，且依賴非公開後端行為。
@@ -12,7 +12,7 @@ opencodex 允許你為目錄中的所有模型選擇多代理協作介面。儀�
 ## What sub-agents are
 
 子代理是主代理為了專注任務而建立的一個獨立 Codex worker。它有自己的 context 與工具，因此多個
-獨立任務可以平行執行。opencodex 控制哪些 Codex 協作介面會暴露這些 worker、Codex 為它們提供哪些
+獨立任務可以平行執行。OpenRelay 控制哪些 Codex 協作介面會暴露這些 worker、Codex 為它們提供哪些
 模型，以及失敗的模型如何回退。它不會決定你的主代理何時必須委派。
 
 ## 模式
@@ -37,11 +37,11 @@ opencodex 允許你為目錄中的所有模型選擇多代理協作介面。儀�
 
 儀表板的 **子代理委託** 控制三個相關設定：
 
-- `injectionModel` 是 opencodex 指引中點名的偏好 worker 模型。
+- `injectionModel` 是 OpenRelay 指引中點名的偏好 worker 模型。
 - `injectionEffort` 是為該模型要求選用的 `reasoning_effort`。
 - `injectionPrompt` 取代內建的 v2 指引文字。
 
-`multiAgentGuidanceEnabled` 預設開啟，是 opencodex 撰寫的指引在兩個介面上的主開關。關閉它會同時
+`multiAgentGuidanceEnabled` 預設開啟，是 OpenRelay 撰寫的指引在兩個介面上的主開關。關閉它會同時
 抑制 v2 指定區塊與 v1 主動文字。
 
 這些是給主代理的指示，不是 proxy 端的 spawn 路由器。在 v2 上，全量歷史 fork 會繼承父模型並拒絕
@@ -57,35 +57,35 @@ opencodex 允許你為目錄中的所有模型選擇多代理協作介面。儀�
 | `{{roster}}` | 解析出的 picker 可見、介面相容名冊 |
 | `{{fallback}}` | 設定的全域 fallback 指引 |
 
-內建 v2 指引有 700 字元的預算。若會超過預算，opencodex 會先丟掉名冊而不是截斷核心 spawn 指示。
+內建 v2 指引有 700 字元的預算。若會超過預算，OpenRelay 會先丟掉名冊而不是截斷核心 spawn 指示。
 內建指引只在偏好模型、合格名冊或 fallback 鏈解析成功時觸發。設定了 `injectionModel` 就足以渲染
 自訂提示詞；若裸值無法唯一解析，`{{model}}` 會展開為空字串。
 
-在 v1 上，opencodex 只在 `max` 或 `ultra` 推理強度下注入與 v2 建議預設相同的主動委派指引。
+在 v1 上，OpenRelay 只在 `max` 或 `ultra` 推理強度下注入與 v2 建議預設相同的主動委派指引。
 僅改變委派的觸發條件：不再需要另外提出委派請求；使用者指示以及權限、任務範圍與協作工具規則仍然適用。
 v1 不會附加偏好模型、
 名冊、fallback 清單或自訂提示詞。
 
-預設關閉的 `syncCodexSubagentDefaults` 選項與指引無關。當 opencodex 擁有作用中的 Codex 路由時，
+預設關閉的 `syncCodexSubagentDefaults` 選項與指引無關。當 OpenRelay 擁有作用中的 Codex 路由時，
 sync 或 restart 可以把選定值寫成帶 marker 的 `[agents] default_subagent_model` 和
-`default_subagent_reasoning_effort` 項目，放進 Codex TOML。opencodex 只更新或移除帶有自己 marker 的
+`default_subagent_reasoning_effort` 項目，放進 Codex TOML。OpenRelay 只更新或移除帶有自己 marker 的
 欄位。若任一目標欄位為使用者所有，整對會保持不變而不部分寫入；有歧義的 TOML 會被拒絕而不寫入。
 外部供應商管理器與使用者擁有的根路由仍然保持權威。
 
 ## Fallback chains
 
-對生成的 worker，opencodex 建立這個優先順序：
+對生成的 worker，OpenRelay 建立這個優先順序：
 
 1. 請求的主要模型。
-2. opencodex 設定中 `subagentModelFallbackByModel` 的 per-model 鏈，以請求的主要模型為鍵。
-3. opencodex 設定中的全域 `subagentModelFallback` 清單。
+2. OpenRelay 設定中 `subagentModelFallbackByModel` 的 per-model 鏈，以請求的主要模型為鍵。
+3. OpenRelay 設定中的全域 `subagentModelFallback` 清單。
 
-Per-role fallback 鏈屬於 opencodex 設定，而不是 `$CODEX_HOME/agents/*.toml`。Codex 0.146+ 嚴格
+Per-role fallback 鏈屬於 OpenRelay 設定，而不是 `$CODEX_HOME/agents/*.toml`。Codex 0.146+ 嚴格
 反序列化 agent role 檔案，並把 `model_fallback` 當作未知欄位拒絕，導致整個 role 定義被跳過（#1190）。
-opencodex 仍可為了向後相容從 TOML 讀取舊版 `model_fallback` 列，但 `ocx doctor` 會對此發出警告，
+OpenRelay 仍可為了向後相容從 TOML 讀取舊版 `model_fallback` 列，但 `orl doctor` 會對此發出警告，
 而 Codex 本身會忽略受影響的 role。
 
-重複的模型 id 會被移除，同時保留第一次出現者。選擇期間，opencodex 會跳過已停用、無法路由、由已
+重複的模型 id 會被移除，同時保留第一次出現者。選擇期間，OpenRelay 會跳過已停用、無法路由、由已
 停用 provider 支撐、標記為不健康、在冷卻中、缺少可用 Pool 化 Codex 帳號，或超過設定配額閾值的
 候選。可用性探測會快取 `subagentModelFallbackPollMs`（預設 60 秒）。
 
@@ -99,7 +99,7 @@ Codex 可能只以後端加密的 `encrypted_content` 傳送 v2 原生→路由�
 後端讀取，但外部 provider 無法讀取。這是已知的
 [#92 限制](https://github.com/lidge-jun/opencodex/issues/92)。
 
-opencodex 會安全失敗，而不是轉發空或無法讀取的任務：
+OpenRelay 會安全失敗，而不是轉發空或無法讀取的任務：
 
 - 直接的非原生路由回傳 HTTP 400，帶有 `error.code = "unreadable_encrypted_agent_task"`，且不會回顯
   密文；但其金鑰驗證 Responses provider 透過 `allowEncryptedV2AgentTasks: true` 明確選擇加入時除外。
@@ -125,10 +125,10 @@ opencodex 會安全失敗，而不是轉發空或無法讀取的任務：
 ### CLI
 
 ```bash
-ocx v2 mode v1       # 強制所有模型使用 v1
-ocx v2 mode default  # 恢復上游固定值
-ocx v2 mode v2       # 強制所有模型使用 v2
-ocx v2 status        # 顯示目前模式和 Codex 功能開關
+orl v2 mode v1       # 強制所有模型使用 v1
+orl v2 mode default  # 恢復上游固定值
+orl v2 mode v2       # 強制所有模型使用 v2
+orl v2 status        # 顯示目前模式和 Codex 功能開關
 ```
 
 ### API
@@ -188,30 +188,30 @@ curl -X PUT http://localhost:10100/api/injection-model \
 ### 模式變更會影響執行中的工作階段嗎？
 
 不會。變更模式後請開啟新的 Codex 工作階段。若長時間執行的 App host 仍顯示過時的目錄狀態，請執行
-`ocx sync` 並重新啟動該 Codex 介面。
+`orl sync` 並重新啟動該 Codex 介面。
 
-### 當 opencodex 無法信任目錄時會發生什麼？
+### 當 OpenRelay 無法信任目錄時會發生什麼？
 
-opencodex 會將磁碟上的模型目錄與目前使用者擁有的每個 Codex app-server 啟動時間比較，產生四種狀態之一：
+OpenRelay 會將磁碟上的模型目錄與目前使用者擁有的每個 Codex app-server 啟動時間比較，產生四種狀態之一：
 
 | 狀態 | 意義 | v2 指引 |
 |---|---|---|
 | `fresh` | 每個 app-server 都在目錄寫入之後啟動 | 完整指引：偏好模型、roster、fallback |
 | `not_running` | 未偵測到 app-server | 完整指引 |
-| `stale` | 至少一個 app-server 早於目錄 | **不新增或覆寫 opencodex 撰寫的模型指引** |
-| `unknown` | 無法進行比較 | **不新增或覆寫 opencodex 撰寫的模型指引** |
+| `stale` | 至少一個 app-server 早於目錄 | **不新增或覆寫 OpenRelay 撰寫的模型指引** |
+| `unknown` | 無法進行比較 | **不新增或覆寫 OpenRelay 撰寫的模型指引** |
 
-對 `stale` 與 `unknown`，opencodex 會保留其自身的磁碟衍生宣稱——偏好模型、roster、fallback 與自訂指引——因為執行中的 Codex 可能無法生成磁碟目錄所廣告的內容。
+對 `stale` 與 `unknown`，OpenRelay 會保留其自身的磁碟衍生宣稱——偏好模型、roster、fallback 與自訂指引——因為執行中的 Codex 可能無法生成磁碟目錄所廣告的內容。
 
 它**不會**指示模型停止設定 `model` 或 `reasoning_effort`。該觀察對使用者擁有的每個 app-server 都是全域的，而入站請求不帶傳送者身分，因此無法將過時的 process 歸因於眼前的請求。基於此禁止覆寫會封鎖現用 `spawn_agent` 工具合法廣告的選項——而該 session 可能其實是新的。現用工具 schema 保持權威。
 
-`unknown` 不是 `stale` 的同義詞。它表示比較本身失敗——目錄時間戳不可讀、process 啟動時間不可讀或 process 列舉失敗——並由 `ocx doctor` 分開回報。`stale` 僅在每個偵測到的 Codex app-server 都在最後一次目錄寫入後啟動時才清除；它不一定會清除 `unknown`。
+`unknown` 不是 `stale` 的同義詞。它表示比較本身失敗——目錄時間戳不可讀、process 啟動時間不可讀或 process 列舉失敗——並由 `orl doctor` 分開回報。`stale` 僅在每個偵測到的 Codex app-server 都在最後一次目錄寫入後啟動時才清除；它不一定會清除 `unknown`。
 
 ### 推理強度
 
 可選的子代理推理強度儲存在 `injectionEffort` 中，只有同時設定注入模型時才有意義。它會向注入的 v2 指引加入 `reasoning_effort` 要求，但不會改變父會話的推理強度。在接受覆蓋的 fork 上，Codex 會直接應用傳給 `spawn_agent` 的 `reasoning_effort`。
 
-在 Codex 目錄中，`ultra` 的級別高於 `max`，並帶有自動委託語義；但 provider 永遠不會線上路上收到字面量 `ultra`。Codex 會在用戶端邊界將 `ultra` 轉成 `max`，隨後 opencodex 再確保 provider 收到有效值：
+在 Codex 目錄中，`ultra` 的級別高於 `max`，並帶有自動委託語義；但 provider 永遠不會線上路上收到字面量 `ultra`。Codex 會在用戶端邊界將 `ultra` 轉成 `max`，隨後 OpenRelay 再確保 provider 收到有效值：
 
 | 模型 | 線路上的 `max` | 選擇 `ultra` 後的線路值 |
 | --- | --- | --- |

@@ -34,7 +34,7 @@ export function clearAnthropicRefreshIntentBestEffort(provider: string, accountI
       ? clearOAuthRefreshIntentIfMatch(provider, accountId, expected)
       : clearOAuthRefreshIntent(provider, accountId, expected.generation);
   } catch {
-    console.warn("[opencodex] Anthropic refresh intent cleanup failed; preserving the durable replay guard.");
+    console.warn("[openrelay] Anthropic refresh intent cleanup failed; preserving the durable replay guard.");
     return false;
   }
 }
@@ -72,7 +72,7 @@ export async function clearAnthropicRefreshIntentForKnownFailure(
   try {
     cleared = clearOAuthRefreshIntentIfMatch(provider, accountId, marked);
   } catch {
-    console.warn("[opencodex] Anthropic refresh intent cleanup failed; retry-safe cleanup remains pending.");
+    console.warn("[openrelay] Anthropic refresh intent cleanup failed; retry-safe cleanup remains pending.");
     return false;
   }
   if (!cleared) throw new OAuthRefreshIntentIOError("clear-cleanup-pending",

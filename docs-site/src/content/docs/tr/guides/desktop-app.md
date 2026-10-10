@@ -1,9 +1,9 @@
 ---
 title: Masaüstü Uygulaması
-description: OpenCodex masaüstü uygulamasını macOS, Windows ve Linux üzerinde kurun ve kullanın.
+description: OpenRelay masaüstü uygulamasını macOS, Windows ve Linux üzerinde kurun ve kullanın.
 ---
 
-OpenCodex masaüstü uygulaması yerel bir sistem tepsisini web kontrol paneliyle birleştirir. Paketindeki CLI mevcut bir yerel proxy'yi bulur; uygulama paketindeki çalışma zamanını yalnızca mevcut bir proxy bulunmadığı kesinleşirse başlatır.
+OpenRelay masaüstü uygulaması yerel bir sistem tepsisini web kontrol paneliyle birleştirir. Paketindeki CLI mevcut bir yerel proxy'yi bulur; uygulama paketindeki çalışma zamanını yalnızca mevcut bir proxy bulunmadığı kesinleşirse başlatır.
 
 Kontrol paneli çözümlenen yerel proxy uç noktasından sunulur (varsayılan port `10100`). Masaüstü uygulaması, bu kontrol paneli ve paketindeki çalışma zamanı çevresinde yerel bir kabuktur.
 
@@ -40,11 +40,11 @@ Tepsi simgesi, AppIndicator destekleyen bir masaüstü ortamı gerektirir.
 
 ## İlk açılış
 
-Uygulama, paketindeki CLI'dan `ocx resolve --json` çalıştırmasını ister ve zaten çalışan erişilebilir bir yerel proxy varsa ona bağlanır. Paketindeki çalışma zamanını yalnızca CLI yokluğunu kanıtlarsa başlatır; belirsiz sonuç başlangıç hatası olarak gösterilir. Ardından kontrol paneli, uygulamanın web görünümünde çözümlenen geri döngü uç noktasında açılır. Oturum açılışında tepside gizli başlayan bir uygulama ise hafif başlangıç sayfasını korur ve kontrol panelini tepsiden ilk açtığınızda ya da uygulamayı yeniden başlattığınızda yükler.
+Uygulama, paketindeki CLI'dan `orl resolve --json` çalıştırmasını ister ve zaten çalışan erişilebilir bir yerel proxy varsa ona bağlanır. Paketindeki çalışma zamanını yalnızca CLI yokluğunu kanıtlarsa başlatır; belirsiz sonuç başlangıç hatası olarak gösterilir. Ardından kontrol paneli, uygulamanın web görünümünde çözümlenen geri döngü uç noktasında açılır. Oturum açılışında tepside gizli başlayan bir uygulama ise hafif başlangıç sayfasını korur ve kontrol panelini tepsiden ilk açtığınızda ya da uygulamayı yeniden başlattığınızda yükler.
 
 Gömülü kontrol paneli ile normal tarayıcınız arasında geçmek için tepsideki **Open dashboard** veya **Open in browser** eylemini kullanın. Tepsi, güncelleme denetimlerini de sunar.
 
-macOS’te kontrol panelini kapattığınızda uygulama menü çubuğunda çalışmaya devam eder. Proxy’yi yeniden başlatmadan kontrol panelini geri getirmek için OpenCodex’i Dock veya Finder üzerinden yeniden açın.
+macOS’te kontrol panelini kapattığınızda uygulama menü çubuğunda çalışmaya devam eder. Proxy’yi yeniden başlatmadan kontrol panelini geri getirmek için OpenRelay’i Dock veya Finder üzerinden yeniden açın.
 
 ## Tepside kullanım
 
@@ -70,11 +70,11 @@ Güncellemeler kurulmadan önce projenin imzalı güncelleyici açık anahtarıy
 
 ## Widget
 
-macOS uygulaması OpenCodex WidgetKit uzantısını içerir. Widget kurulumu ve yerel anlık görüntü ayrıntıları için [macOS Menü Çubuğu Uygulaması rehberine](/tr/guides/macos-menu-bar/) bakın.
+macOS uygulaması OpenRelay WidgetKit uzantısını içerir. Widget kurulumu ve yerel anlık görüntü ayrıntıları için [macOS Menü Çubuğu Uygulaması rehberine](/tr/guides/macos-menu-bar/) bakın.
 
 ## Kaldırma
 
-macOS'ta `OpenCodex.app` uygulamasını Applications klasöründen Çöp Sepeti'ne sürükleyin. Windows'ta OpenCodex'i **Installed apps** bölümünden kaldırın. Debian tabanlı Linux sistemlerinde şunu çalıştırın:
+macOS'ta `OpenCodex.app` uygulamasını Applications klasöründen Çöp Sepeti'ne sürükleyin. Windows'ta OpenRelay'i **Installed apps** bölümünden kaldırın. Debian tabanlı Linux sistemlerinde şunu çalıştırın:
 
 ```bash
 sudo apt remove opencodex

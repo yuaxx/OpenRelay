@@ -1,6 +1,6 @@
 ---
 title: Быстрый старт
-description: Настройте первого провайдера и направьте OpenAI Codex через opencodex тремя командами.
+description: Настройте первого провайдера и направьте OpenAI Codex через OpenRelay тремя командами.
 ---
 
 Это руководство проводит от чистой установки до запуска Codex с моделью не от OpenAI.
@@ -8,15 +8,15 @@ description: Настройте первого провайдера и напр�
 ## Автономный бинарный файл (без npm)
 
 Можно также использовать архив с бинарным файлом `ocx` и рантаймом Bun без npm.
-Распакуйте его, оставив каталог `gui/dist` рядом с бинарным файлом, и выполните `./ocx start`.
+Распакуйте его, оставив каталог `gui/dist` рядом с бинарным файлом, и выполните `./orl start`.
 
 ## 1. Запустите мастер настройки
 
 ```bash
-ocx init
+orl init
 ```
 
-`ocx init` проведёт вас по следующим шагам:
+`orl init` проведёт вас по следующим шагам:
 
 1. **Выбор провайдера** — выберите один из 103 встроенных пресетов реестра или `custom`, чтобы
    ввести базовый URL и адаптер вручную.
@@ -24,12 +24,12 @@ ocx init
 3. **Модель по умолчанию** — для провайдеров с ключом, локальных и `custom` примите значение из
    пресета или введите id модели.
 4. **Порт прокси** — по умолчанию `10100`.
-5. **Внедрить в Codex?** — при обычной loopback-настройке opencodex добавляет корневой
+5. **Внедрить в Codex?** — при обычной loopback-настройке OpenRelay добавляет корневой
    `openai_base_url` в `$CODEX_HOME/config.toml` (по умолчанию `~/.codex/config.toml`), чтобы
    встроенный провайдер `openai` в Codex указывал на прокси. При привязке к удалённым/LAN-адресам
    вместо этого используется отдельная запись провайдера с заголовком API-аутентификации.
 6. **Установить shim автозапуска?** — если включено, при запуске `codex` сначала выполняется
-   `ocx ensure`.
+   `orl ensure`.
 
 Результат сохраняется в `$OPENCODEX_HOME/config.json` (по умолчанию `~/.opencodex/config.json`).
 
@@ -44,32 +44,32 @@ API-ключу, OpenRouter и экспериментального адапте�
 ## 2. Запустите прокси
 
 ```bash
-ocx start            # defaults to port 10100
-ocx start --port 8080
+orl start            # defaults to port 10100
+orl start --port 8080
 ```
 
-При запуске opencodex:
+При запуске OpenRelay:
 
 - записывает свой PID в `~/.opencodex/ocx.pid` (и отказывается запускаться повторно),
 - обнаруживает живые модели там, где провайдер это поддерживает, и **синхронизирует нативные и
   маршрутизируемые записи в каталог моделей Codex**,
 - слушает `http://localhost:<port>/v1`.
 
-Если запрошенный порт занят, `ocx start` останавливается и сообщает, какой процесс его удерживает:
-если там отвечает opencodex, сначала выполните `ocx stop`; либо запустите прокси на свободном порту
-через `ocx start --port <port>`. Команда не переходит на другой порт сама — раньше из-за этого два
+Если запрошенный порт занят, `orl start` останавливается и сообщает, какой процесс его удерживает:
+если там отвечает OpenRelay, сначала выполните `orl stop`; либо запустите прокси на свободном порту
+через `orl start --port <port>`. Команда не переходит на другой порт сама — раньше из-за этого два
 прокси продолжали работать одновременно, а Codex перенаправлялся на более новый.
 
 Проверьте:
 
 ```bash
-ocx status
-ocx gui       # open the dashboard on the live port
+orl status
+orl gui       # open the dashboard on the live port
 ```
 
 ## 3. Используйте Codex
 
-Теперь Codex прозрачно общается с opencodex:
+Теперь Codex прозрачно общается с OpenRelay:
 
 ```bash
 codex "Refactor this function for readability"
@@ -86,7 +86,7 @@ codex -m "ollama-cloud/glm-5.2"      "Write a SQL migration"
 ## Выбор моделей подагентов (опционально)
 
 В свежей конфигурации в селекторе подагентов Codex представлены пять нативных моделей: `gpt-5.5`,
-`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna` и `gpt-6-astra`. Откройте `ocx gui`, чтобы
+`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna` и `gpt-6-astra`. Откройте `orl gui`, чтобы
 заменить или переупорядочить до пяти нативных или маршрутизируемых моделей. В панели управления
 также можно задать одну предпочитаемую модель подагента и уровень рассуждений. Раздел
 [Поверхность подагентов](/guides/sub-agent-surface/) поможет выбрать v1/base/v2 и понять, когда
@@ -97,8 +97,8 @@ codex -m "ollama-cloud/glm-5.2"      "Write a SQL migration"
 Некоторые провайдеры поддерживают полноценный вход в аккаунт (OAuth с автообновлением):
 
 ```bash
-ocx login xai          # or: anthropic, kimi, kiro, google-antigravity, cursor
-ocx logout xai
+orl login xai          # or: anthropic, kimi, kiro, google-antigravity, cursor
+orl logout xai
 ```
 
 Самому OpenAI ключ **не нужен** — провайдер по умолчанию напрямую пересылает ваши существующие
@@ -107,9 +107,9 @@ ocx logout xai
 ## Остановка и восстановление
 
 ```bash
-ocx stop          # stop the proxy and restore native Codex
-ocx restore       # restore native Codex without stopping (alias: ocx eject)
-ocx restore back  # route Codex through the still-running proxy again
+orl stop          # stop the proxy and restore native Codex
+orl restore       # restore native Codex without stopping (alias: orl eject)
+orl restore back  # route Codex through the still-running proxy again
 ```
 
 ## Далее

@@ -296,7 +296,7 @@ export async function loadOcxPlugins(
     let shutdownCount = 0;
     const whileActive = (name: string, register: () => () => void): void => {
       if (!active) {
-        console.error("[opencodex] plugin registration ignored: setup_failed");
+        console.error("[openrelay] plugin registration ignored: setup_failed");
         return;
       }
       unregister.push(register());

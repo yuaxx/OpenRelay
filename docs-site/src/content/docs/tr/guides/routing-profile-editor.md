@@ -1,9 +1,9 @@
 ---
 title: Yönlendirme Profili Düzenleyicisi
-description: OpenCodex kontrol panelinden yönlendirme politikası profilleri oluşturun, düzenleyin, doğrulayın, deneme çalıştırması (dry-run) yapın ve kaldırın.
+description: OpenRelay kontrol panelinden yönlendirme politikası profilleri oluşturun, düzenleyin, doğrulayın, deneme çalıştırması (dry-run) yapın ve kaldırın.
 ---
 
-OpenCodex kontrol panelindeki **Modeller → Yönlendirme** sekmesi, `config.json`
+OpenRelay kontrol panelindeki **Modeller → Yönlendirme** sekmesi, `config.json`
 dosyasını elle düzenlemeden `config.routingProfiles` alanını yönetebilir.
 
 ## Bir profil oluşturma

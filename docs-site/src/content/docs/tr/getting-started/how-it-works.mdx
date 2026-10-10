@@ -1,11 +1,11 @@
 ---
 title: Nasıl Çalışır
-description: Tam opencodex istek yaşam döngüsü — ayrıştırma, yönlendirme, uyarlama, köprüleme ve akış.
+description: Tam OpenRelay istek yaşam döngüsü — ayrıştırma, yönlendirme, uyarlama, köprüleme ve akış.
 ---
 
 import { Steps } from '@astrojs/starlight/components';
 
-Codex, OpenAI **Responses API** protokolünü konuşur. opencodex, Server-Sent
+Codex, OpenAI **Responses API** protokolünü konuşur. OpenRelay, Server-Sent
 Events ile HTTP üzerinden `POST /v1/responses` isteklerini ve aynı yol üzerinde
 isteğe bağlı bir WebSocket yükseltmesini kabul eder. İsteği sağlayıcınızın hat
 formatına ve yanıtı tekrar Responses olaylarına dönüştürür — böylece Codex
@@ -29,7 +29,7 @@ bir hesap seçebilir.](../../../../assets/multi-auth-routing.svg)
 
 ## Codex kimlik doğrulama hesabı seçimi
 
-Seçilen sağlayıcı ChatGPT/Codex doğrudan geçişi olduğunda, opencodex istek
+Seçilen sağlayıcı ChatGPT/Codex doğrudan geçişi olduğunda, OpenRelay istek
 yukarı akışa iletilmeden önce depolanan bir havuz hesabını seçebilir. Kural
 kasıtlı olarak ikiye ayrılmıştır:
 
@@ -38,7 +38,7 @@ kasıtlı olarak ikiye ayrılmıştır:
   mobile bağlı Codex oturumu görüşmenin ortasında yeniden dengelenmek yerine tek
   bir hesabı kullanmaya devam eder.
 - **Yeni oturumlar yeniden dengelenebilir.** Yeni bir iş parçacığı için
-  opencodex, `accountPoolStrategy` (varsayılan olarak `quota` veya `round-robin`
+  OpenRelay, `accountPoolStrategy` (varsayılan olarak `quota` veya `round-robin`
   / `fill-first`) kullanarak uygun hesaplar arasından seçim yapar. `quota`
   stratejisi, 5 saatlik, haftalık ve 30 günlük pencerelerdeki bilinen kullanımı
   karşılaştırır ve aktif hesap `autoSwitchThreshold` eşiğini aştığında daha
@@ -81,7 +81,7 @@ istekleri Codex'in yerel çoklu ajan rehberliğini korur.
    `defaultProvider` geri dönüşü. Bkz. [Model
    Yönlendirme](/tr/guides/model-routing/).
 
-3. **Kimlik Doğrulama (Authenticate)** — bir `oauth` sağlayıcısı için opencodex,
+3. **Kimlik Doğrulama (Authenticate)** — bir `oauth` sağlayıcısı için OpenRelay,
    taşıyıcı anahtar olarak yeni, otomatik olarak yenilenmiş bir erişim belirteci
    yerleştirir, böylece mevcut adaptörler değişmeden kimlik doğrulaması yapar.
    ChatGPT/Codex havuz hesapları için `codex/auth-context.ts` önce hesabı çözer
@@ -90,19 +90,19 @@ istekleri Codex'in yerel çoklu ajan rehberliğini korur.
 
 4. **Vizyon sidecar'ı (isteğe bağlı)** — yönlendirilen model
    `provider.noVisionModels` listesinde yer alıyorsa ve istek bir görsel
-   taşıyorsa, opencodex her görseli yapılandırılmış ChatGPT vizyon sidecar'ı ile
+   taşıyorsa, OpenRelay her görseli yapılandırılmış ChatGPT vizyon sidecar'ı ile
    tanımlar ve metinle değiştirir; böylece salt metin bir model bile görsel
    hakkında akıl yürütebilir. Bkz. [Sidecar'lar](/tr/guides/sidecars/).
 
 5. **Doğrudan geçiş hızlı yolu (Passthrough fast path)** — adaptör bir Responses
-   doğrudan geçişi ise (`openai-responses` veya `azure-openai`), opencodex
+   doğrudan geçişi ise (`openai-responses` veya `azure-openai`), OpenRelay
    Responses gövdesini korur, hedeflenen yönlendirme ve uyumluluk yeniden
    yazımlarını uygular, ardından sağlayıcının yanıtını `AdapterEvent`'ler
    üzerinden dönüştürmeden iletir.
 
 6. **Web araması sidecar'ı (isteğe bağlı)** — Codex barındırılan `web_search`
    özelliğini etkinleştirdiyse ancak yönlendirilen model OpenAI harici bir
-   modelse, opencodex sentetik bir `web_search` fonksiyon aracı sunar ve modeli
+   modelse, OpenRelay sentetik bir `web_search` fonksiyon aracı sunar ve modeli
    küçük bir ajan döngüsünde çalıştırarak varsayılan olarak `gpt-5.6-luna`
    üzerinden ChatGPT oturumunuzla gerçek aramalar yapar ve sonuçları araç
    sonuçları olarak geri enjekte eder.
@@ -115,7 +115,7 @@ istekleri Codex'in yerel çoklu ajan rehberliğini korur.
 
 8. **Uyarlama (Adapt)** — aksi takdirde seçilen adaptörün `buildRequest()`
    fonksiyonu, sağlayıcının yerel formatında yukarı akış HTTP isteğini (URL,
-   başlıklar, gövde) üretir ve opencodex bunu `fetch` eder.
+   başlıklar, gövde) üretir ve OpenRelay bunu `fetch` eder.
 
 9. **Köprüleme (Bridge)** — adaptörün `parseStream()` (veya `parseResponse()`)
    fonksiyonu dahili `AdapterEvent`'leri (metin, akıl yürütme, araç çağrısı
@@ -130,7 +130,7 @@ istekleri Codex'in yerel çoklu ajan rehberliğini korur.
 
 ## Neden bir Codex çatalı (fork) değil de bir proxy?
 
-Codex, Responses API'sini sabit kodlamıştır. opencodex protokol sınırında çeviri
+Codex, Responses API'sini sabit kodlamıştır. OpenRelay protokol sınırında çeviri
 yaparak Codex **CLI, App ve SDK** ile değişmeden çalışır, Codex
 güncellemelerinden etkilenmez ve Codex'in kendisine dokunmadan istek başına
 sağlayıcıları değiştirmenize olanak tanır. Çeviri çift yönlüdür ve akışa

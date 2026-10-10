@@ -10,7 +10,7 @@ Non-mutating probes may still contact providers, consume quota or refresh caches
 
 Declared capabilities: 12.
 
-### `ocx chatgpt`
+### `orl chatgpt`
 
 Experimental ChatGPT app-server shim: launch, restore or status (macOS only).
 
@@ -22,7 +22,7 @@ JSON mode: `none`.
 
 - Default off; launch requires chatgptDesktop.appServerShim: true. Restore removes the generated launcher.
 
-### `ocx status`
+### `orl status`
 
 Proxy status, injection state, and version skew between this CLI and the running proxy.
 
@@ -38,7 +38,7 @@ JSON mode: `envelope`.
 
 - Reads /healthz plus local config; drives no management API route.
 
-### `ocx resolve`
+### `orl resolve`
 
 One JSON document naming the config home, the effective port, and the identity-checked proxy liveness verdict.
 
@@ -55,7 +55,7 @@ JSON mode: `envelope`.
 - Exit 0 carries a trustworthy verdict (live or proven absent); exit 1 means the CLI could not resolve and a caller must refuse to guess — unknown liveness never reads as absent.
 - Built for embedding shells (desktop app): the liveness budgets stay owned by src/server/proxy-liveness.ts.
 
-### `ocx capabilities`
+### `orl capabilities`
 
 List the declared CLI capabilities and the management routes they drive.
 
@@ -71,9 +71,9 @@ Drives no management route.
 
 JSON mode: `envelope`.
 
-- Start here when driving ocx programmatically: it is the declared surface index, not a complete verb list.
+- Start here when driving orl programmatically: it is the declared surface index, not a complete verb list.
 
-### `ocx sync`
+### `orl sync`
 
 Synchronize client catalogs, including Aside profiles through the running server's mutation owner.
 
@@ -93,9 +93,9 @@ JSON mode: `none`.
 
 - The Aside refresh uses the live server; other catalog synchronization also performs local work.
 
-### `ocx service install`
+### `orl service install`
 
-Usage: `ocx service install [--native|--scheduler]`
+Usage: `orl service install [--native|--scheduler]`
 
 Install the local background service.
 
@@ -113,9 +113,9 @@ JSON mode: `none`.
 - Local OS service manager: macOS launchd, Linux systemd, Windows Task Scheduler or WinSW. No management API or JSON mode.
 - Backend options apply only to install; other verbs use the installed backend.
 
-### `ocx service repair`
+### `orl service repair`
 
-Usage: `ocx service repair`
+Usage: `orl service repair`
 
 Repair local service registration and verify serving health.
 
@@ -128,9 +128,9 @@ JSON mode: `none`.
 - Local OS service manager: macOS launchd, Linux systemd, Windows Task Scheduler or WinSW. No management API or JSON mode.
 - Backend options apply only to install; other verbs use the installed backend.
 
-### `ocx service restart`
+### `orl service restart`
 
-Usage: `ocx service restart`
+Usage: `orl service restart`
 
 Restart the local background service.
 
@@ -143,9 +143,9 @@ JSON mode: `none`.
 - Local OS service manager: macOS launchd, Linux systemd, Windows Task Scheduler or WinSW. No management API or JSON mode.
 - Backend options apply only to install; other verbs use the installed backend.
 
-### `ocx service start`
+### `orl service start`
 
-Usage: `ocx service start`
+Usage: `orl service start`
 
 Start the registered local service.
 
@@ -158,9 +158,9 @@ JSON mode: `none`.
 - Local OS service manager: macOS launchd, Linux systemd, Windows Task Scheduler or WinSW. No management API or JSON mode.
 - Backend options apply only to install; other verbs use the installed backend.
 
-### `ocx service stop`
+### `orl service stop`
 
-Usage: `ocx service stop`
+Usage: `orl service stop`
 
 Stop the registered local service.
 
@@ -173,9 +173,9 @@ JSON mode: `none`.
 - Local OS service manager: macOS launchd, Linux systemd, Windows Task Scheduler or WinSW. No management API or JSON mode.
 - Backend options apply only to install; other verbs use the installed backend.
 
-### `ocx service status`
+### `orl service status`
 
-Usage: `ocx service status`
+Usage: `orl service status`
 
 Inspect local service-manager status.
 
@@ -188,9 +188,9 @@ JSON mode: `none`.
 - Local OS service manager: macOS launchd, Linux systemd, Windows Task Scheduler or WinSW. No management API or JSON mode.
 - Backend options apply only to install; other verbs use the installed backend.
 
-### `ocx service uninstall`
+### `orl service uninstall`
 
-Usage: `ocx service uninstall`
+Usage: `orl service uninstall`
 
 Uninstall the local service.
 

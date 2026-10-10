@@ -43,7 +43,7 @@ const graph: GraphNode[] = [
 		url: homeUrl,
 		// `name` matches the visible site name (header wordmark + <title> prefix),
 		// which is what Google requires before it will adopt it over the domain.
-		name: 'opencodex',
+		name: 'OpenRelay',
 		alternateName: 'ocx',
 		description: descriptions[inLanguage],
 		inLanguage,
@@ -56,7 +56,7 @@ if (!locale) {
 	graph.push({
 		'@type': 'SoftwareApplication',
 		'@id': `${SITE_URL}/#software`,
-		name: 'opencodex',
+		name: 'OpenRelay',
 		alternateName: 'ocx',
 		description:
 			'Local LLM proxy that lets OpenAI Codex (CLI, App, SDK) and Claude Code run on any model — Claude, Gemini, Grok, DeepSeek, Kimi, Qwen, Ollama, OpenRouter, and more — with streaming, tool calls, reasoning tokens, and images working in both directions.',

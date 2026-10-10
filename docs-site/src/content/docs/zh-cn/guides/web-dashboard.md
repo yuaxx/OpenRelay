@@ -1,22 +1,22 @@
 ---
 title: Web 仪表盘
-description: 用于管理代理健康状态、provider、模型、委派指引、认证池、usage 和日志的 opencodex GUI。
+description: 用于管理代理健康状态、provider、模型、委派指引、认证池、usage 和日志的 OpenRelay GUI。
 ---
 
-opencodex 内置了一个由代理提供服务的本地 web 仪表盘（`gui/` 下的 Vite/React 应用）。你可以在
+OpenRelay 内置了一个由代理提供服务的本地 web 仪表盘（`gui/` 下的 Vite/React 应用）。你可以在
 这里快速管理 provider、Codex/ChatGPT 账号、目录模型、sidecar、子代理设置和请求流量。
 
 ## 打开仪表盘
 
 ```bash
-ocx gui
+orl gui
 ```
 
 该命令会在浏览器中打开 `http://localhost:<port>`；在启用了管理 ingress 的 hub 上则打开 `http://127.0.0.1:<管理端口>`；如果代理尚未运行，会先自动启动。开发时也可
 让 GUI dev server 单独连接到正在运行的代理：
 
 ```bash
-ocx start
+orl start
 bun run dev:gui
 ```
 
@@ -43,12 +43,12 @@ bun run dev:gui
 | 区域 | 作用 |
 | --- | --- |
 | **Dashboard 摘要** | 显示 multi-agent 模式、在线状态、版本、运行时间、provider 数量、30 天 token 总量、活动 provider 和可用的原生/路由模型。 |
-| **Sub-agent delegation** | 选择供 OpenCodex 委派指引与可选的 Codex 原生子代理默认值共用的原生/路由模型和可选 reasoning 强度。它不是逐次生成的路由器，详见下文。 |
+| **Sub-agent delegation** | 选择供 OpenRelay 委派指引与可选的 Codex 原生子代理默认值共用的原生/路由模型和可选 reasoning 强度。它不是逐次生成的路由器，详见下文。 |
 | **Sidecar** | 选择 web-search 模型及强度，以及图像描述模型；更改从下一次请求开始生效。 |
 | **Maintenance** | 重新同步 Codex 模型目录，查看项目级配置绕过警告，检查 latest/preview 版本，并可在更新后重启代理。 在桌面 shell 中，该更新入口会打开原生应用更新页面，而不是运行包更新器。 |
 | **启动安全** | 显示注入的 Codex 路由能否在重启后继续工作，并分别显示服务、launcher shim 状态和准确的修复命令。 |
 | **Windows 托盘** | 安装用户登录托盘，一键控制代理启动、停止、重启、面板和状态。托盘不是代理重启服务。 |
-| **Codex 自动启动** | 允许已安装的 Codex launcher shim 运行 `ocx ensure`。此开关不会安装 shim 或后台服务。 |
+| **Codex 自动启动** | 允许已安装的 Codex launcher shim 运行 `orl ensure`。此开关不会安装 shim 或后台服务。 |
 | **Providers** | 添加、编辑、设为默认（仅已启用）、启用/禁用、删除 provider，并在支持时管理 OAuth 账号池和 API key 池。删除当前默认时，会切换到剩余的第一个已启用 provider（若存在）；否则拒绝删除并保留当前默认。Claude（Anthropic）OAuth 池中，每个已登录账号显示各自的 5 小时与周限额条（用量按凭证计）；探测失败时保留上次已知数值并标记为暂时不可用。 未选中任何 provider 时显示的 Providers 概览带有**刷新全部额度**按钮，会在服务端一次性重新读取所有已配置的 provider；上游探测失败的 provider 会保留上次已知数值，因此状态文案只表示检查已完成，而不声称每个数值都是最新的，各行自身的检查时间仍是该 provider 的新鲜度信号。 |
 | **Add provider** | 标签页上方的单个搜索框可同时搜索账号、免费、本地、付费四个标签页。搜索时选中的标签页不会跳转，结果按标签页分组并显示数量。本地运行时（Ollama、vLLM、LM Studio、LiteLLM）拥有独立标签页，过长的说明会截断为两行，点击即可查看全文。 |
 | **Codex Auth** | 添加 ChatGPT/Codex 池账号，选择下一 session 的账号，刷新 5h / 每周 / 30d 配额，启用或停用配额自动切换，设置其 1–100% 阈值和临时故障 failover。 |
@@ -57,7 +57,7 @@ bun run dev:gui
 | **Logs** | 自动刷新近期请求，显示 token、请求强度以及（可用时）实际发送强度、实际模型、provider、状态、request id、耗时和错误详情。适配器发送 reasoning 参数时，详情中还会显示准确的 wire field。可按不透明会话/对话 ID（客户端提供时）筛选，并对当前已加载的 Logs 环形缓冲合计 token 与估算标价成本。 |
 | **Usage / Debug** | 查看 token usage 覆盖率与趋势，或启用可选的 provider transport 和 usage 提取诊断。 |
 | **Storage** | 只读查看 CODEX_HOME 磁盘占用（会话、归档、数据库、附件）。可选归档清理：预览最旧 N%，默认隔离到 `CODEX_HOME/.trash`，或勾选后永久删除。**自动清理策略**为可选且**默认关闭**（`storageCleanupPolicy.enabled`）；可在 Storage 页配置阈值/目标/计划/模式，或点「立即运行」。可在 Storage 页从隔离区恢复（JSONL + 线程）。活动会话保持只读。Codex 锁定最新/活动的 `state_*.sqlite` 时拒绝清理与恢复。 |
-| **Stop** | 优雅地停止代理和已安装的后台服务，恢复原生 Codex 并退出（`POST /api/stop`）。在使用任务计划程序后端的 Windows 上，仪表板会拒绝并提示改用 `ocx stop`：任务结束后包装器仍可能重新拉起代理，只有运行在代理之外的 stop 才能在恢复客户端配置前确认这个重启窗口。被拒绝时不会做任何更改。 |
+| **Stop** | 优雅地停止代理和已安装的后台服务，恢复原生 Codex 并退出（`POST /api/stop`）。在使用任务计划程序后端的 Windows 上，仪表板会拒绝并提示改用 `orl stop`：任务结束后包装器仍可能重新拉起代理，只有运行在代理之外的 stop 才能在恢复客户端配置前确认这个重启窗口。被拒绝时不会做任何更改。 |
 
 用量、仪表板、供应商工作区、供应商目录和 API 密钥页面会提示部分记录被排除，即使没有可读取的记录。次数、日期和使用排名仅反映可读取的记录。历史不完整时，无法保存模型的最常用排序；请选择其他排序或修复历史后重试。
 
@@ -100,15 +100,15 @@ Logs 可组合界面、被拦截请求、提供商、完整模型名、状态、
 ## 委派选择器与生成路由的区别
 
 Dashboard 的 **Sub-agent delegation** 选择器会保存 `injectionModel`，以及可选的
-`injectionEffort`。所选值会用于由 OpenCodex 编写的委派指引，而该指引由
+`injectionEffort`。所选值会用于由 OpenRelay 编写的委派指引，而该指引由
 `multiAgentGuidanceEnabled` 单独控制。清除模型时也会清除已保存的强度，并关闭原生默认值同步。
 
-启用 **用作原生 Codex 子代理默认值** 后，当 OpenCodex 管理当前 Codex 路由时，下一次同步或重启会
+启用 **用作原生 Codex 子代理默认值** 后，当 OpenRelay 管理当前 Codex 路由时，下一次同步或重启会
 把所选模型和强度应用为原生 `[agents]` 默认值；外部用户管理的 provider 配置不会被修改。这些默认值只影响新建的 Codex 任务，该选项本身不会触发委派。已有的用户自有
 `[agents]` 默认值会保留而不会被覆盖，因此请求的默认值可能与 Codex 实际使用的默认值不同。
 
 :::caution
-两个开关相互独立：关闭 OpenCodex 委派指引不会关闭原生默认值同步；启用原生默认值同步也不会
+两个开关相互独立：关闭 OpenRelay 委派指引不会关闭原生默认值同步；启用原生默认值同步也不会
 启用委派指引或触发委派。两者都不是代理侧的逐次跨模型路由器。v1/base/v2 的
 权威说明见 [子代理界面](/zh-cn/guides/sub-agent-surface/)。
 :::
@@ -150,7 +150,7 @@ Pool 模式会在主账号和已添加的 Codex 账号之间选择；Direct 只�
 - 每张账号卡片都带有 **选择顺序** 控件（最先 / 较先 / 默认 / 较后 / 最后）。顺序靠前的账号先被使用，
   只有当它上面的账号全部耗尽或不可用时才会降到更靠后的顺序。改动顺序会从**下一个未绑定请求**起生效，
   且不会移动已经绑定的 thread。Codex Desktop（主）账号同样参与排序，可以设为 **最后** 留作备用。
-  用 `ocx account priority` 设置的非预设值也会保留在卡片上，仍可选择。
+  用 `orl account priority` 设置的非预设值也会保留在卡片上，仍可选择。
 - Thread affinity 可避免每个请求都来回切换账号。默认开启 `pool.cacheAffinity` 后，长时间运行的
   thread 不会仅因 usage 达到阈值就重新绑定；只有账号耗尽或无法继续服务时才会离开，并且只改绑到
   确有额度余量且使用率确实更低的账号。关闭该标志后，才会在存在使用率确实更低且确有额度余量的
@@ -167,7 +167,7 @@ Pool 模式会在主账号和已添加的 Codex 账号之间选择；Direct 只�
   继续路由。关闭此设置只会隐藏生成的 picker 项，不会删除账号、selector 或精确路由；普通 GPT
   model id 继续使用已配置的 Pool 或 Direct 行为。
 - 添加、删除账号或更改 picker 设置时，会先保存变更再刷新模型目录。如果有界刷新未完成，
-  仪表盘会显示琥珀色的“成功但需要恢复”提示；运行 `ocx sync` 即可重试。账号或设置变更本身
+  仪表盘会显示琥珀色的“成功但需要恢复”提示；运行 `orl sync` 即可重试。账号或设置变更本身
   仍已保存。
 
 Providers 概览会单独汇总 Pool 模式的显示专用加权容量估算，并同时显示当前有效账户的原始配额和

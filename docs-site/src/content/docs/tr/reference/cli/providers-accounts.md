@@ -9,7 +9,7 @@ kontrol eder.
 
 ## Sağlayıcılar
 
-### `ocx provider <alt-komut>`
+### `orl provider <alt-komut>`
 
 Etkileşimsiz sağlayıcı yönetimi. Kayıt defteri girdileri ada göre beslenir; özel
 bir ad hem `--adapter` hem de `--base-url` gerektirir.
@@ -31,14 +31,14 @@ bir ad hem `--adapter` hem de `--base-url` gerektirir.
 Varsayılan `add`, `remove` ve `set-default` yerel yapılandırmayı değiştirir. Çalışan proxy için `--live`, canlı silme için ayrıca `--yes` kullanın. `--sync --json` da kayıttan sonra eşitlemeyi dener; başarısızlıkta kayıt korunur, sıfır olmayan çıkış kodu ve `needsSync: true` döner. `--live` ile `--sync` birlikte kullanılamaz. Pacing ve snapshot/apply için [İngilizce kılavuza](/reference/cli/providers-accounts/#snapshot-edit-and-apply-with-a-baseline) bakın.
 
 ```bash
-ocx provider list --json
-ocx provider list --jsonl
-ocx provider test ark
-ocx provider add anthropic --api-key sk-ant-... --set-default --sync
-ocx provider add local-dev --adapter openai-chat --base-url http://localhost:11434/v1
-ocx provider show anthropic --json
-ocx models --provider anthropic --json
-ocx models live --provider ark --json
+orl provider list --json
+orl provider list --jsonl
+orl provider test ark
+orl provider add anthropic --api-key sk-ant-... --set-default --sync
+orl provider add local-dev --adapter openai-chat --base-url http://localhost:11434/v1
+orl provider show anthropic --json
+orl models --provider anthropic --json
+orl models live --provider ark --json
 ```
 
 `--jsonl` yalnızca yapılandırılmış sağlayıcıları, her satırda bir JSON nesnesi olacak şekilde yazar. Her nesne, `--json` çıktısındaki `configured` dizisinin bir öğesiyle aynı alanları içerir; `registryCount` özeti eklenmez. Betikler nesneleri satır satır işleyebilir. `--json` ve `--jsonl` birlikte kullanılamaz.
@@ -65,7 +65,7 @@ Gizli olan her şey için `--api-key` veya bir OAuth girişi kullanın.
 
 ## Kimlik Doğrulama
 
-### `ocx login <saglayici>`
+### `orl login <saglayici>`
 
 Sağlayıcının kayıtlı giriş akışını başlatın. OAuth sağlayıcıları bir tarayıcı
 açar ve otomatik olarak yenilenen kimlik bilgilerini `~/.opencodex/` altında
@@ -74,19 +74,19 @@ anahtarı sorar, mümkün olduğunda doğrular ve ortaya çıkan sağlayıcı
 yapılandırmasını kaydeder. Komut ad eksik veya bilinmediğinde geçerli olarak
 kabul edilen OAuth ve API anahtarı sağlayıcı kimliklerini yazdırır.
 
-`ocx status` / `ocx doctor` yeniden kimlik doğrulama gerektiğini veya bir
+`orl status` / `orl doctor` yeniden kimlik doğrulama gerektiğini veya bir
 terminal yenileme hatasını bildirdikten sonra **yeniden kimlik doğrulaması
 yapmak** için aynı komutu kullanın (veya kontrol panelinde Yeniden Kimlik
 Doğrula'yı kullanın). Codex havuz hesapları yukarıdaki OAuth veya API anahtarı
-sağlayıcılarından biri değildir, ancak `ocx login codex` onlara ulaşır: komut
-hesap havuzu girişine yönlendirilir, bu yüzden `ocx login codex --reauth` ile
-`ocx account reauth codex` aynı şeydir. Kontrol panelindeki Codex hesap havuzu
+sağlayıcılarından biri değildir, ancak `orl login codex` onlara ulaşır: komut
+hesap havuzu girişine yönlendirilir, bu yüzden `orl login codex --reauth` ile
+`orl account reauth codex` aynı şeydir. Kontrol panelindeki Codex hesap havuzu
 (Yeniden Kimlik Doğrula) da aynısını yapar. Bu yol proxy içinde çalışır, bu
 nedenle çalışan bir proxy gerektirir.
 
 ```bash
-ocx login xai
-ocx login anthropic
+orl login xai
+orl login anthropic
 ```
 
 Zaten çalışan bir proxy yeni kimlik bilgisini yeniden başlatmadan alır: CLI
@@ -100,22 +100,22 @@ başlatmanızı ister:
 ```
 ⚠️  A proxy is running but could not reload this provider (unattested-target).
    The credential is saved to disk; the running proxy keeps using the previous one.
-   Restart it to pick this up: ocx restart
+   Restart it to pick this up: orl restart
 ```
 
-### `ocx logout <saglayici>`
+### `orl logout <saglayici>`
 
 Bir sağlayıcı için saklanan OAuth kimlik bilgisini kaldırın.
 
 ## Hesaplar ve anahtar havuzları
 
-### `ocx account <alt-komut>`
+### `orl account <alt-komut>`
 
 Çalışan proxy aracılığıyla sağlayıcı hesaplarını ve API anahtarı havuzlarını
 listeleyin ve değiştirin. Sağlanan yardım arayüzü şöyledir:
 
 ```text
-Usage: ocx account <list|history|current|use|clear|refresh|auto-switch|alias|priority|pause|resume|pause-exhausted|strategy|sticky|remove|clear-cooldown|add-key|import|import-orca|login|reauth|code|cancel|reset-credits|grok-reset-coupons|main> ...
+Usage: orl account <list|history|current|use|clear|refresh|auto-switch|alias|priority|pause|resume|pause-exhausted|strategy|sticky|remove|clear-cooldown|add-key|import|import-orca|login|reauth|code|cancel|reset-credits|grok-reset-coupons|main> ...
 
 list [provider]     Codex account pool, OAuth accounts and API keys (identifiers shown masked as the API returns them).
 history openai <pool-account-id> [--limit <1-200>]  Recent routing decisions for one Codex pool account.
@@ -173,7 +173,7 @@ kullanılamadığında atlanır):
 }
 ```
 
-### `ocx account list [provider] [--json] [--all]`
+### `orl account list [provider] [--json] [--all]`
 
 Bir sağlayıcı olmadan Codex havuzunu, OAuth hesaplarını ve yapılandırılmış API
 anahtarı havuzlarını listeler. `--all` bulunmadıkça boş sağlayıcılar atlanır.
@@ -183,12 +183,12 @@ bir Codex satırı `selected` olarak işaretlenir. `PRIORITY`, imzalı Codex se�
 sırasıdır (ayarlanmadığında `0`) ve OAuth hesapları ve API anahtarları gibi
 sıralamanın geçerli olmadığı satırlar için `-` gösterir. İki veya daha fazla kayıtlı Kiro hesabı
 saklandığında, varsayılan olarak 429 yanıtı otomatik olarak başka bir hesaba geçer ve bilinen kalan
-kotası en yüksek hesabı tercih eder; rotasyon hesapların varlığıyla etkinleşir ve kapatılamaz — `oauthAccountFailover.enabled: false` gönderim öncesi hesap tercihini reddeder, 429 kurtarmasını değil; `ocx account login kiro` hesapları havuza teker teker ekler. Boş bir sonuç yine de başarıdır.
+kotası en yüksek hesabı tercih eder; rotasyon hesapların varlığıyla etkinleşir ve kapatılamaz — `oauthAccountFailover.enabled: false` gönderim öncesi hesap tercihini reddeder, 429 kurtarmasını değil; `orl account login kiro` hesapları havuza teker teker ekler. Boş bir sonuç yine de başarıdır.
 
 Kiro için hız sınırı, doğrulanmış aylık kota ve doğrulanmış askıya alma retleri çıktıdan önce uygun başka bir hesaba geçebilir. Aylık kota yalnızca o hesabı sıfırlamaya veya kanıtın süresinin dolmasına kadar dışlar; aynı hesaptaki tamamlanmış yanıt eski kararı temizler. Proaktif tercih için sağlayıcı ayarı genel ayardan önceliklidir; reaktif hesap değişimi açık kalır.
 Kiro, `pool.kernel` ve proaktif tercih açıkken `least-loaded` stratejisini seçebilir. `maxConcurrentPerAccount` (1–100), süreç başına hesap kuyruğu sınırıdır: seçili hesap doluysa en çok 250 ms bekler, ardından `Retry-After: 1` ile 503 `account_capacity` döner. Sınır, isteği başka bir hesaba taşımaz.
 
-`ocx account list kiro`, otomatik seçimden dışlanan hesaplar için `not-auto-selected(<neden>)` gösterir. JSON, `autoSelectable` ve false olduğunda kapalı kümeden bir `skipReason` (`paused`, `needs_reauth`, `suspended`, `cooldown` veya `quota_exhausted`) içerir. Tek etkin hesap yine istek gönderebilir. `providerCredits`, `meteringEvent` ile ölçülür: fiziksel yanıttaki son değer tutulur, ayrı ücretlendirilen gönderimler toplanır; tokenlardan kredi tahmini yapılmaz.
+`orl account list kiro`, otomatik seçimden dışlanan hesaplar için `not-auto-selected(<neden>)` gösterir. JSON, `autoSelectable` ve false olduğunda kapalı kümeden bir `skipReason` (`paused`, `needs_reauth`, `suspended`, `cooldown` veya `quota_exhausted`) içerir. Tek etkin hesap yine istek gönderebilir. `providerCredits`, `meteringEvent` ile ölçülür: fiziksel yanıttaki son değer tutulur, ayrı ücretlendirilen gönderimler toplanır; tokenlardan kredi tahmini yapılmaz.
 
 `--json` şunu döndürür:
 
@@ -196,7 +196,7 @@ Kiro, `pool.kernel` ve proaktif tercih açıkken `least-loaded` stratejisini se�
 { accounts: AccountRow[], notes: string[] }
 ```
 
-### `ocx account current <provider> [--json]`
+### `orl account current <provider> [--json]`
 
 Aktif hesabı veya anahtarı gösterir. Manuel sabitleme içermeyen bir Codex havuzu
 öncelik duyarlı otomatik seçimi bildirir: en yüksek öncelikli uygun katman
@@ -208,9 +208,9 @@ yine de 0 ile çıkar. `--json` şunu döndürür:
 { provider, type, activeId: string | null, autoSwitchThreshold?: number, account: AccountRow | null }
 ```
 
-### `ocx account use <provider> <account-or-key-id|alias|main|auto> [--json]`
+### `orl account use <provider> <account-or-key-id|alias|main|auto> [--json]`
 
-`auto` elle yapılan seçimi temizler; havuz işi yeniden kendi stratejisiyle yerleştirir — ancak id'si `auto` olan bir Codex hesabı varsa tam id eşleşmesi kazanır ve `ocx account clear <provider>` her zaman otomatik seçimi geri yükler. Bir Codex hesabı, id yerine `ocx account alias` ile verilen takma adla da belirtilebilir; bu `priority`, `pause`, `resume`, `clear-cooldown`, `remove` ve `alias` için de geçerlidir. Codex hesaplarında `auto`, `main` ve `__main__` büyük/küçük harf fark etmeksizin ayrılmış sözcüklerdir ve takma ad olarak atanamaz. OAuth hesaplarının ve API anahtarlarının görünen adları için mevcut kurallar geçerlidir.
+`auto` elle yapılan seçimi temizler; havuz işi yeniden kendi stratejisiyle yerleştirir — ancak id'si `auto` olan bir Codex hesabı varsa tam id eşleşmesi kazanır ve `orl account clear <provider>` her zaman otomatik seçimi geri yükler. Bir Codex hesabı, id yerine `orl account alias` ile verilen takma adla da belirtilebilir; bu `priority`, `pause`, `resume`, `clear-cooldown`, `remove` ve `alias` için de geçerlidir. Codex hesaplarında `auto`, `main` ve `__main__` büyük/küçük harf fark etmeksizin ayrılmış sözcüklerdir ve takma ad olarak atanamaz. OAuth hesaplarının ve API anahtarlarının görünen adları için mevcut kurallar geçerlidir.
 
 Mevcut bir Codex hesabını, OAuth hesabını veya API anahtarını seçer. `openai`
 için `main` Codex App girişini seçer. Bir Codex Havuzu seçimi süreç içi yerel
@@ -222,12 +222,12 @@ modu arayana ait/yerel ana kimlik bilgisini kullanmaya devam eder. Kullanıma
 dayalı proaktif geçiş, 401/403 yeniden kimlik doğrulaması, 429/retry-after
 soğuma süreleri, hariç tutma ve çıktı öncesi 429/402 arıza kurtarma daha sonra
 başka bir uygun Havuz hesabını seçebilir. Bu kurtarma yolları kullanıma dayalı
-geçiş kapalı olduğunda da aktif kalır. OpenCodex bir hesap değişikliğinden sonra
+geçiş kapalı olduğunda da aktif kalır. OpenRelay bir hesap değişikliğinden sonra
 görüşmeyi yeniden oynatır, ancak sağlayıcı tarafındaki istem önbelleği soğuk
 olabilir. Bilinmeyen sağlayıcılar veya kimlikler 1 ile çıkar.
 Bir **401/403** durumunda, App girişi o hesabın süreç içi yerel bağlılığını
 temizler ve yeniden kimlik doğrulama gerektirir.
-Bir **429** durumunda, opencodex `Retry-After`'a uyar, hesap soğuma süresini
+Bir **429** durumunda, OpenRelay `Retry-After`'a uyar, hesap soğuma süresini
 başlatır, bağlılığı temizler ve isteği başka bir uygun Havuz hesabına
 döndürebilir. Bu arıza geçişleri `autoSwitchThreshold: 0` ile aktif kalır; bu
 ayar yalnızca kullanıma dayalı proaktif geçişi devre dışı bırakır.
@@ -237,15 +237,15 @@ ayar yalnızca kullanıma dayalı proaktif geçişi devre dışı bırakır.
 { ok: true, provider, type, activeId }
 ```
 
-### `ocx account pause|resume anthropic <id|alias> [--json]`
+### `orl account pause|resume anthropic <id|alias> [--json]`
 
 CLI komutu Anthropic OAuth hesabını id veya benzersiz takma ad ile duraklatır ya da sürdürür. Önce tam eşleşme, ardından büyük/küçük harf duyarsız eşleşme aranır. CLI ve kontrol paneli aynı `PUT /api/oauth/accounts/pause` uç noktasına `{ provider: "anthropic", accountId, paused }` gönderir. `paused` hesapta saklanır ve `GET /api/oauth/accounts` yanıtında gösterilir. Proaktif havuz kapalı olsa bile duraklatılan hesap seçimden, oturum bağlarından ve 429 sonrası adaylardan çıkarılır. Tüm hesaplar duraklatılmışsa biri sürdürülene kadar istekler 403 döndürür. Önceden gönderilmiş istekler devam eder; kimlik bilgileri ve sağlık durumu korunur. Duraklatma yeniden başlatma ve yeniden girişten sonra da sürer, hesap silinince kaldırılır. Hesaba özel eşikler bu işleme dahil değildir.
 
-### `ocx account clear <provider> [--json]`
+### `orl account clear <provider> [--json]`
 
 Bir hesap id'si çözümlemeden Codex hesabının elle seçimini temizler; `auto` adında bir hesap olsa bile çalışır. Yalnızca Codex havuzları içindir; diğer sağlayıcı türlerinde geri yüklenecek otomatik seçim yoktur.
 
-### `ocx account clear-cooldown <openai|anthropic> <id|alias|main> [--json]`
+### `orl account clear-cooldown <openai|anthropic> <id|alias|main> [--json]`
 
 Kaydedilmiş kimlik bilgilerini değiştirmeden süreç içi hata cooldown durumunu kaldırır. Codex havuzu
 hesabı için `openai`, Anthropic OAuth hesabı için `anthropic` kullanın; diğer sağlayıcılar reddedilir.
@@ -253,16 +253,16 @@ Her iki biçim de hesap id'sini veya benzersiz takma adı kabul eder, `main` ise
 özgüdür.
 
 ```bash
-ocx account clear-cooldown anthropic <id-or-alias>
+orl account clear-cooldown anthropic <id-or-alias>
 ```
 
 Etkin cooldown olmasa da komut başarılı olur ve JSON'da `cleared: false` döner. Anthropic cooldown
 temizliği hesap generation değerini de ilerletir; böylece eski bir quota probe temizlenen durumu geri
 getiremez veya eski quota uygunluğunu yayımlayamaz.
 
-### `ocx account refresh <provider> [--json]`
+### `orl account refresh <provider> [--json]`
 
-Codex havuzu için `ocx account refresh openai [--json]` kullanın. Hesap
+Codex havuzu için `orl account refresh openai [--json]` kullanın. Hesap
 kotalarını yenilemeye zorlar ve kullanılabilir haftalık/aylık yüzdeleri ve
 sıfırlama sürelerini yazdırır; eksik kota verileri %0 olarak değil, bilinmeyen
 olarak bildirilir. JSON zarfı her Codex satırında `quota` ile birlikte `{
@@ -277,26 +277,26 @@ yönetim API'si arızaları 1 ile çıkar; başarısız olan veya zaman aşımı
 bir yukarı akış kota probu bunun yerine kontrol panelinin kota çubuklarıyla
 eşleşen null veya eski bir rapora düşer (çıkış 0).
 
-### `ocx account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]`
+### `orl account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]`
 
 `openai` Codex havuzunun eşiğini yönetir veya genel OAuth havuzunun eşiğini kaydeder. `on` %80, `off` %0 kaydeder; `threshold <n>` 0–100 kabul eder. Genel havuz eşiği yalnızca `pool.kernel` açıkken ve `strategy: "fill-first"` seçiliyken seçimi yönlendirir; bayrak kapalıyken kayıt işlemi eşik tabanlı geçişi etkinleştirmez. Her iki durumda da sağlayıcının etkinlik ayarını veya 429 hatasından sonraki otomatik hesap değişimini etkilemez. Genel havuz çıktısı sunucunun doğruladığı değerleri kullanır. Genel havuzlarda `poolEnabled`, kaydedilmiş sağlayıcı ayarıdır (`null` belirtilmemiş demektir); devralınmış etkin durumu göstermez. `inert: true` eşiğin kaydedildiğini ama uygulanmadığını, `inert: false` ise havuzun onu uyguladığını belirtir. `inert` yoksa yetenek bilinmiyordur ve bu durumda da `enabled: true` bildirilmez. API anahtarlı sağlayıcılar ve geçersiz değerler reddedilir.
 
-### `ocx account auto-switch anthropic … --account <id>`
+### `orl account auto-switch anthropic … --account <id>`
 
-Anthropic OAuth için `ocx account auto-switch anthropic threshold 90 --account <id>` komutu 0–100 arasında tam sayı kaydeder. `off --account <id>` 0, `on --account <id>` 80 kaydeder; `inherit --account <id>` devralmayı geri getirir, `status --account <id>` yalnızca okur. `--json` desteklenir. Hesap kartı aynı ayarı sunar. Eksik/null değer `anthropicAccountPool.autoSwitchThreshold` varsayılanını (80) devralır; 0 yalnızca bu hesabın kullanıma dayalı geçişini kapatır. Yeniden başlatma ve girişte korunur, hesap silinince kaldırılır. Manuel seçim, affinity, bilinmeyen/tükenmiş kota yedek davranışı ve model rotaları değişmez. Havuz kapalıyken eşikler uygulanmaz; duraklatma ve 429 kurtarması sürer.
+Anthropic OAuth için `orl account auto-switch anthropic threshold 90 --account <id>` komutu 0–100 arasında tam sayı kaydeder. `off --account <id>` 0, `on --account <id>` 80 kaydeder; `inherit --account <id>` devralmayı geri getirir, `status --account <id>` yalnızca okur. `--json` desteklenir. Hesap kartı aynı ayarı sunar. Eksik/null değer `anthropicAccountPool.autoSwitchThreshold` varsayılanını (80) devralır; 0 yalnızca bu hesabın kullanıma dayalı geçişini kapatır. Yeniden başlatma ve girişte korunur, hesap silinince kaldırılır. Manuel seçim, affinity, bilinmeyen/tükenmiş kota yedek davranışı ve model rotaları değişmez. Havuz kapalıyken eşikler uygulanmaz; duraklatma ve 429 kurtarması sürer.
 
 ```text
 openai: { provider, autoSwitchThreshold: number, enabled: boolean }
 generic OAuth: { provider, autoSwitchThreshold: number | null, enabled: boolean, poolEnabled: boolean | null, inert: boolean | null }
 ```
 
-### `ocx account priority <provider> <account-id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]`
+### `orl account priority <provider> <account-id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]`
 
 Bir Codex havuz hesabının seçim sırasını okur veya ayarlar: **daha yüksek olan
 daha önce kullanılır**, varsayılan `0`'dır ve aralık `-100` ile `100`
 arasındadır. Yalnızca `openai` Codex havuzu sıralanır, bu nedenle diğer
 sağlayıcılar 1 ile çıkar. `main`, diğer herhangi bir havuz hesabı gibi sıralanan
-Codex Desktop girişini hedefler — `ocx account priority openai main last`, onu
+Codex Desktop girişini hedefler — `orl account priority openai main last`, onu
 yedek olarak tutma şeklinizdir.
 
 Önayar kelimeleri küçük tamsayıların yerine geçer: `first` `+2`, `earlier` `+1`,
@@ -329,11 +329,11 @@ değer 1 ile çıkar. `--json` şunu döndürür:
 { ok: true, provider, id, priority: number, preset: string | null }
 ```
 
-### `ocx account login|reauth|code|cancel ...`
+### `orl account login|reauth|code|cancel ...`
 
-Grafik arayüzü olmayan bir kabuktan tarayıcı veya elle girilen kod ile hesap doğrulaması yapar. Sağlayıcıya özgü sözdizimi için `ocx account --help` kullanın. Codex girişi kaydedilmiş olsa bile doğrulama ya da model kataloğu yenilemesi bekliyorsa hem metin modu hem de `--json` çıkış kodu 1 döndürür. Kaydedilen giriş korunur; yalnızca bekleyen işlem nedeniyle kimlik doğrulamayı yeniden başlatmayın. Katalog yenilemesi beklerken metin modu stderr üzerinde `ocx sync` yönlendirmesi gösterir. `--json`, metin uyarısı eklemeden durumu ve bekleme işaretlerini ayrıştırılabilir stdout çıktısında tutar.
+Grafik arayüzü olmayan bir kabuktan tarayıcı veya elle girilen kod ile hesap doğrulaması yapar. Sağlayıcıya özgü sözdizimi için `orl account --help` kullanın. Codex girişi kaydedilmiş olsa bile doğrulama ya da model kataloğu yenilemesi bekliyorsa hem metin modu hem de `--json` çıkış kodu 1 döndürür. Kaydedilen giriş korunur; yalnızca bekleyen işlem nedeniyle kimlik doğrulamayı yeniden başlatmayın. Katalog yenilemesi beklerken metin modu stderr üzerinde `orl sync` yönlendirmesi gösterir. `--json`, metin uyarısı eklemeden durumu ve bekleme işaretlerini ayrıştırılabilir stdout çıktısında tutar.
 
-### `ocx account remove <provider> <id|alias|main> --yes [--json]`
+### `orl account remove <provider> <id|alias|main> --yes [--json]`
 
 Bu korumalı, etkileşimsiz silme işlemi `--yes` gerektirir. Silmeden önce
 kimliğin var olduğunu doğrular; eksik bir kimlik DELETE göndermeden 1 ile çıkar.
@@ -350,11 +350,11 @@ anahtarı yükseltir veya hiçbirini bildirmez. `--json` başarı ve başarısı
 ```
 
 `catalogRefreshPending` yalnızca Codex kaldırmalarında bulunur. `true` olduğunda
-hesap silme işlemi zaten kaydedilmiştir; insan çıktısı stderr'e genel `ocx sync`
+hesap silme işlemi zaten kaydedilmiştir; insan çıktısı stderr'e genel `orl sync`
 kurtarma rehberliği yazdırır ve yine de 0 ile çıkar. OAuth hesabı ve API
 anahtarı kaldırma zarfları bu alanı kazanmaz.
 
-### `ocx account add-key <provider> [--label <label>] [--json]`
+### `orl account add-key <provider> [--label <label>] [--json]`
 
 Bir API anahtarı sağlayıcısı için bir anahtar ekler ve etkinleştirir. Anahtar
 yalnızca TTY olmayan yönlendirilmiş/borulanmış stdin'den okunur; etkileşimli TTY
@@ -363,56 +363,56 @@ Anahtar, bir etiketin içinde göründüğü durumlar da dahil olmak üzere asla
 yankılanmaz. Bir gizli dizi yöneticisini veya bir here-string'i tercih edin:
 
 ```bash
-ocx account add-key openrouter --label personal <<< "$OPENROUTER_API_KEY"
-security find-generic-password -w openrouter | ocx account add-key openrouter --json
+orl account add-key openrouter --label personal <<< "$OPENROUTER_API_KEY"
+security find-generic-password -w openrouter | orl account add-key openrouter --json
 ```
 
 `--json`, `{ ok: true, id: string | null, label?: string }` döndürür ve asla
 anahtarı içermez.
 
-### `ocx account reset-credits <id|main> [--consume --yes]`
+### `orl account reset-credits <id|main> [--consume --yes]`
 
 Bir hesap için Codex sıfırlama kredilerini inceleyin. Bir krediyi tüketmek
 yıkıcıdır ve hem `--consume` hem de `--yes` gerektirir.
 
-### `ocx account grok-reset-coupons [<account-id>] [--consume --yes [--token-id <id>] [--operation-id <uuid>]] [--json]`
+### `orl account grok-reset-coupons [<account-id>] [--consume --yes [--token-id <id>] [--operation-id <uuid>]] [--json]`
 
 Bir xAI / Grok hesabı için kalan sıfırlama kuponlarını inceler veya bir tanesini kullanır.
 
 `--consume` olmadan çağrıldığında, kullanılabilir kupon jetonlarını ve geçerlilik pencerelerini döndürür:
 
 ```bash
-ocx account grok-reset-coupons
-ocx account grok-reset-coupons acc_xai_01 --json
+orl account grok-reset-coupons
+orl account grok-reset-coupons acc_xai_01 --json
 ```
 
 Bir sıfırlama kuponunu kullanmak faturalandırma durumunu değiştirir ve bir kupon jetonunu kalıcı olarak tüketir. `--consume` kesinlikle `--yes` gerektirir:
 
 ```bash
-ocx account grok-reset-coupons --consume --yes
-ocx account grok-reset-coupons --consume --yes --token-id <token-id>
+orl account grok-reset-coupons --consume --yes
+orl account grok-reset-coupons --consume --yes --token-id <token-id>
 ```
 
 İdempotent sonuç garantisi için `--operation-id <uuid>` (geçerli bir UUIDv4 olmalıdır) iletin. Ağ kopması veya komutun yeniden denenmesi durumunda, özdeş işlem kimlikleri ikinci bir kupon tüketmek yerine kalıcı olarak kaydedilen sonucu yeniden oynatır.
 
-### `ocx account main <alt-komut>`
+### `orl account main <alt-komut>`
 
-OpenCodex hesap havuzu yönlendirmesini değiştirmeden adlandırılmış yerel Codex
+OpenRelay hesap havuzu yönlendirmesini değiştirmeden adlandırılmış yerel Codex
 ana giriş profillerini yönetin:
 
 ```text
-ocx account main doctor [--json]
-ocx account main list [--json]
-ocx account main register <etiket> [--json]
-ocx account main add <etiket>
-ocx account main reauth --device [--no-wait] [--json]
-ocx account main reauth status --flow <id> [--json]
-ocx account main reauth cancel --flow <id> [--json]
-ocx account main switch <profil-id-veya-etiket> --yes [--json]
-ocx account main recover [--rollback --yes] [--json]
+orl account main doctor [--json]
+orl account main list [--json]
+orl account main register <etiket> [--json]
+orl account main add <etiket>
+orl account main reauth --device [--no-wait] [--json]
+orl account main reauth status --flow <id> [--json]
+orl account main reauth cancel --flow <id> [--json]
+orl account main switch <profil-id-veya-etiket> --yes [--json]
+orl account main recover [--rollback --yes] [--json]
 ```
 
-`ocx account main reauth --device --no-wait --json` başarılı olduğunda stdout'a tek bir JSON nesnesi yazar; insan tarafından okunabilir `follow up:` satırını yazmaz. İlerlemeyi kontrol etmek için döndürülen `flowId` değerini `ocx account main reauth status --flow <id> --json` komutuna iletin.
+`orl account main reauth --device --no-wait --json` başarılı olduğunda stdout'a tek bir JSON nesnesi yazar; insan tarafından okunabilir `follow up:` satırını yazmaz. İlerlemeyi kontrol etmek için döndürülen `flowId` değerini `orl account main reauth status --flow <id> --json` komutuna iletin.
 
 Değiştiren her komut çalışan proxy tarafından döndürülen kurallı etkin
 `CODEX_HOME`'u bildirir. Bu yol arayanın `CODEX_HOME`'undan farklı olabilir;
@@ -429,13 +429,13 @@ uğrayan bir geçişi tamamlamak veya geri almak için `recover` kullanın. `swi
 profil kimliğini veya etiketini kabul eder.
 
 v1 kurtarma matrisi, bir işlem dosyası yeniden adlandırma yoluyla yayınlandıktan
-sonra çıkan bir OpenCodex sürecini kapsar. Bir işletim sistemi veya çekirdek
+sonra çıkan bir OpenRelay sürecini kapsar. Bir işletim sistemi veya çekirdek
 çökmesi ya da ani güç kaybı genelinde dayanıklılık iddia etmez:
 `atomicWriteFileAsync()`, dosyayı veya üst dizinini `fsync` yapmaz.
 
 Şifrelenmiş kasa, geçiş günlüğü, kurtarma işaretçisi ve günlük karantinası
 kurallı `<gercek CODEX_HOME>/.opencodex-native-main-profiles` dizininde bulunur,
-böylece bu Codex ana dizinini paylaşan her OpenCodex örneği tek bir sahip ve tek
+böylece bu Codex ana dizinini paylaşan her OpenRelay örneği tek bir sahip ve tek
 bir kurtarma durumu gözlemler. Düz metin giriş hazırlığı her
 `<OPENCODEX_HOME>/native-main-profile-staging` dizini altında yalıtılmış olarak
 kalır.
@@ -448,14 +448,14 @@ kalmalıdır; kesilir, temizlenir ve ardından bağlantısı kesilir. Bağlantı
 ayrıştırma ikameleri, kimlik değişiklikleri ve diğer belirsizlikler yerel ana
 trafiği kapalı tutarken yakın eşleşen adlar asla otomatik olarak kaldırılmaz.
 Bu, aynı işletim sistemi kullanıcısı olarak çalışan kötü niyetli bir sürece
-karşı değil, işbirlikçi OpenCodex çökmelerine karşı koruma sağlar. Bu kullanıcı
+karşı değil, işbirlikçi OpenRelay çökmelerine karşı koruma sağlar. Bu kullanıcı
 ve `CODEX_HOME`'u içeren dosya sistemi güvenilir kalır ve kesme işlemi yazma
 üzerine kopyalama depolamasından, anlık görüntülerden veya SSD kalıntısından
 fiziksel silme vaat etmez.
 
 Önizleme derlemeleri `<OPENCODEX_HOME>/native-main-profiles` kullanmıştır. Bu
 düzen asla sessizce içe aktarılmaz. `doctor` eski profil durumunu bildirirse
-aynı `CODEX_HOME`'u paylaşan her OpenCodex proxy'sini durdurun. Ardından eşleşen
+aynı `CODEX_HOME`'u paylaşan her OpenRelay proxy'sini durdurun. Ardından eşleşen
 `*.vault.json`, `*.journal.json`, kurtarma işaretçisini ve başvurulan herhangi
 bir günlük karantinası dosyasını yalnızca sahip izinlerini koruyarak birlikte
 kurallı dizine yedekleyip taşıyın ya da eski önizleme kümesini kaldırıp `ocx
@@ -468,9 +468,9 @@ işletim sistemi anahtarlık kimliği kasıtlı olarak yeniden kullanılmaz.
 
 ## Modeller
 
-### `ocx models [alt-komut]` · `ocx model <alt-komut>`
+### `orl models [alt-komut]` · `orl model <alt-komut>`
 
-`ocx model`, `ocx models`'ın bir takma adıdır. Alt komut olmadan yapılandırılmış
+`orl model`, `orl models`'ın bir takma adıdır. Alt komut olmadan yapılandırılmış
 sağlayıcılarda statik olarak beslenen modelleri listeler. `--provider`
 yapılandırılmış bir sağlayıcıyı filtreler ve `--json` model meta verilerini
 döndürür. `live` çalışan kataloğu okur; `add`, `edit`, `remove` ve `list-custom`
@@ -497,15 +497,15 @@ görünürlüğü kontrol eder; `selected` bir sağlayıcı izin listesini kontr
 | `shadow <status\|set> [model\|-]` | `--enabled <on\|off>`, `--json` | Codex'in arka plan yardımcı çağrıları için değiştirme modelini okuyun veya ayarlayın. `-` modeli temizler. `status` ayrıca proxy'nin müdahale ettiği yardımcı slug'ları olan `sourceModels`'ı bildirir (varsayılan: `gpt-6-luna`, `gpt-5.6-luna`; 0.144.x'e kadar olan istemciler açık bir `sourceModels` geçersiz kılmasının geri yükleyebileceği `gpt-5.4-mini` kullanmıştır). |
 
 ```bash
-ocx models live --json                                  # Codex'in şu anda gerçekte görebildikleri
-ocx models disable anthropic/claude-haiku-4             # bir yönlendirilen modeli gizle
-ocx models enable gpt-5.6-sol                           # eğik çizgi yok, bu yüzden yerel olarak kabul edilir
-ocx models provider zenmux off                          # gürültülü bir sağlayıcıyı toptan gizle
-ocx models selected anthropic --set claude-opus-5,claude-fable-5
-ocx models selected anthropic --clear                   # izin listesini tekrar kaldır
-ocx models add deepseek deepseek-v4 --display-name 'DeepSeek V4' --context-window 128000 --modalities text,image
-ocx models list-custom --json                           # düzenleme/kaldırma için custom-id'yi oku
-ocx models remove deepseek/deepseek-v4 --yes
+orl models live --json                                  # Codex'in şu anda gerçekte görebildikleri
+orl models disable anthropic/claude-haiku-4             # bir yönlendirilen modeli gizle
+orl models enable gpt-5.6-sol                           # eğik çizgi yok, bu yüzden yerel olarak kabul edilir
+orl models provider zenmux off                          # gürültülü bir sağlayıcıyı toptan gizle
+orl models selected anthropic --set claude-opus-5,claude-fable-5
+orl models selected anthropic --clear                   # izin listesini tekrar kaldır
+orl models add deepseek deepseek-v4 --display-name 'DeepSeek V4' --context-window 128000 --modalities text,image
+orl models list-custom --json                           # düzenleme/kaldırma için custom-id'yi oku
+orl models remove deepseek/deepseek-v4 --yes
 ```
 
 Eğik çizgi içeren bir model seçici yönlendirilir (`anthropic/claude-opus-5`);

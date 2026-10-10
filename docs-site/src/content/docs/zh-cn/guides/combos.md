@@ -3,7 +3,7 @@ title: "组合：故障切换与负载均衡"
 description: 将一个虚拟模型路由到多个 provider，用于故障切换或加权负载均衡。
 ---
 
-**combo** 是一个虚拟模型，它前置了一组按顺序排列的真实 provider/model 目标。你的客户端请求 `combo/<id>`；opencodex 会选择一个目标，将请求重写为那个具体的 `provider/model`，并且在第一个目标出现可重试失败时，可以改试另一个目标。
+**combo** 是一个虚拟模型，它前置了一组按顺序排列的真实 provider/model 目标。你的客户端请求 `combo/<id>`；OpenRelay 会选择一个目标，将请求重写为那个具体的 `provider/model`，并且在第一个目标出现可重试失败时，可以改试另一个目标。
 
 这在以下场景很有用：
 
@@ -17,10 +17,10 @@ combo 位于正常 provider 路由之前。如果你还不熟悉 `provider/model
 这个示例创建 `combo/main`，Anthropic 在前，OpenAI 在后。两个 provider 都必须已经存在并启用。
 
 ```bash
-ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
+orl combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 ```
 
-默认策略是故障切换，所以正常请求会发往 `anthropic/claude-opus-4-8`。如果这次尝试出现可重试失败，opencodex 可以切换到 `openai/gpt-5.6-sol`。
+默认策略是故障切换，所以正常请求会发往 `anthropic/claude-opus-4-8`。如果这次尝试出现可重试失败，OpenRelay 可以切换到 `openai/gpt-5.6-sol`。
 
 在任何你通常会提供模型 id 的地方，都可以使用这个虚拟模型：
 
@@ -34,7 +34,7 @@ ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 确认已保存的定义：
 
 ```bash
-ocx combo show main
+orl combo show main
 ```
 
 :::tip
@@ -43,7 +43,7 @@ ocx combo show main
 
 ## combo 名称的工作方式
 
-`ocx combo set <id>` 中的 combo id 必须以字母或数字开头。之后可以包含字母、数字、`.`、`_` 或 `-`，总长度最多 64 个字符。其规范模型 id 始终是 `combo/<id>`；例如，id `main` 会变成 `combo/main`。
+`orl combo set <id>` 中的 combo id 必须以字母或数字开头。之后可以包含字母、数字、`.`、`_` 或 `-`，总长度最多 64 个字符。其规范模型 id 始终是 `combo/<id>`；例如，id `main` 会变成 `combo/main`。
 
 在配置 combo 时，`combo/` 命名空间是保留的。名为 `combo` 的 provider 不能占用它，而 combo id 也不能与已配置的 provider 名称重复。
 
@@ -69,14 +69,14 @@ ocx combo show main
 却不出现在 Desktop。可以显式让一个 combo 接管对应的裸原生 slug：
 
 ```bash
-ocx combo set nova-sol \
+orl combo set nova-sol \
   --targets Nova1/codex/gpt-5.6-sol \
   --alias gpt-5.6-sol \
   --native-alias \
   --display-name 'Nova1 - codex-gpt-5.6-sol'
 ```
 
-该模式默认关闭，同时要求 `--native-alias` 和非空显示名称。alias 必须是当前 opencodex 版本
+该模式默认关闭，同时要求 `--native-alias` 和非空显示名称。alias 必须是当前 OpenRelay 版本
 明确支持的原生 model id；只有原生系列前缀还不够，因为移除 alias 时必须能恢复权威 metadata。
 如果路由目标的 discovery 只返回 model id，兼容行会从被接管的原生 id 补齐缺失的 context、
 modality 和 reasoning metadata；目标显式声明的限制仍然优先，因此不会抬高 context cap 或覆盖
@@ -109,7 +109,7 @@ modality 和 reasoning metadata；目标显式声明的限制仍然优先，因�
 创建一个 2:1 的 combo，并让每批包含两个成功请求：
 
 ```bash
-ocx combo set balanced \
+orl combo set balanced \
   --targets anthropic/claude-opus-4-8:2,openai/gpt-5.6-sol:1 \
   --strategy round-robin \
   --sticky 2
@@ -133,7 +133,7 @@ ocx combo set balanced \
 
 ### `least-used`：优先成功次数最少的目标
 
-`least-used` 会将每个请求路由到合格目标中，由当前 opencodex 进程记录的成功请求数最少者。进程重启后计数从零开始，计数相同时保持配置顺序。`weight` 和 `stickyLimit` 不影响此策略。
+`least-used` 会将每个请求路由到合格目标中，由当前 OpenRelay 进程记录的成功请求数最少者。进程重启后计数从零开始，计数相同时保持配置顺序。`weight` 和 `stickyLimit` 不影响此策略。
 
 ### `reset-window`：跟随最近的额度重置
 
@@ -165,7 +165,7 @@ combo 失败分为 **跳转** 失败和 **终止** 失败。
 在非 combo 的 Responses 请求上，allowlist 中的 xAI 策略 403 会在 Codex 将其当作传输失败重试之前被改写为 HTTP 200 `incomplete/content_filter`；见 [xAI policy refusals](/reference/proxy-formats/#xai-policy-refusals)。combo 跳转仍把原始 HTTP 403 分类为跳转。
 :::
 
-对于流式请求，上游 HTTP 状态并不是最终决定。OpenCodex 只会缓冲所选子目标在开始输出前的一段有上限的 Responses SSE。若在任何文本、推理、工具调用或其他输出事件开始之前收到可重试的 `response.failed` 终止事件，该次尝试会被记为失败，combo 可以继续尝试下一个合格目标。一旦输出开始或预输出缓冲区达到上限，当前目标就会被提交；之后的流错误不会在其他提供商上重放，从而避免重复文本和重复执行工具。
+对于流式请求，上游 HTTP 状态并不是最终决定。OpenRelay 只会缓冲所选子目标在开始输出前的一段有上限的 Responses SSE。若在任何文本、推理、工具调用或其他输出事件开始之前收到可重试的 `response.failed` 终止事件，该次尝试会被记为失败，combo 可以继续尝试下一个合格目标。一旦输出开始或预输出缓冲区达到上限，当前目标就会被提交；之后的流错误不会在其他提供商上重放，从而避免重复文本和重复执行工具。
 
 ## 默认推理力度
 
@@ -188,7 +188,7 @@ combo 失败分为 **跳转** 失败和 **终止** 失败。
 
 对于 Codex v2 子代理，有一个重要限制（[issue #92](https://github.com/lidge-jun/opencodex/issues/92)）。原生父进程只能把新启动 worker 的任务，以为原生 ChatGPT 后端生成的密文形式发送出去。外部 provider 无法读取那段负载。
 
-对于这类请求，combo 会把合格目标筛选为规范的原生 ChatGPT 路由，即使在一次可重试失败之后也是如此。如果 combo 没有任何具备解密能力的目标，opencodex 会在分发前停止，并返回 HTTP 400：
+对于这类请求，combo 会把合格目标筛选为规范的原生 ChatGPT 路由，即使在一次可重试失败之后也是如此。如果 combo 没有任何具备解密能力的目标，OpenRelay 会在分发前停止，并返回 HTTP 400：
 
 ```json
 {
@@ -223,17 +223,17 @@ combo 失败分为 **跳转** 失败和 **终止** 失败。
 主要命令如下：
 
 ```bash
-ocx combo list
-ocx combo show <id>
-ocx combo set <id> --targets provider/model[:weight],...
-ocx combo remove <id> --yes
+orl combo list
+orl combo show <id>
+orl combo set <id> --targets provider/model[:weight],...
+orl combo remove <id> --yes
 ```
 
 `set` 也接受 `--strategy`、`--sticky`、`--effort`、`--alias`、`--native-alias`、
 `--display-name` 和 `--rename-from`。将 `--effort`、`--alias` 或 `--display-name` 的值设为
 `-` 可清除该字段。`--native-alias` 必须配合当前受支持的裸原生 alias 和非空显示名称使用。
 `create` 和 `update` 是 `set` 的别名；`delete` 是 `remove` 的别名；同样的子命令也可通过
-`ocx route combo` 使用。
+`orl route combo` 使用。
 
 ### Management API
 
@@ -283,7 +283,7 @@ combo 会存储在顶层的 `combos` 对象中，并以 combo id 作为键：
 
 ### 为什么 `combo/<id>` 会返回 404？
 
-combo id 不存在。响应是 HTTP 404，类型为 `invalid_request_error`。运行 `ocx combo list`，检查拼写和大小写，并确认你的管理命令写入的是同一个正在运行、并接收模型请求的 opencodex 实例。
+combo id 不存在。响应是 HTTP 404，类型为 `invalid_request_error`。运行 `orl combo list`，检查拼写和大小写，并确认你的管理命令写入的是同一个正在运行、并接收模型请求的 OpenRelay 实例。
 
 ### 为什么会收到 `combo_unavailable`？
 

@@ -3,7 +3,7 @@ title: Agent 設定
 description: 多代理介面、委派指引、偏好模型、fallback 鏈、原生預設同步與 effort 上限。
 ---
 
-Agent 設定控制要廣告哪個 Codex 協作介面，以及 opencodex 如何引導、路由並限制委派的工作。
+Agent 設定控制要廣告哪個 Codex 協作介面，以及 OpenRelay 如何引導、路由並限制委派的工作。
 
 ## Agent 欄位
 
@@ -14,14 +14,14 @@ Agent 設定控制要廣告哪個 Codex 協作介面，以及 opencodex 如何�
 | `injectionModel?` | `string` | — | 在代理撰寫的 v2 委派指引中使用的偏好原生或路由子代理模型。 |
 | `injectionEffort?` | `string` | — | 偏好 effort（`low` 到 `ultra`），僅在搭配 `injectionModel` 時有意義。 |
 | `injectionPrompt?` | `string` | — | 取代內建指引本文。支援 `{{model}}`、`{{effort}}`、`{{roster}}` 與 `{{fallback}}`。觸發閘門保持不變。 |
-| `multiAgentGuidanceEnabled?` | `boolean` | `true` | 僅控制 opencodex 撰寫的 v1/v2 開發者指引；不改變原生 agent 預設值、工具、路由、roster 或 effort 上限。 |
+| `multiAgentGuidanceEnabled?` | `boolean` | `true` | 僅控制 OpenRelay 撰寫的 v1/v2 開發者指引；不改變原生 agent 預設值、工具、路由、roster 或 effort 上限。 |
 | `syncCodexSubagentDefaults?` | `boolean` | `false` | 選擇在 sync/restart 時將 `injectionModel` 與可選的 `injectionEffort` 寫入 Codex 的原生預設值。需要 `injectionModel`。 |
 | `subagentModelFallback?` | `string[]` | `[]` | 為生成的子任務回合排序的全域 fallback 模型。 |
 | `subagentModelFallbackPollMs?` | `number` | `60000` | 可用性探測快取間隔。低於 1000 ms 的值會回退到預設值。 |
 | `effortCap?` | `string` | — | 合格 v2 主回合與標記的生成子回合的硬性上限。接受 `low` 到 `ultra`。 |
 | `subagentEffortCap?` | `string` | — | 僅針對生成子回合的額外上限。當兩個上限都適用時，取較低者。 |
 
-使用儀表板或 `ocx v2 status|on|off|mode <v1|default|v2>|threads <n>` 管理介面。模式變更套用於新 session。`maxConcurrentThreadsPerSession` 是 `PUT /api/v2` 欄位，不是 `config.json` key；`ocx v2 threads <n>` 在啟用 v2 後，將 `max_concurrent_threads_per_session` 寫入 Codex 的 `$CODEX_HOME/config.toml` 中 `[features.multi_agent_v2]` 之下。
+使用儀表板或 `orl v2 status|on|off|mode <v1|default|v2>|threads <n>` 管理介面。模式變更套用於新 session。`maxConcurrentThreadsPerSession` 是 `PUT /api/v2` 欄位，不是 `config.json` key；`orl v2 threads <n>` 在啟用 v2 後，將 `max_concurrent_threads_per_session` 寫入 Codex 的 `$CODEX_HOME/config.toml` 中 `[features.multi_agent_v2]` 之下。
 
 管理 API 暴露 `GET`/`PUT /api/v2`、`/api/injection-model`、`/api/effort-caps`、`/api/subagent-models` 與 `/api/subagent-model-fallback`。注入模型更新為部分更新；自訂 prompt 是該 API 的 `prompt` 欄位。
 
@@ -48,9 +48,9 @@ V1 指引僅在 `max` 或 `ultra` 時為主動文字。V2 僅在存在偏好模�
 3. 全域 `subagentModelFallback` 項目；然後
 4. 為向後相容而讀取的 `$CODEX_HOME/agents/*.toml` 舊版角色級 `model_fallback`。
 
-Codex 0.146+ 會將角色檔案中的 `model_fallback` 視為未知欄位並略過整個角色；`ocx doctor` 也會對此發出警告。因此新的角色級 fallback 應設定在 opencodex，而不是角色 TOML 中。
+Codex 0.146+ 會將角色檔案中的 `model_fallback` 視為未知欄位並略過整個角色；`orl doctor` 也會對此發出警告。因此新的角色級 fallback 應設定在 OpenRelay，而不是角色 TOML 中。
 
-opencodex 會跳過已停用、不可路由、不健康、冷卻中或達到配額閾值的候選項。可用性快取保存 `subagentModelFallbackPollMs`。對於加密的子任務，候選鏈僅包含規範的原生 ChatGPT 目標，以及透過 `allowEncryptedV2AgentTasks: true` 明確信任的直接金鑰驗證 Responses 路由。若無目標可處理加密 payload，且選用的恢復功能無法支援路由傳送，請求會失敗，不會轉送無法讀取的密文。組合會先嘗試可用的規範原生目標；若沒有可選擇的原生目標或原生嘗試已耗盡，且已啟用 `agentTaskRecovery`，會在路由到組合目標前對加密的 `NEW_TASK` 恢復一次。組合恢復僅在 spawn 出的子回合生效；直接路由路徑也會恢復對話中途的模型切換。
+OpenRelay 會跳過已停用、不可路由、不健康、冷卻中或達到配額閾值的候選項。可用性快取保存 `subagentModelFallbackPollMs`。對於加密的子任務，候選鏈僅包含規範的原生 ChatGPT 目標，以及透過 `allowEncryptedV2AgentTasks: true` 明確信任的直接金鑰驗證 Responses 路由。若無目標可處理加密 payload，且選用的恢復功能無法支援路由傳送，請求會失敗，不會轉送無法讀取的密文。組合會先嘗試可用的規範原生目標；若沒有可選擇的原生目標或原生嘗試已耗盡，且已啟用 `agentTaskRecovery`，會在路由到組合目標前對加密的 `NEW_TASK` 恢復一次。組合恢復僅在 spawn 出的子回合生效；直接路由路徑也會恢復對話中途的模型切換。
 
 ```json
 {
@@ -69,7 +69,7 @@ opencodex 會跳過已停用、不可路由、不健康、冷卻中或達到配�
 
 上限僅套用於 v2 協作功能：當主回合的工具暴露 v2 時該回合合格，而子回合在 `x-codex-turn-metadata` 中帶有精確的 codex-rs `x-openai-subagent: collab_spawn` 或 `"subagent_kind": "thread_spawn"` 標記時合格，即使葉工具不再暴露協作。V1 主回合、`multiAgentMode: "v1"`、壓縮、審查與記憶整合回合會略過上限。
 
-上限僅會降低 effort。它們吸附到上限或以下的最高宣告級別。若模型沒有 effort 控制或沒有支援的級別符合，opencodex 會移除 effort 並讓供應商預設值套用。`max` 與 `ultra` 被接受，而儀表板提供 `low` 到 `xhigh`。
+上限僅會降低 effort。它們吸附到上限或以下的最高宣告級別。若模型沒有 effort 控制或沒有支援的級別符合，OpenRelay 會移除 effort 並讓供應商預設值套用。`max` 與 `ultra` 被接受，而儀表板提供 `low` 到 `xhigh`。
 
 即使沒有設定模型 effort pin，符合條件的原生 Chat Completions 回合也會套用設定的上限。套用 pin 或上限改變值時才會對應為供應商的傳輸值；兩者皆未發生時，原生呼叫端值保留原始寫法。
 

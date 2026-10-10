@@ -82,6 +82,7 @@ import {
   recordKeyAttemptUsage,
 } from "../request-log";
 import type { AttemptRecoveryKind } from "../../usage/log";
+import { createRtkTransport, wrapRtkAdapter } from "../../compression/rtk/transport";
 import { bindAttemptDeliveryRecorder } from "../../usage/attempt-delivery";
 import { resolvePassiveRouteSubjectId } from "../passive-route-linker";
 import { clientCancelledResponse } from "./core-errors";
@@ -102,6 +103,7 @@ export async function prepareResponsesTransport(
 ) {
   const { config, logCtx, options, req } = requestContext;
   const { route, parsed, inboundWire, translatorBudget } = requestState;
+  const rtk = createRtkTransport(config.rtk?.enabled === true && !options.internalDecisionCall, translatorBudget, options.inboundWire === "chat" || options.inboundWire === "anthropic", { signal: options.abortSignal ?? req.signal, native: options.inboundTransport === "websocket" });
   const anthropicInstance = route.provider.authMode === "oauth"
     ? configuredAnthropicInstance(config, route.providerName) : undefined;
   // Refuse custom/orphan B OAuth before any generic resolver can observe its auth row.
@@ -413,6 +415,7 @@ export async function prepareResponsesTransport(
   };
   const resolveSelectionAdapter = (provider: OcxProviderConfig, retention = config.cacheRetention): ProviderAdapter => {
     const resolved = resolveAdapter(provider, retention, route.providerName);
+    wrapRtkAdapter(resolved, rtk, req);
     if (route.provider.authMode === "forward") return resolved;
     const binding: DispatchBinding | undefined = route.provider.authMode === "oauth"
       ? oauthSelection && servingOAuthSnapshot

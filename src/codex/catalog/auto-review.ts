@@ -130,7 +130,7 @@ function warnAutoReviewModelDiagnostic(
     ? "the selector was not found in the final catalog"
     : "the selector format is invalid";
   console.warn(
-    `[opencodex] auto_review_model ${detail} (${safeConfigured}); preserving normal upstream auto-review behavior.`,
+    `[openrelay] auto_review_model ${detail} (${safeConfigured}); preserving normal upstream auto-review behavior.`,
   );
 }
 
@@ -146,7 +146,7 @@ function warnProviderAutoReviewModelDiagnostic(
     ? "the selector was not found in the final catalog"
     : "the selector format is invalid";
   console.warn(
-    `[opencodex] auto_review_model for provider ${safeProvider} ${detail} (${safeConfigured}); using the next valid provider/root selector or upstream behavior.`,
+    `[openrelay] auto_review_model for provider ${safeProvider} ${detail} (${safeConfigured}); using the next valid provider/root selector or upstream behavior.`,
   );
 }
 
@@ -161,7 +161,7 @@ function warnProviderAutoReviewForeignTarget(provider: string, configured: strin
   const safeConfigured = JSON.stringify(redactSecretString(configured));
   const safeTarget = JSON.stringify(redactSecretString(target));
   console.warn(
-    `[opencodex] auto_review_model for provider ${safeProvider} (${safeConfigured}) resolved to ${safeTarget}, which is not a row of that provider; that catalog row supplies the reviewer.`,
+    `[openrelay] auto_review_model for provider ${safeProvider} (${safeConfigured}) resolved to ${safeTarget}, which is not a row of that provider; that catalog row supplies the reviewer.`,
   );
 }
 

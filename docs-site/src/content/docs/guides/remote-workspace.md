@@ -5,7 +5,7 @@ description: Keep Codex, Claude Code, Pi, and their logins on one OCX Hub while 
 
 For SSH machine links, see [Remote Link](/guides/remote-link/).
 
-Remote Workspace lets one OpenCodex Hub run your coding agents while another computer supplies the
+Remote Workspace lets one OpenRelay Hub run your coding agents while another computer supplies the
 project files, commands, tests, and build compute. A phone or third computer can control the session
 through the Hub dashboard.
 
@@ -15,7 +15,7 @@ Phone browser -> Computer 1 OCX Hub -> encrypted channel -> Computer 2 OCX Execu
                  logins and sessions                      no coding CLI login
 ```
 
-The Executor needs OpenCodex only. It does not need Codex, Claude Code, Pi, a ChatGPT login, or a
+The Executor needs OpenRelay only. It does not need Codex, Claude Code, Pi, a ChatGPT login, or a
 provider API key. It opens an outbound WebSocket to the Hub, so the Executor needs no public port or
 router port-forward.
 
@@ -40,12 +40,12 @@ accepts inclusive values from 1 through 120,000 milliseconds.
 ## Set up the Hub
 
 Computer 1 owns every coding-agent login and model session. Install and log in to whichever agents
-you want to use there, then run OpenCodex as a Hub:
+you want to use there, then run OpenRelay as a Hub:
 
 ```bash
-ocx config set runtimeRole hub
-OCX_REMOTE_WORKSPACE_ENABLED=1 ocx start
-ocx gui
+orl config set runtimeRole hub
+OCX_REMOTE_WORKSPACE_ENABLED=1 orl start
+orl gui
 ```
 
 Set `OCX_REMOTE_WORKSPACE_ENABLED=1` on the Hub process itself; setting it only for a dashboard
@@ -64,10 +64,10 @@ using the feature; do not configure both the legacy sandbox and a permission pro
 ## Inspect the Hub without starting a session
 
 ```bash
-ocx remote-workspace hub --help
-ocx remote-workspace hub status --json
-ocx remote-workspace hub runtimes --json
-ocx remote-workspace hub sessions --json
+orl remote-workspace hub --help
+orl remote-workspace hub status --json
+orl remote-workspace hub runtimes --json
+orl remote-workspace hub sessions --json
 ```
 
 These use the selected running management Hub. Existing `remote-workspace status`
@@ -94,31 +94,31 @@ trust changes. Those remain the separate dashboard/session workflows below.
 ## Pair an Executor
 
 1. Pair the browser with the Hub through the dashboard pairing panel. Run the displayed
-   `ocx gui pair --origin` command on the Hub and enter its one-time code; an automatically
+   `orl gui pair --origin` command on the Hub and enter its one-time code; an automatically
    bootstrapped local or Tailscale session may view status but cannot control Remote Workspace.
 2. Open **Remote Workspace** in that paired Hub dashboard.
 3. Select **Create pairing code**.
 4. On Computer 2, change into the project directory you want to expose.
 5. Copy the generated **Linux / macOS terminal** or **Windows PowerShell** command for that computer.
    It pairs the current directory and keeps
-   `ocx remote-workspace agent` connected in that terminal.
+   `orl remote-workspace agent` connected in that terminal.
 
 The equivalent manual flow is:
 
 ```bash
 cd /path/to/project
-printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.example' \
+printf '%s\n' 'ONE-TIME-CODE' | orl remote-workspace pair 'https://your-hub.example' \
   --pairing-code-stdin --root "$PWD"
-ocx remote-workspace agent
+orl remote-workspace agent
 ```
 
 On Windows PowerShell, use the command shown in the dashboard. The equivalent manual form is:
 
 ```powershell
 $pairingCode = 'ONE-TIME-CODE'
-$pairingCode | ocx remote-workspace pair 'https://your-hub.example' `
+$pairingCode | orl remote-workspace pair 'https://your-hub.example' `
   --pairing-code-stdin --root (Get-Location).Path
-if ($LASTEXITCODE -eq 0) { ocx remote-workspace agent }
+if ($LASTEXITCODE -eq 0) { orl remote-workspace agent }
 ```
 
 The current OCX Bun executable is added as one read-only file to the Linux sandbox automatically. If
@@ -126,7 +126,7 @@ the project needs a user-installed toolchain outside the system paths, pair it e
 exposing the rest of the home directory:
 
 ```bash
-printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.example' \
+printf '%s\n' 'ONE-TIME-CODE' | orl remote-workspace pair 'https://your-hub.example' \
   --pairing-code-stdin --root "$PWD" \
   --toolchain-root "$HOME/.nvm/versions/node/v24/bin"
 ```
@@ -143,7 +143,7 @@ device.
 Check local enrollment without printing secrets:
 
 ```bash
-ocx remote-workspace status
+orl remote-workspace status
 ```
 
 ## Start a remote coding session

@@ -240,8 +240,8 @@ describe("management API /api/debug/logs", () => {
 describe("management API /api/debug/injection-logs", () => {
   test("returns buffered injection lines with seq cursor and limit", async () => {
     setDebugSettings({ injection: true });
-    injectionDebugLog("[opencodex] gpt-5.4: multi-agent guidance injected (surface=collab, 128 chars)");
-    injectionDebugLog("[opencodex] gpt-5.4: effort cap applied (ultra -> high, main turn)");
+    injectionDebugLog("[openrelay] gpt-5.4: multi-agent guidance injected (surface=collab, 128 chars)");
+    injectionDebugLog("[openrelay] gpt-5.4: effort cap applied (ultra -> high, main turn)");
 
     const server = startServer(0);
     try {
@@ -262,7 +262,7 @@ describe("management API /api/debug/injection-logs", () => {
   });
 
   test("caps limit query param at 2000", async () => {
-    for (let i = 0; i < 5; i += 1) injectionDebugLog(`[opencodex] inj:${i}`);
+    for (let i = 0; i < 5; i += 1) injectionDebugLog(`[openrelay] inj:${i}`);
     const server = startServer(0);
     try {
       const res = await fetch(new URL("/api/debug/injection-logs?limit=99999", server.url));

@@ -7,7 +7,7 @@ import {
   takeFlag, takeOptionWithSyntax, type RuntimeApiDeps,
 } from "./runtime-api";
 
-const PACING_USAGE = "Usage: ocx provider pacing <name> [--file <FILE|-> | --enabled <on|off> --rpm <number> --min-interval-ms <integer> --max-concurrent <integer>] [--json]";
+const PACING_USAGE = "Usage: orl provider pacing <name> [--file <FILE|-> | --enabled <on|off> --rpm <number> --min-interval-ms <integer> --max-concurrent <integer>] [--json]";
 
 function onOff(value: string, flag: string): boolean {
   if (value !== "on" && value !== "off") throw new CliUsageError(`${flag} must be on or off`);

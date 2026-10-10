@@ -1427,7 +1427,7 @@ export function reconcileOAuthProviders(config: OcxConfig, persist = true): bool
   });
   if (outcome.status === "unavailable") {
     console.warn(
-      `[opencodex] OAuth provider reconciliation could not be persisted (${outcome.reason}); `
+      `[openrelay] OAuth provider reconciliation could not be persisted (${outcome.reason}); `
       + "applying it in memory for this run only.",
     );
     adoptOAuthReconciliation(config, projection);

@@ -190,12 +190,12 @@ export function createResetCreditAutoRedeemer(deps: AutoRedeemDeps): ResetCredit
       schedule(idleRecheckMs);
       return { kind: "skipped", reason: "credit-gone" };
     }
-    log(`[opencodex] reset-credit auto-redeem: dispatching for account ${accountKey} (credit expires ${plan.expiresAt})`);
+    log(`[openrelay] reset-credit auto-redeem: dispatching for account ${accountKey} (credit expires ${plan.expiresAt})`);
     let result: { code: string };
     try {
       result = await deps.consume(entry.redeemRequestId);
     } catch (error) {
-      log(`[opencodex] reset-credit auto-redeem: consume uncertain for account ${accountKey}; will retry with the same request id`);
+      log(`[openrelay] reset-credit auto-redeem: consume uncertain for account ${accountKey}; will retry with the same request id`);
       schedule(60_000);
       return { kind: "ambiguous", redeemRequestId: entry.redeemRequestId };
     }
@@ -218,7 +218,7 @@ export function createResetCreditAutoRedeemer(deps: AutoRedeemDeps): ResetCredit
       retryJournal(error);
       return { kind: "error", message: error instanceof Error ? error.message : "journal settlement failed" };
     }
-    log(`[opencodex] reset-credit auto-redeem: upstream answered ${result.code} for account ${accountKey}`);
+    log(`[openrelay] reset-credit auto-redeem: upstream answered ${result.code} for account ${accountKey}`);
     schedule(idleRecheckMs);
     return { kind: "dispatched", code: result.code, redeemRequestId: entry.redeemRequestId };
   };

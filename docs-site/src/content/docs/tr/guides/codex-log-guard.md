@@ -3,11 +3,11 @@ title: Codex Log Guard
 description: Günlük gövdelerini açığa çıkarmadan Codex tanılama günlüklerinin kalıcı kaydını inceleyin ve açıkça azaltın.
 ---
 
-OpenCodex, Codex'in kalıcı tanılama günlüğü veritabanını inceleyebilir ve siz etkinleştirirseniz Codex'in hangi tanılama satırlarını sakladığını azaltabilir. İnceleme salt okunurdur; koruma ise bilinen Codex günlük şeması bulunmadıkça ve Codex durdurulmadıkça reddedilen açık bir değişikliktir.
+OpenRelay, Codex'in kalıcı tanılama günlüğü veritabanını inceleyebilir ve siz etkinleştirirseniz Codex'in hangi tanılama satırlarını sakladığını azaltabilir. İnceleme salt okunurdur; koruma ise bilinen Codex günlük şeması bulunmadıkça ve Codex durdurulmadıkça reddedilen açık bir değişikliktir.
 
 ## İnceleme ne bildirir
 
-OpenCodex, Codex'in mevcut öncelik sırasına göre etkin `sqlite_home` konumunu çözümler ve oradaki kanonik `logs_2.sqlite` veritabanını inceler. Daha yüksek numaralı veya eski bir `logs_N.sqlite` dosyası hiçbir zaman değişiklik yapılabilen hedef olarak onun yerine kullanılmaz.
+OpenRelay, Codex'in mevcut öncelik sırasına göre etkin `sqlite_home` konumunu çözümler ve oradaki kanonik `logs_2.sqlite` veritabanını inceler. Daha yüksek numaralı veya eski bir `logs_N.sqlite` dosyası hiçbir zaman değişiklik yapılabilen hedef olarak onun yerine kullanılmaz.
 
 Depolama görünümü şunları bildirir:
 
@@ -19,11 +19,11 @@ Depolama görünümü şunları bildirir:
 
 `sqlite_home`, `CODEX_HOME` dışında ise tanılama veritabanı ayrı gösterilir. Baytları, mevcut `CODEX_HOME` depolama toplamına sessizce eklenmez.
 
-OpenCodex, bu tanılamaları üretirken `feedback_log_body` alanını seçmez veya açığa çıkarmaz. Günlük düzeyleri bilinen sabit düzey kümesine ve `OTHER` değerine indirgenir; hedef adları serileştirilmez.
+OpenRelay, bu tanılamaları üretirken `feedback_log_body` alanını seçmez veya açığa çıkarmaz. Günlük düzeyleri bilinen sabit düzey kümesine ve `OTHER` değerine indirgenir; hedef adları serileştirilmez.
 
 ## Koruma modları
 
-Koruma **varsayılan olarak kapalıdır**. Etkinleştirmek, Codex'in kanonik `logs_2.sqlite` veritabanına OpenCodex'e ait bir `BEFORE INSERT` tetikleyicisi kurar. OpenCodex, kendisi için ayrılmış adları kullanan bilinmeyen bir tetikleyiciyi asla değiştirmez ve yalnızca SQL'i OpenCodex'e ait sürümle eşleşen tetikleyicileri kaldırır.
+Koruma **varsayılan olarak kapalıdır**. Etkinleştirmek, Codex'in kanonik `logs_2.sqlite` veritabanına OpenRelay'e ait bir `BEFORE INSERT` tetikleyicisi kurar. OpenRelay, kendisi için ayrılmış adları kullanan bilinmeyen bir tetikleyiciyi asla değiştirmez ve yalnızca SQL'i OpenRelay'e ait sürümle eşleşen tetikleyicileri kaldırır.
 
 İki mod kullanılabilir:
 
@@ -36,7 +36,7 @@ Log Guard yalnızca kalıcı yerel SQLite günlük satırlarını filtreler. Cod
 
 ### Güvenlik denetimleri
 
-Protect, Disable veya Repair yabancı veritabanını değiştirmeden önce OpenCodex:
+Protect, Disable veya Repair yabancı veritabanını değiştirmeden önce OpenRelay:
 
 1. yalnızca kanonik `logs_2.sqlite` yolunu çözümler;
 2. yolun sembolik bağlantı olmayan normal bir dosya olduğunu ve bilinen şemayla tam eşleştiğini doğrular;
@@ -44,52 +44,52 @@ Protect, Disable veya Repair yabancı veritabanını değiştirmeden önce OpenC
 4. süreçler arası özel Log Guard kilidini alır;
 5. kilidi aldıktan sonra Codex süreç denetimini tekrarlar;
 6. veritabanını oluşturma semantiği **olmadan** okuma/yazma modunda açar ve beklemeden SQLite `BEGIN IMMEDIATE` kilidini alır;
-7. yalnızca OpenCodex'e ait Log Guard tetikleyicilerini değiştirir ve kaydetmeden önce sonucu yeniden okur; ve
-8. Log Guard kilidi hâlâ tutulurken istenen modu OpenCodex yapılandırmasına kaydeder.
+7. yalnızca OpenRelay'e ait Log Guard tetikleyicilerini değiştirir ve kaydetmeden önce sonucu yeniden okur; ve
+8. Log Guard kilidi hâlâ tutulurken istenen modu OpenRelay yapılandırmasına kaydeder.
 
-Süreç listeleme sonucu belirsizse, veritabanı meşgulse, şema bilinmiyorsa veya ayrılmış bir tetikleyici adı farklı bir SQL'e aitse değişiklik güvenli biçimde reddedilir. OpenCodex, Codex'i otomatik olarak sonlandırmaz.
+Süreç listeleme sonucu belirsizse, veritabanı meşgulse, şema bilinmiyorsa veya ayrılmış bir tetikleyici adı farklı bir SQL'e aitse değişiklik güvenli biçimde reddedilir. OpenRelay, Codex'i otomatik olarak sonlandırmaz.
 
 ## Sapma ve Onarım
 
-İstenen koruma modu, OpenCodex yapılandırmasında Codex'in günlük veritabanından ayrı saklanır. Bu önemlidir; çünkü Codex geçişi `logs` tablosunu yeniden oluşturabilir ve SQLite, değiştirilen tabloya bağlı tetikleyicileri kaldırır.
+İstenen koruma modu, OpenRelay yapılandırmasında Codex'in günlük veritabanından ayrı saklanır. Bu önemlidir; çünkü Codex geçişi `logs` tablosunu yeniden oluşturabilir ve SQLite, değiştirilen tabloya bağlı tetikleyicileri kaldırır.
 
-Kaydedilen mod `compat` veya `quiet` olduğu hâlde ilgili sahipli tetikleyici artık görülmüyorsa Log Guard durumu **drifted** olarak bildirir. `ocx doctor` sapmayı bildirir ancak asla otomatik onarmaz.
+Kaydedilen mod `compat` veya `quiet` olduğu hâlde ilgili sahipli tetikleyici artık görülmüyorsa Log Guard durumu **drifted** olarak bildirir. `orl doctor` sapmayı bildirir ancak asla otomatik onarmaz.
 
 Onarım açıkça başlatılır:
 
 ```bash
-ocx storage codex-logs repair
+orl storage codex-logs repair
 ```
 
-OpenCodex korumayı her başlangıçta yeniden oluşturmamayı bilinçli olarak seçer. Gelecekteki bir sürüm, bunun Codex geçişleri boyunca güvenli olduğuna dair yeterli saha kanıtı toplandıktan sonra otomatik onarımı yeniden değerlendirebilir.
+OpenRelay korumayı her başlangıçta yeniden oluşturmamayı bilinçli olarak seçer. Gelecekteki bir sürüm, bunun Codex geçişleri boyunca güvenli olduğuna dair yeterli saha kanıtı toplandıktan sonra otomatik onarımı yeniden değerlendirebilir.
 
 ## CLI
 
 Durumu okuyun:
 
 ```bash
-ocx storage codex-logs status
-ocx storage codex-logs status --json
-ocx doctor
+orl storage codex-logs status
+orl storage codex-logs status --json
+orl doctor
 ```
 
 Önerilen uyumluluk politikasını etkinleştirin:
 
 ```bash
-ocx storage codex-logs protect
+orl storage codex-logs protect
 ```
 
 Sessiz modu açıkça seçin:
 
 ```bash
-ocx storage codex-logs protect --mode quiet
+orl storage codex-logs protect --mode quiet
 ```
 
-OpenCodex korumasını devre dışı bırakın veya sapmayı onarın:
+OpenRelay korumasını devre dışı bırakın veya sapmayı onarın:
 
 ```bash
-ocx storage codex-logs unprotect
-ocx storage codex-logs repair
+orl storage codex-logs unprotect
+orl storage codex-logs repair
 ```
 
 Makine tarafından okunabilir çıktı için Log Guard komutlarına `--json` ekleyin. Geçerli komut söz dizimi ve JSON davranışı için [CLI başvurusuna](/tr/reference/cli/) bakın.
@@ -97,7 +97,7 @@ Makine tarafından okunabilir çıktı için Log Guard komutlarına `--json` ekl
 Mevcut komut değişmeden kalır:
 
 ```bash
-ocx storage --json
+orl storage --json
 ```
 
 Yanıtı, Depolama sayfasının kullandığı aynı Codex günlük durumunu taşır.
@@ -124,9 +124,9 @@ Protect gövdesi `{"mode":"compat"}` veya `{"mode":"quiet"}` olur. `GET /api/sto
 
 Durum incelemesi veritabanını SQLite `immutable=1` ile salt okunur açar. Bu, tanılama amaçlı okumanın `-wal` veya `-shm` yan dosyalarını oluşturmasını ya da güncellemesini önler.
 
-Bunun bir sonucu vardır: SQL toplamları ve gözlenen tetikleyici meta verileri, veritabanının son denetim noktası anlık görüntüsünü açıklar. Codex etkin olarak yazıyorsa canlı WAL, değişmez anlık görüntüden daha yeni satırlar veya şema sayfaları içerebilir. Başarılı bir değişiklik yanıtı, OpenCodex'in yazma işlemi içinde doğruladığı tetikleyici durumunu kullanır; daha sonraki salt okunur durum isteği, SQLite bu şema sayfaları için denetim noktası oluşturana kadar geçici olarak geriden gelebilir.
+Bunun bir sonucu vardır: SQL toplamları ve gözlenen tetikleyici meta verileri, veritabanının son denetim noktası anlık görüntüsünü açıklar. Codex etkin olarak yazıyorsa canlı WAL, değişmez anlık görüntüden daha yeni satırlar veya şema sayfaları içerebilir. Başarılı bir değişiklik yanıtı, OpenRelay'in yazma işlemi içinde doğruladığı tetikleyici durumunu kullanır; daha sonraki salt okunur durum isteği, SQLite bu şema sayfaları için denetim noktası oluşturana kadar geçici olarak geriden gelebilir.
 
-OpenCodex, WAL dosya boyutunu ayrı bildirir ve sonucu SSD yazma hızı, NAND yazmaları veya sürücü aşınması/TBW tüketimi olarak **etiketlemez**.
+OpenRelay, WAL dosya boyutunu ayrı bildirir ve sonucu SSD yazma hızı, NAND yazmaları veya sürücü aşınması/TBW tüketimi olarak **etiketlemez**.
 
 ## Uyumluluk durumları
 

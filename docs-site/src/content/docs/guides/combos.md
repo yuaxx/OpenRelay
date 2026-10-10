@@ -4,7 +4,7 @@ description: Route one virtual model to several providers for failover or weight
 ---
 
 A **combo** is one virtual model that fronts an ordered list of real provider/model targets. Your
-client requests `combo/<id>`; opencodex chooses a target, rewrites the request to that concrete
+client requests `combo/<id>`; OpenRelay chooses a target, rewrites the request to that concrete
 `provider/model`, and can try another target when the first one has a retryable failure.
 
 This is useful when you want either:
@@ -21,11 +21,11 @@ This example creates `combo/main` with Anthropic first and OpenAI second. Both p
 already exist and be enabled.
 
 ```bash
-ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
+orl combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 ```
 
 The default strategy is failover, so a normal request goes to
-`anthropic/claude-opus-4-8`. If that attempt has a retryable failure, opencodex can hop to
+`anthropic/claude-opus-4-8`. If that attempt has a retryable failure, OpenRelay can hop to
 `openai/gpt-5.6-sol`.
 
 Use the virtual model anywhere you would normally provide a model id:
@@ -40,7 +40,7 @@ Use the virtual model anywhere you would normally provide a model id:
 Confirm the saved definition:
 
 ```bash
-ocx combo show main
+orl combo show main
 ```
 
 :::tip
@@ -50,7 +50,7 @@ distribute traffic, and add weights only when equal distribution is not appropri
 
 ## How combo names work
 
-The combo id in `ocx combo set <id>` must start with a letter or number. It may then contain
+The combo id in `orl combo set <id>` must start with a letter or number. It may then contain
 letters, numbers, `.`, `_`, or `-`, up to 64 characters total. Its canonical model id is always
 `combo/<id>`; for example, id `main` becomes `combo/main`.
 
@@ -76,7 +76,7 @@ concrete provider/model selectors behind it.
 
 ## Compaction after switching combos
 
-When a client compacts using a bare model name after switching combos, opencodex can recall the
+When a client compacts using a bare model name after switching combos, OpenRelay can recall the
 combo that most recently completed successfully on that conversation lane. The model must match
 the completed response, and the combo and its target must still exist in the current configuration.
 The request then follows normal combo selection and failover.
@@ -96,12 +96,12 @@ Some Codex Desktop releases apply a remote native-only `available_models` allowl
 app-server has already loaded `model_catalog_json`. Normal routed ids such as
 `Nova1/codex-gpt-5.6-sol` are then usable by the CLI but absent from the Desktop picker. This is the
 upstream [Codex Desktop bug](https://github.com/openai/codex/issues/19694) tracked by
-[opencodex #241](https://github.com/lidge-jun/opencodex/issues/241).
+[OpenRelay #241](https://github.com/lidge-jun/opencodex/issues/241).
 
 When you control an equivalent routed target, a combo can explicitly take over one native slug:
 
 ```bash
-ocx combo set nova-sol \
+orl combo set nova-sol \
   --targets Nova1/codex/gpt-5.6-sol \
   --alias gpt-5.6-sol \
   --native-alias \
@@ -109,7 +109,7 @@ ocx combo set nova-sol \
 ```
 
 This mode is deliberately opt-in and requires both `--native-alias` and a non-empty display label.
-The alias must be one of the native model ids supported by this opencodex release; a native-family
+The alias must be one of the native model ids supported by this OpenRelay release; a native-family
 prefix alone is not accepted because removal must be able to restore authoritative metadata.
 When the routed target's discovery response supplies only a model id, the compatibility row fills
 missing context, modality, and reasoning metadata from the native id it replaces. Explicit target
@@ -164,7 +164,7 @@ successful requests stay on the selected target before the next weighted selecti
 Create a 2:1 combo with batches of two successful requests:
 
 ```bash
-ocx combo set balanced \
+orl combo set balanced \
   --targets anthropic/claude-opus-4-8:2,openai/gpt-5.6-sol:1 \
   --strategy round-robin \
   --sticky 2
@@ -195,7 +195,7 @@ stickiness of round-robin. `stickyLimit` does not affect this strategy.
 ### Least-used: favor the target with fewest successes
 
 `least-used` routes each request to the eligible target with the fewest successful requests
-recorded by this opencodex process. Counts start at zero on restart, and ties keep configuration
+recorded by this OpenRelay process. Counts start at zero on restart, and ties keep configuration
 order. Weights and `stickyLimit` do not affect this strategy.
 
 ### Reset-window: follow the soonest quota reset
@@ -217,7 +217,7 @@ to use it. Adding a decision credential does not change existing models, aliases
 | --- | --- | --- |
 | TypeSafe (default) | Omit both selectors, or set `decisionProvider: "jev"`. | `typesafe` |
 | System One-compatible server | Set `decisionProvider` to a configured `jev-decision` row id other than `jev`. | `systemone` |
-| opencodex model | Set `decisionModel` to an ordinary opencodex route, such as `ollama/qwen3:4b`. | `model` |
+| OpenRelay model | Set `decisionModel` to an ordinary OpenRelay route, such as `ollama/qwen3:4b`. | `model` |
 
 `decisionProvider` and `decisionModel` are mutually exclusive. The backend is derived from those
 fields; there is no stored `backend` setting. Every method uses the same eligible target and effort
@@ -242,11 +242,11 @@ models remain available in their normal picker groups.
 For headless setup, store the key explicitly or reference the TypeSafe environment variable:
 
 ```bash
-ocx provider add jev --api-key "${TYPESAFE_API_KEY}"
+orl provider add jev --api-key "${TYPESAFE_API_KEY}"
 ```
 
 When the provider has no saved key, the decision client also accepts `TYPESAFE_API_KEY` directly and
-the standard provider-derived alias `JEV_API_KEY` printed by `ocx provider add`.
+the standard provider-derived alias `JEV_API_KEY` printed by `orl provider add`.
 
 ```json
 {
@@ -274,7 +274,7 @@ the standard provider-derived alias `JEV_API_KEY` printed by `ocx provider add`.
 }
 ```
 
-With the default method, OpenCodex sends one bounded decision request to the fixed
+With the default method, OpenRelay sends one bounded decision request to the fixed
 `https://api.typesafe.ai/v1/systemone` endpoint with model `jev-latest`. Only currently eligible
 configured targets are offered. JEV chooses the target and effort together; the effort is still
 constrained by that target's advertised ladder. JEV is not asked again if the selected target has a
@@ -336,7 +336,7 @@ Combo's `decisionProvider`:
   example `Target openai/gpt-5.6-sol (provider openai, model gpt-5.6-sol) with low reasoning
   effort.`), because Ollama accepts only string or `null` option descriptions. TypeSafe keeps
   receiving the structured option objects.
-- OpenCodex offers 2–26 options to a System One-compatible row. Each target contributes one option
+- OpenRelay offers 2–26 options to a System One-compatible row. Each target contributes one option
   per offered reasoning effort; use per-target `reasoningEfforts` to trim them. Fewer than 2 or
   more than 26 options fail open without a request.
 - A cold model load can take tens of seconds, and an aborted decision request makes Ollama abandon the
@@ -379,7 +379,7 @@ The MLX Python runtime alone is not an HTTP decision endpoint. For a loopback HT
 
 For a hosted example, a contributor reported the following Zen System One endpoint working in
 [#6185](https://github.com/lidge-jun/opencodex/pull/6185). Configure it manually as an ordinary row;
-this is not an OpenCodex registry preset or a guarantee of current availability:
+this is not an OpenRelay registry preset or a guarantee of current availability:
 
 ```json
 {
@@ -408,7 +408,7 @@ this is not an OpenCodex registry preset or a guarantee of current availability:
 Use that endpoint's own key if authentication is required; omit `apiKey` only if the endpoint
 accepts keyless calls. Never reuse `TYPESAFE_API_KEY` or `JEV_API_KEY` for it.
 
-#### opencodex model
+#### OpenRelay model
 
 An ordinary chat or Responses model can make the same routing choice without implementing
 `/systemone`. Configure its inference provider as usual and set `decisionModel` to its route:
@@ -490,7 +490,7 @@ offered only when nothing else is reachable.
 
 The decision boundary fails open when the key is missing, no safe task/tool/image decision state is
 available, the configured decision deadline expires, the service redirects or returns an error, or
-the response is malformed or selects an unlisted choice. In those cases OpenCodex uses the first
+the response is malformed or selects an unlisted choice. In those cases OpenRelay uses the first
 currently eligible target, preferring `medium` when that target supports it. Caller cancellation is
 different: it cancels the decision and the model request instead of dispatching the fail-open target.
 
@@ -643,12 +643,12 @@ bounded pre-output prefix of the selected child's Responses SSE. If the stream r
 is recorded as failed and the combo may try its next eligible target. Once any output event begins,
 the target is committed: a later stream failure is returned to the client and is never replayed on
 another provider, which prevents duplicate text and tool execution. If the pre-output buffer reaches
-its safety cap without a terminal or output boundary, OpenCodex also commits the current target
+its safety cap without a terminal or output boundary, OpenRelay also commits the current target
 instead of growing memory without a bound.
 
 ## Request-local target compatibility
 
-When routing Claude Code to the canonical ChatGPT Codex backend, OpenCodex removes the unsupported top-level `user` metadata field without changing the session/cache key, input messages, tool schemas, or safety identifiers. Public Responses API and noncanonical forward gateways keep that field.
+When routing Claude Code to the canonical ChatGPT Codex backend, OpenRelay removes the unsupported top-level `user` metadata field without changing the session/cache key, input messages, tool schemas, or safety identifiers. Public Responses API and noncanonical forward gateways keep that field.
 
 A combo can also advance after an intact HTTP 400 `invalid_request_error` that specifically rejects `user`, reports `unsupported_value` for `reasoning.effort`/`reasoning_effort`, or reports `param: input` with an exact model-scoped `does not support image inputs` rejection. This is a mismatch for that request, not evidence that the target is unhealthy, so it records no cooldown. This compatibility recovery does not silently change `none` into a different effort or broaden this exception to arbitrary invalid requests. Policy refusals, cancellation and already-committed output remain non-replayable. A single-target request still returns an unresolved upstream rejection.
 
@@ -709,7 +709,7 @@ A native parent can send a newly spawned worker's task only as ciphertext minted
 ChatGPT backend. An external provider cannot read that payload.
 
 For such a request, a combo filters its eligible targets to canonical native ChatGPT routes,
-including after a retryable failure. If the combo has no decrypt-capable target, opencodex stops
+including after a retryable failure. If the combo has no decrypt-capable target, OpenRelay stops
 before dispatch and returns HTTP 400:
 
 ```json
@@ -754,10 +754,10 @@ API until the follow-up UI work lands.
 The primary commands are:
 
 ```bash
-ocx combo list
-ocx combo show <id>
-ocx combo set <id> --targets provider/model[:weight],...
-ocx combo remove <id> --yes
+orl combo list
+orl combo show <id>
+orl combo set <id> --targets provider/model[:weight],...
+orl combo remove <id> --yes
 ```
 
 `set` also accepts `--strategy`, `--sticky`, `--effort`, `--alias`, `--native-alias`,
@@ -765,7 +765,7 @@ ocx combo remove <id> --yes
 value of `--effort`, `--alias`, `--display-name`, `--decision-provider`, or `--decision-timeout` to
 clear that field. The two decision flags apply only to `--strategy jev`. `--native-alias` requires a currently supported bare native
 model alias and a non-empty display name. `create` and `update` are aliases for `set`; `delete` is an alias for
-`remove`; and the same subcommands are available under `ocx route combo`.
+`remove`; and the same subcommands are available under `orl route combo`.
 
 ### Management API
 
@@ -836,8 +836,8 @@ Combos are stored in the top-level `combos` object, keyed by combo id:
 ### Why does `combo/<id>` return 404?
 
 The combo id is unknown. The response is HTTP 404 with type `invalid_request_error`. Run
-`ocx combo list`, check spelling and case, and confirm your management command wrote to the same
-running opencodex instance that receives model requests.
+`orl combo list`, check spelling and case, and confirm your management command wrote to the same
+running OpenRelay instance that receives model requests.
 
 ### Why do I get `combo_unavailable`?
 

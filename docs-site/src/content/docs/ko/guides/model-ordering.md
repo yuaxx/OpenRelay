@@ -1,9 +1,9 @@
 ---
 title: 모델 정렬에 관하여
-description: opencodex가 Codex 모델 선택기와 spawn_agent 모델 override의 순서를 정하는 방식.
+description: OpenRelay가 Codex 모델 선택기와 spawn_agent 모델 override의 순서를 정하는 방식.
 ---
 
-Codex 모델 선택기는 opencodex 설정에 적힌 프로바이더 선언 순서나 모델 배열 순서를 보존하지
+Codex 모델 선택기는 OpenRelay 설정에 적힌 프로바이더 선언 순서나 모델 배열 순서를 보존하지
 않습니다. 최종 순서는 카탈로그 priority로 정해지며, 같은 priority를 가진 라우팅 모델에는 결정적인
 알파벳순 정렬이 적용됩니다.
 
@@ -13,7 +13,7 @@ Codex의 models-manager는 선택기에 표시되는 카탈로그 항목을 `pri
 카탈로그 배열 순서는 버리므로 생성된 JSON 배열에서 항목을 앞으로 옮겨도 선택기에서는 앞으로
 이동하지 않습니다. 이 제약은 `src/codex/catalog/sync.ts`에 직접 기록되어 있습니다.
 
-따라서 opencodex는 배열 위치가 아니라 더 낮은 priority를 부여해 featured 위치를 제어합니다.
+따라서 OpenRelay는 배열 위치가 아니라 더 낮은 priority를 부여해 featured 위치를 제어합니다.
 이 표의 고정값과 아래 예시는 유효한 account selector가 없는 설정을 설명합니다. `N`개의 selector가
 있으면 설정 rank `i`의 featured bare native는 priority `i * N + j`인 selector 행으로 확장되며,
 `j`는 0부터 시작하는 selector 위치입니다. featured routed 행은 `i * N`, exact account-qualified
@@ -69,7 +69,7 @@ Codex의 priority 정렬에서도 이 선두 순서가 보존됩니다.
 3. 카탈로그 병합 과정에서 featured 블록 아래로 밀린 선택되지 않은 네이티브 모델
 
 `subagentModels`가 없으면 라우팅 모델은 priority `5`를 유지하고, 네이티브 GPT 항목은 정상 priority
-(opencodex가 만든 항목은 보통 `9`)를 사용합니다. 라우팅 그룹 내부는 계속 프로바이더/id
+(OpenRelay가 만든 항목은 보통 `9`)를 사용합니다. 라우팅 그룹 내부는 계속 프로바이더/id
 알파벳순입니다.
 
 ## 예시
@@ -108,7 +108,7 @@ account selector가 있으면 bare native 선택이 selector-qualified 그룹으
 
 선두 모델 순서를 바꾸는 지원 수단은 `subagentModels`를 재정렬하는 것입니다. 대시보드의
 **Sub-agents** 페이지에서는 bare native와 routed id의 순서를 바꿀 수 있습니다. 설정과
-`ocx agent subagents set`은 exact account-qualified `<selector>/<native-openai-model>` id도
+`orl agent subagents set`은 exact account-qualified `<selector>/<native-openai-model>` id도
 지원합니다. 대시보드는 이미 저장된 id를 현재 사용할 수 없어도 보존합니다. 설정 id는
 최대 5개만 사용하세요. account selector가 있으면 bare native 하나가 여러 selector-qualified 행으로
 확장될 수 있으므로 설정 항목과 노출 행이 항상 일대일로 대응하지는 않습니다.
@@ -139,7 +139,7 @@ account selector가 있으면 bare native 선택이 selector-qualified 그룹으
 featured 행을 포함한 선택기 전체 정렬이 활성화됩니다. 기존 라우팅 전용 동작을 유지하려면 bare ID를
 제거하세요. 미설정 목록, 빈 목록, 공백만 있는 목록, 라우팅 ID만 있는 목록은 기존 동작을 유지합니다.
 
-`modelPickerOrder`는 자연 우선순위로 최대 5개의 선호 후보를 고르는 OpenCodex의
+`modelPickerOrder`는 자연 우선순위로 최대 5개의 선호 후보를 고르는 OpenRelay의
 서브에이전트 안내용 계산을 보존합니다. 이동한 각 행의 자연 우선순위는 네이티브 `priority`와 별도로
 남으며, 선택기 순서만 바꿔서는 이 계산 결과가 달라지지 않습니다. 정확한 모델 이름으로 override를
 지정할 자격도 제한하지 않습니다. 광고 목록은 허용 목록이 아니며, 기존 인증·모델·effort·백엔드 제약은
@@ -147,8 +147,8 @@ featured 행을 포함한 선택기 전체 정렬이 활성화됩니다. 기존 
 
 네이티브 Codex는 네이티브 `priority` 순서에서 사용 가능하고 선택기에 표시되는 모델 중 앞의 5개를
 `spawn_agent`에 광고합니다. V1과 모델 override를 공개하는 V2가 여기에 해당합니다.
-따라서 OpenCodex의 선호 후보가 그대로여도 선택기 순서에 따라 광고되는 5개는 달라질 수 있습니다.
-V1에는 OpenCodex의 선호 후보 목록을 주입하지 않습니다. V2는 클라이언트 카탈로그 상태가 허용할 때
+따라서 OpenRelay의 선호 후보가 그대로여도 선택기 순서에 따라 광고되는 5개는 달라질 수 있습니다.
+V1에는 OpenRelay의 선호 후보 목록을 주입하지 않습니다. V2는 클라이언트 카탈로그 상태가 허용할 때
 자연 우선순위 기반 안내를 추가로 받을 수 있지만, 이 안내가 네이티브 도구의 광고 목록을 재정렬하지는 않습니다.
 
 `disabledModels`와 각 공급자의 `selectedModels`는 노출 여부를 정하는 필드입니다.
@@ -160,4 +160,4 @@ V1에는 OpenCodex의 선호 후보 목록을 주입하지 않습니다. V2는 �
 
 `GET/PUT /api/subagent-models`의 `chosen`·`available`은 비활성·누락된 저장 roster도 보존하고, `pickerAvailable`은 선택 가능한 라우팅 ID만 제공합니다. Models는 `pickerOrder`·`pickerOrderMode`만 보내며 `models`를 보내지 않습니다. Roster만 저장하면 피커 설정은 유지됩니다. 잘못된 요청이나 저장 실패는 이전 상태를 보존합니다.
 
-라우팅 전용 프리셋은 featured·네이티브 우선순위 구간을 유지하며 Codex 카탈로그와 Claude 검색 목록의 라우팅 그룹에 적용됩니다. Claude 네이티브 선두 그룹과 명시적 Desktop 프로필·alias 소유권은 유지됩니다. OpenCodex 가이드 순위와 fallback 설정은 유지되지만 네이티브 Codex에 표시되는 상위 5개·권장 기본 모델은 달라질 수 있습니다. 저장은 클라이언트를 재시작하지 않으며 카탈로그 갱신이 미완료이면 나중에 다시 열어야 할 수 있습니다.
+라우팅 전용 프리셋은 featured·네이티브 우선순위 구간을 유지하며 Codex 카탈로그와 Claude 검색 목록의 라우팅 그룹에 적용됩니다. Claude 네이티브 선두 그룹과 명시적 Desktop 프로필·alias 소유권은 유지됩니다. OpenRelay 가이드 순위와 fallback 설정은 유지되지만 네이티브 Codex에 표시되는 상위 5개·권장 기본 모델은 달라질 수 있습니다. 저장은 클라이언트를 재시작하지 않으며 카탈로그 갱신이 미완료이면 나중에 다시 열어야 할 수 있습니다.

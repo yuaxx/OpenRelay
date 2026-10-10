@@ -1,9 +1,9 @@
 ---
 title: Установка
-description: Установите прокси opencodex (ocx) и необходимые компоненты и убедитесь, что он запускается.
+description: Установите прокси OpenRelay (ocx) и необходимые компоненты и убедитесь, что он запускается.
 ---
 
-opencodex устанавливает два эквивалентных имени команды: `ocx` и `opencodex`. Обе запускают один и
+OpenRelay устанавливает два эквивалентных имени команды: `ocx` и `opencodex`. Обе запускают один и
 тот же небольшой локальный HTTP-сервер (построенный на Bun). Запросы к моделям идут к провайдеру,
 выбранному маршрутизацией; опциональные сайдкары для vision и веб-поиска также могут использовать
 ваш вход в ChatGPT, когда они нужны маршрутизируемой модели.
@@ -13,7 +13,7 @@ opencodex устанавливает два эквивалентных имен�
 | Требование | Зачем |
 | --- | --- |
 | **[Node](https://nodejs.org) ≥ 18** | `ocx` работает на рантайме Bun, но рантайм автоматически поставляется в комплекте при `npm install` — устанавливать Bun самостоятельно **не нужно**. |
-| **[OpenAI Codex](https://openai.com/codex)** (CLI, App или SDK) | Клиент, перед которым работает opencodex. opencodex записывает данные в `$CODEX_HOME/config.toml` (по умолчанию `~/.codex/config.toml`). |
+| **[OpenAI Codex](https://openai.com/codex)** (CLI, App или SDK) | Клиент, перед которым работает opencodex. OpenRelay записывает данные в `$CODEX_HOME/config.toml` (по умолчанию `~/.codex/config.toml`). |
 | Аккаунт провайдера или API-ключ | Anthropic, xAI, Kimi, Ollama Cloud, OpenRouter, OpenAI-совместимая конечная точка или ваш вход в ChatGPT. |
 
 ## Установка
@@ -41,7 +41,7 @@ sudo npm install -g --allow-scripts=bun @bitkyc08/opencodex
 Убедитесь, что оба псевдонима команды доступны в `PATH`:
 
 ```bash
-ocx --version
+orl --version
 opencodex --version
 ```
 
@@ -52,8 +52,8 @@ opencodex --version
 Скачайте архив для своей платформы, распакуйте его и выполните:
 
 ```bash
-./ocx --version
-./ocx start
+./orl --version
+./orl start
 ```
 
 Чтобы дашборд был доступен, оставьте распакованный каталог `gui/dist` рядом с бинарным файлом.
@@ -63,16 +63,16 @@ opencodex --version
 Стабильный канал `latest` уже включает поддержку каталога GPT-5.6 Sol/Terra/Luna для маршрутов
 ChatGPT, OpenAI по API-ключу, OpenRouter и экспериментального Cursor. Доступ у вышестоящего
 провайдера по-прежнему зависит от аккаунта; сами по себе записи каталога доступ не дают.
-Используйте канал preview только для тестирования ещё не выпущенных сборок opencodex:
+Используйте канал preview только для тестирования ещё не выпущенных сборок OpenRelay:
 
 ```bash
 npm install -g @bitkyc08/opencodex@preview
-ocx update --tag preview
+orl update --tag preview
 ```
 
 ## Запуск из исходного кода
 
-Чтобы работать над самим opencodex:
+Чтобы работать над самим OpenRelay:
 
 ```bash
 git clone https://github.com/lidge-jun/opencodex.git
@@ -89,7 +89,7 @@ bun run dev:gui     # запускает dev-сервер панели упра�
 
 ## Что создаётся
 
-Состояние opencodex хранится в `$OPENCODEX_HOME` (по умолчанию `~/.opencodex`). Файлы интеграции
+Состояние OpenRelay хранится в `$OPENCODEX_HOME` (по умолчанию `~/.opencodex`). Файлы интеграции
 с Codex находятся в `$CODEX_HOME` (по умолчанию `~/.codex`).
 
 | Путь | Назначение |
@@ -97,15 +97,15 @@ bun run dev:gui     # запускает dev-сервер панели упра�
 | `$OPENCODEX_HOME/config.json` | Ваши провайдеры, провайдер по умолчанию, порт и параметры. |
 | `$OPENCODEX_HOME/ocx.pid` | PID запущенного прокси (защита от повторного запуска). |
 | `$OPENCODEX_HOME/runtime-port.json` | Текущие PID, имя хоста и порт, включая порт, назначенный ОС, когда `config.port` равен `0`. |
-| `$OPENCODEX_HOME/auth.json` | Сохранённые учётные данные OAuth (после `ocx login`). |
-| `$OPENCODEX_HOME/catalog-backup*.json` | Резервные копии каталога моделей Codex, создаваемые перед тем, как opencodex его изменит. |
-| `$CODEX_HOME/config.toml` | На loopback-адресе opencodex добавляет корневой `openai_base_url`, отмеченный собственным маркером; при привязке не к loopback используются `model_provider = "opencodex"` и `[model_providers.opencodex]`, чтобы Codex мог отправлять заголовок API-аутентификации. |
+| `$OPENCODEX_HOME/auth.json` | Сохранённые учётные данные OAuth (после `orl login`). |
+| `$OPENCODEX_HOME/catalog-backup*.json` | Резервные копии каталога моделей Codex, создаваемые перед тем, как OpenRelay его изменит. |
+| `$CODEX_HOME/config.toml` | На loopback-адресе OpenRelay добавляет корневой `openai_base_url`, отмеченный собственным маркером; при привязке не к loopback используются `model_provider = "opencodex"` и `[model_providers.opencodex]`, чтобы Codex мог отправлять заголовок API-аутентификации. |
 | `$CODEX_HOME/opencodex.config.toml` | Резервный/справочный профиль, записываемый рядом с основной конфигурацией Codex. |
 | `$CODEX_HOME/opencodex-catalog.json` | Синхронизированный каталог нативных и маршрутизируемых моделей, используемый Codex. |
 
 :::note
-opencodex никогда не удаляет вашу конфигурацию Codex. Каждое внедрение обратимо — `ocx stop`,
-`ocx restore` или `ocx eject` убирают ровно те строки, которые добавил opencodex, и восстанавливают
+OpenRelay никогда не удаляет вашу конфигурацию Codex. Каждое внедрение обратимо — `orl stop`,
+`orl restore` или `orl eject` убирают ровно те строки, которые добавил OpenRelay, и восстанавливают
 нативный Codex.
 :::
 

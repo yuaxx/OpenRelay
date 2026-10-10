@@ -40,24 +40,24 @@ import {
 const MAIN_ID = "__main__";
 const AUTO_NOTE = "auto (no pin — lowest-usage account is selected per request)";
 const EXTENDED_USAGE = `Usage:
-  ocx account refresh <provider> [--json]
-  ocx account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]
-  ocx account auto-switch <anthropic|anthropic2> <on|off|status|inherit|threshold <0-100>> --account <id> [--json]
-  ocx account alias <provider> <id|alias|main> <display-name|-> [--json]
-  ocx account priority <provider> <id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]
-  ocx account pause <provider> <id|alias|main> [--json]
-  ocx account resume <provider> <id|alias|main> [--json]
-  ocx account pause-exhausted <provider> [--json]
-  ocx account strategy <provider> [<quota|round-robin|fill-first|least-loaded|reset-first>] [--json]
-  ocx account sticky <provider> [<1-100>] [--json]
-  ocx account routes <anthropic|anthropic2> [--file <json-file>|--clear] [--json]
-  ocx account remove <provider> <id|alias|main> --yes [--json]
-  ocx account clear-cooldown <provider> <id|alias|main> [--json]
-  ocx account add-key <provider> [--label <label>] [--json]
-  ocx account import <provider> --format <format> (--file <path>|--stdin) [--json]`;
+  orl account refresh <provider> [--json]
+  orl account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]
+  orl account auto-switch <anthropic|anthropic2> <on|off|status|inherit|threshold <0-100>> --account <id> [--json]
+  orl account alias <provider> <id|alias|main> <display-name|-> [--json]
+  orl account priority <provider> <id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]
+  orl account pause <provider> <id|alias|main> [--json]
+  orl account resume <provider> <id|alias|main> [--json]
+  orl account pause-exhausted <provider> [--json]
+  orl account strategy <provider> [<quota|round-robin|fill-first|least-loaded|reset-first>] [--json]
+  orl account sticky <provider> [<1-100>] [--json]
+  orl account routes <anthropic|anthropic2> [--file <json-file>|--clear] [--json]
+  orl account remove <provider> <id|alias|main> --yes [--json]
+  orl account clear-cooldown <provider> <id|alias|main> [--json]
+  orl account add-key <provider> [--label <label>] [--json]
+  orl account import <provider> --format <format> (--file <path>|--stdin) [--json]`;
 const PIPE_GUIDANCE = `Pipe the API key on stdin, for example:
-  ocx account add-key <provider> <<< "$MY_KEY"
-  security find-generic-password -w <item> | ocx account add-key <provider>`;
+  orl account add-key <provider> <<< "$MY_KEY"
+  security find-generic-password -w <item> | orl account add-key <provider>`;
 const ACCOUNT_IMPORT_TIMEOUT_MS = ACCOUNT_IMPORT_DEADLINE_MS;
 
 function flag(args: string[], value: string): boolean {
@@ -269,7 +269,7 @@ function refreshLine(row: FamilyRows["rows"][number]): string {
   const quotaText = row.quota ? quotaParts(row.quota).join(" ") : "";
   parts.push(quotaText.length > 0 ? quotaText : "quota: unknown");
   if (row.needsReauth) parts.push("needs-reauth");
-  if (row.validationPending) parts.push("validation-pending (routing disabled; open 'ocx gui' and click Refresh quotas after recovery)");
+  if (row.validationPending) parts.push("validation-pending (routing disabled; open 'orl gui' and click Refresh quotas after recovery)");
   return parts.filter(Boolean).join(" ");
 }
 
@@ -341,7 +341,7 @@ export async function cmdRefresh(args: string[], deps: AccountDeps): Promise<num
     // A passive provider has no probe to run, so "no report available" reads as a
     // failure of something that was never attempted. Say what is actually true.
     else if (hasPassiveAccountQuota(name)) {
-      console.log(`${name} reports usage only during a streaming response; there is nothing to refresh. Run a request through this provider to update it, then see \`ocx account list ${name}\`.`);
+      console.log(`${name} reports usage only during a streaming response; there is nothing to refresh. Run a request through this provider to update it, then see \`orl account list ${name}\`.`);
     } else console.log(`no quota report available for ${name}`);
     return 0;
   }
@@ -448,7 +448,7 @@ export async function cmdRemove(args: string[], deps: AccountDeps): Promise<numb
   const requestedId = args.shift();
   if (!name || !requestedId || args.length) return wantsJson ? fail("provider and account id are required") : usage();
   if (!confirmed) {
-    const message = `Confirmation required. Re-run: ocx account remove ${name} ${requestedId} --yes`;
+    const message = `Confirmation required. Re-run: orl account remove ${name} ${requestedId} --yes`;
     return wantsJson ? fail(message) : usage(message);
   }
   const classified = configAndType(deps, name);
@@ -457,13 +457,13 @@ export async function cmdRemove(args: string[], deps: AccountDeps): Promise<numb
     ? fail("the main Codex App login cannot be removed")
     : usage("Error: the main Codex App login cannot be removed");
   const baseUrl = await resolveBaseUrl(deps);
-  if (!baseUrl) return fail("Proxy not reachable. Start it with 'ocx start' or 'ocx ensure'.");
+  if (!baseUrl) return fail("Proxy not reachable. Start it with 'orl start' or 'orl ensure'.");
   let id = requestedId;
   if (classified.type === "codex") {
     const target = await resolveCodexAccountTarget(deps, baseUrl, requestedId);
     if ("networkDown" in target) {
       const reason = target.transportError ? ` reason: ${target.transportError}` : "";
-      return fail(`Proxy not reachable. Start it with 'ocx start' or 'ocx ensure'.${reason}`);
+      return fail(`Proxy not reachable. Start it with 'orl start' or 'orl ensure'.${reason}`);
     }
     if ("error" in target) {
       const message = target.kind === "not_found" ? `account or key "${requestedId}" was not found` : target.error;
@@ -472,13 +472,13 @@ export async function cmdRemove(args: string[], deps: AccountDeps): Promise<numb
     id = target.id;
   }
   const before = await fetchRows(deps, baseUrl, name, classified.type);
-  if (before.networkDown) return fail("Proxy not reachable. Start it with 'ocx start' or 'ocx ensure'.");
+  if (before.networkDown) return fail("Proxy not reachable. Start it with 'orl start' or 'orl ensure'.");
   if (before.errorJson) return fail(errorText(before.errorJson, `failed to verify ${name} before removal`));
   if (!before.rows.some(row => row.id === id)) return wantsJson
     ? fail(`account or key "${requestedId}" was not found`)
     : usage(`Error: account or key "${requestedId}" was not found`);
   const response = await apiJson(deps, baseUrl, "DELETE", deletePath(classified.type, name, id));
-  if (response.status === 0) return fail("Proxy not reachable. Start it with 'ocx start' or 'ocx ensure'.");
+  if (response.status === 0) return fail("Proxy not reachable. Start it with 'orl start' or 'orl ensure'.");
   if (response.status !== 200) return fail(errorText(response.json, `failed to remove ${requestedId}`));
   const catalogRefreshPending = classified.type === "codex"
     && codexCatalogRefreshPending(response.json);
@@ -1075,7 +1075,7 @@ export async function cmdAlias(args: string[], deps: AccountDeps): Promise<numbe
   }
   const alias = requestedAlias === "-" ? "" : requestedAlias.trim();
   if (alias.length > 80 || /[\x00-\x1f\x7f]/.test(alias)) return usage("Error: alias must be at most 80 printable characters");
-  if (classified.type === "codex" && isReservedCodexAccountWord(alias)) return usage(`Error: "${alias}" is reserved for \`ocx account use\` and cannot be an alias`);
+  if (classified.type === "codex" && isReservedCodexAccountWord(alias)) return usage(`Error: "${alias}" is reserved for \`orl account use\` and cannot be an alias`);
   const baseUrl = await resolveBaseUrl(deps);
   if (!baseUrl) return proxyUnreachable();
   let id = requestedId;

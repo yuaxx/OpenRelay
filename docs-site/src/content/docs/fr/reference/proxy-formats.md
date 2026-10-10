@@ -3,7 +3,7 @@ title: Formats de l’API proxy
 description: Référence au niveau du fil pour les réponses, Chat Completions, Anthropic Messages, le catalogue de modèles, WebSocket, le temps réel et les surfaces de compactage.
 ---
 
-opencodex présente un proxy local dans plusieurs dialectes clients. Un client Codex peut parler le
+OpenRelay présente un proxy local dans plusieurs dialectes clients. Un client Codex peut parler le
 Responses API, une application compatible avec OpenAI peut parler Chat Completions, et Claude Code peut parler
 Anthropic Messages sans exiger que chaque fournisseur en amont implémente chaque format.
 
@@ -28,7 +28,7 @@ Les requêtes de modèle, d’image, de vidéo et de recherche contenant des ide
 
 Certains refus xAI de Chat Completions arrivent en HTTP 403 avec une phrase de refus exacte, par exemple `I can't help with that request.`, au lieu d'un HTTP 200 avec `finish_reason: content_filter`. Codex traite un 403 comme un échec de transport : le tour utilisateur n'est pas enregistré et la même requête est renvoyée.
 
-Sur une requête Responses hors combo, OpenCodex réécrit ce 403 de la liste autorisée en réponse Responses HTTP 200 avec `status: "incomplete"` et `incomplete_details.reason: "content_filter"`. La réécriture s'applique au chemin de l'adaptateur openai-chat et au passthrough openai-responses (OAuth grok-4.6 / grok-4.5). Le streaming utilise la même limite incomplete. Un corps 403 vide ou fait d'espaces reste une erreur. Les 403 d'abonnement, de crédits, de droits d'accès et `not allowed to use this model` restent des erreurs. Le basculement de combo voit toujours le HTTP 403 d'origine.
+Sur une requête Responses hors combo, OpenRelay réécrit ce 403 de la liste autorisée en réponse Responses HTTP 200 avec `status: "incomplete"` et `incomplete_details.reason: "content_filter"`. La réécriture s'applique au chemin de l'adaptateur openai-chat et au passthrough openai-responses (OAuth grok-4.6 / grok-4.5). Le streaming utilise la même limite incomplete. Un corps 403 vide ou fait d'espaces reste une erreur. Les 403 d'abonnement, de crédits, de droits d'accès et `not allowed to use this model` restent des erreurs. Le basculement de combo voit toujours le HTTP 403 d'origine.
 
 ## Présentation du point de terminaison
 
@@ -76,7 +76,7 @@ Avec `stream: false` ou pas de `stream`, les mêmes événements d'adaptateur so
 objet. Les deux formulaires préservent le modèle sélectionné, les éléments de sortie, l'état du terminal et l'utilisation.
 
 La route canonique ChatGPT Codex n'accepte que SSE en amont ; seul l'appel amont utilise donc
-`stream: true`. OpenCodex valide le flux terminal dans des limites bornées, puis le replie dans la
+`stream: true`. OpenRelay valide le flux terminal dans des limites bornées, puis le replie dans la
 forme JSON demandée par le client sans modifier une valeur `store` explicite. Un échec de validation
 renvoie une erreur plutôt qu'un JSON partiel avec HTTP 200. Les limites sont de 4 Mio par trame,
 32 Mio pour le transcript et la source de reconstruction, 100 000 trames SSE et 10 000 éléments de
@@ -297,7 +297,7 @@ La liaison de compte ci-dessous concerne les clients Codex natifs. Pour la dict�
 Connections > API keys propose deux sections, Dictée et Voix en direct. La clé de données reste uniquement en mémoire dans le formulaire. La dictée envoie le fichier choisi ; la vérification vocale attend une confirmation de session sans microphone. Une configuration présente ne garantit pas la connexion.
 
 `POST /v1/live` accepte la surface de création d'appel ChatGPT/Codex App sans cadre.
-`POST /v1/realtime/calls` accepte la surface de création d'appel OpenAI Realtime. opencodex sélectionne un
+`POST /v1/realtime/calls` accepte la surface de création d'appel OpenAI Realtime. OpenRelay sélectionne un
 route OpenAI-family éligible, normalise la demande de création d'appel pour l'authentification en amont
 mode et relaie la réponse limitée.
 
@@ -379,25 +379,25 @@ Les échecs d'origine Anthropic sont restitués dans l'enveloppe d'erreur de Ant
 ## Hygiène du contenu crypté
 
 Le proxy traite le véritable texte chiffré du backend comme opaque. Le texte chiffré structurellement valide est préservé
-octet par octet : opencodex ne le déchiffre pas, ne traduit pas son contenu et ne le rechiffre pas pour un autre
+octet par octet : OpenRelay ne le déchiffre pas, ne traduit pas son contenu et ne le rechiffre pas pour un autre
 fournisseur.Certains hooks d'agent ont historiquement placé le texte de contrôle en clair dans un emplacement `encrypted_content`.
 Pour des raisons de compatibilité, le proxy sépare ce texte brut en parties de texte tout en conservant tout
 Fernet structurellement valide fonctionne inchangé. Si un `agent_message` perd toutes les parties chiffrées pendant
 cette réparation, cela devient un message utilisateur normal. Si une tâche v2 actuelle reste véritablement chiffrée
-mais la cible routé sélectionnée ne peut pas lire le texte chiffré natif ChatGPT, opencodex échoue avec
+mais la cible routé sélectionnée ne peut pas lire le texte chiffré natif ChatGPT, OpenRelay échoue avec
 `unreadable_encrypted_agent_task` au lieu d'envoyer des octets illisibles à ce fournisseur. Voir
 [Surface du sous-agent](/fr/guides/sub-agent-surface/) pour le comportement du client autour des tâches des travailleurs.
 
 ### Changer de fournisseur dans une conversation existante
 
 Un élément de raisonnement rejoué transporte un `encrypted_content` que seuls le fournisseur et
-l’identifiant qui l’ont produit peuvent lire. Quand opencodex sait que la conversation a été servie en
+l’identifiant qui l’ont produit peuvent lire. Quand OpenRelay sait que la conversation a été servie en
 dernier par un autre fournisseur, il retire ce blob avant l’envoi et conserve le résumé de l’élément.
 Si ce fournisseur utilisait aussi un autre point de terminaison ou un autre identifiant, l’identifiant
 `rs_…` de l’élément est retiré également, car il désigne un élément que la nouvelle destination ne peut
-pas retrouver. Quand opencodex ne peut pas le savoir, par exemple après un redémarrage du proxy, la
+pas retrouver. Quand OpenRelay ne peut pas le savoir, par exemple après un redémarrage du proxy, la
 nouvelle destination rejette le blob : OpenAI et Azure OpenAI répondent `400 invalid_encrypted_content`.
-opencodex renvoie alors la requête une seule fois sans l’état de raisonnement du fournisseur précédent,
+OpenRelay renvoie alors la requête une seule fois sans l’état de raisonnement du fournisseur précédent,
 c’est-à-dire sans le blob ni l’identifiant `rs_…`, qui provoquerait sinon
 `Item with id 'rs_…' not found`.
 

@@ -1,9 +1,9 @@
 ---
 title: Intégrations
-description: Connectez opencodex à OpenCode, Pi, OMP, Hermes, OpenClaw, Kimi Code, gjc, DeepSeek Harness, MiniMax Code, ZCode, Prime Agent, Aside, Raycast, omo, Cline CLI, Kilo, Command Code et Factory Droid depuis le tableau de bord — un commutateur par client, avec une sauvegarde avant chaque écriture.
+description: Connectez OpenRelay à OpenCode, Pi, OMP, Hermes, OpenClaw, Kimi Code, gjc, DeepSeek Harness, MiniMax Code, ZCode, Prime Agent, Aside, Raycast, omo, Cline CLI, Kilo, Command Code et Factory Droid depuis le tableau de bord — un commutateur par client, avec une sauvegarde avant chaque écriture.
 ---
 
-L'onglet **Connexion** écrit le bloc fournisseur d'opencodex dans le fichier de configuration du client,
+L'onglet **Connexion** écrit le bloc fournisseur d'OpenRelay dans le fichier de configuration du client,
 puis peut le retirer. Dix-huit clients fonctionnent ainsi, chacun avec son propre commutateur :
 
 | Client | Fichier de configuration | Format | Prise d'effet de la modification | Identifiant |
@@ -29,7 +29,7 @@ puis peut le retirer. Dix-huit clients fonctionnent ainsi, chacun avec son propr
 
 Les modèles GJC dotés d'une échelle d'effort de raisonnement prise en charge exportent `reasoning: true`, `thinking.levels` et `compat.supportsReasoningEffort`, afin que GJC propose le choix de l'effort. Les modèles Codex natifs reçoivent leur échelle standard même si le catalogue l'omet. Ces champs sont absents sans échelle connue ; `none` n'envoie pas d'effort et `ultra` devient `max` sur le réseau. Actualisez l'intégration pour mettre à jour ces options.
 
-La prise en charge gérée de DSH exige au minimum **DSH 0.1.0-rc.6**. Avec **DSH 0.1.7 et versions ultérieures**, DSH lit les routes dans le patch du profil Desktop, `$DSH_HOME/profiles/desktop/cordis.patch.yml`, qu’il recharge à chaud. Lorsque le profil Desktop et son patch existent, OpenCodex y écrit uniquement `[id=llm-pi-ai].config.providers.opencodex`. Si `$DSH_HOME/profiles/desktop/package.json` existe mais que `cordis.patch.yml` manque, Appliquer refuse : créez `cordis.patch.yml` contenant `[]` (le patch vide que DSH écrit pour un nouveau profil), puis activez à nouveau l’intégration. En l’absence du profil Desktop, il utilise uniquement `llm-pi-ai.providers.opencodex` dans `$DSH_HOME/settings.yaml` comme solution de repli. **Appliquer** et **Actualiser** remplacent ce fragment, **Désactiver** ne supprime que ce fragment, et **Restaurer** rétablit un instantané enregistré. Ces opérations ne changent ni le modèle par défaut de l’utilisateur ni le fournisseur natif `deepseek-official`. L’intégration DSH gérée est actuellement limitée au bouclage et n’écrit jamais de véritable identifiant.
+La prise en charge gérée de DSH exige au minimum **DSH 0.1.0-rc.6**. Avec **DSH 0.1.7 et versions ultérieures**, DSH lit les routes dans le patch du profil Desktop, `$DSH_HOME/profiles/desktop/cordis.patch.yml`, qu’il recharge à chaud. Lorsque le profil Desktop et son patch existent, OpenRelay y écrit uniquement `[id=llm-pi-ai].config.providers.opencodex`. Si `$DSH_HOME/profiles/desktop/package.json` existe mais que `cordis.patch.yml` manque, Appliquer refuse : créez `cordis.patch.yml` contenant `[]` (le patch vide que DSH écrit pour un nouveau profil), puis activez à nouveau l’intégration. En l’absence du profil Desktop, il utilise uniquement `llm-pi-ai.providers.opencodex` dans `$DSH_HOME/settings.yaml` comme solution de repli. **Appliquer** et **Actualiser** remplacent ce fragment, **Désactiver** ne supprime que ce fragment, et **Restaurer** rétablit un instantané enregistré. Ces opérations ne changent ni le modèle par défaut de l’utilisateur ni le fournisseur natif `deepseek-official`. L’intégration DSH gérée est actuellement limitée au bouclage et n’écrit jamais de véritable identifiant.
 
 MiniMax Code recherche d’abord `MINIMAX_DATA_DIR`, puis `MAVIS_DATA_DIR`, avant de se rabattre sur
 `~/.minimax`. Son bloc géré ne possède que `custom_provider.opencodex`. Il ne modifie ni `defaultModel`, ni
@@ -41,9 +41,9 @@ qui appartient à la session MCode, est préservé.
 
 Raycast a deux prérequis. Les fournisseurs personnalisés (Custom Providers) sont une fonctionnalité
 **Raycast Pro** : avec un forfait gratuit, le fichier est tout de même écrit, mais
-`ocx integration client status --client raycast` et la page **Connexion** signalent un avertissement,
+`orl integration client status --client raycast` et la page **Connexion** signalent un avertissement,
 car Raycast ne le lira pas. Et Raycast ne crée son dossier `ai` que lorsque vous ouvrez une fois
-Raycast → Settings → AI → **Reveal Providers Config** ; opencodex utilise ce dossier comme signal
+Raycast → Settings → AI → **Reveal Providers Config** ; OpenRelay utilise ce dossier comme signal
 d'installation et indique que le client n'est pas installé tant qu'il n'existe pas. Raycast lit
 `~/.config/raycast/ai/providers.yaml` aussi bien sur macOS que sur Windows et n'honore pas
 `XDG_CONFIG_HOME` ; ce chemin ne peut donc pas être déplacé.
@@ -55,8 +55,8 @@ catalogue, `reasoning_effort` est défini lorsque le modèle dispose d'une éche
 `temperature` est désactivé pour les modèles de raisonnement. Les autres fournisseurs du fichier sont
 préservés, et la désactivation ne retire que l'élément OpenCodex. Raycast prend en compte la
 modification dès l'enregistrement du fichier, sans redémarrage ; les modèles apparaissent dans le
-sélecteur de modèles de Raycast regroupés sous **OpenCodex**. Raycast accepte le champ facultatif
-`api_keys`, mais OpenCodex l’omet volontairement et refuse les cibles hors bouclage ou exigeant
+sélecteur de modèles de Raycast regroupés sous **OpenRelay**. Raycast accepte le champ facultatif
+`api_keys`, mais OpenRelay l’omet volontairement et refuse les cibles hors bouclage ou exigeant
 authentification : cette intégration ne fournit pas l’en-tête d’admission requis par OpenCodex.
 Le signal Pro issu d’une préférence privée macOS est indicatif ; Windows ne la lit jamais et
 renvoie un état inconnu. Il ne bloque pas l’écriture. Les métadonnées exportées ne prouvent pas
@@ -66,7 +66,7 @@ préservées, sans garantie pour les commentaires ou la mise en forme YAML. Le f
 
 Les exports Raycast en CLI et les téléchargements utilisent la destination et la politique
 d’admission du serveur actif, y compris son listener de bouclage sans authentification.
-`ocx ensure` ne réactualise pas Raycast depuis sa copie de configuration enregistrée, qui peut
+`orl ensure` ne réactualise pas Raycast depuis sa copie de configuration enregistrée, qui peut
 différer du serveur actif. Le démarrage du serveur et la synchronisation explicite restent disponibles.
 
 
@@ -94,14 +94,14 @@ Ces chemins doivent être **absolus** ou commencer par `~`. Un chemin relatif es
 car il désignerait le répertoire depuis lequel chaque processus aurait été lancé. Comme ce chemin est
 enregistré avec la sauvegarde, il doit désigner demain le même fichier qu'aujourd'hui.
 
-opencodex lit ces variables dans son propre environnement. Si votre passerelle utilise un profil ou un
-dossier personnel déplacé, lancez opencodex avec les mêmes variables ; sinon, il suivra correctement une
+OpenRelay lit ces variables dans son propre environnement. Si votre passerelle utilise un profil ou un
+dossier personnel déplacé, lancez OpenRelay avec les mêmes variables ; sinon, il suivra correctement une
 autre installation.
 
 ## Les cinq autres surfaces ne sont pas des commutateurs
 
-**Clés API** gère les propres identifiants d'opencodex et n'est donc pas un client. **Codex CLI** est relié
-par le service du proxy lui-même : démarrer opencodex applique ce routage et l'arrêter restaure le routage
+**Clés API** gère les propres identifiants d'OpenRelay et n'est donc pas un client. **Codex CLI** est relié
+par le service du proxy lui-même : démarrer OpenRelay applique ce routage et l'arrêter restaure le routage
 natif ; aucun fichier ne doit donc être activé ou désactivé séparément. **Claude** conserve son propre
 indicateur d'activation et le flux **Enregistrer/Appliquer** de Desktop, tandis que **Grok Build** conserve
 sa barrière « sélectionner, puis appliquer » pour les modèles. Ces règles sont antérieures à cette
@@ -118,7 +118,7 @@ toujours récupérable :
 - **Restaurer ce point…** apparaît sur les opérations plus anciennes, ou lorsque le fichier a changé depuis l'opération. Une restauration malgré une telle modification demande une deuxième confirmation avant de remplacer vos changements récents et les sauvegarde elle aussi, afin que la restauration puisse être annulée.
 - Dix sauvegardes sont conservées par client. Au-delà, les fichiers d'instantanés les plus anciens sont supprimés et leurs lignes d'historique affichent **Sauvegarde expirée**.
 
-La désactivation ne supprime que les entrées enregistrées par opencodex comme lui appartenant. Si votre
+La désactivation ne supprime que les entrées enregistrées par OpenRelay comme lui appartenant. Si votre
 fichier a changé après l'écriture, le comportement dépend de l'intégrité de ces entrées et du format du
 fichier. Pour les configurations JSON strictes (OpenCode et Pi), une modification **à côté** du bloc géré —
 par exemple l'ajout d'un serveur MCP ou de votre propre fournisseur — affiche **Mise à jour nécessaire** :
@@ -131,7 +131,7 @@ niveaux. Dans ces cas, le commutateur est verrouillé afin que rien ne soit modi
 d'écriture ne modifient, octet par octet, que leur propre plage `providers.opencodex` ; le reste du fichier
 n'est jamais réécrit. Pour les autres formats susceptibles de contenir des commentaires (OpenClaw,
 Kimi Code, gjc, MiniMax Code et Raycast — documents YAML, JSON5 et TOML réécrits en entier), ou lorsque les propres entrées
-d'opencodex ont été modifiées, le commutateur se verrouille et la désactivation est refusée plutôt que de
+d'OpenRelay ont été modifiées, le commutateur se verrouille et la désactivation est refusée plutôt que de
 deviner quelles modifications vous appartiennent.
 
 Exception pour Hermes : l'ajout de `session_affinity_header: session-id` seul dans un bloc déjà géré peut être adopté via **Apply** ; toute autre modification d'un champ géré reste un conflit. Jusqu'à cette application, l'actualisation automatique de la liste des modèles est également suspendue. Le réglage concerne tous les modèles du provider et nécessite une version de Hermes qui le prend en charge ; il ne garantit aucun taux de succès du cache. Voir le [guide de mise à niveau en anglais](/guides/integrations/#hermes-session-affinity).
@@ -190,7 +190,7 @@ l'intégration gérée.
 donc la valeur fictive `opencodex-loopback` plutôt qu'une clé. Aucun véritable identifiant n'est écrit dans
 une configuration cliente.
 
-**Pour `ocx opencode`, le bloc fournisseur du lanceur l'emporte.** Le lanceur injecte
+**Pour `orl opencode`, le bloc fournisseur du lanceur l'emporte.** Le lanceur injecte
 `provider.opencodex` par `OPENCODE_CONFIG_CONTENT`, qui est prioritaire sur la même entrée enregistrée sur
 le disque ; le reste de votre configuration opencode continue de s'appliquer normalement. Ces blocs sont
 construits à partir des mêmes métadonnées canoniques effectives que les exports : capacités, choix de
@@ -203,17 +203,17 @@ décrit ici est celui qui compte lorsque vous lancez directement `opencode`.
 Les mêmes opérations sont disponibles sans interface graphique :
 
 ```bash
-ocx integration client status
-ocx integration client enable --client hermes
-ocx integration client disable --client hermes
-ocx integration client history --client hermes
-ocx integration client restore --op <opId> [--confirm-drift]
+orl integration client status
+orl integration client enable --client hermes
+orl integration client disable --client hermes
+orl integration client history --client hermes
+orl integration client restore --op <opId> [--confirm-drift]
 ```
 
 `--overwrite-conflict` est la forme terminale de **Replace** :
 
 ```bash
-ocx integration client enable --client zcode --overwrite-conflict
+orl integration client enable --client zcode --overwrite-conflict
 ```
 
 Comme `--confirm-drift`, il n'est jamais supposé : sans lui, un conflit reste refusé.
@@ -223,11 +223,11 @@ que nous n'avons jamais écrit, donc cette combinaison est rejetée.
 Pour MiniMax Code, connectez une fois le fournisseur puis utilisez l’enveloppe qui vérifie la connexion :
 
 ```bash
-ocx integration client enable --client mcode
-ocx mcode
+orl integration client enable --client mcode
+orl mcode
 ```
 
-Une fois l’intégration connectée, `ocx sync` et `POST /api/sync` actualisent les catalogues MCode,
+Une fois l’intégration connectée, `orl sync` et `POST /api/sync` actualisent les catalogues MCode,
 Pi, Aside, Raycast, omo, OpenCode et Kilo gérés. Le démarrage du proxy actualise aussi le
 catalogue Raycast géré. Les changements de visibilité, de fournisseur ou de préréglage actualisent
 Pi, Aside, Raycast, omo, OpenCode et Kilo. Les blocs absents, modifiés par un tiers, non sûrs ou
@@ -236,12 +236,12 @@ souhaitez la reconnecter. Démarrez une nouvelle session Pi, OpenCode ou Kilo po
 fichier actualisé.
 
 Le CLI distinct de la plateforme MiniMax (`mmx`) n’est pas une intégration à commutateur de fichier. Ses
-commandes textuelles utilisent le point de terminaison compatible avec Anthropic de MiniMax ; OpenCodex
+commandes textuelles utilisent le point de terminaison compatible avec Anthropic de MiniMax ; OpenRelay
 fournit donc un lanceur isolant les identifiants et limité à l’adresse locale :
 
 ```bash
-ocx mmx text chat --model anthropic/claude-opus-5 --message "Hello"
-ocx mmx text repl --model openai/gpt-5.6-sol
+orl mmx text chat --model anthropic/claude-opus-5 --message "Hello"
+orl mmx text repl --model openai/gpt-5.6-sol
 ```
 
 Seules les commandes `mmx text chat` et `mmx text repl` passent par le proxy. Utilisez directement `mmx`
@@ -267,25 +267,25 @@ nouveau fichier est absent. ZCode crée ce nouveau fichier au premier lancement 
 installation déjà démarrée une fois, l'import a donc déjà eu lieu et une écriture dans
 `config.json` n'atteint plus rien.
 
-opencodex écrit désormais `provider_config.json` directement quand il le peut. Activer
+OpenRelay écrit désormais `provider_config.json` directement quand il le peut. Activer
 l'intégration ajoute la règle de fournisseur `opencodex` dans ce fichier, une actualisation du
-catalogue la met à jour, et la désactivation retire exactement ce qu'opencodex y a mis. Toutes les
+catalogue la met à jour, et la désactivation retire exactement ce qu'OpenRelay y a mis. Toutes les
 autres règles du fichier restent intactes, y compris celle qu'un autre fournisseur conserve pour un
 identifiant de modèle qui figure aussi chez nous. Une règle portant l'identifiant `opencodex`
-qu'opencodex n'a pas écrite est un conflit et non quelque chose à reprendre : réglez-la dans ZCode,
+qu'OpenRelay n'a pas écrite est un conflit et non quelque chose à reprendre : réglez-la dans ZCode,
 ou utilisez l'écrasement explicite.
 
-Deux situations refusent encore au lieu d'écrire. Un bloc écrit par opencodex avant le déplacement
+Deux situations refusent encore au lieu d'écrire. Un bloc écrit par OpenRelay avant le déplacement
 du stockage maintient l'intégration sur `config.json` : désactivez-la d'abord à cet endroit, puis
 réactivez-la pour écrire le nouveau stockage. Et un `provider_config.json` dont le
-`schemaVersion` n'est pas un de ceux qu'opencodex a observés est signalé plutôt que fusionné :
+`schemaVersion` n'est pas un de ceux qu'OpenRelay a observés est signalé plutôt que fusionné :
 ce fichier contient tous les fournisseurs de ZCode, et y affirmer une forme échangerait une
 absence d'effet silencieuse contre une perte silencieuse. L'état nomme le fichier que ZCode lit dès
 que l'intégration ne l'écrit pas.
 
 Dans ce second cas, ajoutez le fournisseur dans les réglages de ZCode : URL de base
 `http://127.0.0.1:10100/v1` (ajustez le port à votre écoute), une clé non vide quelconque, et les
-identifiants de modèle donnés par `ocx export --client zcode`. Supprimer
+identifiants de modèle donnés par `orl export --client zcode`. Supprimer
 `provider_config.json` pour relancer l'import de ZCode n'est pas pris en charge : cela détruit
 tous les fournisseurs que ZCode y conserve.
 
@@ -294,23 +294,23 @@ tous les fournisseurs que ZCode y conserve.
 Cline CLI utilise providers.json et models.json. Quittez Cline avant toute modification ou synchronisation, puis redémarrez-le. Annuler restaure les deux originaux. Le fournisseur par défaut reste inchangé. Cette intégration ne migre pas le stockage des anciennes extensions VS Code.
 
 ```bash
-ocx integration client enable --client cline
-ocx integration client history --client cline
-ocx integration client restore --op <operation-id>
+orl integration client enable --client cline
+orl integration client history --client cline
+orl integration client restore --op <operation-id>
 ```
 
 [CLI / rollback / CLINE_PROVIDER_SETTINGS_PATH](/guides/integrations/#cline-cli).
 
 ## Kilo
 
-Kilo n’écrit que `provider.opencodex` dans le premier fichier global existant sous `~/.config/kilo` (`XDG_CONFIG_HOME` déplace ce répertoire ; `kilo.jsonc` est créé si aucun candidat n’existe). Si un autre fichier candidat définit aussi `provider.opencodex`, l’état signale un conflit et Appliquer refuse. Les autres clés restent inchangées. Les choix de raisonnement par modèle sont écrits sous forme de carte de variantes dans le bloc fournisseur, à partir des mêmes métadonnées canoniques effectives que l’export OpenCode. `ocx sync` et `POST /api/sync` actualisent un bloc Kilo possédé par OpenCodex ; démarrez une nouvelle session Kilo pour charger le fichier actualisé. Appliquer réécrit tout le fichier ; commentaires et virgules finales ne sont pas conservés. Sélectionnez `opencodex/<modèle>` dans Kilo.
+Kilo n’écrit que `provider.opencodex` dans le premier fichier global existant sous `~/.config/kilo` (`XDG_CONFIG_HOME` déplace ce répertoire ; `kilo.jsonc` est créé si aucun candidat n’existe). Si un autre fichier candidat définit aussi `provider.opencodex`, l’état signale un conflit et Appliquer refuse. Les autres clés restent inchangées. Les choix de raisonnement par modèle sont écrits sous forme de carte de variantes dans le bloc fournisseur, à partir des mêmes métadonnées canoniques effectives que l’export OpenCode. `orl sync` et `POST /api/sync` actualisent un bloc Kilo possédé par OpenRelay ; démarrez une nouvelle session Kilo pour charger le fichier actualisé. Appliquer réécrit tout le fichier ; commentaires et virgules finales ne sont pas conservés. Sélectionnez `opencodex/<modèle>` dans Kilo.
 
-Désactiver peut retirer le bloc appartenant à OpenCodex du fichier enregistré même si un autre candidat est en conflit ou ne peut pas être analysé ; cet autre fichier reste intact.
+Désactiver peut retirer le bloc appartenant à OpenRelay du fichier enregistré même si un autre candidat est en conflit ou ne peut pas être analysé ; cet autre fichier reste intact.
 
 ```bash
-ocx integration client enable --client kilo
+orl integration client enable --client kilo
 ```
 
 ## Factory Droid
 
-Factory Droid utilise `~/.factory/settings.json` (`%USERPROFILE%\.factory\settings.json` sous Windows). Activez explicitement l’intégration avec `ocx integration client enable --client droid`, puis choisissez un modèle personnalisé dans `/model`. Les entrées gérées n’utilisent pas de clé et fonctionnent uniquement en boucle locale. La désactivation supprime ces entrées ; l’annulation restaure les octets sauvegardés. Si l’ancien `config.json` contient des entrées OpenCodex ou si `settings.local.json` remplace `customModels`, résolvez ce conflit avant l’activation. Consultez la [documentation Factory BYOK](https://docs.factory.ai/model-independence/byok).
+Factory Droid utilise `~/.factory/settings.json` (`%USERPROFILE%\.factory\settings.json` sous Windows). Activez explicitement l’intégration avec `orl integration client enable --client droid`, puis choisissez un modèle personnalisé dans `/model`. Les entrées gérées n’utilisent pas de clé et fonctionnent uniquement en boucle locale. La désactivation supprime ces entrées ; l’annulation restaure les octets sauvegardés. Si l’ancien `config.json` contient des entrées OpenRelay ou si `settings.local.json` remplace `customModels`, résolvez ce conflit avant l’activation. Consultez la [documentation Factory BYOK](https://docs.factory.ai/model-independence/byok).

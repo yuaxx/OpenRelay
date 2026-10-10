@@ -3,7 +3,7 @@ title: 供應商設定
 description: 供應商項目、認證、端點、模型目錄、配額、context 上限與供應商專屬選項。
 ---
 
-供應商告訴 opencodex 模型在哪裡、它使用哪種 wire adapter，以及請求如何被認證。
+供應商告訴 OpenRelay 模型在哪裡、它使用哪種 wire adapter，以及請求如何被認證。
 
 ## 首次註冊時的模型選擇
 
@@ -12,13 +12,13 @@ description: 供應商項目、認證、端點、模型目錄、配額、context
 只在首次註冊供應商時套用；更新、重新登入與更換金鑰不會重設既有選擇。初始化後，可在 Models 或使用以下 CLI 指令啟用所需模型。後續新增模型的獨立政策不變。請將 `<model-id>` 換成清單中的 ID。
 
 ```sh
-ocx models live --provider openrouter
-ocx models enable '<model-id>'
-ocx models disable '<model-id>'
-ocx models provider openrouter on
+orl models live --provider openrouter
+orl models enable '<model-id>'
+orl models disable '<model-id>'
+orl models provider openrouter on
 ```
 
-在介面中完成註冊或 OAuth 登入後，提示視窗可開啟 Models 頁面。CLI 會輸出模型管理指令，JSON 也包含後續步驟。`--no-wait` 表示登入仍在等待中，並非已完成。使用即時模型指令前，請先執行 `ocx start` 啟動代理。
+在介面中完成註冊或 OAuth 登入後，提示視窗可開啟 Models 頁面。CLI 會輸出模型管理指令，JSON 也包含後續步驟。`--no-wait` 表示登入仍在等待中，並非已完成。使用即時模型指令前，請先執行 `orl start` 啟動代理。
 
 ## 供應商相關的頂層欄位
 
@@ -55,7 +55,7 @@ ocx models provider openrouter on
 
 `openai` 與 `openai-apikey` 是固定的保留 id。`openai.codexAccountMode` 預設為 `"pool"` 並在 main 加上新增帳號之間選擇；`"direct"` 僅使用目前呼叫者／main 登入。API 僅使用其設定的 API 金鑰或金鑰池。使用裸模型或 `openai-apikey/<model>`；無跨路由憑證後備。API GPT-5.6 列帶有 1,050,000 context / 922,000 max input 中繼資料，而 Pro 虛擬 id 以 `reasoning.mode: "pro"` 重寫為基礎 wire 模型。
 
-`openaiProviderTierVersion: 2` 標記目前的單一供應商 projection。在遷移已出貨的 v1 設定前，opencodex 會在不替換不同備份的情況下建立 `config.json.pre-openai-tiers-v2.bak`，並將已知的舊版命名空間 selected id 重寫為裸 id。
+`openaiProviderTierVersion: 2` 標記目前的單一供應商 projection。在遷移已出貨的 v1 設定前，OpenRelay 會在不替換不同備份的情況下建立 `config.json.pre-openai-tiers-v2.bak`，並將已知的舊版命名空間 selected id 重寫為裸 id。
 
 ## 供應商項目（`OcxProviderConfig`）
 
@@ -130,7 +130,7 @@ ocx models provider openrouter on
 
 註冊或替換供應商（`POST /api/providers`）時，會先驗證 `responsesPath` 和 `chatCompletionsPath`，再修改記憶體或磁碟中的設定。`PATCH /api/providers?name=<provider>` 會將請求內容與已儲存的供應商合併；除僅更新 `requestPacing` 的請求外，凡是修改 `disabled` 以外欄位的更新，都會在儲存前以同樣方式驗證合併後供應商的路徑，若保留的既有路徑無效則回傳 `400`，且不變更設定。載入設定檔時也適用相同的路徑規則。
 
-API-key 供應商可持有字面值金鑰或環境參考。OAuth 供應商使用由 `ocx login` 填入的憑證存放；訂閱支援的 Claude Code 啟動行為在 [`claudeCode.authMode`](/zh-tw/reference/configuration/server/#claude-codeclaudecode) 下設定。
+API-key 供應商可持有字面值金鑰或環境參考。OAuth 供應商使用由 `orl login` 填入的憑證存放；訂閱支援的 Claude Code 啟動行為在 [`claudeCode.authMode`](/zh-tw/reference/configuration/server/#claude-codeclaudecode) 下設定。
 
 ### 儲存供應商時會保留什麼
 
@@ -148,9 +148,9 @@ API-key 供應商可持有字面值金鑰或環境參考。OAuth 供應商使用
 
 ## 供應商診斷對外安全
 
-儀表板連線測試與即時模型探索使用有界的 GET-only 傳輸。在沒有對外代理的情況下，opencodex 解析主機名稱一次並僅連接到該已驗證位址。HTTPS 保留原始 Host、SNI 與憑證驗證；供應商設定無法停用憑證檢查。
+儀表板連線測試與即時模型探索使用有界的 GET-only 傳輸。在沒有對外代理的情況下，OpenRelay 解析主機名稱一次並僅連接到該已驗證位址。HTTPS 保留原始 Host、SNI 與憑證驗證；供應商設定無法停用憑證檢查。
 
-這些操作使用[伺服器設定的對外 fetch](/zh-tw/reference/configuration/server/)。以 `config.proxy` 設定或繼承自 SOCKS5 `ALL_PROXY` 的伺服器 SOCKS5 代理，在目標不符合 `NO_PROXY` 時使用 OpenCodex 的內建通道。`HTTP_PROXY` 與 `HTTPS_PROXY` 保留 Bun 的原生 HTTP(S) 處理，而非 SOCKS 的 `ALL_PROXY` 不是原生 HTTP fetch 路由。URL 與字面位址檢查仍會執行，但所選代理會決定最終路由、DNS 答案與對等端，因此 opencodex 無法 pin 或驗證該對等端。這是明確的安全限制。
+這些操作使用[伺服器設定的對外 fetch](/zh-tw/reference/configuration/server/)。以 `config.proxy` 設定或繼承自 SOCKS5 `ALL_PROXY` 的伺服器 SOCKS5 代理，在目標不符合 `NO_PROXY` 時使用 OpenRelay 的內建通道。`HTTP_PROXY` 與 `HTTPS_PROXY` 保留 Bun 的原生 HTTP(S) 處理，而非 SOCKS 的 `ALL_PROXY` 不是原生 HTTP fetch 路由。URL 與字面位址檢查仍會執行，但所選代理會決定最終路由、DNS 答案與對等端，因此 OpenRelay 無法 pin 或驗證該對等端。這是明確的安全限制。
 
 私有／本機目的地需要 `allowPrivateNetwork: true`，且當對外代理活躍時需要相符的 `NO_PROXY` 項目。回送會自動加入；請明確列出每個 LAN 主機，因為 CIDR 項目不被解讀。比對器支援精確主機、網域後綴、可選連接埠、方括號 IPv6 與 `*`；例如，明確列出 `192.168.1.50`。中繼資料與 link-link 目標保持被封鎖。診斷請求拒絕重新導向並回報已剝離憑證的目標。普通供應商請求的重新導向審查與此診斷防護分開。
 
@@ -161,7 +161,7 @@ API-key 供應商可持有字面值金鑰或環境參考。OAuth 供應商使用
 在儀表板中使用 **Codex Auth** 新增池帳號並重新整理配額。`config.json` 儲存非秘密中繼資料；access 與 refresh token 使用強化的憑證存放。池路由將新／未綁定指派、基於用量的主動切換與失敗復原分開。綁定任務通常保留親和性。預設（`pool.cacheAffinity`）下，該重新綁定會等到綁定帳號耗盡或無法繼續服務，並且只改綁到確有額度餘裕且用量嚴格更低的帳號；所有帳號都高於閾值時，綁定任務留在原帳號。關閉該設定後，`quota` 可在超過用量閾值後的下一個請求時重新綁定它，但仍只改綁到確有額度餘裕且用量嚴格更低的帳號。暫停、冷卻、重新認證與失敗處理可獨立清除或移動路由。未綁定請求沒有即時帳號綁定；這可包含代理重啟或親和性重置後的既有可見任務。Pre-stream 的 429 或 402 在同一個請求中於一個合格的備用帳號上重試一次，即使基於用量的主動切換關閉。帳號變更保留並重播對話 context，但跨帳號的供應商端 prompt-cache 重用不保證，cache 可能需要重新暖機。
 
 在 **401/403** 時，App 登入清除該帳號的行程本地親和性並要求重新認證。
-在 **429** 時，opencodex 遵循 `Retry-After`、啟動帳號冷卻、清除親和性，並可能將請求輪換到另一個合格的池帳號。這些失敗轉換在 `autoSwitchThreshold: 0` 時仍然活躍；該設定僅停用基於用量的主動切換。
+在 **429** 時，OpenRelay 遵循 `Retry-After`、啟動帳號冷卻、清除親和性，並可能將請求輪換到另一個合格的池帳號。這些失敗轉換在 `autoSwitchThreshold: 0` 時仍然活躍；該設定僅停用基於用量的主動切換。
 
 暫停帳號保留其配額中繼資料，但將其排除於切換、容錯移轉、復原探測與手動啟用。它也清除該帳號的執行緒親和性。進行中的請求保留擷取的憑證；後續回合被重新路由。若每個帳號都被暫停，池路由會失敗而非靜默選擇一個。**Pause exhausted** 會用可用憑證重新整理合格帳號，並僅暫停新確認為 100% 的帳號；未知或失敗的重新整理保持不變。
 
@@ -188,14 +188,14 @@ API-key 供應商可持有字面值金鑰或環境參考。OAuth 供應商使用
 只有共用5小時或每週額度明確拒絕的429才會冷卻帳號並切換。暫時速率限制保留親和性，只暫停該帳號的請求准入；每個請求最多一次短暫的同帳號重試及一次合格兄弟帳號切換。沒有依據回應標頭的429只允許一次同帳號短暫重試，不冷卻帳號，也不產生Retry-After。預設單帳號行為不變。Fable專屬拒絕不限制Sonnet；手動選擇和親和性均檢查請求模型的共用與家族額度。被動家族資訊在30分鐘或已知重設時到期，由一個服務請求依序重新驗證。用量門檻仍是軟偏好，全部候選耗盡時保留原有退回機制，不是用量或帳單硬上限。親和性為行程本地且有界。Token 更新失敗保留原有重新認證規則。已分類的訂閱或帳號計費 403 可在輸出前切換帳號，並按 `Retry-After` 或預設十分鐘冷卻；一般權限拒絕不切換。若所有合格帳號都在冷卻，客戶端收到附帶已知 `Retry-After` 的 429，而非認證錯誤。
 
 :::caution[實驗性]
-除非你了解 Anthropic 帳號政策風險，否則保持停用。不確定時偏好手動 `ocx account use anthropic <id>` 切換。
+除非你了解 Anthropic 帳號政策風險，否則保持停用。不確定時偏好手動 `orl account use anthropic <id>` 切換。
 :::
 
 ### Anthropic · Pool 2 (`anthropic2`)
 
 `anthropic2`（「Anthropic · Pool 2」）是第二個內建的 Anthropic OAuth 供應商，擁有自己的帳戶池。它與 `anthropic` 使用同一套 Anthropic 實作：相同的登入流程、線路格式、原生 Messages 與 Responses 橋接以及模型中繼資料。只有帳號及其所在的帳戶池是分開的。以模型前綴選擇帳戶池：`anthropic/claude-sonnet-5` 使用主要帳戶池，`anthropic2/claude-sonnet-5` 使用 Pool 2。
 
-在你新增之前，Pool 2 處於休眠狀態。使用 `ocx login anthropic2` 登入，或在儀表板的供應商頁面新增 **Anthropic · 帳戶池 2**。首次登入成功後會建立帶有標記 `"anthropicOAuthInstance": "anthropic2"` 的 `providers.anthropic2`。Pool 2 永遠不會成為預設供應商：不帶前綴的 `claude-*` 模型名稱、預設模型以及 Claude Code 呼叫端轉送仍解析至 `anthropic`。你先前自行建立、沒有標記的 `anthropic2` 項目保留其自訂意義；登入會拒絕該名稱衝突，既不改寫該項目，也不改寫你的憑證。
+在你新增之前，Pool 2 處於休眠狀態。使用 `orl login anthropic2` 登入，或在儀表板的供應商頁面新增 **Anthropic · 帳戶池 2**。首次登入成功後會建立帶有標記 `"anthropicOAuthInstance": "anthropic2"` 的 `providers.anthropic2`。Pool 2 永遠不會成為預設供應商：不帶前綴的 `claude-*` 模型名稱、預設模型以及 Claude Code 呼叫端轉送仍解析至 `anthropic`。你先前自行建立、沒有標記的 `anthropic2` 項目保留其自訂意義；登入會拒絕該名稱衝突，既不改寫該項目，也不改寫你的憑證。
 
 Pool 2 從自己的供應商項目讀取帳戶池設定。鍵、預設值與行為與上文的頂層 `anthropicAccountPool` 相同，且不從主要帳戶池繼承任何內容。`providers.anthropic.anthropicAccountPool`，以及任何其他供應商上的該欄位，都會被拒絕。
 
@@ -214,7 +214,7 @@ Pool 2 從自己的供應商項目讀取帳戶池設定。鍵、預設值與行�
 }
 ```
 
-兩個帳戶池在 opencodex 內部彼此隔離：
+兩個帳戶池在 OpenRelay 內部彼此隔離：
 
 - **憑證：** Pool 2 帳號以獨立的 `anthropic2` 鍵儲存在受保護的憑證存放區中。若登入的權杖或已驗證的 Anthropic 帳號已儲存在另一個帳戶池，該登入會被拒絕。
 - **帳戶池設定與執行階段狀態：** 選擇、工作階段親和性、冷卻、暫停、模型路由與各帳號閾值都只屬於一個帳戶池。路由的 `fallback: true` 只在同一帳戶池內放寬。
@@ -222,11 +222,11 @@ Pool 2 從自己的供應商項目讀取帳戶池設定。鍵、預設值與行�
 - **重設額度：** Pool 2 使用自己的日誌（`anthropic2-reset-grant-ledger.json`），與維持不變的主要帳戶池日誌並存。
 - **復原：** 直接的 `anthropic2/<model>` 請求絕不會退回主要帳戶池，Pool 2 的速率限制或拒絕也絕不會讓主要帳戶池的帳號進入冷卻。明確指定兩個帳戶池的組合（combo）保留你宣告的目標。
 
-這種分離是 opencodex 內部的路由邊界。它不會改變 Anthropic 對待你帳號的方式，也不會消除上文所述的帳號政策風險。
+這種分離是 OpenRelay 內部的路由邊界。它不會改變 Anthropic 對待你帳號的方式，也不會消除上文所述的帳號政策風險。
 
 Pool 2 帳號只能透過瀏覽器 OAuth 新增。與 `anthropic` 不同，Pool 2 從不匯入、接管或回寫 Claude Code CLI 權杖；這項差異是刻意的。Pool 2 一開始是空的；沒有可用 Pool 2 帳號的 Pool 2 請求會以驗證錯誤失敗，而不會借用主要帳戶池或 Claude Code 的憑證。
 
-帳號命令與管理 API 以名稱指定帳戶池：`ocx account pool anthropic2 …`、`ocx account auto-switch anthropic2 …`、`ocx account routes anthropic2 …` 以及 `ocx account anthropic-reset-grants --provider anthropic2`。帳戶池設定與重設額度端點接受 `provider: "anthropic2"`；省略時仍使用主要帳戶池。
+帳號命令與管理 API 以名稱指定帳戶池：`orl account pool anthropic2 …`、`orl account auto-switch anthropic2 …`、`orl account routes anthropic2 …` 以及 `orl account anthropic-reset-grants --provider anthropic2`。帳戶池設定與重設額度端點接受 `provider: "anthropic2"`；省略時仍使用主要帳戶池。
 
 #### 輔助功能的帳戶池選擇（`anthropicInstance`）
 
@@ -283,7 +283,7 @@ Pool 2 帳號只能透過瀏覽器 OAuth 新增。與 `anthropic` 不同，Pool 
 
 Adapter 可在之後調整解析的 URL。例如 Kiro 遵循匯入憑證的 API 區域，用於規範 `runtime.{region}.kiro.dev`。請見[Adapter](/zh-tw/reference/adapters/)。
 
-當路由丟棄 `baseUrl` 時，opencodex 記錄 registry 端點與僅設定的來源；設定的路徑本身可能包含憑證。移除未使用的 URL 或選擇符合預期區域的供應商項目。`alibaba-token-plan` 被 pin 到北京，而
+當路由丟棄 `baseUrl` 時，OpenRelay 記錄 registry 端點與僅設定的來源；設定的路徑本身可能包含憑證。移除未使用的 URL 或選擇符合預期區域的供應商項目。`alibaba-token-plan` 被 pin 到北京，而
 `alibaba-token-plan-intl` 涵蓋國際端點。
 
 對於故障的 `openai-responses` 閘道，修復屬於供應商物件：
@@ -309,7 +309,7 @@ Adapter 可在之後調整解析的 URL。例如 Kiro 遵循匯入憑證的 API 
 
 ## Cursor 供應商（`adapter: "cursor"`）
 
-Cursor 橋接為實驗性。在 `ocx login cursor` 後，新增或編輯 `providers.cursor`。
+Cursor 橋接為實驗性。在 `orl login cursor` 後，新增或編輯 `providers.cursor`。
 Cursor Router 的最佳化階梯以獨立的 Codex id 暴露，因為 picker 無法渲染 Cursor 專屬的模型參數：
 
 | Codex 模型 | Cursor Router 模式 |
@@ -355,7 +355,7 @@ Cursor 伺服器驅動的本機工具預設停用。Codex 繼續使用其自身�
 
 Grok 4.7 在 OAuth 上支援 Fast，提供 `low` / `medium` / `high` / `xhigh`，context window 為 500,000。依 [xAI 標準價格](https://docs.x.ai/developers/models/grok-4.7)，每百萬 token 的輸入、快取輸入及輸出費用分別為 $2.00、$0.50 及 $6.00；context 達 200,000 token 時分別為 $4.00 / $1.00 / $12.00。
 
-未明確設定供應商的 `fastWire` 時，透過 `allowedModels` 限制的 opencodex API 金鑰必須允許 `xai/grok-4.7-build-fast`（或不含供應商前綴的模型 ID），才能傳送 OAuth Fast 請求。僅允許 `xai/grok-4.7` 不會授予此 Fast 模型的權限。僅允許 Fast 模型的金鑰可以使用該模型；一般請求或關閉 Fast 時仍需允許 `xai/grok-4.7`。明確設定 `fastWire` 時，應允許實際傳送的模型。例如，`service-tier` 方式保留 `xai/grok-4.7`，因此需要該模型的權限。供應商限制仍然有效。
+未明確設定供應商的 `fastWire` 時，透過 `allowedModels` 限制的 OpenRelay API 金鑰必須允許 `xai/grok-4.7-build-fast`（或不含供應商前綴的模型 ID），才能傳送 OAuth Fast 請求。僅允許 `xai/grok-4.7` 不會授予此 Fast 模型的權限。僅允許 Fast 模型的金鑰可以使用該模型；一般請求或關閉 Fast 時仍需允許 `xai/grok-4.7`。明確設定 `fastWire` 時，應允許實際傳送的模型。例如，`service-tier` 方式保留 `xai/grok-4.7`，因此需要該模型的權限。供應商限制仍然有效。
 
 ## OpenRouter 供應商路由
 
@@ -385,7 +385,7 @@ OpenRouter 可透過多個推論供應商提供一個模型。`openRouterRouting
 }
 ```
 
-模型 key 為精確的原生 OpenRouter id，不含外層 opencodex 供應商前綴。選擇 `openrouter/anthropic-claude-sonnet-5` 會在套用模型規則前還原原生 `anthropic/claude-sonnet-5`。
+模型 key 為精確的原生 OpenRouter id，不含外層 OpenRelay 供應商前綴。選擇 `openrouter/anthropic-claude-sonnet-5` 會在套用模型規則前還原原生 `anthropic/claude-sonnet-5`。
 
 ## Vercel AI Gateway 供應商路由
 
@@ -416,7 +416,7 @@ Vercel AI Gateway 可在多個底層推論供應商之間路由一個模型。`v
 }
 ```
 
-模型 key 是不含外層 OpenCodex 供應商前綴的 Vercel 公開模型選擇器。選擇 `vercel-ai-gateway/zai-glm-5.2` 時，會先還原原生 `zai/glm-5.2`，再套用模型規則。相同映射也適用於原生 `vercel/<model-id>` 選擇器：在 OpenCodex 中使用編碼後的 `vercel-ai-gateway/vercel-<model-id>` 選擇器，並保留 `vercel/<model-id>` 作為模型 key。
+模型 key 是不含外層 OpenRelay 供應商前綴的 Vercel 公開模型選擇器。選擇 `vercel-ai-gateway/zai-glm-5.2` 時，會先還原原生 `zai/glm-5.2`，再套用模型規則。相同映射也適用於原生 `vercel/<model-id>` 選擇器：在 OpenRelay 中使用編碼後的 `vercel-ai-gateway/vercel-<model-id>` 選擇器，並保留 `vercel/<model-id>` 作為模型 key。
 
 ## 靜態模型允許清單
 

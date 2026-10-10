@@ -1,9 +1,9 @@
 ---
 title: macOS Menu Bar App
-description: Use the OpenCodex desktop app's macOS tray, native usage panel, and widget.
+description: Use the OpenRelay desktop app's macOS tray, native usage panel, and widget.
 ---
 
-The macOS menu bar item is part of the OpenCodex desktop app. It shows usage from the local proxy and opens a native usage panel. The same app also contains the dashboard and a WidgetKit extension. See the [desktop app guide](/guides/desktop-app/) for installation on other platforms.
+The macOS menu bar item is part of the OpenRelay desktop app. It shows usage from the local proxy and opens a native usage panel. The same app also contains the dashboard and a WidgetKit extension. See the [desktop app guide](/guides/desktop-app/) for installation on other platforms.
 
 ## Install
 
@@ -29,11 +29,11 @@ The tray headline refreshes every 60 seconds. While the native panel is open, it
 
 ## Widget
 
-On macOS 14 or later, open OpenCodex.app once, then Control-click an empty area of the desktop, choose **Edit Widgets**, search for **OpenCodex**, and add the size you want. Widget sizes show different combinations of proxy status, today's tokens and requests, estimated cost, quotas, and a usage chart. The extension reads a local snapshot written by the desktop app; that snapshot contains display data, not API keys or raw account data. The app refreshes the widget snapshot on every fifth 60-second tray tick, about every five minutes while the proxy is connected. WidgetKit also requests a new timeline after five minutes.
+On macOS 14 or later, open OpenCodex.app once, then Control-click an empty area of the desktop, choose **Edit Widgets**, search for **OpenRelay**, and add the size you want. Widget sizes show different combinations of proxy status, today's tokens and requests, estimated cost, quotas, and a usage chart. The extension reads a local snapshot written by the desktop app; that snapshot contains display data, not API keys or raw account data. The app refreshes the widget snapshot on every fifth 60-second tray tick, about every five minutes while the proxy is connected. WidgetKit also requests a new timeline after five minutes.
 
 ## Connecting to the proxy
 
-The desktop app asks its bundled CLI to run `ocx resolve --json`. It attaches to an existing reachable local proxy, or starts its bundled runtime only when the CLI proves no runtime is listening. If discovery is uncertain, startup reports the problem instead of starting a second proxy. The app talks to the resolved port on `127.0.0.1`.
+The desktop app asks its bundled CLI to run `orl resolve --json`. It attaches to an existing reachable local proxy, or starts its bundled runtime only when the CLI proves no runtime is listening. If discovery is uncertain, startup reports the problem instead of starting a second proxy. The app talks to the resolved port on `127.0.0.1`.
 
 For management requests, the app first tries without a token. If the proxy returns HTTP 401, it retries using `OPENCODEX_ADMIN_AUTH_TOKEN` from the app's environment or the resolved configuration home's `admin-api-token` file. It does not use the macOS Keychain for this token. A proxy bound only to an address the app cannot reach on loopback cannot be attached to by the desktop shell.
 
@@ -51,7 +51,7 @@ bun run prepare-widget
 bun run build:local
 ```
 
-`build:local` produces the local app and DMG without requiring a Tauri updater signing key. A direct `bunx tauri build` requires `TAURI_SIGNING_PRIVATE_KEY` because it also produces an updater artifact. The widget build uses an ad-hoc signature unless `MACOS_SIGN_IDENTITY` is set, and local desktop bundles are also ad-hoc signed. The app runs, but macOS does not register an ad-hoc signed widget extension, so a local build usually shows no OpenCodex widget. `build:local` always ad-hoc signs the app, so setting `MACOS_SIGN_IDENTITY` alone does not help: the widget registers only when the app and the extension are both signed by the same Developer ID team, as the release build does. Use a release build when you need the widget.
+`build:local` produces the local app and DMG without requiring a Tauri updater signing key. A direct `bunx tauri build` requires `TAURI_SIGNING_PRIVATE_KEY` because it also produces an updater artifact. The widget build uses an ad-hoc signature unless `MACOS_SIGN_IDENTITY` is set, and local desktop bundles are also ad-hoc signed. The app runs, but macOS does not register an ad-hoc signed widget extension, so a local build usually shows no OpenRelay widget. `build:local` always ad-hoc signs the app, so setting `MACOS_SIGN_IDENTITY` alone does not help: the widget registers only when the app and the extension are both signed by the same Developer ID team, as the release build does. Use a release build when you need the widget.
 
 ## Uninstall
 

@@ -1,6 +1,6 @@
 ---
 title: Contributing
-description: Develop opencodex — setup, layout, conventions, and how to add a provider or adapter.
+description: Develop OpenRelay — setup, layout, conventions, and how to add a provider or adapter.
 ---
 
 ## Setup
@@ -101,7 +101,7 @@ GitHub Actions intentionally stay small:
 - **Cross-platform CI** (`.github/workflows/ci.yml`) runs on pull requests and `main` pushes that
   touch runtime, tests, package, script, TypeScript, or workflow files. Its Bun matrix covers Linux,
   Windows, and macOS with install, typecheck, tests, privacy scan, a release-helper build smoke, GUI
-  build, and `ocx help`. A second three-OS lane proves npm global install works without a separately
+  build, and `orl help`. A second three-OS lane proves npm global install works without a separately
   installed Bun by using the package's bundled runtime.
 - **Release** (`.github/workflows/release.yml`) is manual. It does not act as a second full CI
   pipeline; before dry-run or publish it requires the exact release commit (`GITHUB_SHA`) to already
@@ -206,14 +206,14 @@ All provider pickers and seeds derive from the canonical registry (`src/provider
 },
 ```
 
-`src/providers/derive.ts` feeds that entry into `ocx init`, `ocx provider`, dashboard presets,
+`src/providers/derive.ts` feeds that entry into `orl init`, `orl provider`, dashboard presets,
 API-key login, and OAuth config seeds. `enrichProviderFromCatalog()` copies model metadata and
 capability classifications onto the saved provider config. OAuth protocol implementations still
 live in `src/oauth/`; registry metadata alone is not an OAuth flow.
 
 ### Evidence required for a canonical preset
 
-A registry entry is a maintained promise: opencodex ships the destination that a user's API key is
+A registry entry is a maintained promise: OpenRelay ships the destination that a user's API key is
 sent to. A preset therefore needs primary-source evidence, not a working code path. Pull requests
 that add or promote a provider must supply all of the following in the description:
 
@@ -239,7 +239,7 @@ not a reason for rejection, and it does not lower the evidence bar either.
 When the evidence is incomplete, the honest home is a reference row in
 `src/providers/free-directory.ts` rather than the canonical registry. Directory rows carry an
 explicit `verification` grade (`official`, `primary`, `unverified`) and are inert: users can still
-reach the service through the custom OpenAI-compatible flow, while opencodex avoids advertising a
+reach the service through the custom OpenAI-compatible flow, while OpenRelay avoids advertising a
 preset it cannot stand behind. Promote the row to the registry once the evidence above exists.
 
 ## Adding an adapter

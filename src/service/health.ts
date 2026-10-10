@@ -210,7 +210,7 @@ export async function reportServiceServing(
         : `❌ Service ${operation} failed: ${failureDetail}\n`
           + `   No proxy answered on port ${serving.port} after ${Math.round(waitedMs / 1000)}s either.\n`
           + `   Log:       ${serviceLogPath()}\n`
-          + `   Meanwhile: ocx start   (serves in the foreground)`,
+          + `   Meanwhile: orl start   (serves in the foreground)`,
     );
     process.exitCode = 1;
     return;
@@ -224,7 +224,7 @@ export async function reportServiceServing(
     + `${Math.round(waitedMs / 1000)}s.\n`
     + `   The manager registered the job; that is not the same as serving.\n`
     + `   Log:       ${serviceLogPath()}\n`
-    + `   Meanwhile: ocx start   (serves in the foreground)`,
+    + `   Meanwhile: orl start   (serves in the foreground)`,
   );
   process.exitCode = 1;
 }

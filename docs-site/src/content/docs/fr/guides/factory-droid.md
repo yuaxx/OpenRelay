@@ -1,9 +1,9 @@
 ---
 title: Pont Factory Droid
-description: Connectez les modèles Factory Droid à OpenCodex au moyen d’un pont local compatible avec Responses.
+description: Connectez les modèles Factory Droid à OpenRelay au moyen d’un pont local compatible avec Responses.
 ---
 
-Factory Droid est un environnement d’exécution d’agents, et non un point de terminaison d’inférence compatible avec OpenAI et documenté. Si un fournisseur personnalisé qui pointe vers une URL interne de Factory LLM renvoie `403 Forbidden`, modifier uniquement l’adaptateur OpenCodex ou ajouter des en-têtes de fournisseur ne transforme pas cette route privée en API publique prise en charge.
+Factory Droid est un environnement d’exécution d’agents, et non un point de terminaison d’inférence compatible avec OpenAI et documenté. Si un fournisseur personnalisé qui pointe vers une URL interne de Factory LLM renvoie `403 Forbidden`, modifier uniquement l’adaptateur OpenRelay ou ajouter des en-têtes de fournisseur ne transforme pas cette route privée en API publique prise en charge.
 
 L’intégration fonctionnelle est la suivante :
 
@@ -15,7 +15,7 @@ Client Responses en texte seul
   -> compte Factory et modèle sélectionné
 ```
 
-Ainsi, l’identifiant Factory reste dans le client Droid officiel. OpenCodex reçoit un jeton distinct, limité au pont local.
+Ainsi, l’identifiant Factory reste dans le client Droid officiel. OpenRelay reçoit un jeton distinct, limité au pont local.
 
 ## Échecs possibles et causes
 
@@ -25,7 +25,7 @@ Ainsi, l’identifiant Factory reste dans le client Droid officiel. OpenCodex re
 | `404` sur `/models/models` | L’URL de base du fournisseur se terminait déjà par `/models` | Utilisez la racine de l’API comme `baseUrl` ; n’y incluez jamais le chemin de découverte |
 | La recherche de modèles échoue | Le pont n’expose pas de catalogue dynamique complet | Définissez `liveModels: false` et fournissez une liste `models` statique |
 | Le fournisseur local est rejeté | L’accès au réseau privé est refusé par défaut | Définissez `allowPrivateNetwork: true` uniquement pour le pont local |
-| `${DROID_BRIDGE_TOKEN}` n’est pas résolu | La variable est absente de l’environnement du service OpenCodex | Injectez-la dans le processus de service, pas seulement dans un terminal interactif |
+| `${DROID_BRIDGE_TOKEN}` n’est pas résolu | La variable est absente de l’environnement du service OpenRelay | Injectez-la dans le processus de service, pas seulement dans un terminal interactif |
 | `OutputTextDelta without active item` | Le pont a émis un delta de texte avant d’ouvrir un élément de sortie et une partie de contenu | Émettez dans l’ordre le cycle de vie SSE Responses complet |
 
 Le même identifiant Factory peut donc fonctionner avec `droid exec` alors qu’une requête directe vers une URL LLM non documentée renvoie toujours `403`. Ces résultats testent des produits différents et ne sont pas contradictoires.
@@ -90,12 +90,12 @@ response.completed
 
 N’exposez pas le pont sur `0.0.0.0` et ne réutilisez pas l’identifiant Factory comme jeton porteur du pont.
 
-## Configuration du fournisseur OpenCodex
+## Configuration du fournisseur OpenRelay
 
 Créez le fournisseur personnalisé avec l’identifiant explicite `droid` :
 
 ```bash
-ocx provider add droid \
+orl provider add droid \
   --adapter openai-responses \
   --base-url http://127.0.0.1:11435/v1 \
   --default-model glm-5.2 \
@@ -123,8 +123,8 @@ Les identifiants de modèle ne sont que des exemples. Ne conservez que les modè
 Après avoir enregistré un fournisseur ou modifié son catalogue statique, synchronisez puis redémarrez Codex afin que les nouvelles sessions lisent le catalogue à jour :
 
 ```bash
-ocx sync --restart-codex
-ocx doctor
+orl sync --restart-codex
+orl doctor
 ```
 
 `--restart-codex` redémarre les app-servers correspondants et quitte puis relance entièrement l’application Codex Desktop, ce qui termine les conversations en cours. Utilisez `--restart-app-server-only` pour laisser l’application Desktop ouverte. Ne lancez le redémarrage qu’après avoir terminé ou enregistré ces sessions.
@@ -135,12 +135,12 @@ Vérifiez chaque frontière séparément :
 
 ```bash
 curl -fsS http://127.0.0.1:11435/healthz
-ocx doctor
-ocx access test droid/glm-5.2 --protocol responses
+orl doctor
+orl access test droid/glm-5.2 --protocol responses
 ```
 
 La présence d’une ligne de fournisseur ou d’une entrée dans le sélecteur de modèles prouve uniquement la visibilité dans le catalogue. L’intégration ne fonctionne réellement qu’une fois la sonde Responses revenue par la route `droid/<model>`.
 
 ## Limitation actuelle
 
-Le pont minimal décrit ci-dessus traduit le texte et le cycle de vie SSE Responses. Il n’implémente **pas** le protocole bidirectionnel complet des appels de fonctions et d’outils de Codex. Codex App et `codex exec` envoient normalement des définitions d’outils même si le prompt demande de ne pas appeler d’outil, et le CLI Codex actuel ne fournit aucun indicateur général pour les supprimer. Le pont minimal doit rejeter ces requêtes conformément au contrat `400` ci-dessus. Les définitions, appels et résultats d’outils, les autorisations, l’annulation et les événements Droid enrichis nécessitent un pont avec état fondé sur le mode de flux JSON-RPC de Factory ou sur un SDK Droid officiel. Considérez le succès de `ocx access test` comme une validation du chemin textuel, et non du chemin des agents ou des outils Codex.
+Le pont minimal décrit ci-dessus traduit le texte et le cycle de vie SSE Responses. Il n’implémente **pas** le protocole bidirectionnel complet des appels de fonctions et d’outils de Codex. Codex App et `codex exec` envoient normalement des définitions d’outils même si le prompt demande de ne pas appeler d’outil, et le CLI Codex actuel ne fournit aucun indicateur général pour les supprimer. Le pont minimal doit rejeter ces requêtes conformément au contrat `400` ci-dessus. Les définitions, appels et résultats d’outils, les autorisations, l’annulation et les événements Droid enrichis nécessitent un pont avec état fondé sur le mode de flux JSON-RPC de Factory ou sur un SDK Droid officiel. Considérez le succès de `orl access test` comme une validation du chemin textuel, et non du chemin des agents ou des outils Codex.

@@ -3,7 +3,7 @@ title: Inspection des réponses et réponses volumineuses
 description: Interaction entre la conservation limitée des diagnostics, l'inspection des flux et la livraison des réponses.
 ---
 
-OpenCodex limite la taille des diagnostics de réponse conservés sans appliquer
+OpenRelay limite la taille des diagnostics de réponse conservés sans appliquer
 cette limite aux octets livrés au client. Les autres limites des fournisseurs,
 des requêtes et du transport s'appliquent indépendamment.
 

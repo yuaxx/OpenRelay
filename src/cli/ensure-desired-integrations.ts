@@ -36,7 +36,7 @@ export function grokSyncFailureMessage(err: unknown): string {
   const detail = err instanceof Error ? err.message : String(err);
   return `Grok Build config sync failed: ${detail}. `
     + "~/.grok/config.toml may still point at a previous proxy port — "
-    + "run 'ocx ensure' (or apply from the dashboard's Grok page) to repoint it.";
+    + "run 'orl ensure' (or apply from the dashboard's Grok page) to repoint it.";
 }
 
 export interface EnsureDesiredIntegrationsDeps {
@@ -168,7 +168,7 @@ export async function ensureClaudeDesktopMatchesDesired(
     if (library.kind === "gateway_ours" || library.kind === "gateway_drifted") {
       // The mode marker and the disk disagree. Replacing a live Desktop profile is an operator
       // action, not something an update hook should do silently.
-      error("⚠️  Claude Desktop mode is first-party but a gateway profile is still applied; run `ocx claude desktop apply --first-party` (or `--gateway`) to reconcile.");
+      error("⚠️  Claude Desktop mode is first-party but a gateway profile is still applied; run `orl claude desktop apply --first-party` (or `--gateway`) to reconcile.");
       return;
     }
     const seen = (deps.inspectDesktopFirstParty ?? inspectDesktopFirstParty)(config);

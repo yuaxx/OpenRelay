@@ -3,18 +3,18 @@ title: 代理配置
 description: 多代理界面、委派引导、首选模型、回退链、原生默认值同步以及 effort 上限。
 ---
 
-代理设置控制会公开哪种 Codex 协作界面，以及 opencodex 如何引导、路由并限制委派工作。
+代理设置控制会公开哪种 Codex 协作界面，以及 OpenRelay 如何引导、路由并限制委派工作。
 
 ## 代理字段
 
 | 字段 | 类型 | 默认值 | 含义 |
 | --- | --- | --- | --- |
 | `multiAgentMode?` | `"v1" \| "default" \| "v2"` | `"default"` | `v1` 会把目录中的每个模型都标记为 v1；`v2` 会把每个模型都标记为 v2。`default` 会恢复上游固定值（Sol/Terra 为 v2，Luna 为 v1），否则遵循原生 `multi_agent_v2` 标志。适用于新会话。 |
-| `subagentModels?` | `string[]` | `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna` | 最多五个裸原生 id、账户限定的 `<selector>/<native-openai-model>` id 或路由 `provider/model` id 会优先显示在子代理选择器中。Subagents 页面只提供裸原生和路由 id，保存时会省略精确的账户限定选项；如需精确选择，请使用 `ocx agent subagents set` 或直接编辑配置。[Astra 一次性升级](/reference/configuration/agents/#astra-roster-upgrade)后，显式空列表会被保留。 |
+| `subagentModels?` | `string[]` | `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna` | 最多五个裸原生 id、账户限定的 `<selector>/<native-openai-model>` id 或路由 `provider/model` id 会优先显示在子代理选择器中。Subagents 页面只提供裸原生和路由 id，保存时会省略精确的账户限定选项；如需精确选择，请使用 `orl agent subagents set` 或直接编辑配置。[Astra 一次性升级](/reference/configuration/agents/#astra-roster-upgrade)后，显式空列表会被保留。 |
 | `injectionModel?` | `string` | — | 在代理生成的 v2 委派引导中使用的首选原生或路由后的子代理模型。 |
 | `injectionEffort?` | `string` | — | 首选 effort（`low` 到 `ultra`），只有在 `injectionModel` 存在时才有意义。 |
 | `injectionPrompt?` | `string` | — | 替换内置 v2 指引正文。支持 `{{model}}`、`{{effort}}`、`{{roster}}` 和 `{{fallback}}`。只要配置了 `injectionModel`，自定义提示词就会触发。 |
-| `multiAgentGuidanceEnabled?` | `boolean` | `true` | 只控制 opencodex 生成的 v1/v2 开发者引导；不会改变原生代理默认值、工具、路由、名单或 effort 上限。 |
+| `multiAgentGuidanceEnabled?` | `boolean` | `true` | 只控制 OpenRelay 生成的 v1/v2 开发者引导；不会改变原生代理默认值、工具、路由、名单或 effort 上限。 |
 | `syncCodexSubagentDefaults?` | `boolean` | `false` | 允许在同步或重启时，将 `injectionModel` 以及可选的 `injectionEffort` 写入为 Codex 的原生默认值。需要 `injectionModel`。 |
 | `subagentModelFallback?` | `string[]` | `[]` | 按优先级排序的全局回退模型，用于派生的子轮次。 |
 | `subagentModelFallbackByModel?` | `Record<string, string[]>` | `{}` | 按请求的主模型 id 做键的 per-model 回退链。这是 per-role fallback 元数据的受支持存放位置；`model_fallback` 写在 Codex agent TOML 里会让 Codex 0.146+ 跳过该角色（#1190）。 |
@@ -23,7 +23,7 @@ description: 多代理界面、委派引导、首选模型、回退链、原生�
 | `subagentEffortCap?` | `string` | — | 仅针对派生子轮次的额外上限。两个上限同时适用时，较低者生效。 |
 | `plaintextV2AgentMessages?` | `boolean` | —（未设置） | 实验性选项。只有显式设置为 `true` 才会启用。符合条件的新 `spawn_agent`、`send_message` 和 `followup_task` 调用会使用明文消息参数。详见[明文 v2 代理消息](#明文-v2-代理消息)。 |
 
-通过仪表板或 `ocx v2 status|on|off|mode <v1|default|v2>|threads <n>` 管理该界面。模式变更会应用于新会话。`maxConcurrentThreadsPerSession` 是 `PUT /api/v2` 字段，不是 `config.json` 键；`ocx v2 threads <n>` 会在启用 v2 后，将 `max_concurrent_threads_per_session` 写入 Codex 的 `$CODEX_HOME/config.toml` 中的 `[features.multi_agent_v2]` 下。
+通过仪表板或 `orl v2 status|on|off|mode <v1|default|v2>|threads <n>` 管理该界面。模式变更会应用于新会话。`maxConcurrentThreadsPerSession` 是 `PUT /api/v2` 字段，不是 `config.json` 键；`orl v2 threads <n>` 会在启用 v2 后，将 `max_concurrent_threads_per_session` 写入 Codex 的 `$CODEX_HOME/config.toml` 中的 `[features.multi_agent_v2]` 下。
 
 管理 API 公开 `GET`/`PUT /api/v2`、`/api/injection-model`、`/api/effort-caps`、`/api/subagent-models` 和 `/api/subagent-model-fallback`。injection-model 更新是部分更新；自定义 prompt 是该 API 上的 `prompt` 字段。
 
@@ -33,7 +33,7 @@ Subagents → 高级中的 **始终主动委派**（原名 **Ultra mode**）只�
 
 `GET` 和 `PUT /api/v2` 还会返回 `multiAgentModeHintRecommendation: { text, revision }`。仪表板在启用或恢复预设时使用服务器提供的文本，不会回退到硬编码文案。如果旧服务器没有提供推荐值，或返回的值格式无效，则无法应用或恢复预设；仍可编辑或清除现有的自定义提示。恢复预设只修改本地草稿，保存操作才会将其写入配置。
 
-读取设置、无关更新和版本升级不会迁移已保存的提示。只有显式更新提示，且正文与两种已知旧版 OpenCodex 预设之一逐字节完全一致时，才会替换为当前推荐文本。其他有效的自定义文本，包括仅空白字符不同的变体，都会逐字节保留。现有的 v2 启用、功能支持检查和清除提示规则保持不变；更改会应用于新的 Codex 会话。
+读取设置、无关更新和版本升级不会迁移已保存的提示。只有显式更新提示，且正文与两种已知旧版 OpenRelay 预设之一逐字节完全一致时，才会替换为当前推荐文本。其他有效的自定义文本，包括仅空白字符不同的变体，都会逐字节保留。现有的 v2 启用、功能支持检查和清除提示规则保持不变；更改会应用于新的 Codex 会话。
 
 ## 名单与引导
 
@@ -59,11 +59,11 @@ replay 去重会分别与每类标签的最新文本进行精确比较。当两�
 2. `subagentModelFallbackByModel` 中的 per-model 链（按主模型做键）；然后是
 3. 全局 `subagentModelFallback` 条目。
 
-per-role fallback 链必须放在 opencodex 配置里。把 `model_fallback` 写进
+per-role fallback 链必须放在 OpenRelay 配置里。把 `model_fallback` 写进
 `$CODEX_HOME/agents/*.toml` 会让 Codex 0.146+ 把整个角色文件当作未知字段拒绝并跳过该角色
-（#1190）。TOML 中的旧版 `model_fallback` 仍会被读取以保持向后兼容，但 `ocx doctor` 会标记它。
+（#1190）。TOML 中的旧版 `model_fallback` 仍会被读取以保持向后兼容，但 `orl doctor` 会标记它。
 
-opencodex 会跳过已禁用、不可路由、不健康、处于冷却中，或已达到配额阈值的候选项。可用性快照会在 `subagentModelFallbackPollMs` 期间缓存。对于加密的子任务，候选链只包含规范的原生 ChatGPT 目标，以及通过 `allowEncryptedV2AgentTasks: true` 明确信任的直接密钥认证 Responses 路由。如果没有目标能处理加密载荷，且可选恢复无法支持路由发送，请求就会失败，不会转发不可读的密文。combo 会先尝试可用的规范原生目标；如果没有可选择的原生目标或原生尝试已耗尽，且已启用 `agentTaskRecovery`，会在路由到 combo 目标前对加密的 `NEW_TASK` 恢复一次。combo 恢复只在 spawn 出的子回合生效；直接路由路径还会恢复会话中途的模型切换。
+OpenRelay 会跳过已禁用、不可路由、不健康、处于冷却中，或已达到配额阈值的候选项。可用性快照会在 `subagentModelFallbackPollMs` 期间缓存。对于加密的子任务，候选链只包含规范的原生 ChatGPT 目标，以及通过 `allowEncryptedV2AgentTasks: true` 明确信任的直接密钥认证 Responses 路由。如果没有目标能处理加密载荷，且可选恢复无法支持路由发送，请求就会失败，不会转发不可读的密文。combo 会先尝试可用的规范原生目标；如果没有可选择的原生目标或原生尝试已耗尽，且已启用 `agentTaskRecovery`，会在路由到 combo 目标前对加密的 `NEW_TASK` 恢复一次。combo 恢复只在 spawn 出的子回合生效；直接路由路径还会恢复会话中途的模型切换。
 
 ```json
 {
@@ -88,19 +88,19 @@ opencodex 会跳过已禁用、不可路由、不健康、处于冷却中，或�
 `authMode: "forward"` 和准确的基础地址 `https://chatgpt.com/backend-api/codex`。OpenAI API key
 provider、自定义 OpenAI 兼容网关、最终发往其他 provider 的请求，以及非 Responses 调用都不会被改写。
 
-对于符合条件的 v2 请求，opencodex 只识别工具目录顶层的 `collaboration` namespace，而且它必须直接包含
+对于符合条件的 v2 请求，OpenRelay 只识别工具目录顶层的 `collaboration` namespace，而且它必须直接包含
 `spawn_agent`。目录可以位于顶层 `tools`；如果该字段不存在，也可以位于首个输入项的 developer
 `additional_tools` 中（Responses Lite）。显式顶层目录优先，user 角色和后续历史目录不会启用转换。
-原生 ChatGPT 收到请求前，opencodex 会删除 `spawn_agent`、`send_message` 和
+原生 ChatGPT 收到请求前，OpenRelay 会删除 `spawn_agent`、`send_message` 和
 `followup_task` 中已有的 `parameters.properties.message.encrypted: true`。ChatGPT 会按保留的
 `collaboration` namespace 和三个工具名处理消息，因此请求会给这四个名称使用固定的临时别名。
-修改前，opencodex 会检查顶层和 `additional_tools` 工具目录、嵌套 namespace、
+修改前，OpenRelay 会检查顶层和 `additional_tools` 工具目录、嵌套 namespace、
 `tool_search_output` 声明、`tool_choice` 和历史调用项。只要发现私有 namespace 或固定别名冲突，
-整个请求就保持原样。opencodex 只会在 JSON、SSE 和 WebSocket 响应中恢复本次请求生成的别名，
+整个请求就保持原样。OpenRelay 只会在 JSON、SSE 和 WebSocket 响应中恢复本次请求生成的别名，
 并保留 `encrypted_function_args: []`，让兼容的 Codex 客户端把参数识别为明文。
 
 这个选项不会增加恢复请求，也不会使用 `agentTaskRecovery` 在缓存未命中时产生的额外 ChatGPT
-配额。它只能影响新工具调用，不能修改已有密文。请求已占用私有名称或有冲突引用时，opencodex 会保持该请求不变；若它后来生成加密的路由子任务，单独启用的 `agentTaskRecovery` 仍可处理。ChatGPT 拒绝或忽略修改后的 schema，或 Codex 客户端不识别明文响应字段时，调用可能失败。opencodex 不会用原 schema 自动重发父请求，因为重发可能重复消耗配额或重复执行工具。
+配额。它只能影响新工具调用，不能修改已有密文。请求已占用私有名称或有冲突引用时，OpenRelay 会保持该请求不变；若它后来生成加密的路由子任务，单独启用的 `agentTaskRecovery` 仍可处理。ChatGPT 拒绝或忽略修改后的 schema，或 Codex 客户端不识别明文响应字段时，调用可能失败。OpenRelay 不会用原 schema 自动重发父请求，因为重发可能重复消耗配额或重复执行工具。
 
 每个响应的恢复检查最多处理 10,000 个身份位置。达到限制时，JSON 响应返回 HTTP 502，流式响应返回
 `response.failed`。这两种情况都不会把私有别名发给 Codex，也不会保存该响应供后续
@@ -117,13 +117,13 @@ provider、自定义 OpenAI 兼容网关、最终发往其他 provider 的请求
 }
 ```
 
-等价命令是 `ocx config set plaintextV2AgentMessages true`。修改后重启代理。
+等价命令是 `orl config set plaintextV2AgentMessages true`。修改后重启代理。
 
 ## Effort 上限
 
 上限只适用于 v2 协作功能：当主轮次的工具暴露 v2 时，它就符合条件；当子轮次在 `x-codex-turn-metadata` 中带有 codex-rs 的精确 `x-openai-subagent: collab_spawn` 或 `"subagent_kind": "thread_spawn"` 标记时，它也符合条件，即使叶子工具已经不再暴露协作。V1 主轮次、`multiAgentMode: "v1"`、压缩、审查以及记忆整合轮次都会绕过上限。
 
-上限只会降低 effort。它们会向下贴合到不高于上限、且模型公开的最高档位。如果模型没有 effort 控制，或者没有任何受支持的档位可用，opencodex 会移除 effort，让提供方默认值生效。`max` 和 `ultra` 都可接受，而仪表板提供 `low` 到 `xhigh`。
+上限只会降低 effort。它们会向下贴合到不高于上限、且模型公开的最高档位。如果模型没有 effort 控制，或者没有任何受支持的档位可用，OpenRelay 会移除 effort，让提供方默认值生效。`max` 和 `ultra` 都可接受，而仪表板提供 `low` 到 `xhigh`。
 
 即使没有设置模型 effort pin，符合条件的原生 Chat Completions 轮次也会应用配置的上限。仅在应用 pin 或上限改变值时才映射为提供方的传输值；两者都未发生时，原生调用方值保留原始写法。
 

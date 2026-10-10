@@ -70,9 +70,9 @@ export function computeVersionSkew(cliVersion: string, proxyVersion: string | un
       // `restart`, not `repair`: a version skew leaves the service DEFINITION unchanged, and
       // repair reloads only when something changed, so it would no-op and keep the old
       // process serving (#4249).
-      + "For a background service, run ocx service restart (repair reloads only a changed definition)."
+      + "For a background service, run orl service restart (repair reloads only a changed definition)."
     : order < 0
-      ? "this ocx on PATH is older than the running proxy. Upgrade the CLI or resolve PATH to the intended installation."
+      ? "this orl on PATH is older than the running proxy. Upgrade the CLI or resolve PATH to the intended installation."
       : "the versions differ, but neither can be identified as older. Check which installations the CLI and proxy use.";
   return {
     cliVersion,

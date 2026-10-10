@@ -9,7 +9,7 @@ Reclaim is **never scheduled automatically** and never runs merely because the S
 
 ## What Reclaim does
 
-OpenCodex performs a bounded offline maintenance sequence:
+OpenRelay performs a bounded offline maintenance sequence:
 
 1. resolve the canonical `logs_2.sqlite` through Codex's effective `sqlite_home`;
 2. verify the file identity and known Codex log schema;
@@ -42,29 +42,29 @@ Reclaim deliberately does **not**:
 - proceed on an unknown future log schema; or
 - continue after a failed SQLite integrity check.
 
-A busy Log Guard lock, busy SQLite writer, or busy initial checkpoint is returned as an explicit refusal rather than being retried in the background. If checkpoint contention appears only after an incremental-vacuum batch has already committed, OpenCodex reports the work already completed as a successful partial result with `stopReason: "busy"` instead of claiming that nothing changed.
+A busy Log Guard lock, busy SQLite writer, or busy initial checkpoint is returned as an explicit refusal rather than being retried in the background. If checkpoint contention appears only after an incremental-vacuum batch has already committed, OpenRelay reports the work already completed as a successful partial result with `stopReason: "busy"` instead of claiming that nothing changed.
 
 ## CLI
 
 Inspect reclaimable space first:
 
 ```bash
-ocx storage codex-logs status
+orl storage codex-logs status
 ```
 
 Run one bounded maintenance pass:
 
 ```bash
-ocx storage codex-logs compact
+orl storage codex-logs compact
 ```
 
 For machine-readable before/after metrics:
 
 ```bash
-ocx storage codex-logs compact --json
+orl storage codex-logs compact --json
 ```
 
-If the result reports that more reclaimable space remains, stop there unless you explicitly want another bounded pass. OpenCodex does not loop indefinitely or schedule a follow-up pass for you.
+If the result reports that more reclaimable space remains, stop there unless you explicitly want another bounded pass. OpenRelay does not loop indefinitely or schedule a follow-up pass for you.
 
 ## Management API
 

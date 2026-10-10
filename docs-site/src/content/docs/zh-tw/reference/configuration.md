@@ -1,10 +1,10 @@
 
 ---
 title: 設定參考
-description: opencodex 存放設定檔的位置、編輯方式的套用規則，以及每個設定領域的連結。
+description: OpenRelay 存放設定檔的位置、編輯方式的套用規則，以及每個設定領域的連結。
 ---
 
-opencodex 把持久化設定存放在 `$OPENCODEX_HOME/config.json`，通常是
+OpenRelay 把持久化設定存放在 `$OPENCODEX_HOME/config.json`，通常是
 `~/.opencodex/config.json`。在 Windows 上預設為
 `%USERPROFILE%\.opencodex\config.json`。
 
@@ -13,8 +13,8 @@ opencodex 把持久化設定存放在 `$OPENCODEX_HOME/config.json`，通常是
 依任務選擇合適的編輯管道：
 
 - **儀表板：** 使用 Web UI 進行引導式的 provider、模型、agent、存取與儲存設定。
-- **CLI：** `ocx init` 建立初始檔案，`ocx provider`、`ocx models`、`ocx combo`、
-  `ocx agent`、`ocx config` 等命令會更新或檢查各自擁有的設定。
+- **CLI：** `orl init` 建立初始檔案，`orl provider`、`orl models`、`orl combo`、
+  `orl agent`、`orl config` 等命令會更新或檢查各自擁有的設定。
 - **檔案：** 對沒有專用 UI 或 CLI 命令的欄位，直接編輯 `config.json`。檔案必須維持
   有效的 JSON。
 
@@ -23,7 +23,7 @@ opencodex 把持久化設定存放在 `$OPENCODEX_HOME/config.json`，通常是
 覆寫手動編輯的內容。對於 `claudeCode` 與 listener 繫結欄位，即時儲存會合併外部編輯——這些
 路徑有明確的衝突保護，但該保護並非涵蓋每個子樹。
 
-如果檔案無法解析，opencodex 會把它備份為 `config.json.invalid-<timestamp>`、在 console
+如果檔案無法解析，OpenRelay 會把它備份為 `config.json.invalid-<timestamp>`、在 console
 警告，並以預設值啟動。檔案缺失時也使用全新安裝的預設：一個 `openai` forward provider。
 
 ## 優先順序與預設值
@@ -54,7 +54,7 @@ token 存放在個別的憑證儲存中，而非 `config.json`。帳號 id 與�
 地方使用公開的 selector 別名。
 
 :::note[原子寫入]
-opencodex 透過臨時檔加上重新命名（`atomicWriteFile`）寫入受管的 `config.toml` 與
-`opencodex-catalog.json`。當 `ocx stop` 與代理的 shutdown handler 這類同時寫入者
+OpenRelay 透過臨時檔加上重新命名（`atomicWriteFile`）寫入受管的 `config.toml` 與
+`opencodex-catalog.json`。當 `orl stop` 與代理的 shutdown handler 這類同時寫入者
 一起恢復 Codex 時，這可避免只寫了一半的檔案。
 :::

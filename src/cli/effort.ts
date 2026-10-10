@@ -23,14 +23,14 @@ import {
 } from "./runtime-api";
 
 export const EFFORT_USAGE = `Usage:
-  ocx effort [status] [--json]
-  ocx effort <low|medium|high|xhigh|max|ultra|-> [--json]
-  ocx effort set [--main <level|->] [--subagent <level|->] [--injection <level|->] [--json]
-  ocx effort clear [--json]
-  ocx effort model <provider/model|model> [--json]
+  orl effort [status] [--json]
+  orl effort <low|medium|high|xhigh|max|ultra|-> [--json]
+  orl effort set [--main <level|->] [--subagent <level|->] [--injection <level|->] [--json]
+  orl effort clear [--json]
+  orl effort model <provider/model|model> [--json]
 
-Note: 'ocx effort clear' resets main and subagent caps but keeps delegation
-injection effort. Use 'ocx effort set --injection -' to clear injection effort.`;
+Note: 'orl effort clear' resets main and subagent caps but keeps delegation
+injection effort. Use 'orl effort set --injection -' to clear injection effort.`;
 
 function clearable(value: string | undefined): string | null | undefined {
   return value === "-" ? null : value;
@@ -128,7 +128,7 @@ async function status(wantsJson: boolean, deps: RuntimeApiDeps): Promise<void> {
     .flatMap(([key, flag]) => {
       const value = data[key];
       if (value === null || isCodexReasoningEffort(value)) return [];
-      return [`${key}=${JSON.stringify(value)} is invalid and is not applied. Use: ocx effort set ${flag} <${CODEX_REASONING_LEVELS.map(l => l.effort).join("|")}|->.`];
+      return [`${key}=${JSON.stringify(value)} is invalid and is not applied. Use: orl effort set ${flag} <${CODEX_REASONING_LEVELS.map(l => l.effort).join("|")}|->.`];
     });
 
   const lines = [

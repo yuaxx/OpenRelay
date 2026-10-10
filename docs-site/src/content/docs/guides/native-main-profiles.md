@@ -1,6 +1,6 @@
 ---
 title: Native main login profiles
-description: Manage stored native Codex login profiles separately from OpenCodex Pool routing.
+description: Manage stored native Codex login profiles separately from OpenRelay Pool routing.
 ---
 
 ## Native login is not Pool selection
@@ -11,11 +11,11 @@ panel appears beside the main card in the Providers account workspace. It
 manages the physical Codex login, not the account selected for the next Pool
 request. It does not add an Integrations tab or replace existing Pool controls.
 
-The displayed **Effective CODEX_HOME** belongs to the OpenCodex server. When
+The displayed **Effective CODEX_HOME** belongs to the OpenRelay server. When
 using a remote dashboard, this may be a different computer from the browser.
 **Registered active profile** is the encrypted profile store's recorded owner;
 the server verifies the physical login before switching. A login changed outside
-OpenCodex can therefore produce an ownership-mismatch error rather than being
+OpenRelay can therefore produce an ownership-mismatch error rather than being
 silently overwritten.
 
 ## Save and switch
@@ -92,14 +92,14 @@ A network error does not establish that a write failed or rolled back. The panel
 rereads server state after a dispatched mutation, including a lost response, and
 never automatically retries it. If refresh fails, a successful change is not
 reported as undone. Refresh and inspect diagnostics before another operation.
-The existing `ocx account main doctor` command provides server-side diagnostics.
+The existing `orl account main doctor` command provides server-side diagnostics.
 
 ## Scope of this phase
 
 This panel lists, registers, switches and recovers existing profiles using the
 existing `/api/native-main-profiles` boundary. It does not launch login processes
 or expose staging writer tokens. Adding another native login remains in the
-existing `ocx account main add` CLI workflow; browser enrollment is a separate
+existing `orl account main add` CLI workflow; browser enrollment is a separate
 follow-up to issue #3417. Existing device reauthentication of the current main
 slot is a different workflow and is not replaced by this panel.
 

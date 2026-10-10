@@ -1,9 +1,9 @@
 ---
 title: 路由設定檔編輯器
-description: 從 OpenCodex 儀表板建立、編輯、驗證、試跑（dry-run）與移除路由原則設定檔。
+description: 從 OpenRelay 儀表板建立、編輯、驗證、試跑（dry-run）與移除路由原則設定檔。
 ---
 
-OpenCodex 儀表板中的 **Models → Routing** 分頁可以直接管理 `config.routingProfiles`，不必手動編輯 `config.json`。
+OpenRelay 儀表板中的 **Models → Routing** 分頁可以直接管理 `config.routingProfiles`，不必手動編輯 `config.json`。
 
 ## 建立設定檔
 

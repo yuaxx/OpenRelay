@@ -1,9 +1,9 @@
 ---
 title: 데스크톱 앱
-description: macOS, Windows, Linux에서 OpenCodex 데스크톱 앱을 설치하고 사용합니다.
+description: macOS, Windows, Linux에서 OpenRelay 데스크톱 앱을 설치하고 사용합니다.
 ---
 
-OpenCodex 데스크톱 앱은 네이티브 트레이와 웹 대시보드를 함께 제공합니다. 번들 CLI가 기존 로컬 프록시를 찾으며, 프록시가 없다는 사실이 확인된 경우에만 앱이 번들 런타임을 시작합니다.
+OpenRelay 데스크톱 앱은 네이티브 트레이와 웹 대시보드를 함께 제공합니다. 번들 CLI가 기존 로컬 프록시를 찾으며, 프록시가 없다는 사실이 확인된 경우에만 앱이 번들 런타임을 시작합니다.
 
 대시보드는 확인된 로컬 프록시 엔드포인트에서 제공됩니다. 기본 포트는 `10100`입니다. 데스크톱 앱은 해당 대시보드와 번들 런타임을 감싸는 로컬 셸입니다.
 
@@ -40,11 +40,11 @@ sudo apt install ./OpenCodex-<version>-linux-amd64.deb
 
 ## 첫 실행
 
-앱은 번들 CLI에 `ocx resolve --json` 실행을 요청합니다. 이미 실행 중인 로컬 프록시에 연결할 수 있으면 그 프록시를 사용합니다. CLI가 프록시의 부재를 확인한 경우에만 번들 런타임을 시작하고, 결과가 불확실하면 시작 실패로 표시합니다. 그 뒤 확인된 loopback 엔드포인트의 대시보드를 앱 webview에서 엽니다. 로그인 시 트레이에 숨겨진 채로 시작한 경우에는 가벼운 시작 화면을 유지하고, 트레이에서 처음 열거나 앱을 다시 실행할 때 대시보드를 불러옵니다.
+앱은 번들 CLI에 `orl resolve --json` 실행을 요청합니다. 이미 실행 중인 로컬 프록시에 연결할 수 있으면 그 프록시를 사용합니다. CLI가 프록시의 부재를 확인한 경우에만 번들 런타임을 시작하고, 결과가 불확실하면 시작 실패로 표시합니다. 그 뒤 확인된 loopback 엔드포인트의 대시보드를 앱 webview에서 엽니다. 로그인 시 트레이에 숨겨진 채로 시작한 경우에는 가벼운 시작 화면을 유지하고, 트레이에서 처음 열거나 앱을 다시 실행할 때 대시보드를 불러옵니다.
 
 트레이의 **Open dashboard** 또는 **Open in browser**를 사용하면 내장 대시보드와 일반 브라우저를 오갈 수 있습니다. 트레이에서는 업데이트도 확인할 수 있습니다.
 
-macOS에서는 대시보드를 닫아도 앱이 메뉴 막대에서 계속 실행됩니다. Dock 또는 Finder에서 OpenCodex를 다시 열면 프록시를 재시작하지 않고 대시보드가 다시 표시됩니다.
+macOS에서는 대시보드를 닫아도 앱이 메뉴 막대에서 계속 실행됩니다. Dock 또는 Finder에서 OpenRelay를 다시 열면 프록시를 재시작하지 않고 대시보드가 다시 표시됩니다.
 
 ## 데스크톱 앱과 ocx CLI 함께 사용하기
 
@@ -64,7 +64,7 @@ zsh·bash·fish 시작 파일의 관리 블록을 사용합니다. 소유권과 
 시스템 `Path`는 변경하지 않습니다.
 
 설정을 켜거나 복구한 뒤에는 새 터미널을 여세요. macOS/Linux에서는 `type -a ocx`,
-Windows에서는 `Get-Command ocx -All`과 `where.exe ocx`로 확인하세요. 이미 열린 셸,
+Windows에서는 `Get-Command orl -All`과 `where.exe ocx`로 확인하세요. 이미 열린 셸,
 별칭, 절대 경로 명령, 이후 PATH 변경은 다른 실행 파일을 선택할 수 있습니다.
 Desktop을 종료해도 설정은 유지됩니다. 번들이 사라지면 POSIX shim은 다른 `ocx`를
 조용히 선택하지 않고 복구 또는 제거 안내와 함께 실패합니다.
@@ -74,9 +74,9 @@ POSIX에서는 launch proof 생성 도구가 있으면 셸에서 export한 Anthr
 Anthropic 환경 설정을 제거하는 기존 번들 CLI 동작을 유지합니다.
 
 macOS와 Linux에서 데스크톱 앱이 번들 프록시를 실행하는 것으로 확인되면,
-`ocx status`에 `Runtime supervisor: OpenCodex Desktop`이 표시됩니다.
+`orl status`에 `Runtime supervisor: OpenCodex Desktop`이 표시됩니다.
 기록된 소유권이 없어도 이 관계를 확인할 수 있습니다. 백그라운드 서비스를
-설치하는 대신 OpenCodex 메뉴에서 **Start at Login**을 켜세요. 앱의 로그인
+설치하는 대신 OpenRelay 메뉴에서 **Start at Login**을 켜세요. 앱의 로그인
 등록이 확인되어야 재시작 후 보호가 적용됩니다. 등록을 확인할 수 없으면
 status에 표시되는 데스크톱 안내를 따르세요. 실행 관계 확인은 소유권을 생성하지 않습니다.
 
@@ -84,20 +84,20 @@ status에 표시되는 데스크톱 안내를 따르세요. 실행 관계 확인
 Linux deb 패키지에서 `/usr/bin/ocx`입니다. 해당 실행 파일에 `status`를 붙여
 앱의 프록시 상태를 확인할 수 있습니다. Windows에서는 supervision 감지를 지원하지 않습니다.
 
-CLI가 Desktop의 프록시 감독을 감지하면 `ocx service install`, `repair`, `start`,
+CLI가 Desktop의 프록시 감독을 감지하면 `orl service install`, `repair`, `start`,
 `restart`는 서비스를 변경하기 전에 중단됩니다. 기록된 소유권이나 확인된 로그인
-등록이 없어도 적용됩니다. CLI로 시작 관리를 옮기려면 OpenCodex를 종료한 뒤
-`ocx service install`을 실행하세요. 중복 `ocx start`는 Desktop 감독자를 표시합니다.
+등록이 없어도 적용됩니다. CLI로 시작 관리를 옮기려면 OpenRelay를 종료한 뒤
+`orl service install`을 실행하세요. 중복 `orl start`는 Desktop 감독자를 표시합니다.
 
 앱 번들은 트레이의 **Check for Updates…**로 업데이트하세요. Desktop이 프록시를
-감독하는 동안 `ocx update`는 별도로 설치한 npm/Bun 패키지도 교체하지 않습니다.
-해당 설치를 업데이트하려면 OpenCodex를 먼저 종료하세요. 수락된 `ocx restart`는
+감독하는 동안 `orl update`는 별도로 설치한 npm/Bun 패키지도 교체하지 않습니다.
+해당 설치를 업데이트하려면 OpenRelay를 먼저 종료하세요. 수락된 `orl restart`는
 Desktop이 교체 프록시를 시작한다고 알리고 정상 작동 확인을 기다립니다. 더 최신인
-PATH CLI도 `ocx restart`로 앱의 프록시를 자기 설치의 런타임으로 교체할 수 없습니다.
+PATH CLI도 `orl restart`로 앱의 프록시를 자기 설치의 런타임으로 교체할 수 없습니다.
 
-터미널의 `ocx stop`은 프록시를 중지하지만 Desktop이 짧은 대기 후 다시 시작할 수
+터미널의 `orl stop`은 프록시를 중지하지만 Desktop이 짧은 대기 후 다시 시작할 수
 있습니다. 계속 중지하려면 트레이의 **Stop proxy** 또는 **Quit**을 사용하세요.
-일반 stop은 이 안내를 stderr에 표시하고, `ocx stop --json`은 감독 검사와 안내를 생략합니다.
+일반 stop은 이 안내를 stderr에 표시하고, `orl stop --json`은 감독 검사와 안내를 생략합니다.
 
 이 가드는 현재 CLI와 런타임이 제공하는 조기 경고입니다. 이전 버전에는 없을 수 있으며
 Windows에서는 감독 검사를 지원하지 않습니다. 검사 중 Desktop을 발견했지만 확인을
@@ -130,7 +130,7 @@ Tauri 업데이터가 새 앱 버전을 찾으면 macOS 메뉴 막대 아이콘�
 
 ## 위젯
 
-macOS 앱에는 OpenCodex WidgetKit 확장이 포함됩니다. 위젯 설정과 로컬 스냅샷에 관한 자세한 내용은 [macOS 메뉴 막대 앱 가이드](/ko/guides/macos-menu-bar/)를 참고하세요.
+macOS 앱에는 OpenRelay WidgetKit 확장이 포함됩니다. 위젯 설정과 로컬 스냅샷에 관한 자세한 내용은 [macOS 메뉴 막대 앱 가이드](/ko/guides/macos-menu-bar/)를 참고하세요.
 
 ## 제거
 
@@ -140,7 +140,7 @@ macOS 앱에는 OpenCodex WidgetKit 확장이 포함됩니다. 위젯 설정과 
 전에 해당 문제를 처리하세요. 앱만 직접 제거하면 셸 파일이나 사용자 `Path` 정리가
 보장되지 않습니다.
 
-macOS에서는 Applications의 `OpenCodex.app`을 휴지통으로 옮깁니다. Windows에서는 **Installed apps**에서 OpenCodex를 제거합니다. Debian 기반 Linux에서는 다음 명령을 실행합니다.
+macOS에서는 Applications의 `OpenCodex.app`을 휴지통으로 옮깁니다. Windows에서는 **Installed apps**에서 OpenRelay를 제거합니다. Debian 기반 Linux에서는 다음 명령을 실행합니다.
 
 ```bash
 sudo apt remove opencodex

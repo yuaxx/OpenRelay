@@ -60,10 +60,11 @@ test("Connect sits directly after Dashboard, then Codex", async () => {
   expect(app).not.toContain("nav-divider");
 });
 
-test("Dashboard uses the shared page-tabs strip with a tablist", async () => {
+test("Dashboard uses the shared semantic tabs with a labelled panel", async () => {
   const page = await Bun.file(new URL("../src/pages/Dashboard.tsx", import.meta.url)).text();
-  expect(page).toContain('className="page-tabs" role="tablist"');
-  expect(page).toContain('role="tab"');
+  expect(page).toContain('<Tabs aria-label={t("dash.workspace.sections")}');
+  expect(page).toContain('<Tab');
+  expect(page).toContain('aria-controls={`dashboard-panel-${s.id}`}');
   expect(page).toContain('role="tabpanel"');
   // The left rail is gone.
   expect(page).not.toContain("dashboard-workspace-rail");

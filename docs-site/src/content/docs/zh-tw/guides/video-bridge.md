@@ -5,13 +5,13 @@ description: 透過非 OpenAI 模型使用 Grok Imagine Video 生成影片。
 
 ## 概觀
 
-Video Bridge 讓你透過 opencodex 路由的任何非 OpenAI 模型，使用 xAI 的 Grok Imagine Video 生成。啟用後，對話中會注入一個合成的 `video_gen` 工具。模型像呼叫一般函式工具一樣呼叫它；opencodex 攔截該呼叫、向 xAI 提交影片生成工作、輪詢直到完成，並下載結果。
+Video Bridge 讓你透過 OpenRelay 路由的任何非 OpenAI 模型，使用 xAI 的 Grok Imagine Video 生成。啟用後，對話中會注入一個合成的 `video_gen` 工具。模型像呼叫一般函式工具一樣呼叫它；OpenRelay 攔截該呼叫、向 xAI 提交影片生成工作、輪詢直到完成，並下載結果。
 
 ## 前置條件
 
-- 一個帶有 **API key** 的 `xai` 供應商項目（單靠 `ocx login xai` 不足夠 — video bridge 需要 key 認證，而非 OAuth）
+- 一個帶有 **API key** 的 `xai` 供應商項目（單靠 `orl login xai` 不足夠 — video bridge 需要 key 認證，而非 OAuth）
 - 一個非 OpenAI 模型作為你的路由供應商（例如 Anthropic Claude、Google Gemini）
-- opencodex 設定為透過該非 OpenAI 供應商路由
+- OpenRelay 設定為透過該非 OpenAI 供應商路由
 
 > **⚠ 需要供應商 key：** Video Bridge 僅在 `xai` 供應商使用
 > API key 認證時啟用。將以下加入你的設定：
@@ -24,7 +24,7 @@ Video Bridge 讓你透過 opencodex 路由的任何非 OpenAI 模型，使用 xA
 > }
 > ```
 >
-> 若你是透過 `ocx login xai`（OAuth）接入，供應商會停留在 `authMode: "oauth"`，bridge 不會悄悄啟用。請在環境中設定 `XAI_API_KEY`，**或**如上所示直接寫入 key。
+> 若你是透過 `orl login xai`（OAuth）接入，供應商會停留在 `authMode: "oauth"`，bridge 不會悄悄啟用。請在環境中設定 `XAI_API_KEY`，**或**如上所示直接寫入 key。
 
 ## 設定
 
@@ -51,9 +51,9 @@ Video Bridge 讓你透過 opencodex 路由的任何非 OpenAI 模型，使用 xA
 
 ## 運作方式
 
-1. opencodex 偵測到帶有 `videoBridgeEnabled: true` 的非 OpenAI 路由模型
+1. OpenRelay 偵測到帶有 `videoBridgeEnabled: true` 的非 OpenAI 路由模型
 2. 對話中注入一個合成的 `video_gen` 函式工具
-3. 當模型呼叫 `video_gen` 時，opencodex 向 xAI 的 `/videos/generations` 提交工作
+3. 當模型呼叫 `video_gen` 時，OpenRelay 向 xAI 的 `/videos/generations` 提交工作
 4. Bridge 每 5-15 秒輪詢工作狀態，並發送 heartbeat 訊息以保持串流活躍
 5. 影片就緒後，下載到 artifacts 目錄
 6. 本機檔案路徑作為工具結果回傳給模型

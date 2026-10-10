@@ -63,7 +63,7 @@ function capability(key: string) {
 describe("account discovery follows actual family-specific workflows", () => {
   test("logout documents explicit targets without executing credential removal", () => {
     const source = readFileSync(repoPath("src", "cli", "logout-command.ts"), "utf8");
-    const usage = /Usage: (ocx logout <provider> \[--live\] \[--json\])/.exec(source)?.[1];
+    const usage = /Usage: (orl logout <provider> \[--live\] \[--json\])/.exec(source)?.[1];
     expect(capability("logout").usage).toBe(usage);
     expect(capability("logout").routes).toEqual([{ method: "POST", path: "/api/oauth/logout" }]);
     expect(capability("logout").mutates).toBe(true);
@@ -74,7 +74,7 @@ describe("account discovery follows actual family-specific workflows", () => {
     expect(new Set(keys).size).toBe(keys.length);
     for (const row of ACCOUNT_CAPABILITIES) {
       expect(BASE.some(base => base.command.join(" ") === row.command.join(" "))).toBe(false);
-      expect(row.usage?.startsWith(`ocx ${row.command.join(" ")}`)).toBe(true);
+      expect(row.usage?.startsWith(`orl ${row.command.join(" ")}`)).toBe(true);
     }
   });
 
@@ -159,7 +159,7 @@ describe("account discovery follows actual family-specific workflows", () => {
     expect(await cmdNativeMainAccount(["recover", "--rollback", "--json"], deps)).not.toBe(0);
     expect(await cmdNativeMainAccount(["add", "profile", "--json"], deps)).not.toBe(0);
     expect(await cmdNativeMainAccount(["register"], deps)).not.toBe(0);
-    expect(capability("account main register").usage).toBe("ocx account main register <label> [--json]");
+    expect(capability("account main register").usage).toBe("orl account main register <label> [--json]");
     expect(calls).toEqual([]);
   });
 
@@ -169,7 +169,7 @@ describe("account discovery follows actual family-specific workflows", () => {
     expect(capability("account reauth").routes).toContainEqual({ method: "POST", path: "/api/codex-auth/login" });
     expect(await handleAccountAuthCommand("reauth", ["kiro", "--method", "builder-id", "--json"], deps)).not.toBe(0);
     expect(await handleAccountAuthCommand("cancel", ["openai", "--json"], deps)).not.toBe(0);
-    expect(capability("account cancel").usage).toBe("ocx account cancel <provider> [--flow <flow-id>] [--json]");
+    expect(capability("account cancel").usage).toBe("orl account cancel <provider> [--flow <flow-id>] [--json]");
     expect(await cmdNativeMainAccount(["reauth", "cancel", "--json"], deps)).not.toBe(0);
     expect(capability("account main reauth cancel").flags.find(flag => flag.name === "--flow")?.required).toBe(true);
     expect(await handleAccountAuthCommand("reset-credits", ["main", "--consume", "--json"], deps)).not.toBe(0);

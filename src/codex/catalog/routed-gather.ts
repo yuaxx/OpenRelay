@@ -894,7 +894,7 @@ function augmentRoutedModelsWithCapturedOpenAiApiRows(
     const warningKey = `${trusted.provider}/${trusted.id}\n${liveSignature}\n${trustedSignature}`;
     if (openAiApiCollisionWarnings.has(warningKey)) continue;
     openAiApiCollisionWarnings.add(warningKey);
-    console.warn(`[opencodex] replacing conflicting live OpenAI API metadata for ${trusted.provider}/${trusted.id} with trusted registry metadata`);
+    console.warn(`[openrelay] replacing conflicting live OpenAI API metadata for ${trusted.provider}/${trusted.id} with trusted registry metadata`);
   }
 
   return [

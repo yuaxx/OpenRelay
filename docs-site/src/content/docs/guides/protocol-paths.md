@@ -3,7 +3,7 @@ title: Protocol paths
 description: How a request on the Responses, Chat Completions, or Messages API reaches a provider, how to preview and trace that path, and the staged switches that change it.
 ---
 
-opencodex serves three client APIs: **Responses** (`/v1/responses`), **Chat Completions**
+OpenRelay serves three client APIs: **Responses** (`/v1/responses`), **Chat Completions**
 (`/v1/chat/completions`), and **Messages** (`/v1/messages`). Each provider receives one upstream
 wire, decided by its adapter. When the client API and the upstream wire differ, the request is
 converted on the way in and the answer is converted on the way back. This page explains how that
@@ -15,7 +15,7 @@ did before these settings existed.
 ## Delivery modes
 
 A path is a list of hops from the client API to the upstream wire. The hops are the three API
-names, `ir` (opencodex's adapter-neutral request and event form), and `responses-internal`
+names, `ir` (OpenRelay's adapter-neutral request and event form), and `responses-internal`
 (Responses JSON or SSE produced only as an internal bridge, never seen by a client).
 
 | Mode | Meaning | Example request path |
@@ -38,7 +38,7 @@ With every switch off, an eligible single-provider route takes these paths:
 | Chat → Chat | native (JSON when the client sends `stream: false`) |
 | Chat → Responses, Messages → Responses | translated through the Responses codec |
 | Chat → Messages, Messages → Chat | legacy bridge |
-| Messages → Messages | native only when the caller forwards its own Anthropic credential; legacy bridge for a key opencodex manages |
+| Messages → Messages | native only when the caller forwards its own Anthropic credential; legacy bridge for a key OpenRelay manages |
 
 Combos, routing policies, and synthetic effort or fast model rows take the legacy bridge from Chat
 and Messages unless a switch below says otherwise.
@@ -47,7 +47,7 @@ and Messages unless a switch below says otherwise.
 
 Some request features cannot survive every conversion. For example, the Chat fields `n`,
 `logprobs`, `logit_bias`, `seed`, `audio`, and `prediction` have no place in a Responses body, and
-the Messages `top_k` field is dropped on the way to Responses. opencodex records each such effect as
+the Messages `top_k` field is dropped on the way to Responses. OpenRelay records each such effect as
 `passthrough`, `translated`, `degraded`, or `unsupported` (shown as *Dropped* in the dashboard).
 These are declared from the converters' code; they are not measured results.
 
@@ -60,12 +60,12 @@ advance combo rotation, and is not logged.
 - CLI:
 
   ```bash
-  ocx api explain --model combo/main --inbound chat --feature request.seed
-  ocx api explain --model claude-sonnet-4-5 --inbound messages --json
+  orl api explain --model combo/main --inbound chat --feature request.seed
+  orl api explain --model claude-sonnet-4-5 --inbound messages --json
   ```
 
 The preview lists every route candidate with its request path, delivery mode, feature effects, and
-whether the `reject` policy (below) would refuse it. `ocx api protocols --json` lists the feature
+whether the `reject` policy (below) would refuse it. `orl api protocols --json` lists the feature
 names it accepts. A Messages request that forwards the caller's own Anthropic credential is shown
 with `caller-credential-required` rather than assumed, because a preview has no caller.
 
@@ -108,12 +108,12 @@ Change them with the CLI or by editing `protocols` in `config.json`
 ([reference](/reference/configuration/server/#protocol-paths-protocols)):
 
 ```bash
-ocx api policy                                   # show the current policy; changes nothing
-ocx api policy --rollout shadowPlan=on           # change one switch
-ocx api policy --unrepresentable reject
+orl api policy                                   # show the current policy; changes nothing
+orl api policy --rollout shadowPlan=on           # change one switch
+orl api policy --unrepresentable reject
 ```
 
-`ocx api policy` writes only when you pass a setting flag, and only when you run it.
+`orl api policy` writes only when you pass a setting flag, and only when you run it.
 
 ### Shadow plan
 

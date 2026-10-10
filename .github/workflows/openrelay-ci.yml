@@ -1,0 +1,109 @@
+name: OpenRelay CI
+
+on:
+  push:
+    branches: [main, dev, preview]
+  pull_request:
+    branches: [main, dev, preview]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux CI (Checks & Focused Tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-project-bun
+        with:
+          role: test-runner
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772115cf71e # v4.2.2
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+            gui/node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', 'gui/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install root dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install GUI dependencies
+        run: cd gui && bun install --frozen-lockfile
+
+      - name: TypeScript strict typecheck
+        run: bun run typecheck
+
+      - name: Structure SSOT check
+        run: bun run structure:check
+
+      - name: Skill surface check
+        run: bun run skill:surface:check
+
+      - name: Git diff whitespace check
+        run: git diff --check
+
+      - name: GUI lint
+        run: bun run lint:gui
+
+      - name: GUI typecheck and build
+        run: cd gui && bun run build
+
+      - name: Run focused backend tests
+        run: bun test tests/cli/openrelay-branding.test.ts tests/responses/rtk-compression.test.ts tests/responses/rtk-transport.test.ts
+
+      - name: Run privacy scan
+        run: bun run privacy:scan
+
+  windows-smoke:
+    name: Windows Compatibility Smoke
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-project-bun
+        with:
+          role: test-runner
+
+      - name: Install root dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install GUI dependencies
+        run: cd gui && bun install --frozen-lockfile
+
+      - name: TypeScript typecheck
+        run: bun run typecheck
+
+      - name: GUI build
+        run: cd gui && bun run build
+
+      # On Windows runners, test queue locks and effective Windows SID resolution can encounter
+      # EPERM / EACLIDENTITY under non-elevated or restricted PowerShell environments.
+      # Setting OCX_TEST_NO_QUEUE=1 isolates the tests from lock contention while running the complete logic.
+      - name: Run focused Windows tests
+        env:
+          OCX_TEST_NO_QUEUE: "1"
+        run: bun test tests/cli/openrelay-branding.test.ts tests/responses/rtk-compression.test.ts
+
+      - name: Build standalone binaries
+        run: bun run build:standalone
+
+      - name: Verify CLI smoke
+        run: |
+          ./dist/standalone/bun-windows-x64/orl.exe --version
+          ./dist/standalone/bun-windows-x64/orl.exe --help
+          ./dist/standalone/bun-windows-x64/ocx.exe --version
+          ./dist/standalone/bun-windows-x64/opencodex.exe --version

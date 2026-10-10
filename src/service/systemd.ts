@@ -185,7 +185,7 @@ export function startSystemd(): void {
   ensureUserBusEnv();
   if (!existsSync(unitPath())) {
     console.error(`opencodex service is not installed: ${unitPath()}`);
-    console.error("Run `ocx service install` first to create and enable the systemd user unit.");
+    console.error("Run `orl service install` first to create and enable the systemd user unit.");
     process.exit(1);
   }
   // The unit on disk may be newer than what systemd loaded; starting now would run

@@ -22,7 +22,7 @@ export default defineConfig({
   vite: { build: { cssMinify: "esbuild" } },
   integrations: [
     starlight({
-      title: "opencodex",
+      title: "OpenRelay",
       description:
         "Universal provider proxy for OpenAI Codex & Claude Code — use any LLM with Codex CLI, App, SDK, and Claude Code.",
       tagline: "Use any LLM with OpenAI Codex and Claude Code.",

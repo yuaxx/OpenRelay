@@ -3,7 +3,7 @@ import type { Capability } from "./capability-types";
 export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   {
     command: ["grok", "status"],
-    usage: "ocx grok status [--json]",
+    usage: "orl grok status [--json]",
     summary: "Read Grok model fence state and catalog.",
     routes: [{"method": "GET", "path": "/api/grok"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
@@ -13,7 +13,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["grok", "set"],
-    usage: "ocx grok set <model,model...> [--json]",
+    usage: "orl grok set <model,model...> [--json]",
     summary: "Replace the excluded Grok model list.",
     routes: [{"method": "PUT", "path": "/api/grok/selection"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
@@ -23,7 +23,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["grok", "exclude"],
-    usage: "ocx grok exclude <model,model...> [--json]",
+    usage: "orl grok exclude <model,model...> [--json]",
     summary: "Add models to the Grok exclusion list.",
     routes: [{"method": "GET", "path": "/api/grok"}, {"method": "PUT", "path": "/api/grok/selection"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
@@ -33,7 +33,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["grok", "include"],
-    usage: "ocx grok include <model,model...> [--json]",
+    usage: "orl grok include <model,model...> [--json]",
     summary: "Remove models from the Grok exclusion list.",
     routes: [{"method": "GET", "path": "/api/grok"}, {"method": "PUT", "path": "/api/grok/selection"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
@@ -43,7 +43,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["grok", "clear"],
-    usage: "ocx grok clear [--json]",
+    usage: "orl grok clear [--json]",
     summary: "Clear Grok exclusions.",
     routes: [{"method": "PUT", "path": "/api/grok/selection"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
@@ -53,7 +53,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["grok", "apply"],
-    usage: "ocx grok apply [--json]",
+    usage: "orl grok apply [--json]",
     summary: "Apply the saved Grok model fence.",
     routes: [{"method": "POST", "path": "/api/grok/apply"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
@@ -63,7 +63,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["integration", "client", "status"],
-    usage: "ocx integration client status [--client <id>] [--profile <id>] [--json]",
+    usage: "orl integration client status [--client <id>] [--profile <id>] [--json]",
     summary: "Read all file integrations, one client or an Aside profile.",
     routes: [{"method": "GET", "path": "/api/client-integrations"}, {"method": "GET", "path": "/api/client-integrations/{clientId}"}, {"method": "GET", "path": "/api/client-integrations/aside/profiles"}, {"method": "GET", "path": "/api/client-integrations/aside/profiles/{profileId}"}],
     flags: [{"name": "--client", "value": "string", "summary": "File integration ID; aside selects profiles."}, {"name": "--profile", "value": "number", "summary": "Aside nonnegative integer account ID; requires --client aside."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
@@ -73,7 +73,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["integration", "client", "history"],
-    usage: "ocx integration client history [--client <id>] [--profile <id>] [--json]",
+    usage: "orl integration client history [--client <id>] [--profile <id>] [--json]",
     summary: "Read integration rollback history and snapshot availability.",
     routes: [{"method": "GET", "path": "/api/client-integrations/journal"}, {"method": "GET", "path": "/api/client-integrations/aside/profiles/journal"}, {"method": "GET", "path": "/api/client-integrations/aside/profiles/{profileId}/journal"}],
     flags: [{"name": "--client", "value": "string", "summary": "File integration ID; aside selects profiles."}, {"name": "--profile", "value": "number", "summary": "Aside nonnegative integer account ID; requires --client aside."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
@@ -83,7 +83,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["integration","client","enable"],
-    usage: "ocx integration client enable --client <id> [--profile <id>] [--overwrite-conflict] [--plan-fingerprint <token>] [--reasoning-default <model=effort> ... | --clear-reasoning-defaults] [--json]",
+    usage: "orl integration client enable --client <id> [--profile <id>] [--overwrite-conflict] [--plan-fingerprint <token>] [--reasoning-default <model=effort> ... | --clear-reasoning-defaults] [--json]",
     summary: "Apply the selected managed file integration.",
     routes: [{"method":"PUT","path":"/api/client-integrations/{clientId}"},{"method":"PUT","path":"/api/client-integrations/aside/profiles"},{"method":"PUT","path":"/api/client-integrations/aside/profiles/{profileId}"}],
     flags: [{"name":"--client","value":"string","summary":"Explicit file integration ID.","required":true},{"name":"--profile","value":"number","summary":"Aside nonnegative integer account ID; requires --client aside."},{"name":"--overwrite-conflict","value":"boolean","summary":"Explicitly permit replacing a conflicting block."},{"name":"--json","value":"boolean","summary":"Emit the result as JSON."},{"name":"--plan-fingerprint","value":"string","summary":"Optional versioned token from a matching preview; stale intent is refused without retry."},{"name":"--reasoning-default","value":"string","summary":"Repeat MODEL=EFFORT to replace the full Droid defaults map; exact model IDs, duplicate keys refused."},{"name":"--clear-reasoning-defaults","value":"boolean","summary":"Droid apply/overwrite only: send an empty map, distinct from omitted inherited defaults."}],
@@ -93,7 +93,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["integration","client","disable"],
-    usage: "ocx integration client disable --client <id> [--profile <id>] [--plan-fingerprint <token>] [--json]",
+    usage: "orl integration client disable --client <id> [--profile <id>] [--plan-fingerprint <token>] [--json]",
     summary: "Disable the selected managed file integration.",
     routes: [{"method":"PUT","path":"/api/client-integrations/{clientId}"},{"method":"PUT","path":"/api/client-integrations/aside/profiles"},{"method":"PUT","path":"/api/client-integrations/aside/profiles/{profileId}"}],
     flags: [{"name":"--client","value":"string","summary":"Explicit file integration ID.","required":true},{"name":"--profile","value":"number","summary":"Aside nonnegative integer account ID; requires --client aside."},{"name":"--json","value":"boolean","summary":"Emit the result as JSON."},{"name":"--plan-fingerprint","value":"string","summary":"Optional versioned token from a matching preview; stale intent is refused without retry."}],
@@ -103,7 +103,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["integration","client","restore"],
-    usage: "ocx integration client restore --op <opId> [--client aside --profile <id>] [--confirm-drift] [--preview | --plan-fingerprint <token>] [--json]",
+    usage: "orl integration client restore --op <opId> [--client aside --profile <id>] [--confirm-drift] [--preview | --plan-fingerprint <token>] [--json]",
     summary: "Restore a selected rollback operation, retaining drift refusal.",
     routes: [{"method":"POST","path":"/api/client-integrations/restore"},{"method":"POST","path":"/api/client-integrations/aside/profiles/{profileId}/restore"},{"method":"POST","path":"/api/client-integrations/restore/preview"},{"method":"POST","path":"/api/client-integrations/aside/profiles/{profileId}/preview"}],
     flags: [{"name":"--op","value":"string","summary":"Operation ID; --op-id is an alias.","required":true},{"name":"--client","value":"string","summary":"File integration ID; aside selects profiles."},{"name":"--profile","value":"number","summary":"Aside nonnegative integer account ID; requires --client aside."},{"name":"--confirm-drift","value":"boolean","summary":"Explicitly allow replacing edits made after the snapshot."},{"name":"--json","value":"boolean","summary":"Emit the result as JSON."},{"name":"--preview","value":"boolean","summary":"Inspect restoration without mutating; exclusive with a commit fingerprint."},{"name":"--plan-fingerprint","value":"string","summary":"Optional versioned token from a matching preview; stale intent is refused without retry."}],
@@ -113,7 +113,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["commandcode", "restore"],
-    usage: "ocx commandcode restore --op <opId> [--confirm-drift] [--preview | --plan-fingerprint <token>] [--json]",
+    usage: "orl commandcode restore --op <opId> [--confirm-drift] [--preview | --plan-fingerprint <token>] [--json]",
     summary: "Restore a Command Code rollback operation, retaining client ownership and drift checks.",
     routes: [{ method: "POST", path: "/api/client-integrations/commandcode/restore" }, { method: "POST", path: "/api/client-integrations/commandcode/restore/preview" }],
     flags: [
@@ -129,7 +129,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["claude", "config", "status"],
-    usage: "ocx claude config status [--json]",
+    usage: "orl claude config status [--json]",
     summary: "Read effective Claude Code configuration.",
     routes: [{"method": "GET", "path": "/api/claude-code"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
@@ -139,7 +139,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["claude", "config", "set"],
-    usage: "ocx claude config set [--enabled <on|off>] [--auth-mode <auto|proxy|subscription>] [--system-env <on|off>] [--fast-mode <on|off>] [--auto-context <on|off>] [--compact-window <tokens|default>] [--context-accounting <1m|200k>] [--inject-agents <on|off>] [--small-fast-model <id|->] [--model-map <from=to,...|->] [--blocked-skills <name,name|->] [--web-model <id|->] [--web-backend <openai|anthropic|xai|gemini|exa|->] [--vision-model <id|->] [--vision-backend <openai|anthropic|->] [--json]; or ocx claude config set --first-party <on|off> [--json]",
+    usage: "orl claude config set [--enabled <on|off>] [--auth-mode <auto|proxy|subscription>] [--system-env <on|off>] [--fast-mode <on|off>] [--auto-context <on|off>] [--compact-window <tokens|default>] [--context-accounting <1m|200k>] [--inject-agents <on|off>] [--small-fast-model <id|->] [--model-map <from=to,...|->] [--blocked-skills <name,name|->] [--web-model <id|->] [--web-backend <openai|anthropic|xai|gemini|exa|->] [--vision-model <id|->] [--vision-backend <openai|anthropic|->] [--json]; or orl claude config set --first-party <on|off> [--json]",
     summary: "Change Claude Code settings through the runtime owner.",
     routes: [{"method": "PUT", "path": "/api/claude-code"}],
     flags: [{"name": "--enabled", "value": "string", "summary": "on or off."}, {"name": "--auth-mode", "value": "string", "summary": "auto, proxy or subscription."}, {"name": "--system-env", "value": "string", "summary": "on or off."}, {"name": "--fast-mode", "value": "string", "summary": "on or off."}, {"name": "--auto-context", "value": "string", "summary": "on or off."}, {"name": "--compact-window", "value": "string", "summary": "Positive token count or default to clear."}, {"name": "--context-accounting", "value": "string", "summary": "1m (default) or 200k."}, {"name": "--inject-agents", "value": "string", "summary": "on or off."}, {"name": "--small-fast-model", "value": "string", "summary": "Model ID; - clears."}, {"name": "--model-map", "value": "string", "summary": "Comma-separated from=to mappings; - clears."}, {"name": "--blocked-skills", "value": "string", "summary": "Comma-separated names; - clears."}, {"name": "--web-model", "value": "string", "summary": "Model ID; - clears."}, {"name": "--web-backend", "value": "string", "summary": "openai, anthropic, xai, gemini, exa or -."}, {"name": "--vision-model", "value": "string", "summary": "Model ID; - clears."}, {"name": "--vision-backend", "value": "string", "summary": "openai, anthropic or -."}, {"name": "--first-party", "value": "string", "summary": "on or off; must be the only setting."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
@@ -149,7 +149,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["claude", "desktop", "show"],
-    usage: "ocx claude desktop show [--json]",
+    usage: "orl claude desktop show [--json]",
     summary: "Inspect the desired profile derived on this machine.",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
@@ -159,7 +159,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["claude", "desktop", "move"],
-    usage: "ocx claude desktop move <provider/model> <opus|fable|sonnet|haiku> [--default]",
+    usage: "orl claude desktop move <provider/model> <opus|fable|sonnet|haiku> [--default]",
     summary: "Move an available route to a local Desktop family.",
     routes: [],
     flags: [{"name": "--default", "value": "boolean", "summary": "Make this route the family default."}],
@@ -169,7 +169,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["claude", "desktop", "default"],
-    usage: "ocx claude desktop default <opus|fable|sonnet|haiku> <provider/model|none>",
+    usage: "orl claude desktop default <opus|fable|sonnet|haiku> <provider/model|none>",
     summary: "Set or clear a local Desktop family default.",
     routes: [],
     flags: [],
@@ -179,7 +179,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["claude", "desktop", "export"],
-    usage: "ocx claude desktop export <path|->",
+    usage: "orl claude desktop export <path|->",
     summary: "Export the persisted local Desktop profile.",
     routes: [],
     flags: [],
@@ -189,7 +189,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["claude", "desktop", "import"],
-    usage: "ocx claude desktop import <path> [--apply]",
+    usage: "orl claude desktop import <path> [--apply]",
     summary: "Import a local Desktop profile, optionally applying it as a static gateway.",
     routes: [{"method": "POST", "path": "/api/claude-desktop/apply"}],
     flags: [{"name": "--apply", "value": "boolean", "summary": "After saving, apply as a static gateway."}],
@@ -199,7 +199,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["claude", "desktop", "apply"],
-    usage: "ocx claude desktop [apply] [--first-party | --gateway [--static|--hybrid|--discovery-only]]",
+    usage: "orl claude desktop [apply] [--first-party | --gateway [--static|--hybrid|--discovery-only]]",
     summary: "Apply Claude Desktop first-party interception or gateway profile.",
     routes: [{"method": "POST", "path": "/api/claude-desktop/apply"}],
     flags: [{"name": "--first-party", "value": "boolean", "summary": "Keep Desktop on claude.ai and intercept its Code tab."}, {"name": "--gateway", "value": "boolean", "summary": "Apply a third-party gateway profile."}, {"name": "--static", "value": "boolean", "summary": "Static gateway model catalog."}, {"name": "--hybrid", "value": "boolean", "summary": "Hybrid gateway catalog."}, {"name": "--discovery-only", "value": "boolean", "summary": "Discovery-only gateway catalog."}],
@@ -209,7 +209,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["integration","client","preview"],
-    usage: "ocx integration client preview --client <id> --operation <apply|overwrite|disable> [--profile <id>] [--reasoning-default <model=effort> ... | --clear-reasoning-defaults] [--json]",
+    usage: "orl integration client preview --client <id> --operation <apply|overwrite|disable> [--profile <id>] [--reasoning-default <model=effort> ... | --clear-reasoning-defaults] [--json]",
     summary: "Inspect a managed client change before choosing whether to apply it.",
     routes: [{"method":"POST","path":"/api/client-integrations/preview"},{"method":"POST","path":"/api/client-integrations/aside/profiles/{profileId}/preview"}],
     flags: [{"name":"--client","required":true,"value":"string","summary":"Explicit client; profile selectors require aside."},{"name":"--profile","value":"number","summary":"One Aside nonnegative integer profile ID."},{"name":"--operation","required":true,"value":"string","summary":"Required apply, overwrite or disable; Aside requires one profile."},{"name":"--reasoning-default","value":"string","summary":"Repeat MODEL=EFFORT to replace the full Droid defaults map; exact model IDs, duplicate keys refused."},{"name":"--clear-reasoning-defaults","value":"boolean","summary":"Droid apply/overwrite only: send an empty map, distinct from omitted inherited defaults."},{"name":"--json","value":"boolean","summary":"Emit one validated task result as JSON."}],
@@ -219,7 +219,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["integration","client","history","remove"],
-    usage: "ocx integration client history remove --op <opId> --yes [--client aside [--profile <id>]] [--json]",
+    usage: "orl integration client history remove --op <opId> --yes [--client aside [--profile <id>]] [--json]",
     summary: "Retire a selected rollback-history entry and its retained snapshot.",
     routes: [{"method":"DELETE","path":"/api/client-integrations/journal"},{"method":"DELETE","path":"/api/client-integrations/aside/profiles/journal"},{"method":"DELETE","path":"/api/client-integrations/aside/profiles/{profileId}/journal"}],
     flags: [{"name":"--op","required":true,"value":"string","summary":"Exact operation ID to retire."},{"name":"--yes","required":true,"value":"boolean","summary":"Required explicit confirmation of irreversible rollback-history retirement."},{"name":"--client","value":"string","summary":"Explicit client; profile selectors require aside."},{"name":"--profile","value":"number","summary":"One Aside nonnegative integer profile ID."},{"name":"--json","value":"boolean","summary":"Emit one validated task result as JSON."}],
@@ -229,7 +229,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["integration","client","sync"],
-    usage: "ocx integration client sync --client aside [--json]",
+    usage: "orl integration client sync --client aside [--json]",
     summary: "Refresh the managed Aside profiles through their existing owner.",
     routes: [{"method":"POST","path":"/api/client-integrations/aside/sync"}],
     flags: [{"name":"--client","required":true,"value":"string","summary":"Explicit client; profile selectors require aside."},{"name":"--json","value":"boolean","summary":"Emit one validated task result as JSON."}],
@@ -239,7 +239,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["claude","desktop","profile","show"],
-    usage: "ocx claude desktop profile show [--json]",
+    usage: "orl claude desktop profile show [--json]",
     summary: "Read the selected running proxy’s Desktop profile and available models.",
     routes: [{"method":"GET","path":"/api/claude-desktop"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit one validated task result as JSON."}],
@@ -249,7 +249,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["claude","desktop","profile","import"],
-    usage: "ocx claude desktop profile import <file|-> [--json]",
+    usage: "orl claude desktop profile import <file|-> [--json]",
     summary: "Validate and save a Desktop profile on the selected running proxy.",
     routes: [{"method":"PUT","path":"/api/claude-desktop"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit one validated task result as JSON."}],
@@ -259,7 +259,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["integration","native","cursor","status"],
-    usage: "ocx integration native cursor status [--json]",
+    usage: "orl integration native cursor status [--json]",
     summary: "Read Cursor installation, gateway requirements and model capabilities.",
     routes: [{"method":"GET","path":"/api/native-integrations/cursor"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit one validated task result as JSON."}],
@@ -269,7 +269,7 @@ export const INTEGRATION_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["integration","native","cursor","local-installer"],
-    usage: "ocx integration native cursor local-installer [--json]",
+    usage: "orl integration native cursor local-installer [--json]",
     summary: "Read the available Cursor installer link without downloading or installing it.",
     routes: [{"method":"GET","path":"/api/native-integrations/cursor/local-installer"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit one validated task result as JSON."}],

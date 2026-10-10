@@ -141,8 +141,8 @@ function findOcxOnPath(
     : [""];
   for (const directory of pathValue.split(platform === "win32" ? ";" : delimiter)) {
     if (!directory) continue;
-    for (const extension of extensions) {
-      const candidate = pathApi.join(directory, `ocx${extension}`);
+    for (const name of ["orl", "ocx", "opencodex"]) for (const extension of extensions) {
+      const candidate = pathApi.join(directory, `${name}${extension}`);
       if (exists(candidate)) return pathApi.resolve(candidate);
     }
   }

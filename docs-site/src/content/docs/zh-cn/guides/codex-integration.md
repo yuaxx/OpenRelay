@@ -1,9 +1,9 @@
 ---
 title: Codex 集成
-description: opencodex 如何将自身注入 Codex、同步模型目录、安装 shim，并干净地恢复。
+description: OpenRelay 如何将自身注入 Codex、同步模型目录、安装 shim，并干净地恢复。
 ---
 
-opencodex 通过修改 Codex 读取的两样东西，让 Codex 经由 proxy 路由：它的 config
+OpenRelay 通过修改 Codex 读取的两样东西，让 Codex 经由 proxy 路由：它的 config
 （`$CODEX_HOME/config.toml`，默认 `~/.codex/config.toml`）和它的 model catalog。每一次修改都
 是幂等且可逆的。
 
@@ -14,13 +14,13 @@ proxy 提供一条裸 `openai` Codex 登录路由，支持 Pool（默认）和 D
 
 ## Config 注入
 
-`ocx init`、`ocx start` 和 `ocx sync` 都会调用注入器。在默认的 loopback 绑定下，它会保留
-Codex 内置的 `openai` provider id，并将该 provider 指向 opencodex：
+`orl init`、`orl start` 和 `orl sync` 都会调用注入器。在默认的 loopback 绑定下，它会保留
+Codex 内置的 `openai` provider id，并将该 provider 指向 OpenRelay：
 
 ```toml
 # root keys, before the first table
 model_catalog_json = "/absolute/path/to/opencodex-catalog.json"
-# Auto-injected by opencodex (undo: ocx restore)
+# Auto-injected by opencodex (undo: orl restore)
 openai_base_url = "http://127.0.0.1:10100/v1"
 
 # 仅在设置了 fastMode 时写入；未设置则不会创建 [features] 表
@@ -39,7 +39,7 @@ proxy 默认监听 `10100` 端口，并提供 `POST /v1/responses`、`POST /v1/r
 
 Codex 内置的 `image_gen` 工具不会经过 `/v1/responses` —— codex-rs 扩展会直接 POST
 `{base_url}/images/generations`（附带参考图像时则为 `/images/edits`），并使用它在聊天时相同的
-ChatGPT bearer auth。由于注入的 `base_url` 指向 opencodex，proxy 会把这些调用中继到 OpenAI
+ChatGPT bearer auth。由于注入的 `base_url` 指向 OpenRelay，proxy 会把这些调用中继到 OpenAI
 上游。
 
 这与 [Image Bridge](/guides/image-bridge/) 是分开的；后者只会在某个 **Responses** 回合列出
@@ -54,12 +54,12 @@ ChatGPT bearer auth。由于注入的 `base_url` 指向 opencodex，proxy 会把
   `openai-responses` provider 的 id，该 endpoint 必须实现 OpenAI Images API。显式选择会失败即关闭，
   不会 fallback 到其他付费上游。这里不接受 registry 管理的 provider id；省略 `images.provider`
   即可使用内置的 OpenAI tiers。
-- **xAI Imagine（Grok OAuth）中继：** 当 `images.bridgeEnabled` 为 `true`、未设置 `images.provider`，且配置了 `xai` provider 时，`/v1/images/generations` 和 `/v1/images/edits` 会发到 `https://api.x.ai/v1`。使用哪种凭据由 provider 的 `authMode` 决定：`"oauth"` 时复用 `ocx login xai` 获得的 Grok CLI 授权，其他模式则使用 provider 的 API key。OAuth 登录不会启用 key 方式的 provider，反之亦然。ChatGPT 凭据不会被转发。若凭据缺失，代理返回 400，而不会向 ChatGPT 计费。显式设置 `images.provider` 后，`/v1/images` 由该 provider 接管，其校验错误原样返回，不会再尝试 xAI 中继。该中继会把 Codex 的 `size` / `aspect_ratio` 映射到 xAI Imagine 请求体，并返回同样的 `{created, data:[{b64_json}]}` 形状。整批（inline `b64_json` 与下载的 URL）解码字节与 base64 编码输出合计不超过 100 MiB；超出则返回 502。若 xAI 返回的是图片 URL 而非内联字节，代理会不带凭据自行下载：URL 必须是公开 HTTPS（不允许重定向、`file:`、回环或私有地址），每个文件上限 50 MiB，结果作为本地 artifact 保存，仅通过需认证的管理端点提供。这与仍仅支持 API key 的 Responses Image Bridge 循环相互独立。
+- **xAI Imagine（Grok OAuth）中继：** 当 `images.bridgeEnabled` 为 `true`、未设置 `images.provider`，且配置了 `xai` provider 时，`/v1/images/generations` 和 `/v1/images/edits` 会发到 `https://api.x.ai/v1`。使用哪种凭据由 provider 的 `authMode` 决定：`"oauth"` 时复用 `orl login xai` 获得的 Grok CLI 授权，其他模式则使用 provider 的 API key。OAuth 登录不会启用 key 方式的 provider，反之亦然。ChatGPT 凭据不会被转发。若凭据缺失，代理返回 400，而不会向 ChatGPT 计费。显式设置 `images.provider` 后，`/v1/images` 由该 provider 接管，其校验错误原样返回，不会再尝试 xAI 中继。该中继会把 Codex 的 `size` / `aspect_ratio` 映射到 xAI Imagine 请求体，并返回同样的 `{created, data:[{b64_json}]}` 形状。整批（inline `b64_json` 与下载的 URL）解码字节与 base64 编码输出合计不超过 100 MiB；超出则返回 502。若 xAI 返回的是图片 URL 而非内联字节，代理会不带凭据自行下载：URL 必须是公开 HTTPS（不允许重定向、`file:`、回环或私有地址），每个文件上限 50 MiB，结果作为本地 artifact 保存，仅通过需认证的管理端点提供。这与仍仅支持 API key 的 Responses Image Bridge 循环相互独立。
 - **Google Antigravity（CCA）fallback：** 当既没有 OpenAI forward 候选，也没有已配置的 keyed
   provider 时，`/v1/images/generations`（不是 `/images/edits`）会 fallback 到 Antigravity
   **Cloud Code Assist** endpoint，并使用 `gemini-3.1-flash-image` 模型。该 fallback 也会在
   OpenAI auth 解析失败后触发（例如 ChatGPT 凭据过期或缺失），而不只是没有配置任何 OpenAI 候选时才触发。
-  这需要 `ocx login google-antigravity`；OAuth token 只会发送到固定的 CCA registry host，
+  这需要 `orl login google-antigravity`；OAuth token 只会发送到固定的 CCA registry host，
   不会发送到配置级别的 `baseUrl` override。响应会以 Codex 期望的同一
   `{created, data:[{b64_json}]}` 形状返回。
 - **两者都不是：** proxy 会返回清晰的错误，而不是泛化的 404。路由型 provider（Cursor、Gemini、
@@ -67,9 +67,9 @@ ChatGPT bearer auth。由于注入的 `base_url` 指向 opencodex，proxy 会把
   用 `codex features disable image_generation` 关闭它（即 `config.toml` 中
   `[features] image_generation = false`）。
 
-工具声明仍会随模型的 Responses 请求一同发送。对于 API-key Responses provider，opencodex 会把
+工具声明仍会随模型的 Responses 请求一同发送。对于 API-key Responses provider，OpenRelay 会把
 Codex 私有的 `image_gen` namespace 降级为上游安全的 `image_gen__<inner-name>` alias（例如
-`image_gen__imagegen`）。当这个可用 alias 取代客户端声明时，opencodex 会移除重复的 hosted
+`image_gen__imagegen`）。当这个可用 alias 取代客户端声明时，OpenRelay 会移除重复的 hosted
 `image_generation` 声明。它会在 Codex 看到之前把函数调用映射回显式的 `image_gen` namespace，
 并在之后将历史记录重放到上游时再次编码原生调用。这样即可让客户端侧图像生成在那些保留该 namespace，
 或拒绝带点号函数名的公有兼容上游上继续可调用。ChatGPT forward 模式保持不变，并维持其原生
@@ -110,7 +110,7 @@ model_provider = "opencodex"
 model_catalog_json = "/absolute/path/to/opencodex-catalog.json"
 
 # appended at the end of the file
-# Auto-injected by opencodex (undo: ocx restore)
+# Auto-injected by opencodex (undo: orl restore)
 [model_providers.opencodex]
 name = "OpenCodex Proxy"
 base_url = "http://your-host:10100/v1"
@@ -120,7 +120,7 @@ env_key = "OPENCODEX_API_AUTH_TOKEN"
 # supports_websockets = true   # only when config.websockets is true
 ```
 
-当 OpenCodex 负责路由时，两种模式都会把 `$CODEX_HOME/opencodex.config.toml` 写成参考/回退配置。
+当 OpenRelay 负责路由时，两种模式都会把 `$CODEX_HOME/opencodex.config.toml` 写成参考/回退配置。
 在 loopback 情况下，它包含可在自动注入被移除后手动合并的 root keys；在非 loopback 情况下，
 它包含专用 provider 形式。外部 provider 模式会保持这个 profile 不变。
 
@@ -132,7 +132,7 @@ env_key = "OPENCODEX_API_AUTH_TOKEN"
 
 ## 共享模型目录
 
-Codex CLI、TUI、App 和 SDK 都读取同一个 Codex home。opencodex 会从 `CODEX_HOME` 解析该目录，
+Codex CLI、TUI、App 和 SDK 都读取同一个 Codex home。OpenRelay 会从 `CODEX_HOME` 解析该目录，
 回退到 `~/.codex`，并管理：
 
 ```text
@@ -142,18 +142,18 @@ $CODEX_HOME/opencodex-catalog.json
 $CODEX_HOME/models_cache.json
 ```
 
-在 WSL 中，如果未设置 `CODEX_HOME`，且 Linux 侧的 `~/.codex` 目录不存在或不含任何 Codex 状态（`config.toml`, `auth.json`, `sessions`, `history.jsonl`），opencodex 还会检查
+在 WSL 中，如果未设置 `CODEX_HOME`，且 Linux 侧的 `~/.codex` 目录不存在或不含任何 Codex 状态（`config.toml`, `auth.json`, `sessions`, `history.jsonl`），OpenRelay 还会检查
 `/mnt/c/Users/*/.codex/config.toml` 下是否存在单一的 Windows Codex Desktop home。只要候选项恰好只有一个，
 它就会使用那个目录，让 WSL app-server mode 和 Windows Codex Desktop 共享同一份 config 与 auth 文件。
 如需覆盖这一检测，请显式设置 `CODEX_HOME`。
 
 在 Windows 上，Orca shell 可能会把 `CODEX_HOME` 和 `ORCA_CODEX_HOME` 都设置为 Orca 打包的 runtime home，
-而 ChatGPT/Codex app 仍然读取 `%USERPROFILE%\\.codex`。`ocx status` 和 `ocx doctor` 会提示这个确切的不一致，
+而 ChatGPT/Codex app 仍然读取 `%USERPROFILE%\\.codex`。`orl status` 和 `orl doctor` 会提示这个确切的不一致，
 并打印经过脱敏的目标路径。如果某个后台服务是在那个 Orca shell 中安装的，请先在原始 shell 中卸载它，
 然后把 `CODEX_HOME` 设为 app home，取消 `ORCA_CODEX_HOME`，重新运行 sync/restore，再安装一次服务。
 
 在专用 provider 模式下，`requires_openai_auth = true` 会让 Codex App/TUI 中受账号门控的界面与原生 Codex 保持一致。
-opencodex 也会通过 WebSocket 提供 `/v1/responses`。专用 provider 只有在 `"websockets": true` 时才会声明
+OpenRelay 也会通过 WebSocket 提供 `/v1/responses`。专用 provider 只有在 `"websockets": true` 时才会声明
 `supports_websockets = true`；在 loopback 情况下，Codex 的内置 provider 可能会先尝试 WebSocket，而关闭的 proxy
 会返回 `426`，从而让 Codex fallback 到 HTTP/SSE。
 
@@ -162,7 +162,7 @@ opencodex 也会通过 WebSocket 提供 `/v1/responses`。专用 provider 只有
 默认的 loopback 形式会让新线程继续标记为 Codex 原生的 `openai` provider，因此正常的 resume history 不需要
 重映射。sync 和 restore 只应用与当前状态数据库匹配的备份 manifest，并精确恢复每个线程原来的 provider、
 source 和 event marker。没有 manifest 的 `opencodex` 行会保持不变；只有明确要强制执行旧式重标记时，才使用
-`ocx recover-history --legacy-openai --yes`。此命令的作用范围有意设置得很广：它会把所有包含用户消息且当前标记为
+`orl recover-history --legacy-openai --yes`。此命令的作用范围有意设置得很广：它会把所有包含用户消息且当前标记为
 `opencodex` 的线程改标为 `openai`，将 `exec` 规范化为 `cli`，并设置事件标记；正常的专用提供方历史记录也在
 范围内。请先备份状态，并且仅在确实需要这一完整范围时使用。非 loopback 的专用 provider 模式在运行期间仍会把历史记录镜像到
 `opencodex` provider 名下，并在退出时恢复已备份的 metadata。如需保持历史记录完全不变，请设置
@@ -171,7 +171,7 @@ source 和 event marker。没有 manifest 的 `opencodex` 行会保持不变；�
 ## 模型目录同步
 
 Codex 显示的模型来自一个磁盘上的 catalog（默认是 `$CODEX_HOME/opencodex-catalog.json`）。在启动时以及执行
-`ocx sync` 时，opencodex 会：
+`orl sync` 时，OpenRelay 会：
 
 1. **备份**一次干净的 catalog 到 `~/.opencodex/catalog-backup.json`（这样 featuring 是可逆的）。
 2. **抓取**符合条件的 provider 的实时模型 catalog（缓存约 5 分钟；失败时先回退到上一个正常列表，再回退到
@@ -189,21 +189,21 @@ Codex 显示的模型来自一个磁盘上的 catalog（默认是 `$CODEX_HOME/o
 ### 路由模型的本地工具
 
 非原生的路由 catalog 条目使用 `tool_mode: "code_mode_only"`。这样 Codex 可以公开其官方 `exec` 入口以及
-嵌套的 MCP 工具，包括 Browser 和 Computer Use；opencodex 只负责路由模型发起的普通 function call。
-工具执行、权限和确认仍由 Codex 在本地处理；opencodex 不会实现另一套浏览器或桌面控制 executor。
+嵌套的 MCP 工具，包括 Browser 和 Computer Use；OpenRelay 只负责路由模型发起的普通 function call。
+工具执行、权限和确认仍由 Codex 在本地处理；OpenRelay 不会实现另一套浏览器或桌面控制 executor。
 
-对于不接受 Codex `exec` custom-tool grammar 的 key-auth Responses provider，opencodex 会把该工具声明及其
+对于不接受 Codex `exec` custom-tool grammar 的 key-auth Responses provider，OpenRelay 会把该工具声明及其
 历史记录编码成上游 function tool，再在 Codex 收到结果前，把流式 function-call lifecycle 还原成
 `custom_tool_call`。原生 OpenAI forward routing 和已支持的 `apply_patch` custom tool 保持不变。
 
 路由的 code-mode 轮次还会在首次调用前收到宿主对嵌套辅助工具的规则：`tools.apply_patch`
 接收一个字符串，首尾必须是没有额外包装的独立补丁标记行；isolate 中没有 `import`，长时间运行的
 命令通过 `write_stdin` 轮询。如果原生路由 Responses、Kiro 或 Cursor 路径上的 code-mode exec
-结果仍包含宿主的某条失败消息，opencodex 会追加一行提示，指出对应规则。此变更不会重写模型的
+结果仍包含宿主的某条失败消息，OpenRelay 会追加一行提示，指出对应规则。此变更不会重写模型的
 代码或补丁文本。
 
 如果路由模型误把 `{"cmd":"git status --short"}` 这样的 shell 参数对象传给 code-mode `exec`，
-opencodex 会在确认工具目录为 code mode 且内容无歧义时，将它转换为调用
+OpenRelay 会在确认工具目录为 code mode 且内容无歧义时，将它转换为调用
 `tools.exec_command(...)` 并通过 `text(...)` 返回结果的 JavaScript。shell 选项会保留，
 命令执行与权限检查仍由 Codex 处理。合法的 JavaScript 后备字段、歧义对象和其他工具命名空间
 不会被转换；这项兼容修复不会绕过提供方限流，也不改变配置的重试策略。
@@ -211,7 +211,7 @@ opencodex 会在确认工具目录为 code mode 且内容无歧义时，将它�
 所选 provider 必须支持 function/tool calling。不支持 tool call 的 text-only provider 无法使用 `exec`、
 Browser 或 Computer Use。原生 OpenAI 条目会保持其上游 tool mode 不变。
 
-`ocx sync` 修改这些 metadata 后，请重启 Codex App 并打开一个新任务。现有 app-server process 和任务可能仍会
+`orl sync` 修改这些 metadata 后，请重启 Codex App 并打开一个新任务。现有 app-server process 和任务可能仍会
 保留它们在启动时加载的 catalog 和 tool plan。
 
 ### 自定义模型显示名
@@ -223,7 +223,7 @@ Browser 或 Computer Use。原生 OpenAI 条目会保持其上游 tool mode 不�
 可以通过 CLI 添加 display name（proxy 在线时会立即同步 catalog）：
 
 ```bash
-ocx models add deepseek deepseek-v4 --display-name "DeepSeek V4" --context-window 128000
+orl models add deepseek deepseek-v4 --display-name "DeepSeek V4" --context-window 128000
 ```
 
 远程 Codex 客户端可以使用普通的数据面密钥（与 `/v1/responses` 所用凭据相同，而非管理员令牌）拉取同一个生成好的 catalog：
@@ -234,7 +234,7 @@ tmp="$(mktemp "${dest}.XXXXXX")"
 curl -fsS -H "x-opencodex-api-key: $OPENCODEX_API_AUTH_TOKEN" \
   "https://proxy.example.com/v1/catalog" > "$tmp" \
   && mv "$tmp" "$dest"
-ocx sync-cache
+orl sync-cache
 ```
 
 响应就是原始的 `opencodex-catalog.json` 文档（不含 provider 凭据）。当可用时，
@@ -245,24 +245,24 @@ ocx sync-cache
 
 `GET /v1/catalog` 的存在是为了让读取模型列表不再需要管理员令牌。该路由为只读（`GET` 与 `HEAD`），接受 `x-opencodex-api-key`、bearer 令牌或 `x-api-key`，并返回与管理路由完全相同的字节。响应携带强 `ETag`——通过 `If-None-Match` 回传即可重新验证并获得 `304` 而非完整文档——同时设置 `Cache-Control: private, no-cache`。在此被接纳的数据面密钥在管理面上**不会**获得任何权限：`/api/catalog` 以及所有 `/api/*` 路由仍然要求管理员令牌或仪表板会话。
 
-display name 是 **仅用于显示且在重新生成时保持稳定的**。每一次 `ocx sync` 和 catalog refresh 都会从
+display name 是 **仅用于显示且在重新生成时保持稳定的**。每一次 `orl sync` 和 catalog refresh 都会从
 `config.json`（包括 `customModels`）重新派生路由条目，因此配置过的名称会重新应用，而不是漂回路由 slug。
 受管服务重启后也会在 proxy 绑定完成后不久尝试做这次 sync。如果这个尽力而为的启动 sync 失败了，比如在离线登录时，
-之前持久化下来的 catalog 会保留，而下一次成功的 `ocx sync` 会重新应用已配置的名称。真实的上游原生名称
+之前持久化下来的 catalog 会保留，而下一次成功的 `orl sync` 会重新应用已配置的名称。真实的上游原生名称
 （例如 `gpt-5.6-sol` → "GPT-5.6-Sol"）来自固定的上游快照，绝不会被自定义 display name 覆盖。
 
 ### 外部 provider 管理器
 
-如果 `config.toml` 已经选择了 `openai` 或 `opencodex` 之外的 provider，OpenCodex 会保持文件不变，
+如果 `config.toml` 已经选择了 `openai` 或 `opencodex` 之外的 provider，OpenRelay 会保持文件不变，
 并跳过 profile 写入、catalog/cache 刷新，以及立即和后台两种 Codex 历史元数据恢复。管理自定义 provider 的工具
 通常会把现有会话标记为那个 provider id；如果替换活动 id，Codex 历史视图里那些完整会话可能会消失。
 同样的保护也适用于由旧版 root profile 选择的外部 provider。
 
-只保留一个工具作为 Codex provider 配置的 owner。若要在现有 provider 管理器之后使用 OpenCodex，
+只保留一个工具作为 Codex provider 配置的 owner。若要在现有 provider 管理器之后使用 OpenRelay，
 请把那个 provider 指向 `http://127.0.0.1:10100/v1`，并使用 Responses passthrough（Codex TOML 中的
 `wire_api = "responses"`），而不是 Chat Completions translation。当启用 proxy API auth 时，也要像上面的非 loopback
-provider 形式一样，从 `OPENCODEX_API_AUTH_TOKEN` 传入 `x-opencodex-api-key`。如果要让 OpenCodex 直接注入路由，
-请先把 Codex 切回其内置的 `openai` provider，并移除任何用户拥有的 root `openai_base_url`，然后重新运行 `ocx start`。
+provider 形式一样，从 `OPENCODEX_API_AUTH_TOKEN` 传入 `x-opencodex-api-key`。如果要让 OpenRelay 直接注入路由，
+请先把 Codex 切回其内置的 `openai` provider，并移除任何用户拥有的 root `openai_base_url`，然后重新运行 `orl start`。
 
 ### 目录排障
 
@@ -280,35 +280,35 @@ provider 形式一样，从 `OPENCODEX_API_AUTH_TOKEN` 传入 `x-opencodex-api-k
    不使用此静态路由列表。这些规则不改变实时发现失败时的回退行为。
 4. **Cursor `GetUsableModels`** - Cursor adapter 通过它的 protobuf `GetUsableModels` RPC 发现模型，而不是
    `/models`，所以 Cursor 侧的变动会独立于其他 provider 改变哪些 id 可见。
-5. **缓存和 `ocx sync`** - live catalog 的缓存时间大约是五分钟（`modelCacheTtlMs`，默认 `300000`）。
-   运行 `ocx sync` 可以强制立即重新抓取并重写 catalog。
+5. **缓存和 `orl sync`** - live catalog 的缓存时间大约是五分钟（`modelCacheTtlMs`，默认 `300000`）。
+   运行 `orl sync` 可以强制立即重新抓取并重写 catalog。
 6. **正在运行的 Codex `app-server`** - 当长生命周期的 Codex `app-server`（Desktop / CLI 后台宿主）还在
-   内存中保留旧列表时，只重写磁盘上的 catalog 还不够。`ocx sync` 和 `ocx sync-cache` 会在检测到这些进程时给出
-   警告。`ocx sync --restart-codex` 会重启这些进程，并在 macOS、Linux 和 Windows 上完全退出再重新启动 Codex
+   内存中保留旧列表时，只重写磁盘上的 catalog 还不够。`orl sync` 和 `orl sync-cache` 会在检测到这些进程时给出
+   警告。`orl sync --restart-codex` 会重启这些进程，并在 macOS、Linux 和 Windows 上完全退出再重新启动 Codex
    桌面应用，让选择器重新读取 catalog。若要让桌面应用继续运行，请传入 `--restart-app-server-only`，或自行停掉匹配的
    `app-server` 进程。
 
 :::caution[其他本地写入者]
-在 opencodex 内部，catalog 写入（`opencodex-catalog.json`、`config.toml`）是原子的，这只能防止两个
-opencodex 所有的 writer 竞争时写出半截文件。它**不能**阻止其他本地进程、文件 watcher 或同步 agent 在
-opencodex 写入之后再次改写 catalog 的可见性或顺序。Codex 还有自己独立的 `models_cache.json`，并且可以独立刷新它，
+在 OpenRelay 内部，catalog 写入（`opencodex-catalog.json`、`config.toml`）是原子的，这只能防止两个
+OpenRelay 所有的 writer 竞争时写出半截文件。它**不能**阻止其他本地进程、文件 watcher 或同步 agent 在
+OpenRelay 写入之后再次改写 catalog 的可见性或顺序。Codex 还有自己独立的 `models_cache.json`，并且可以独立刷新它，
 从而在不重写 `opencodex-catalog.json` 的情况下改变可见列表。如果 proxy 正在运行时模型突然翻转，请停掉或重新配置
-竞争中的写入者，然后运行 `ocx sync` —— 这是外部写入者风险，不是已确认的 opencodex 缺陷。
+竞争中的写入者，然后运行 `orl sync` —— 这是外部写入者风险，不是已确认的 OpenRelay 缺陷。
 :::
 
 ## Proxy 连接错误
 
 如果 Codex 重试后报出类似
 `stream disconnected before completion: error sending request for url (http://127.0.0.1:10100/v1/responses)`
-的错误——或者 Claude Code 报告类似的连接失败——说明 opencodex proxy 没有在运行：
+的错误——或者 Claude Code 报告类似的连接失败——说明 OpenRelay proxy 没有在运行：
 配置端口上没有任何监听，所以客户端只能自己渲染出那条原始连接错误。重启 proxy：
 
 ```bash
-ocx start              # foreground
-ocx service install    # persistent: auto-starts on login and respawns on crash
+orl start              # foreground
+orl service install    # persistent: auto-starts on login and respawns on crash
 ```
 
-`ocx status` 会显示 proxy 是否在运行，并在未运行时打印相同的重启提示；`ocx doctor` 会报告
+`orl status` 会显示 proxy 是否在运行，并在未运行时打印相同的重启提示；`orl doctor` 会报告
 重启安全性（service/shim 覆盖情况）。
 
 ## sub-agent 选择器
@@ -323,7 +323,7 @@ fallback 行为，参见 [Sub-agent Surface](/guides/sub-agent-surface/)。
 
 如果新 OAuth 凭据的已认证用量查询确认5小时、每周或每月额度耗尽，则不调用模型而直接保存账号，显示**等待验证**。重启或刷新令牌也不会使其可用。额度恢复后刷新额度：只有完整的最新用量显示有余额，才会发送一个小型验证请求；请求完成后账号才可用于路由。查询或验证失败将保留等待状态。普通状态轮询不会发送该请求。初次注册时用量未知仍需常规预热验证。
 
-`ocx account refresh openai` 和 `ocx account list openai --quota --refresh` 仅查询用量。模型验证会消耗配额，因此需要用户的仪表板会话：配额恢复后，打开 `ocx gui` 并点击 **Refresh quotas**。无界面主机也需要通过浏览器访问其仪表板；仅凭管理员令牌无法授权验证。暂停的账号可以完成验证，但不会因此恢复或被选中。模型授权错误会一直显示，直到验证或重新登录成功。
+`orl account refresh openai` 和 `orl account list openai --quota --refresh` 仅查询用量。模型验证会消耗配额，因此需要用户的仪表板会话：配额恢复后，打开 `orl gui` 并点击 **Refresh quotas**。无界面主机也需要通过浏览器访问其仪表板；仅凭管理员令牌无法授权验证。暂停的账号可以完成验证，但不会因此恢复或被选中。模型授权错误会一直显示，直到验证或重新登录成功。
 
 在 **Codex Set → Multi-auth** 中，打开 **Codex Auth** 标题栏中的 **Codex 额度** 开关，即可在 Week 下方显示主账号和各池账号最近查询到的积分。默认关闭，并保存为 `showCodexCredits`。余额按地区格式显示；上游报告时会显示无限额或超额使用上限警告。由于没有积分总上限，条形表示可用状态而非百分比。此开关仅控制显示，新登录需等待其自身的查询结果。
 
@@ -342,7 +342,7 @@ fallback 行为，参见 [Sub-agent Surface](/guides/sub-agent-surface/)。
 `codexPool.excludedPlans` 列出自动账号池选择要跳过的套餐键，与每个账号上保存的套餐不区分大小写比对。默认不存在，因此现有安装的轮换完全不变。
 
 ```bash
-ocx config set codexPool '{"excludedPlans":["free"]}'
+orl config set codexPool '{"excludedPlans":["free"]}'
 ```
 
 这是选择策略，不是封禁。被排除的账号保留凭据、用量历史和线程亲和性，仍显示在账号列表中，也仍可通过 `work/gpt-5.5` 这类显式选择使用。改变的只是自动轮换不再选它，包括它已经是活跃账号或已绑定线程的情况——订阅到期后留下的正是这种状态。
@@ -350,25 +350,25 @@ ocx config set codexPool '{"excludedPlans":["free"]}'
 主 Codex 账号不受套餐排除策略影响；仅选择模式不会读取受保护的原生凭据。如果所有可用的池账号都被排除，自动选择不返回账号。明确指定账号的路由仍可使用，并继续检查暂停、认证和模型权限。账号卡片与 CLI 将被排除的路由套餐与凭据健康状态分开显示。套餐没有全序关系，因此不提供 `minimumPlan` 设置。
 ## 恢复原生 Codex
 
-`ocx stop` 会停止 proxy 和已安装的后台服务，然后尝试恢复原生 Codex。OpenCodex 只移除能够确认归属的路由配置；如果无法安全恢复配置文件，会报告恢复未完成。
+`orl stop` 会停止 proxy 和已安装的后台服务，然后尝试恢复原生 Codex。OpenRelay 只移除能够确认归属的路由配置；如果无法安全恢复配置文件，会报告恢复未完成。
 
 如果当前 config 或 profile 与保存的原始内容不同，且日志缺少该文件注入状态的哈希值，自动快照恢复会保留两个文件和日志，不作修改。已经与原始内容相同的文件不会重写。对已路由配置的再次注入也会拒绝使用这种未确认的基线；原生配置可以建立新的快照。详见[恢复规则](/guides/codex-integration/#recovery-without-injection-hashes)。
 
 ```bash
-ocx stop       # stop the proxy + service, restore native Codex
-ocx restore    # restore without stopping  (alias: ocx eject)
-ocx restore back # point plain Codex at the running proxy again
+orl stop       # stop the proxy + service, restore native Codex
+orl restore    # restore without stopping  (alias: orl eject)
+orl restore back # point plain Codex at the running proxy again
 ```
 
-当 opencodex 作为受管的 [background service](/zh-cn/reference/cli/lifecycle/#ocx-service-installrepairrestartstartstopstatusuninstallremove) 运行时，它会设置
+当 OpenRelay 作为受管的 [background service](/zh-cn/reference/cli/lifecycle/#ocx-service-installrepairrestartstartstopstatusuninstallremove) 运行时，它会设置
 `OCX_SERVICE=1`，这样由服务驱动的重启**不会**反复改写 Codex config——只有显式的
-`ocx stop` / `ocx service stop` 才会恢复原生 Codex。
+`orl stop` / `orl service stop` 才会恢复原生 Codex。
 
 ## 分页历史记录安全拒绝
 
-如果受影响的历史存储支持分页，提供商切换可能返回 `history_paginated_requires_native_writer`。该原因不再拒绝写入 Codex 配置、参考配置档和模型目录。`ocx sync` 与 `ocx start` 仍会写入这些文件并设置 `model_catalog_json`，因此 Codex 模型选择器会继续显示所有经 OpenCodex 路由的模型。只有这一条原因会让会话历史的重新标记停手，因为分页历史序号由 Codex 自己的写入器分配，重试也不会改变。无法读取的状态数据库、身份已变的历史文件、未能运行的预检等其他历史预检原因仍会拒绝整个切换并回滚，因为那些情况以后可能成功。在此状态下，OpenCodex 不会修改分页历史文件或线程行。现有会话保留已标记的提供商，不会被迁移；新会话仍正常经代理路由。重新标记停手时，主目录里已有的 `[model_providers.opencodex]` 表会保留而不是撤下，即便是 root-override（loopback）形式也一样，这样行上标记为 `opencodex` 的会话仍能对应到还存在的提供商 id。可迁移存储中的 legacy 记录也适用。CLI 会打印 `Codex resume history: left to Codex's native writer (history_paginated_requires_native_writer)`。`ocx restore`、`ocx stop` 和 `ocx uninstall` 不再因 `history_paginated_requires_native_writer` 被拒绝。它们会移除 OpenCodex 写入的全部根路由键，并把 `[model_providers.opencodex]` 定义保留在磁盘上，因此行上仍指向该提供商的会话依旧可以解析，而裸 `codex` 不再指向代理。结果会报告为部分恢复并列出保留的行；`ocx restore --remove-codex-provider-table` 会连这些行一并删除，之后那些会话将无法打开。另外，在 Codex 已把 `openai` 标记会话迁移为分页历史的主目录上启用提供商表形式的集成，过去会以 `history_paginated_openai_requires_native_writer` 整体拒绝：什么都不写，集成保持关闭。现在 OpenCodex 会保留受管的根 `openai_base_url` 覆盖，与 `[model_providers.opencodex]` 表并存，从而完成这次切换。Codex 会把该覆盖合并到内置 `openai` 提供商上，所以那些会话无需重新标记即可继续到达代理，历史文件与线程行都不会被改动。只有需要 `x-opencodex-api-key` 准入标头的路由形式仍会拒绝，因为 Codex 内置提供商无法携带该标头；此时消息会点名两个可行设置——让 Codex 走回环监听器以便保留该覆盖，或把 `syncResumeHistory` 设为 `false`，接受那些会话转向 Codex 自己的 OpenAI 端点。
+如果受影响的历史存储支持分页，提供商切换可能返回 `history_paginated_requires_native_writer`。该原因不再拒绝写入 Codex 配置、参考配置档和模型目录。`orl sync` 与 `orl start` 仍会写入这些文件并设置 `model_catalog_json`，因此 Codex 模型选择器会继续显示所有经 OpenRelay 路由的模型。只有这一条原因会让会话历史的重新标记停手，因为分页历史序号由 Codex 自己的写入器分配，重试也不会改变。无法读取的状态数据库、身份已变的历史文件、未能运行的预检等其他历史预检原因仍会拒绝整个切换并回滚，因为那些情况以后可能成功。在此状态下，OpenRelay 不会修改分页历史文件或线程行。现有会话保留已标记的提供商，不会被迁移；新会话仍正常经代理路由。重新标记停手时，主目录里已有的 `[model_providers.opencodex]` 表会保留而不是撤下，即便是 root-override（loopback）形式也一样，这样行上标记为 `opencodex` 的会话仍能对应到还存在的提供商 id。可迁移存储中的 legacy 记录也适用。CLI 会打印 `Codex resume history: left to Codex's native writer (history_paginated_requires_native_writer)`。`orl restore`、`orl stop` 和 `orl uninstall` 不再因 `history_paginated_requires_native_writer` 被拒绝。它们会移除 OpenRelay 写入的全部根路由键，并把 `[model_providers.opencodex]` 定义保留在磁盘上，因此行上仍指向该提供商的会话依旧可以解析，而裸 `codex` 不再指向代理。结果会报告为部分恢复并列出保留的行；`orl restore --remove-codex-provider-table` 会连这些行一并删除，之后那些会话将无法打开。另外，在 Codex 已把 `openai` 标记会话迁移为分页历史的主目录上启用提供商表形式的集成，过去会以 `history_paginated_openai_requires_native_writer` 整体拒绝：什么都不写，集成保持关闭。现在 OpenRelay 会保留受管的根 `openai_base_url` 覆盖，与 `[model_providers.opencodex]` 表并存，从而完成这次切换。Codex 会把该覆盖合并到内置 `openai` 提供商上，所以那些会话无需重新标记即可继续到达代理，历史文件与线程行都不会被改动。只有需要 `x-opencodex-api-key` 准入标头的路由形式仍会拒绝，因为 Codex 内置提供商无法携带该标头；此时消息会点名两个可行设置——让 Codex 走回环监听器以便保留该覆盖，或把 `syncResumeHistory` 设为 `false`，接受那些会话转向 Codex 自己的 OpenAI 端点。
 
-返回根 URL 覆盖模式时，即使历史预检通过，OpenCodex 也会在提交配置前保留已有的 `[model_providers.opencodex]` 定义。这样，即使 Codex 在提交后或后台历史任务启动时迁移历史格式，旧的 `opencodex` 对话仍能找到其提供商。新对话继续使用所选的根提供商；显式恢复仍执行原有的独立删除检查。
+返回根 URL 覆盖模式时，即使历史预检通过，OpenRelay 也会在提交配置前保留已有的 `[model_providers.opencodex]` 定义。这样，即使 Codex 在提交后或后台历史任务启动时迁移历史格式，旧的 `opencodex` 对话仍能找到其提供商。新对话继续使用所选的根提供商；显式恢复仍执行原有的独立删除检查。
 
 不要改写正在使用的分页历史文件或线程行来自行迁移这些会话。恢复前关闭相关会话，并只报告准确的错误和版本，不要公开私人历史。备份或脚本成功并不能证明显示已恢复；重新打开 Codex 后检查会话。
 

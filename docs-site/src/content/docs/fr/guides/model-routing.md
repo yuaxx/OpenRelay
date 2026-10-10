@@ -1,6 +1,6 @@
 ---
 title: Routage des modèles
-description: Comment opencodex détermine quel fournisseur sert un identifiant de modèle donné.
+description: Comment OpenRelay détermine quel fournisseur sert un identifiant de modèle donné.
 ---
 
 Lorsque Codex demande un modèle, `router.ts` le résout vers un unique fournisseur configuré. Les règles

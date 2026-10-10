@@ -1,9 +1,9 @@
 ---
 title: Factory Droid köprüsü
-description: Factory Droid modellerini yerel ve Responses uyumlu bir köprü aracılığıyla opencodex'e bağlayın.
+description: Factory Droid modellerini yerel ve Responses uyumlu bir köprü aracılığıyla OpenRelay'e bağlayın.
 ---
 
-Factory Droid bir ajan çalışma zamanıdır; belgelenmiş bir OpenAI uyumlu çıkarım uç noktası değildir. Dahili Factory LLM URL'sine yöneltilen özel sağlayıcı `403 Forbidden` döndürüyorsa yalnızca opencodex adaptörünü değiştirmek veya sağlayıcı başlıkları eklemek, bu özel rotayı desteklenen genel API'ye dönüştürmez.
+Factory Droid bir ajan çalışma zamanıdır; belgelenmiş bir OpenAI uyumlu çıkarım uç noktası değildir. Dahili Factory LLM URL'sine yöneltilen özel sağlayıcı `403 Forbidden` döndürüyorsa yalnızca OpenRelay adaptörünü değiştirmek veya sağlayıcı başlıkları eklemek, bu özel rotayı desteklenen genel API'ye dönüştürmez.
 
 Çalışan entegrasyon şöyledir:
 
@@ -15,7 +15,7 @@ Text-only Responses client
   -> Factory account and selected model
 ```
 
-Böylece Factory kimlik bilgisi resmî Droid istemcisinde kalır. OpenCodex yalnızca yerelde kullanılan ayrı bir köprü belirteci alır.
+Böylece Factory kimlik bilgisi resmî Droid istemcisinde kalır. OpenRelay yalnızca yerelde kullanılan ayrı bir köprü belirteci alır.
 
 ## Başarısız olanlar ve nedenleri
 
@@ -25,7 +25,7 @@ Böylece Factory kimlik bilgisi resmî Droid istemcisinde kalır. OpenCodex yaln
 | `/models/models` adresinde `404` | Sağlayıcının temel URL'si zaten `/models` ile bitiyordu | `baseUrl` olarak API kökünü kullanın; keşif yolunu eklemeyin |
 | Model araması başarısız | Köprü tam bir canlı katalog sunmuyor | `liveModels: false` ayarlayın ve sabit bir `models` listesi sağlayın |
 | Geri döngü sağlayıcısı reddediliyor | Özel ağ erişimi varsayılan olarak reddedilir | `allowPrivateNetwork: true` değerini yalnızca geri döngü köprüsü için ayarlayın |
-| `${DROID_BRIDGE_TOKEN}` çözümlenemiyor | Değişken opencodex servis ortamında yok | Onu yalnızca etkileşimli kabuğa değil, servis sürecine ekleyin |
+| `${DROID_BRIDGE_TOKEN}` çözümlenemiyor | Değişken OpenRelay servis ortamında yok | Onu yalnızca etkileşimli kabuğa değil, servis sürecine ekleyin |
 | `OutputTextDelta without active item` | Köprü, çıktı öğesi ve içerik parçasını açmadan önce metin farkı yayımladı | Tam Responses SSE yaşam döngüsünü sırayla yayımlayın |
 
 Dolayısıyla aynı Factory kimlik bilgisi `droid exec` içinde çalışırken belgelenmemiş LLM URL'sine doğrudan istek yine `403` döndürebilir. Bu sonuçlar farklı ürünleri sınar; çelişki sayılmamalıdır.
@@ -90,12 +90,12 @@ response.completed
 
 Köprüyü `0.0.0.0` üzerinden sunmayın ve Factory kimlik bilgisini köprünün bearer belirteci olarak yeniden kullanmayın.
 
-## OpenCodex sağlayıcı yapılandırması
+## OpenRelay sağlayıcı yapılandırması
 
 `droid` kimliğini açıkça belirterek özel sağlayıcıyı oluşturun:
 
 ```bash
-ocx provider add droid \
+orl provider add droid \
   --adapter openai-responses \
   --base-url http://127.0.0.1:11435/v1 \
   --default-model glm-5.2 \
@@ -123,8 +123,8 @@ Model kimlikleri örnektir. Yalnızca `droid exec` komutunun oturum açılan Fac
 Sağlayıcıyı kaydettikten veya sabit kataloğunu değiştirdikten sonra, yeni oturumların güncellenmiş kataloğu okuması için Codex'i eşitleyip yeniden başlatın:
 
 ```bash
-ocx sync --restart-codex
-ocx doctor
+orl sync --restart-codex
+orl doctor
 ```
 
 `--restart-codex`, eşleşen app-server süreçlerini yeniden başlatır ve Codex masaüstü uygulamasını tamamen kapatıp yeniden açar; canlı konuşmalar sona erer. Masaüstü uygulaması çalışmaya devam etsin istiyorsanız `--restart-app-server-only` kullanın. Yeniden başlatmayı yalnızca bu oturumları bitirdikten veya kaydettikten sonra çalıştırın.
@@ -135,12 +135,12 @@ Her sınırı ayrı ayrı denetleyin:
 
 ```bash
 curl -fsS http://127.0.0.1:11435/healthz
-ocx doctor
-ocx access test droid/glm-5.2 --protocol responses
+orl doctor
+orl access test droid/glm-5.2 --protocol responses
 ```
 
 Sağlayıcı satırı veya model seçici girdisi yalnızca katalogda göründüğünü kanıtlar. Entegrasyon, Responses probu `droid/<model>` rotası üzerinden döndükten sonra çalışıyor sayılır.
 
 ## Geçerli sınırlama
 
-Yukarıdaki en küçük köprü metni ve Responses SSE yaşam döngüsünü çevirir. Tam çift yönlü Codex işlev/araç çağrısı protokolünü **uygulamaz**. Codex App ve `codex exec`, istem araç çağırmamasını söylese bile normalde araç tanımları gönderir; geçerli Codex CLI'da bu tanımları kaldıran genel bir bayrak yoktur. En küçük köprü, bu istekleri yukarıdaki `400` sözleşmesiyle reddetmelidir. Araç tanımları, araç çağrıları, araç sonuçları, izinler, iptal ve zengin Droid olayları, Factory'nin akış JSON-RPC modu veya resmî bir Droid SDK üzerine kurulu durum bilgisi tutan köprü gerektirir. `ocx access test` başarısını Codex ajan veya araç yolu doğrulaması değil, metin yolu doğrulaması olarak değerlendirin.
+Yukarıdaki en küçük köprü metni ve Responses SSE yaşam döngüsünü çevirir. Tam çift yönlü Codex işlev/araç çağrısı protokolünü **uygulamaz**. Codex App ve `codex exec`, istem araç çağırmamasını söylese bile normalde araç tanımları gönderir; geçerli Codex CLI'da bu tanımları kaldıran genel bir bayrak yoktur. En küçük köprü, bu istekleri yukarıdaki `400` sözleşmesiyle reddetmelidir. Araç tanımları, araç çağrıları, araç sonuçları, izinler, iptal ve zengin Droid olayları, Factory'nin akış JSON-RPC modu veya resmî bir Droid SDK üzerine kurulu durum bilgisi tutan köprü gerektirir. `orl access test` başarısını Codex ajan veya araç yolu doğrulaması değil, metin yolu doğrulaması olarak değerlendirin.

@@ -15,7 +15,7 @@ Le routage transforme l’identifiant de modèle envoyé par un client en un fou
 
 ## Ordre de résolution des modèles
 
-opencodex résout le modèle demandé dans l’ordre suivant :
+OpenRelay résout le modèle demandé dans l’ordre suivant :
 
 1. Un `policy/<id>` configuré ou l’alias d’un profil de routage : l’évaluateur de politique est exécuté et le candidat retenu est routé. Si `policy/<id>` n’est pas résolu, les règles suivantes sont examinées.
 2. Un espace de noms `<account-selector>/<native-openai-model>` configuré : la requête utilise exactement le compte Codex enregistré qui lui est associé. Une cible exacte invalide ou indisponible échoue de manière sûre.
@@ -47,7 +47,7 @@ Les identifiants propres à un compte observés dans le catalogue actuel de Code
 
 La sélection exacte contourne la stratégie d’attribution du pool et l’affinité ordinaire des fils. Si le compte associé est absent, suspendu, en période de temporisation, inutilisable ou doit être réauthentifié, la requête échoue de manière sûre au lieu de changer de compte ; elle ne modifie pas non plus le compte actif du pool. Lorsqu’au moins un sélecteur admissible est configuré, les catalogues Codex masquent les lignes natives non qualifiées du sélecteur et affichent une ligne `<selector>/<native-openai-model>` distincte pour chaque sélecteur. Les identifiants natifs non qualifiés conservent le routage Pool/Direct habituel et restent présents dans la découverte brute `/v1/models`, sauf désactivation explicite. Les sélecteurs dont le compte enregistré associé est absent ne sont pas annoncés. La validation des sélecteurs, les règles de collision et les recommandations de confidentialité sont décrites dans [Configuration des fournisseurs](/fr/reference/configuration/providers/).
 
-La page Codex Auth propose ce comportement du sélecteur sous forme d’option. Sa désactivation masque les lignes générées qualifiées par un sélecteur et rétablit les lignes GPT ordinaires, sans supprimer les associations ni modifier le routage exact `<selector>/<model>`. Sa réactivation rétablit donc les mêmes libellés publics. Les modifications de comptes et de paramètres sont conservées avant une actualisation bornée du catalogue. Un avertissement de `ocx sync` signifie uniquement que le catalogue du sélecteur n’a pas encore convergé, et non que la modification du routage a été perdue.
+La page Codex Auth propose ce comportement du sélecteur sous forme d’option. Sa désactivation masque les lignes générées qualifiées par un sélecteur et rétablit les lignes GPT ordinaires, sans supprimer les associations ni modifier le routage exact `<selector>/<model>`. Sa réactivation rétablit donc les mêmes libellés publics. Les modifications de comptes et de paramètres sont conservées avant une actualisation bornée du catalogue. Un avertissement de `orl sync` signifie uniquement que le catalogue du sélecteur n’a pas encore convergé, et non que la modification du routage a été perdue.
 
 ## Combinaisons (`config.combos`)
 
@@ -130,7 +130,7 @@ La simulation de la CLI accepte des indicateurs de preuve propres à la requête
 }
 ```
 
-CLI : `ocx route policy list [--json]`, `ocx route policy show <id> [--json]` et `ocx route policy dry-run <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]`. La simulation évalue les candidats sans envoyer de requête en amont.
+CLI : `orl route policy list [--json]`, `orl route policy show <id> [--json]` et `orl route policy dry-run <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]`. La simulation évalue les candidats sans envoyer de requête en amont.
 
 Les preuves de quota (`optimize.quota`, `require.minQuotaHeadroom`, `unknownEvidence.quota`) proviennent des caches de quota Codex et Anthropic indexés par compte. Un candidat à l’exécution ne reçoit un quota mis en cache que si les preuves identifient déjà le compte. Les candidats canoniques `openai` et Anthropic qui ne sont liés à aucun compte restent inconnus pendant l’évaluation de la politique, car la sélection du pool, l’identité de l’appelant Direct, la rotation du fournisseur et l’affinité du fil sont résolues après le choix d’un fournisseur/modèle par la politique. Le compte actif du processus n’est pas utilisé comme substitut.
 
@@ -147,7 +147,7 @@ Le coût est également imposé par le plafond `limits.maxEstimatedCostUsd` : un
 
 ### Admissibilité au catalogue
 
-Une combinaison reste directement routable même si elle ne peut pas figurer dans le catalogue. `ocx sync`, `/v1/models` et le sélecteur Codex ne l’affichent que si toutes les cibles exposent des capacités dont l’intersection peut être calculée :
+Une combinaison reste directement routable même si elle ne peut pas figurer dans le catalogue. `orl sync`, `/v1/models` et le sélecteur Codex ne l’affichent que si toutes les cibles exposent des capacités dont l’intersection peut être calculée :
 
 - une valeur positive de `contextWindow` provenant des métadonnées en direct, des indications du registre, de `modelContextWindows` / `contextWindow` du fournisseur, d’une valeur positive connue de `maxInputTokens` dans la ligne du membre, ou — lorsque le fournisseur est connu et activé mais qu’aucune source ne fournit de fenêtre — d’une valeur prudente de 128 000 jetons, limitée par `providerContextCaps` lorsque ce réglage est défini ;
 - une intersection non vide de `inputModalities`, une valeur absente chez un membre étant interprétée comme `["text"]`.
@@ -163,7 +163,7 @@ Une cible appartenant à un fournisseur désactivé — même si sa ligne de dé
 
 L’historique et les charges utiles de décision renvoyés n’exposent que des métadonnées de requête masquées, par exemple des libellés opaques `apiKeyId`. Ils ne contiennent ni identifiants, ni corps de prompts bruts, ni secrets de fournisseurs.
 
-CLI : `ocx logs explain <request-id>`, `ocx logs rebuild-index`, `ocx logs index-status`, `ocx route policy list | show | dry-run | evaluate`.
+CLI : `orl logs explain <request-id>`, `orl logs rebuild-index`, `orl logs index-status`, `orl route policy list | show | dry-run | evaluate`.
 
 ## Migration
 

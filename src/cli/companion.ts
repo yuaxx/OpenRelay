@@ -4,11 +4,11 @@ import type { ObserveStreamDeps } from "./observe-stream";
 import { CliUsageError, printData, rejectArgs, runCliAction, runtimeRequest, takeFlag, type RuntimeApiDeps } from "./runtime-api";
 
 const USAGE = `Usage:
-  ocx companion [show] [--json]
-  ocx companion set <key>=<value> [...] [--json]
-  ocx companion reset [--json]
-  ocx companion usage [--json]
-  ocx companion timeline [--hours <6|24|72|168>] [--bucket-minutes <1..1440>]
+  orl companion [show] [--json]
+  orl companion set <key>=<value> [...] [--json]
+  orl companion reset [--json]
+  orl companion usage [--json]
+  orl companion timeline [--hours <6|24|72|168>] [--bucket-minutes <1..1440>]
       [--metric <total|input|output|cached>] [--aggregation <sum|average|max>]
       [--grouping <model|modelAccount>] [--model <provider/model>]... [--hide-provider <name>]... [--json]`;
 

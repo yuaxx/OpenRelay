@@ -55,9 +55,9 @@ export function formatHelpRecovery(path: readonly string[]): string {
     : safeToken(path[0]) ? `Unknown command: ${path[0]}` : "Unknown command."];
   const suggestions = suggestHelpPaths(path);
   if (suggestions.length) {
-    lines.push("Did you mean:", ...suggestions.map(suggestion => `  ocx help ${suggestion.join(" ")}`));
+    lines.push("Did you mean:", ...suggestions.map(suggestion => `  orl help ${suggestion.join(" ")}`));
   }
-  lines.push(parent ? `See: ocx help ${parent.join(" ")}` : "See: ocx help --all");
+  lines.push(parent ? `See: orl help ${parent.join(" ")}` : "See: orl help --all");
   return lines.join("\n");
 }
 

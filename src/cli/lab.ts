@@ -74,27 +74,27 @@ import {
 } from "../lab/public";
 
 const USAGE = `Usage:
-  ocx lab status [--json]
-  ocx lab production-signals --subject <id> [--limit <n>] [--json]
-  ocx lab verdicts [--subject <id>] [--layer <layer>] [--suite <id>] [--verdict <v>] [--from <ms>] [--to <ms>] [--limit <n>] [--cursor <c>] [--json]
-  ocx lab subjects [--kind <kind>] [--limit <n>] [--cursor <c>] [--json]
-  ocx lab subject <subjectId> [--json]
-  ocx lab observations [--subject <id>] [--layer <layer>] [--suite <id>] [--scenario <id>] [--outcome <o>] [--execution-mode <m>] [--from <ms>] [--to <ms>] [--limit <n>] [--cursor <c>] [--json]
-  ocx lab events [--event-kind <k>] [--subject <id>] [--from <ms>] [--to <ms>] [--excluded <true|false>] [--limit <n>] [--cursor <c>] [--json]
-  ocx lab event <eventId> [--json]
-  ocx lab artifacts [--status <s>] [--artifact-class <c>] [--limit <n>] [--cursor <c>] [--json]
-  ocx lab artifact <digest> [--json]
-  ocx lab catalog [--layer <layer>] [--suite <id>] [--json]
-  ocx lab public preview --event <eventId> [--event <eventId> ...] [--json]
-  ocx lab public export --event <eventId> [--event <eventId> ...] [--json]
-  ocx lab public verify --file <bundle.json> [--json]
-  ocx lab public import --file <bundle.json> [--json]
-  ocx lab public community [--json]
-  ocx lab automation status [--json]
-  ocx lab automation enable [--protocol] [--live] [--json]
-  ocx lab automation disable [--json]
-  ocx lab automation runs [--limit <n>] [--cursor <c>] [--json]
-  ocx lab run --layer <layer> --scenario <id> [--provider <name>] [--model <id>] [--json]`;
+  orl lab status [--json]
+  orl lab production-signals --subject <id> [--limit <n>] [--json]
+  orl lab verdicts [--subject <id>] [--layer <layer>] [--suite <id>] [--verdict <v>] [--from <ms>] [--to <ms>] [--limit <n>] [--cursor <c>] [--json]
+  orl lab subjects [--kind <kind>] [--limit <n>] [--cursor <c>] [--json]
+  orl lab subject <subjectId> [--json]
+  orl lab observations [--subject <id>] [--layer <layer>] [--suite <id>] [--scenario <id>] [--outcome <o>] [--execution-mode <m>] [--from <ms>] [--to <ms>] [--limit <n>] [--cursor <c>] [--json]
+  orl lab events [--event-kind <k>] [--subject <id>] [--from <ms>] [--to <ms>] [--excluded <true|false>] [--limit <n>] [--cursor <c>] [--json]
+  orl lab event <eventId> [--json]
+  orl lab artifacts [--status <s>] [--artifact-class <c>] [--limit <n>] [--cursor <c>] [--json]
+  orl lab artifact <digest> [--json]
+  orl lab catalog [--layer <layer>] [--suite <id>] [--json]
+  orl lab public preview --event <eventId> [--event <eventId> ...] [--json]
+  orl lab public export --event <eventId> [--event <eventId> ...] [--json]
+  orl lab public verify --file <bundle.json> [--json]
+  orl lab public import --file <bundle.json> [--json]
+  orl lab public community [--json]
+  orl lab automation status [--json]
+  orl lab automation enable [--protocol] [--live] [--json]
+  orl lab automation disable [--json]
+  orl lab automation runs [--limit <n>] [--cursor <c>] [--json]
+  orl lab run --layer <layer> --scenario <id> [--provider <name>] [--model <id>] [--json]`;
 
 const ARTIFACT_STATUSES = ["present", "corrupt", "purged_unavailable"] as const;
 type ArtifactStatus = (typeof ARTIFACT_STATUSES)[number];

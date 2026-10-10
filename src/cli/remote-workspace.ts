@@ -20,10 +20,10 @@ import {
 } from "./runtime-api";
 
 export const REMOTE_WORKSPACE_USAGE = `Usage:
-  ocx remote-workspace pair <hub-url> --pairing-code-stdin --root <absolute-path> [--root <absolute-path> ...] [--toolchain-root <absolute-directory> ...] [--executor-helper <absolute-file>] [--name <device-name>] [--json]
-  ocx remote-workspace agent
-  ocx remote-workspace status [--json]
-  ocx remote-workspace hub [status|runtimes|sessions] [--json]`;
+  orl remote-workspace pair <hub-url> --pairing-code-stdin --root <absolute-path> [--root <absolute-path> ...] [--toolchain-root <absolute-directory> ...] [--executor-helper <absolute-file>] [--name <device-name>] [--json]
+  orl remote-workspace agent
+  orl remote-workspace status [--json]
+  orl remote-workspace hub [status|runtimes|sessions] [--json]`;
 
 export interface RemoteWorkspaceCliDeps extends RuntimeApiDeps {
   store?: RemoteWorkspaceDeviceStateStore;
@@ -123,7 +123,7 @@ export async function runRemoteWorkspaceCommand(rawArgs: string[], deps: RemoteW
     if (wantsJson) console.log(JSON.stringify(status, null, 2));
     else {
       console.log(`Paired ${state.deviceName} with ${state.hubUrl}.`);
-      console.log("Run `ocx remote-workspace agent` to keep this executor online.");
+      console.log("Run `orl remote-workspace agent` to keep this executor online.");
     }
     return 0;
   }

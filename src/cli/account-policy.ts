@@ -10,11 +10,11 @@ import { CliUsageError, RuntimeApiError, printData, runtimeBaseUrl, runtimeReque
   takeFlag, takeOptionWithSyntax, type RuntimeApiDeps } from "./runtime-api";
 
 type Subcommand = "pool" | "auto-switch" | "credits" | "quota-activation" | "anthropic-reset-grants";
-const USAGE = "Usage: ocx account pool <provider> [--enabled on|off] [--threshold 0-100] [--strategy NAME] [--sticky 1-100] [--quota-window NAME] [--json]\n"
-  + "       ocx account auto-switch openai <status|on|off|inherit|threshold N> --account ID [--json]\n"
-  + "       ocx account credits openai <ID on|off|--all on|off> [--json]\n"
-  + "       ocx account quota-activation openai ID --window <fiveHour|weekly> <on|off> [--json]\n"
-  + "       ocx account anthropic-reset-grants [ID] [--provider anthropic|anthropic2] [--json]";
+const USAGE = "Usage: orl account pool <provider> [--enabled on|off] [--threshold 0-100] [--strategy NAME] [--sticky 1-100] [--quota-window NAME] [--json]\n"
+  + "       orl account auto-switch openai <status|on|off|inherit|threshold N> --account ID [--json]\n"
+  + "       orl account credits openai <ID on|off|--all on|off> [--json]\n"
+  + "       orl account quota-activation openai ID --window <fiveHour|weekly> <on|off> [--json]\n"
+  + "       orl account anthropic-reset-grants [ID] [--provider anthropic|anthropic2] [--json]";
 const READ_ERRORS = { no_account: "No matching Anthropic OAuth account.", auth_failed: "Sign in to this Anthropic account again.",
   upstream_unavailable: "Anthropic did not return the reset-grant status.", ledger_unavailable: "The reset journal is unavailable.",
   ledger_busy: "The reset journal is busy. No grant was consumed." };

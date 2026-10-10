@@ -1,6 +1,6 @@
 ---
 title: Quickstart
-description: Configure your first provider and route OpenAI Codex through opencodex in three commands.
+description: Configure your first provider and route OpenAI Codex through OpenRelay in three commands.
 ---
 
 This guide takes you from a fresh install to running Codex against a non-OpenAI model.
@@ -8,30 +8,30 @@ This guide takes you from a fresh install to running Codex against a non-OpenAI 
 ## Standalone binary (no npm)
 
 You can also use a release archive containing the `ocx` binary and Bun runtime without npm.
-Extract it with its `gui/dist` directory beside the binary, then run `./ocx start`.
+Extract it with its `gui/dist` directory beside the binary, then run `./orl start`.
 
 ## 1. Run the setup wizard
 
 ```bash
-ocx init
+orl init
 ```
 
-`ocx init` walks you through:
+`orl init` walks you through:
 
 1. **Pick a provider** — choose one of the 103 built-in registry presets or `custom` to type a base
    URL and adapter.
 2. **API key** — paste a key, or reference an environment variable like `${ANTHROPIC_API_KEY}`.
 3. **Default model** — for key, local, and custom providers, accept the preset or enter a model id.
 4. **Proxy port** — defaults to `10100`.
-5. **Inject into Codex?** — on a normal loopback setup, opencodex adds a root `openai_base_url` to
+5. **Inject into Codex?** — on a normal loopback setup, OpenRelay adds a root `openai_base_url` to
    `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`) so Codex's built-in `openai` provider
    targets the proxy. Remote/LAN binds use a dedicated provider entry with an API-auth header instead.
-6. **Install the autostart shim?** — when enabled, launching `codex` runs `ocx ensure` first.
+6. **Install the autostart shim?** — when enabled, launching `codex` runs `orl ensure` first.
 
 The result is saved to `$OPENCODEX_HOME/config.json` (default `~/.opencodex/config.json`).
 
-`ocx init` creates a config only when none exists. An existing valid config is kept and setup
-exits; use `ocx config` or the dashboard to update it. Invalid, unreadable, or symlinked config
+`orl init` creates a config only when none exists. An existing valid config is kept and setup
+exits; use `orl config` or the dashboard to update it. Invalid, unreadable, or symlinked config
 entries are preserved and reported as errors. If another process creates the config during the
 wizard, its file wins and setup stops before backup housekeeping or integration prompts.
 
@@ -55,13 +55,13 @@ same terminal before running setup:
 ```powershell
 # Windows PowerShell: choose a fresh directory on a local NTFS volume.
 $env:OPENCODEX_HOME = Join-Path $env:LOCALAPPDATA "opencodex-local"
-ocx init
+orl init
 ```
 
 ```sh
 # macOS/Linux: choose a fresh directory on a filesystem with hard links and Unix permissions.
 export OPENCODEX_HOME="$HOME/.opencodex-local"
-ocx init
+orl init
 ```
 
 Use the same `OPENCODEX_HOME` for subsequent commands and the service that runs the proxy.
@@ -80,32 +80,32 @@ adapter metadata.
 ## 2. Start the proxy
 
 ```bash
-ocx start            # defaults to port 10100
-ocx start --port 8080
+orl start            # defaults to port 10100
+orl start --port 8080
 ```
 
-On start, opencodex:
+On start, OpenRelay:
 
 - writes its PID to `~/.opencodex/ocx.pid` (and refuses to start twice),
 - discovers live models where the provider supports it and **syncs native and routed entries into
   Codex's model catalog**,
 - listens on `http://localhost:<port>/v1`.
 
-If the requested port is busy, `ocx start` stops and tells you what holds it: run `ocx stop` first
-when the holder is an opencodex, or start on a free port with `ocx start --port <port>`. It does not
+If the requested port is busy, `orl start` stops and tells you what holds it: run `orl stop` first
+when the holder is an OpenRelay, or start on a free port with `orl start --port <port>`. It does not
 move to another port by itself — that is what used to leave two proxies running with Codex pointed
 at the newer one.
 
 Check it:
 
 ```bash
-ocx status
-ocx gui       # open the dashboard on the live port
+orl status
+orl gui       # open the dashboard on the live port
 ```
 
 ## 3. Use Codex
 
-Codex now talks to opencodex transparently:
+Codex now talks to OpenRelay transparently:
 
 ```bash
 codex "Refactor this function for readability"
@@ -121,7 +121,7 @@ codex -m "ollama-cloud/glm-5.2"      "Write a SQL migration"
 ## Choose sub-agent models (optional)
 
 A fresh config features five native models in Codex's sub-agent picker: `gpt-5.5`,
-`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, and `gpt-6-astra`. Open `ocx gui` to replace or
+`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, and `gpt-6-astra`. Open `orl gui` to replace or
 reorder up to five native or routed models. The dashboard can also set one preferred sub-agent model
 and reasoning effort. See [Sub-agent Surface](/guides/sub-agent-surface/) to choose v1/base/v2 and
 understand when guidance, native defaults, and fallback apply.
@@ -131,8 +131,8 @@ understand when guidance, native defaults, and fallback apply.
 Some providers support real account login (OAuth, auto-refreshed):
 
 ```bash
-ocx login xai          # or: anthropic, kimi, kiro, google-antigravity, cursor
-ocx logout xai
+orl login xai          # or: anthropic, kimi, kiro, google-antigravity, cursor
+orl logout xai
 ```
 
 OpenAI itself needs **no key** — the default provider forwards your existing `codex login`
@@ -141,9 +141,9 @@ credentials straight through (see [Providers](/guides/providers/)).
 ## Stopping & restoring
 
 ```bash
-ocx stop          # stop the proxy and restore native Codex
-ocx restore       # restore native Codex without stopping (alias: ocx eject)
-ocx restore back  # route Codex through the still-running proxy again
+orl stop          # stop the proxy and restore native Codex
+orl restore       # restore native Codex without stopping (alias: orl eject)
+orl restore back  # route Codex through the still-running proxy again
 ```
 
 ## Next

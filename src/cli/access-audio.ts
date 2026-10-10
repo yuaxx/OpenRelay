@@ -12,7 +12,7 @@ const HTTP_TIMEOUT_MS = 130_000;
 const RESPONSE_MAX_BYTES = 2 * 1024 * 1024;
 const MODEL_MAX_BYTES = 16 * 1024;
 const TRANSCRIPTION_MODELS = new Set(["gpt-4o-transcribe", "gpt-4o-mini-transcribe", "whisper-1"]);
-const USAGE = "Usage: ocx access audio transcribe FILE --model ID --api-key-stdin [--json]\n       ocx access audio live-check --model ID --api-key-stdin [--json]";
+const USAGE = "Usage: orl access audio transcribe FILE --model ID --api-key-stdin [--json]\n       orl access audio live-check --model ID --api-key-stdin [--json]";
 export interface AccessAudioDeps extends DataClientDeps, AudioInputDeps, AudioLiveDeps {
   audioHttpTimeoutMs?: number;
 }

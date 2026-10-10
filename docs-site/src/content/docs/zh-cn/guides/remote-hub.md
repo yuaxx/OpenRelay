@@ -1,6 +1,6 @@
 ---
 title: Remote Hub 部署
-description: 使用仅回环管理入口、Tailscale Serve 和无头 OAuth 运行 opencodex hub。
+description: 使用仅回环管理入口、Tailscale Serve 和无头 OAuth 运行 OpenRelay hub。
 ---
 
 有关 SSH 机器链接，请参阅[远程链接](/zh-cn/guides/remote-link/)。
@@ -12,42 +12,42 @@ Remote Hub 将提供商凭据、模型目录和使用记录保存在一台主机
 `standalone` 在一台机器上运行全部功能；`hub` 保存提供商密钥和使用记录；`client` 只保存连接状态和专属数据密钥。
 
 ```bash
-ocx connect https://hub-name.tailnet-name.ts.net --pairing-code-stdin
-ocx connect status
-ocx sync
+orl connect https://hub-name.tailnet-name.ts.net --pairing-code-stdin
+orl connect status
+orl sync
 ```
 
-面向人阅读的就绪诊断会把目录值中的 C0/C1 控制字符、DEL 以及 Unicode 行分隔符和段落分隔符（U+2028、U+2029）显示为可见的十六进制转义，首次连接时如此，`ocx sync` 拒绝重新获取的 hub 目录时也一样。JSON 状态仍保留原始的诊断值。
+面向人阅读的就绪诊断会把目录值中的 C0/C1 控制字符、DEL 以及 Unicode 行分隔符和段落分隔符（U+2028、U+2029）显示为可见的十六进制转义，首次连接时如此，`orl sync` 拒绝重新获取的 hub 目录时也一样。JSON 状态仍保留原始的诊断值。
 
 客户端密钥写入仅所有者可读的 `service-api-token`，绝不会写入 `config.json`。连接期间，使用记录来自 hub 并按稳定的 `apiKeyId` 过滤；断开后显示本地记录。两者不会镜像。
-`ocx service uninstall` 会移除本地服务，但在客户端处于连接状态、其连接元数据无效或不匹配，或待处理的连接标记与当前密钥一致时保留现有密钥。旧密钥的有效标记不会保留无关的服务密钥。如果标记不安全、格式错误或无法读取，则无法确认令牌清理结果，此时命令会发出警告，而不会声称密钥已保留。要移除已连接客户端的本地密钥和状态，请使用 `ocx disconnect`。
+`orl service uninstall` 会移除本地服务，但在客户端处于连接状态、其连接元数据无效或不匹配，或待处理的连接标记与当前密钥一致时保留现有密钥。旧密钥的有效标记不会保留无关的服务密钥。如果标记不安全、格式错误或无法读取，则无法确认令牌清理结果，此时命令会发出警告，而不会声称密钥已保留。要移除已连接客户端的本地密钥和状态，请使用 `orl disconnect`。
 
 Admin token 只能执行普通管理，永远不能创建用户同意会话。用户同意操作必须使用服务器签发的 `gui-session`、匹配的 Origin 和 CSRF。`Tailscale-User-Login` 只在独立管理入口可信；请在 `remoteGui.allowedTailscaleUsers` 中填写准确登录名。
 
 ## systemd/launchd 与 Tailscale Serve
 
 ```bash
-ocx config set runtimeRole hub
-ocx config set hostname 100.64.0.10
-ocx config set corsAllowOrigins '["http://localhost:10100"]'
+orl config set runtimeRole hub
+orl config set hostname 100.64.0.10
+orl config set corsAllowOrigins '["http://localhost:10100"]'
 
-# 全新的 standalone 配置没有 `hub` 或 `remoteGui` 对象，而 `ocx config set` 不会
+# 全新的 standalone 配置没有 `hub` 或 `remoteGui` 对象，而 `orl config set` 不会
 # 自动创建缺失的父对象：直接写嵌套路径会以 `config parent path not found: hub` 失败。
 # 设置 `runtimeRole` 同样不会创建它。请先建对象，再设置字段。
-ocx config set hub '{}'
-ocx config set remoteGui '{}'
-ocx config set hub.managementPublicOrigin '"https://hub-name.tailnet-name.ts.net"'
-ocx config set hub.managementIngress '{"enabled":true,"port":10101}'
-ocx config set remoteGui.allowedTailscaleUsers '["operator@example.com"]'
+orl config set hub '{}'
+orl config set remoteGui '{}'
+orl config set hub.managementPublicOrigin '"https://hub-name.tailnet-name.ts.net"'
+orl config set hub.managementIngress '{"enabled":true,"port":10101}'
+orl config set remoteGui.allowedTailscaleUsers '["operator@example.com"]'
 export OPENCODEX_API_AUTH_TOKEN="$(openssl rand -hex 32)"
-ocx service install
+orl service install
 ```
 
 如果配置确实还是空的，也可以一次性写入整个对象：
 
 ```bash
-ocx config set hub '{"managementPublicOrigin":"https://hub-name.tailnet-name.ts.net","managementIngress":{"enabled":true,"port":10101}}'
-ocx config set remoteGui '{"allowedTailscaleUsers":["operator@example.com"]}'
+orl config set hub '{"managementPublicOrigin":"https://hub-name.tailnet-name.ts.net","managementIngress":{"enabled":true,"port":10101}}'
+orl config set remoteGui '{"allowedTailscaleUsers":["operator@example.com"]}'
 ```
 
 只有在对象尚不存在时才用这种写法。整对象赋值是**替换**而不是合并：对已经含有 `hub.managementIngress` 的配置执行上面这行，该入口会被悄悄丢掉。调整既有配置时父对象已经存在，用嵌套路径逐个字段设置即可，不会动到其他值。
@@ -67,7 +67,7 @@ tailscale serve status
 
 ### 为数据监听器提供 TLS
 
-上面的 Serve 映射只发布**管理**入口。该入口从不提供 `/v1/*`、`/healthz` 或 `/readyz`，因此仅凭它并不能让远程客户端获得可用的数据平面。opencodex 自身也不终结 TLS：监听器是明文 HTTP，HTTPS 始终由运维方自建的前端负责。
+上面的 Serve 映射只发布**管理**入口。该入口从不提供 `/v1/*`、`/healthz` 或 `/readyz`，因此仅凭它并不能让远程客户端获得可用的数据平面。OpenRelay 自身也不终结 TLS：监听器是明文 HTTP，HTTPS 始终由运维方自建的前端负责。
 
 数据平面同样可以交给 Serve，只需再用一个 HTTPS 端口。在 macOS 上还要多一跳，因为 Tailscale Serve 只能代理到 `127.0.0.1`，无法指向你绑定在节点自身 tailnet 地址上的监听器，而 App Store 版 macOS 客户端会直接拒绝远程目标。请在 hub 上运行一个回环转发器，再让 Serve 指向它：
 
@@ -80,19 +80,19 @@ tailscale serve --bg --https=8443 http://127.0.0.1:10110
 tailscale serve status   # 应同时出现 443 -> 10101 和 8443 -> 10110
 ```
 
-Serve 只接受有限的几个 HTTPS 端口。请用 `tailscale serve status` 确认映射确实建立，而不要假定端口被允许。转发器应与 hub 拥有相同的生命周期：后台 shell 作业会在重启时消失而服务会自行恢复，于是 hub 在运行却无法经 TLS 访问。请随 `ocx service install` 一起，用 launchd 或 systemd 托管它。
+Serve 只接受有限的几个 HTTPS 端口。请用 `tailscale serve status` 确认映射确实建立，而不要假定端口被允许。转发器应与 hub 拥有相同的生命周期：后台 shell 作业会在重启时消失而服务会自行恢复，于是 hub 在运行却无法经 TLS 访问。请随 `orl service install` 一起，用 launchd 或 systemd 托管它。
 
 连接时把两个 origin 分开写。位置参数 URL 是**数据** origin，`/readyz` 和 `/v1/catalog` 都从这里获取；`--management-url` 是用于配对和密钥签发的控制台 origin。两者不必共用端口：
 
 ```bash
-ocx connect https://hub-name.tailnet-name.ts.net:8443 \
+orl connect https://hub-name.tailnet-name.ts.net:8443 \
   --management-url https://hub-name.tailnet-name.ts.net \
   --admin-token-stdin
 ```
 
 省略 `--management-url` 时，它取自 `/readyz` 响应，而该响应报告的正是 `hub.managementPublicOrigin`。两个 origin 不同时，显式写出更清楚。
 
-**不要为图省事把数据监听器绑到 `127.0.0.1`。** 回环绑定正是 opencodex 判定“纯本地部署”的依据：它会不再要求数据凭据，转而要求请求的 `Host` 头也是回环地址。TLS 前端会原样转发 `Host: hub-name.tailnet-name.ts.net`，于是 `/v1/catalog` 返回 `403 origin_rejected`，而不做这项检查的 `/readyz` 仍然返回 `200`。部署看起来健康，却无法提供模型。请求路径中没有任何代码读取 `X-Forwarded-Host`，所以前端也无法修正。请把监听器留在 tailnet 地址上：凭据准入保持开启，而 `Host` 检查不会生效。
+**不要为图省事把数据监听器绑到 `127.0.0.1`。** 回环绑定正是 OpenRelay 判定“纯本地部署”的依据：它会不再要求数据凭据，转而要求请求的 `Host` 头也是回环地址。TLS 前端会原样转发 `Host: hub-name.tailnet-name.ts.net`，于是 `/v1/catalog` 返回 `403 origin_rejected`，而不做这项检查的 `/readyz` 仍然返回 `200`。部署看起来健康，却无法提供模型。请求路径中没有任何代码读取 `X-Forwarded-Host`，所以前端也无法修正。请把监听器留在 tailnet 地址上：凭据准入保持开启，而 `Host` 检查不会生效。
 
 绑定 `0.0.0.0` 同样可行，而且因为回环也能访问，就不再需要转发器。但它会把数据端口发布到所有接口，所以只在你不在意其他网络的主机上这么做。
 
@@ -101,17 +101,17 @@ Serve 就绪后，请针对 HTTPS 数据 origin 重新执行验收检查：`/rea
 ## OAuth、密钥轮换与断开
 
 ```bash
-ocx config set oauthOpenBrowser false
-ocx connect rotate --pairing-code-stdin
+orl config set oauthOpenBrowser false
+orl connect rotate --pairing-code-stdin
 # 仅限 HTTPS：
-ocx connect rotate --admin-token-stdin
+orl connect rotate --admin-token-stdin
 ```
 
 通过 `POST /api/oauth/login` 启动 OAuth。如果回调无法到达 hub，将最终 URL 或授权码作为 `{provider,input}` 发送到 `POST /api/oauth/login/code`。不要把 OAuth 码放入 argv 或日志。
 
 轮换期间，旧密钥和新密钥在同一个 `apiKeyId` 下最多同时有效十分钟。旧密钥备份到 `service-api-token.prev`，新密钥以原子方式安装，并通过 `/v1/catalog` 验证后提交。如果提交结果不确定，请使用临时权限重新运行命令；在验证两个候选密钥前不要删除任何文件。
 
-`ocx disconnect` 即使 hub 离线也能恢复本地状态，但不会吊销 hub 密钥。断开后，唯一的吊销入口是 hub 的 **连接 → API 密钥**。`ocx connect revoke --admin-token-stdin` 只能在仍连接时使用。
+`orl disconnect` 即使 hub 离线也能恢复本地状态，但不会吊销 hub 密钥。断开后，唯一的吊销入口是 hub 的 **连接 → API 密钥**。`orl connect revoke --admin-token-stdin` 只能在仍连接时使用。
 
 ## Docker、回滚与排障
 
@@ -134,7 +134,7 @@ ocx connect rotate --admin-token-stdin
 `ocx-state` 和 `codex-state`，包括配置、凭据、用量记录、数据密钥及 Codex 状态和模型目录。
 这是破坏性操作，不能当作升级或重启命令使用。
 
-opencodex 不发布官方 Docker 镜像，但仓库提供维护的 `Dockerfile` 和 `compose.yaml`，用于在本地构建按 digest 固定的 Bun 镜像。首次启动前，通过 stdin 初始化一次数据密钥；密钥不会输出，并以仅所有者可读的权限保存在 `ocx-state` 卷中。
+OpenRelay 不发布官方 Docker 镜像，但仓库提供维护的 `Dockerfile` 和 `compose.yaml`，用于在本地构建按 digest 固定的 Bun 镜像。首次启动前，通过 stdin 初始化一次数据密钥；密钥不会输出，并以仅所有者可读的权限保存在 `ocx-state` 卷中。
 
 本地 checkout 需要 Git 和 Docker Compose；远程 Git 上下文只需要 Docker Compose。两种方式都不再需要宿主机安装 Bun 或执行手动准备步骤。专用构建阶段会从所选 Git 快照生成规范清单，并在复制源码前完成验证。`.git` 仅通过只读挂载提供给该阶段，不会复制到任何镜像层。宿主机上已有的清单在通过验证后仍可继续使用。宿主机端口默认绑定 `127.0.0.1`。远程访问须显式使用 `OPENCODEX_BIND_ADDRESS=<LAN或Tailscale-IP> docker compose up -d`；`0.0.0.0` 会公开所有接口。请使用防火墙和经过身份验证的 TLS/tailnet 前端保护访问。
 

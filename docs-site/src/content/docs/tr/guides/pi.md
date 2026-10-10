@@ -1,11 +1,11 @@
 ---
 title: "Pi Entegrasyonu"
-description: "Inflection Pi ve hafif sohbet modellerini OpenCodex üzerinden bağlama rehberi."
+description: "Inflection Pi ve hafif sohbet modellerini OpenRelay üzerinden bağlama rehberi."
 ---
 
 Pi reads its providers from a single global JSON file rather than environment
 variables, so
-opencodex does not launch it. Instead, `ocx export` serializes the `opencodex`
+OpenRelay does not launch it. Instead, `orl export` serializes the `opencodex`
 provider block —
 base URL, model list, and the env reference Pi interpolates — and you merge it
 into your own
@@ -16,8 +16,8 @@ config.
 Start the proxy, then print the config:
 
 ```bash
-ocx start
-ocx export --client pi
+orl start
+orl export --client pi
 ```
 
 The output leads with the JSON, then prints the destination path, the merge
@@ -49,9 +49,9 @@ export line, and how many models carry authoritative context limits.
 }
 ```
 
-Oluşturulan Pi sağlayıcılarında `compat.sendSessionAffinityHeaders` etkinleştirilir. Sağlayıcıyı birleştirirken veya elle düzenlerken bu ayarı koruyun: Pi sabit bir oturum kimliği gönderir ve OpenCodex bu kimlikten kanonik OpenCode Go hedefi için oturum yakınlığı üretir. `cacheRetention` değeri `none` olduğunda Pi kimliği göndermeyebilir.
+Oluşturulan Pi sağlayıcılarında `compat.sendSessionAffinityHeaders` etkinleştirilir. Sağlayıcıyı birleştirirken veya elle düzenlerken bu ayarı koruyun: Pi sabit bir oturum kimliği gönderir ve OpenRelay bu kimlikten kanonik OpenCode Go hedefi için oturum yakınlığı üretir. `cacheRetention` değeri `none` olduğunda Pi kimliği göndermeyebilir.
 
-Oluşturulan Pi sağlayıcıları ayrıca `compat.supportsDeveloperRole` değerini `false` yapar; böylece Pi sistem istemini `developer` yerine `system` rolüyle gönderir. OpenCodex Chat Completions rollerini olduğu gibi iletir ve OpenAI uyumlu bazı sağlayıcılar `developer` rolünü 400 hatasıyla reddeder; `system` rolünü hepsi kabul eder.
+Oluşturulan Pi sağlayıcıları ayrıca `compat.supportsDeveloperRole` değerini `false` yapar; böylece Pi sistem istemini `developer` yerine `system` rolüyle gönderir. OpenRelay Chat Completions rollerini olduğu gibi iletir ve OpenAI uyumlu bazı sağlayıcılar `developer` rolünü 400 hatasıyla reddeder; `system` rolünü hepsi kabul eder.
 
 Model ids are the proxy's canonical selectors, so routed models appear as
 `provider/model`
@@ -70,20 +70,20 @@ Pi's global model config is:
 ```
 
 :::caution[Merge, never replace]
-`ocx export` never writes that file. Merge the `providers.opencodex` block into
+`orl export` never writes that file. Merge the `providers.opencodex` block into
 it — replacing the
 file destroys every other provider you have configured there. `--out` exists for
 a scratch path
 and refuses to overwrite an existing file without `--force`:
 
 ```bash
-ocx export --client pi --out ~/opencodex-pi-models.json
-ocx export --client pi --json > ~/opencodex-pi-models.json   # or redirect the byte-exact JSON
+orl export --client pi --out ~/opencodex-pi-models.json
+orl export --client pi --json > ~/opencodex-pi-models.json   # or redirect the byte-exact JSON
 ```
 
 :::
 
-The exported block is a static snapshot, not a live view. Re-run `ocx export`
+The exported block is a static snapshot, not a live view. Re-run `orl export`
 after adding a
 provider or changing model visibility, and merge the new block over the old one.
 
@@ -94,8 +94,8 @@ this file:
 
 | Key | What it is | Where it lives |
 | --- | --- | --- |
-| Proxy admission key | opencodex's own credential, generated on the dashboard's **API** tab | referenced by `apiKey` as `$OPENCODEX_API_KEY`; the value stays in your environment |
-| Provider key | your Anthropic / OpenAI / OpenRouter key | opencodex's own config, per [Providers](/guides/providers/) |
+| Proxy admission key | OpenRelay's own credential, generated on the dashboard's **API** tab | referenced by `apiKey` as `$OPENCODEX_API_KEY`; the value stays in your environment |
+| Provider key | your Anthropic / OpenAI / OpenRouter key | OpenRelay's own config, per [Providers](/guides/providers/) |
 
 The exported config carries only the reference, never a secret. Pi interpolates
 a bare `$NAME`, so
@@ -109,7 +109,7 @@ That name is Pi's alone. opencode uses a different variable
 (`OPENCODEX_OPENCODE_API_KEY`, in `{env:…}` form) — see the [opencode
 guide](/guides/opencode/).
 
-**A loopback proxy needs no key at all.** opencodex binds `127.0.0.1` by default
+**A loopback proxy needs no key at all.** OpenRelay binds `127.0.0.1` by default
 and authenticates
 nothing there, so the `$OPENCODEX_API_KEY` reference is inert and you can leave
 the variable unset.
@@ -124,12 +124,12 @@ access](/tr/reference/configuration/server/#uzaktan-erişim).
 authoritative context
 window. When it does not, both fields are omitted for that model and Pi applies
 its own defaults;
-`ocx export` prints how many rows fell into that case.
+`orl export` prints how many rows fell into that case.
 
 Çıktı sınırı, katalogdaki veya oluşturulan meta verilerdeki bilinen model sınırını kullanır. Yalnızca sınır bilinmiyorsa `32000` kullanılır. Çıktı sınırı her zaman bağlam penceresiyle sınırlanır; `32000` altındaki bilinen sınırlar da korunur.
 
 Two fields are deliberately absent. `cost` requires all four price fields and
-opencodex has no
+OpenRelay has no
 price data for routed models — emitting zeros would assert that every model is
 free. `reasoning` is
 a boolean in Pi while the catalog carries an effort ladder, and mapping one onto
@@ -150,7 +150,7 @@ reported.
 
 ## Requirements
 
-A running opencodex proxy (`ocx start`) and Pi installed. `ocx export` reads the
+A running OpenRelay proxy (`orl start`) and Pi installed. `orl export` reads the
 live catalog
 through the proxy's management API, so a config can never be emitted with an
 empty model list.

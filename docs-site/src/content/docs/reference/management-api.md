@@ -1,9 +1,9 @@
 ---
 title: Management API
-description: Authentication, errors, and endpoint reference for the opencodex control plane.
+description: Authentication, errors, and endpoint reference for the OpenRelay control plane.
 ---
 
-The Management API is opencodex's control plane. The dashboard at
+The Management API is OpenRelay's control plane. The dashboard at
 `http://localhost:10100` is one client of it; headless `ocx` provider, model, combo, account,
 settings, diagnostics, and lifecycle commands are clients too. The API is available only while the
 proxy is running.
@@ -14,7 +14,7 @@ building automation. Persistent values ultimately follow [Configuration](/refere
 ## Authentication model
 
 The Management API has its own admin credential, independent of data-plane API keys. At startup,
-opencodex resolves it in this order:
+OpenRelay resolves it in this order:
 
 1. `OPENCODEX_ADMIN_AUTH_TOKEN`, when set.
 2. A generated `ocx_admin_*` token in a hardened secret file.
@@ -96,7 +96,7 @@ signed-in account row carries a ticket badge with its remaining coupon count, an
 badge opens a dialog that lists validity windows and redeems the coupon closest to
 expiry. The dialog sends a client-minted `operationId`, and it stops sending after a
 timeout instead of retrying, because a redemption whose journal record is still open
-would execute again. `ocx account grok-reset-coupons` remains the terminal equivalent.
+would execute again. `orl account grok-reset-coupons` remains the terminal equivalent.
 
 Claude usage resets work the same way from **Providers > Anthropic > Accounts**. Each
 signed-in account row carries a ticket badge with its remaining resets, and the dialog
@@ -459,10 +459,10 @@ Unknown fields and malformed rates are rejected. A write preserves other models'
 and returns `{ ok: true, provider, modelId, cost }`; reset returns `cost: null`.
 
 ```bash
-ocx models price ollama/custom-model --json
-ocx models set-price ollama/custom-model --input 0.50 --output 1.50
-ocx models set-price ollama/custom-model --input 0 --output 0
-ocx models set-price ollama/custom-model --auto
+orl models price ollama/custom-model --json
+orl models set-price ollama/custom-model --input 0.50 --output 1.50
+orl models set-price ollama/custom-model --input 0 --output 0
+orl models set-price ollama/custom-model --auto
 ```
 
 Omitted CLI cache-read/cache-write rates default to zero. Use `--cache-read` and `--cache-write`
@@ -555,7 +555,7 @@ selection save; they do not guarantee every client catalog updated. Inspect
 `clientIntegrations[]` for `ok: false`, `client`, optional Aside `profileId`, and the refusal
 `reason`; recovery details may also include `refusalReason`, `snapshotPath`, and `residual`.
 The Models page keeps the saved selection and shows a separate client-refresh warning.
-Inspect Integrations and resolve the reported issue before retrying `ocx sync`. Missing
+Inspect Integrations and resolve the reported issue before retrying `orl sync`. Missing
 outcome fields from an older server do not establish successful recovery.
 
 ### OAuth accounts, provider keys, and data-plane keys
@@ -602,12 +602,12 @@ preview under **Request path preview**. A delivery mode of `native` describes ho
 travels; it is not a compatibility verification.
 
 The `?provider=` form backs the **Upstream wire** section of a provider's settings. It reports
-the format opencodex sends to that provider; it does not open or close any client API. To change
+the format OpenRelay sends to that provider; it does not open or close any client API. To change
 the provider-wide adapter, save the provider's settings as usual (`PATCH /api/providers`).
 
 `PATCH /api/protocols/settings` is the only writer here and backs the Messages toggle on the
-API page. The CLI drives these routes with `ocx api protocols`, `ocx api explain` and
-`ocx api policy`. The rollout switches are staged and default off
+API page. The CLI drives these routes with `orl api protocols`, `orl api explain` and
+`orl api policy`. The rollout switches are staged and default off
 ([Protocol paths](/guides/protocol-paths/#rollout-switches)); see
 [API surfaces](/reference/configuration/server/#api-surfaces-apisurfaces) for how the Messages
 setting interacts with `claudeCode.enabled` across upgrades and downgrades.
@@ -675,13 +675,13 @@ the first accepted restart's grace and do not change its deadline.
 Grace is measured from acceptance, including the response-flush delay. The cleanup
 watchdog remains 60 seconds and replacement readiness retains its separate 70-second
 budget. A short grace can interrupt a turn that already executed upstream. Check its
-outcome before resubmitting; OpenCodex adds no automatic replay of ambiguous work,
+outcome before resubmitting; OpenRelay adds no automatic replay of ambiguous work,
 and a healthy replacement does not prove resending is safe. The dashboard, CLI, tray
 and automatic restarts continue using the 60-second default.
 
 During a restart drain, new data-plane requests receive HTTP 503 with JSON
 `error.type: "server_error"`, `error.code: "server_restarting"`, and the message
-"OpenCodex is restarting; retry this request." Responses retain `Retry-After: 5`
+"OpenRelay is restarting; retry this request." Responses retain `Retry-After: 5`
 and the receiving listener's CORS policy. This code lets every Codex version retry
 the 503 without reporting model capacity; provider overload errors retain their separate mapping.
 
@@ -689,7 +689,7 @@ the 503 without reporting model capacity; provider overload errors retain their 
 | --- | --- | --- |
 | `GET /api/system/memory` | Return scalar process, heap, stream, response-state, watchdog, and active-turn metrics. Response-state diagnostics include spill-write status, consecutive failures, fixed privacy-safe failure class, and last failure/success timestamps. `spillLastWriteFailureOrigin` is `retry_returned_timeout`, `timeout_memo_refusal`, or null; cumulative `spillAclRetryReturnedTimeouts` and `spillAclTimeoutMemoRefusals` count terminal failed publications; cumulative `spillCapacityRefusals` and `spillHeadroomEvictions` count continuations refused at the spill ceiling and continuations evicted to make room for a newer one. See [Windows spill diagnostics](/troubleshooting/windows-memory/) for process-local semantics. Raw errors and paths are never returned. | — |
 | `POST /api/system/restart` | Begin a drain-aware process restart without removing client injection; optional JSON `drainGraceMs` explicitly shortens the default 60s grace | Returns 202; repeated calls report the existing grace; 400 invalid body or grace |
-| `POST /api/stop` | Stop the service, restore native Codex, remove managed Grok injection, and drain the proxy | 409 service ownership conflict; 409 `respawnable_service` when a Windows Task Scheduler wrapper could respawn the proxy and the caller is not `ocx stop` (nothing is changed); 409 `self_unload_service` when this proxy is running as the installed launchd/systemd service, because stopping the manager from inside it would end the process before native Codex is restored — run `ocx stop` instead (nothing is changed); 409 when the installed manager refuses to stop; 409 `service_state_unknown` when the Task Scheduler state cannot be read (nothing is changed; repair the query and retry) |
+| `POST /api/stop` | Stop the service, restore native Codex, remove managed Grok injection, and drain the proxy | 409 service ownership conflict; 409 `respawnable_service` when a Windows Task Scheduler wrapper could respawn the proxy and the caller is not `orl stop` (nothing is changed); 409 `self_unload_service` when this proxy is running as the installed launchd/systemd service, because stopping the manager from inside it would end the process before native Codex is restored — run `orl stop` instead (nothing is changed); 409 when the installed manager refuses to stop; 409 `service_state_unknown` when the Task Scheduler state cannot be read (nothing is changed; repair the query and retry) |
 | `GET /api/system/codex-app-server` | Report whether running Codex app-servers predate the current model catalog | — |
 | `POST /api/system/codex-restart` | Refresh the catalog, then restart stale Codex app-servers and fully quit and relaunch the Codex desktop app so the model picker reloads. When the proxy itself is running inside the Codex app, the desktop restart is refused rather than handed off. | Returns 200 with `code: partially_stopped` when a target survives |
 
@@ -744,7 +744,7 @@ requests with the original ID or a known alias replay the stored result without 
 consume request. A previously unseen ID supplied after settlement starts a new explicit
 redemption; clients retrying an existing action should keep its ID.
 
-After a confirmed manual `reset`, OpenCodex checks fresh usage for that same account
+After a confirmed manual `reset`, OpenRelay checks fresh usage for that same account
 and can reconcile its eligible pre-existing shared reset-derived cooldown immediately.
 Paused accounts, accounts requiring reauthentication and cooldowns already owned by an
 in-flight probe remain excluded from this recovery; their cooldowns are retained. Usage
@@ -803,7 +803,7 @@ HTTP: 400 invalid/unsupported; 404 missing account; `oauth_mutation_busy` on loc
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

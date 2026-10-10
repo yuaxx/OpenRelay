@@ -1,9 +1,9 @@
 ---
 title: 桌面應用程式
-description: 在 macOS、Windows 與 Linux 上安裝及使用 OpenCodex 桌面應用程式。
+description: 在 macOS、Windows 與 Linux 上安裝及使用 OpenRelay 桌面應用程式。
 ---
 
-OpenCodex 桌面應用程式結合原生系統匣與網頁儀表板。內附的 CLI 會尋找既有本機代理；只有確定沒有代理執行時，應用程式才會啟動內附的執行環境。
+OpenRelay 桌面應用程式結合原生系統匣與網頁儀表板。內附的 CLI 會尋找既有本機代理；只有確定沒有代理執行時，應用程式才會啟動內附的執行環境。
 
 儀表板由找到的本機代理端點提供服務（預設連接埠 `10100`）。桌面應用程式是包裝該儀表板及內附執行環境的本機外殼。
 
@@ -40,11 +40,11 @@ sudo apt install ./OpenCodex-<version>-linux-amd64.deb
 
 ## 首次啟動
 
-應用程式會要求內附的 CLI 執行 `ocx resolve --json`；若既有本機代理可連線，就會附著其上。只有 CLI 證實代理不存在時，才會啟動內附執行環境；結果不確定時會顯示啟動失敗。接著儀表板會在應用程式的 webview 中，以找到的 loopback 端點開啟。登入時隱藏在系統匣中啟動的應用程式會保留輕量的啟動頁，直到你第一次從系統匣開啟或再次啟動應用程式時才載入儀表板。
+應用程式會要求內附的 CLI 執行 `orl resolve --json`；若既有本機代理可連線，就會附著其上。只有 CLI 證實代理不存在時，才會啟動內附執行環境；結果不確定時會顯示啟動失敗。接著儀表板會在應用程式的 webview 中，以找到的 loopback 端點開啟。登入時隱藏在系統匣中啟動的應用程式會保留輕量的啟動頁，直到你第一次從系統匣開啟或再次啟動應用程式時才載入儀表板。
 
 透過系統匣的 **Open dashboard** 或 **Open in browser**，可以在內嵌儀表板與一般瀏覽器間切換。系統匣也提供更新檢查。
 
-在 macOS 上，關閉儀表板後，應用程式會繼續在選單列中執行。從 Dock 或 Finder 再次開啟 OpenCodex 即可恢復儀表板，無須重新啟動代理。
+在 macOS 上，關閉儀表板後，應用程式會繼續在選單列中執行。從 Dock 或 Finder 再次開啟 OpenRelay 即可恢復儀表板，無須重新啟動代理。
 
 ## 系統匣中的用量資訊
 
@@ -70,11 +70,11 @@ sudo apt install ./OpenCodex-<version>-linux-amd64.deb
 
 ## Widget
 
-macOS 應用程式包含 OpenCodex WidgetKit 擴充功能。widget 設定及本機快照細節請參閱 [macOS 選單列應用程式指南](/zh-tw/guides/macos-menu-bar/)。
+macOS 應用程式包含 OpenRelay WidgetKit 擴充功能。widget 設定及本機快照細節請參閱 [macOS 選單列應用程式指南](/zh-tw/guides/macos-menu-bar/)。
 
 ## 解除安裝
 
-在 macOS 上，將 `OpenCodex.app` 從 Applications 拖到垃圾桶。在 Windows 上，從 **Installed apps** 移除 OpenCodex。在 Debian 系 Linux 上執行：
+在 macOS 上，將 `OpenCodex.app` 從 Applications 拖到垃圾桶。在 Windows 上，從 **Installed apps** 移除 OpenRelay。在 Debian 系 Linux 上執行：
 
 ```bash
 sudo apt remove opencodex

@@ -3,7 +3,7 @@ title: "콤보: 페일오버와 로드 밸런싱"
 description: "하나의 가상 모델을 여러 공급자에 걸쳐 페일오버나 가중 로드 밸런싱으로 라우팅합니다."
 ---
 
-**콤보**는 정해진 순서로 나열된 실제 공급자/모델 대상 목록 앞에 서는 하나의 가상 모델입니다. 클라이언트는 `combo/<id>`로 요청하고, opencodex는 대상을 하나 선택해 요청을 그 구체적인 `provider/model`로 다시 쓰며, 첫 번째 대상이 재시도 가능한 실패를 내면 다른 대상을 시도할 수 있습니다.
+**콤보**는 정해진 순서로 나열된 실제 공급자/모델 대상 목록 앞에 서는 하나의 가상 모델입니다. 클라이언트는 `combo/<id>`로 요청하고, OpenRelay는 대상을 하나 선택해 요청을 그 구체적인 `provider/model`로 다시 쓰며, 첫 번째 대상이 재시도 가능한 실패를 내면 다른 대상을 시도할 수 있습니다.
 
 이 방식은 다음 두 경우에 유용합니다.
 
@@ -17,10 +17,10 @@ description: "하나의 가상 모델을 여러 공급자에 걸쳐 페일오버
 이 예시는 Anthropic을 먼저, OpenAI를 나중에 두는 `combo/main`을 만듭니다. 두 공급자는 이미 존재하고 활성화되어 있어야 합니다.
 
 ```bash
-ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
+orl combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 ```
 
-기본 전략은 페일오버이므로 일반 요청은 `anthropic/claude-opus-4-8`으로 갑니다. 그 시도가 재시도 가능한 실패를 내면 opencodex는 `openai/gpt-5.6-sol`로 넘어갈 수 있습니다.
+기본 전략은 페일오버이므로 일반 요청은 `anthropic/claude-opus-4-8`으로 갑니다. 그 시도가 재시도 가능한 실패를 내면 OpenRelay는 `openai/gpt-5.6-sol`로 넘어갈 수 있습니다.
 
 가상 모델은 평소에 모델 ID를 넣는 자리 어디서나 사용할 수 있습니다.
 
@@ -34,7 +34,7 @@ ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 저장된 정의를 확인합니다.
 
 ```bash
-ocx combo show main
+orl combo show main
 ```
 
 :::tip
@@ -43,7 +43,7 @@ ocx combo show main
 
 ## 콤보 이름 동작
 
-`ocx combo set <id>`의 콤보 ID는 문자나 숫자로 시작해야 합니다. 그 뒤에는 문자, 숫자, `.`, `_`, `-`를 포함할 수 있고, 전체 길이는 64자 이하여야 합니다. 정식 모델 ID는 항상 `combo/<id>`입니다. 예를 들어 ID `main`은 `combo/main`이 됩니다.
+`orl combo set <id>`의 콤보 ID는 문자나 숫자로 시작해야 합니다. 그 뒤에는 문자, 숫자, `.`, `_`, `-`를 포함할 수 있고, 전체 길이는 64자 이하여야 합니다. 정식 모델 ID는 항상 `combo/<id>`입니다. 예를 들어 ID `main`은 `combo/main`이 됩니다.
 
 콤보를 설정하면 `combo/` 네임스페이스는 예약됩니다. 이름이 `combo`인 공급자는 그 자리를 차지할 수 없고, 콤보 ID도 이미 설정된 공급자 이름과 겹칠 수 없습니다.
 
@@ -64,7 +64,7 @@ alias는 클라이언트가 요청하는 공개 이름만 바꿉니다. 콤보�
 
 ## 콤보를 바꾼 뒤 대화 압축
 
-클라이언트가 콤보를 바꾼 뒤 공급자 접두사 없는 모델 이름으로 압축을 요청하면, opencodex는 같은 대화에서 가장 최근에 응답을 성공적으로 마친 콤보를 기억해 사용할 수 있습니다. 모델 이름이 완료된 응답과 일치하고, 현재 설정에 해당 콤보와 대상이 남아 있어야 합니다. 압축 요청도 일반 콤보 선택과 페일오버를 따릅니다.
+클라이언트가 콤보를 바꾼 뒤 공급자 접두사 없는 모델 이름으로 압축을 요청하면, OpenRelay는 같은 대화에서 가장 최근에 응답을 성공적으로 마친 콤보를 기억해 사용할 수 있습니다. 모델 이름이 완료된 응답과 일치하고, 현재 설정에 해당 콤보와 대상이 남아 있어야 합니다. 압축 요청도 일반 콤보 선택과 페일오버를 따릅니다.
 
 명시한 공급자·콤보 선택자와 설정된 콤보 별칭이 기억한 값보다 우선합니다. 실패·미완료·취소된 응답은 마지막 성공 기록을 덮어쓰지 않습니다. 기록은 프로세스 안에서 최대 256개 대화, 30분 동안 유지하고, 모델 이름 하나당 1 KiB·전체 64 KiB로 제한하며, 만료된 기록은 배경에서도 정리합니다. 모델 이름이 너무 커서 보관할 수 없는 응답은 이전 선택을 지우지 않고 그대로 둡니다. 기록은 계정 자격증명을 저장하지 않습니다. 유효한 대화 식별자나 기록이 없으면 일반 압축 라우팅을 사용합니다. 재시작하면 기록은 사라집니다.
 
@@ -89,7 +89,7 @@ alias는 클라이언트가 요청하는 공개 이름만 바꿉니다. 콤보�
 성공 요청 두 번씩 묶는 2:1 콤보를 만듭니다.
 
 ```bash
-ocx combo set balanced \
+orl combo set balanced \
   --targets anthropic/claude-opus-4-8:2,openai/gpt-5.6-sol:1 \
   --strategy round-robin \
   --sticky 2
@@ -113,7 +113,7 @@ ocx combo set balanced \
 
 ### `least-used`: 성공 횟수가 가장 적은 대상 우선
 
-`least-used`는 이 opencodex 프로세스가 기록한 성공 요청 수가 가장 적은 적합한 대상으로 각 요청을 라우팅합니다. 재시작하면 횟수는 0부터 시작하며, 동률이면 설정 순서를 유지합니다. `weight`와 `stickyLimit`은 이 전략에 영향을 주지 않습니다.
+`least-used`는 이 OpenRelay 프로세스가 기록한 성공 요청 수가 가장 적은 적합한 대상으로 각 요청을 라우팅합니다. 재시작하면 횟수는 0부터 시작하며, 동률이면 설정 순서를 유지합니다. `weight`와 `stickyLimit`은 이 전략에 영향을 주지 않습니다.
 
 ### `reset-window`: 가장 가까운 할당량 재설정 따르기
 
@@ -149,7 +149,7 @@ ocx combo set balanced \
 콤보가 아닌 Responses 요청에서는 allowlist에 오른 xAI 정책 403이 Codex가 전송 실패로 재시도하기 전에 HTTP 200 `incomplete/content_filter`로 바뀝니다. [xAI policy refusals](/reference/proxy-formats/#xai-policy-refusals)를 보세요. 콤보 홉은 원래 HTTP 403을 홉으로 분류합니다.
 :::
 
-스트리밍 요청에서는 상위 HTTP 상태만으로 최종 결정을 내리지 않습니다. OpenCodex는 선택한 하위 대상의 Responses SSE를 출력 시작 전의 제한된 구간까지만 버퍼링합니다. 텍스트, 추론, 도구 호출 또는 그 밖의 출력 이벤트가 시작되기 전에 재시도 가능한 `response.failed` 종결 이벤트가 오면 해당 시도를 실패로 기록하고 다음 적합한 대상을 시도할 수 있습니다. 출력이 시작되거나 버퍼 상한에 도달하면 현재 대상에 커밋하며, 이후의 스트림 실패를 다른 공급자에서 다시 실행하지 않습니다. 따라서 텍스트와 도구 실행이 중복되지 않습니다.
+스트리밍 요청에서는 상위 HTTP 상태만으로 최종 결정을 내리지 않습니다. OpenRelay는 선택한 하위 대상의 Responses SSE를 출력 시작 전의 제한된 구간까지만 버퍼링합니다. 텍스트, 추론, 도구 호출 또는 그 밖의 출력 이벤트가 시작되기 전에 재시도 가능한 `response.failed` 종결 이벤트가 오면 해당 시도를 실패로 기록하고 다음 적합한 대상을 시도할 수 있습니다. 출력이 시작되거나 버퍼 상한에 도달하면 현재 대상에 커밋하며, 이후의 스트림 실패를 다른 공급자에서 다시 실행하지 않습니다. 따라서 텍스트와 도구 실행이 중복되지 않습니다.
 
 ## 기본 reasoning effort
 
@@ -168,7 +168,7 @@ ocx combo set balanced \
 
 Codex v2 서브에이전트에는 중요한 제한이 하나 있습니다([issue #92](https://github.com/lidge-jun/opencodex/issues/92)). 네이티브 부모 프로세스는 새로 생성된 작업자에게 보낼 작업을 네이티브 ChatGPT 백엔드용으로 생성한 암호문으로만 전달할 수 있습니다. 외부 공급자는 그 페이로드를 읽을 수 없습니다.
 
-이런 요청에서 콤보는 재시도 가능한 실패가 나더라도 정식 네이티브 ChatGPT 경로만 적합 대상으로 남깁니다. 콤보에 복호화 가능한 대상이 하나도 없으면 opencodex는 전송 전에 멈추고 HTTP 400을 반환합니다.
+이런 요청에서 콤보는 재시도 가능한 실패가 나더라도 정식 네이티브 ChatGPT 경로만 적합 대상으로 남깁니다. 콤보에 복호화 가능한 대상이 하나도 없으면 OpenRelay는 전송 전에 멈추고 HTTP 400을 반환합니다.
 
 ```json
 {
@@ -203,16 +203,16 @@ v1/base/v2 모드와 암호화된 작업의 전체 흐름은 [Sub-agent Surface]
 주요 명령은 다음과 같습니다.
 
 ```bash
-ocx combo list
-ocx combo show <id>
-ocx combo set <id> --targets provider/model[:weight],...
-ocx combo remove <id> --yes
+orl combo list
+orl combo show <id>
+orl combo set <id> --targets provider/model[:weight],...
+orl combo remove <id> --yes
 ```
 
 `set`은 `--strategy`, `--sticky`, `--effort`, `--alias`, `--native-alias`, `--display-name`,
 `--rename-from`도 받습니다. `--native-alias`에는 현재 지원되는 bare native alias와 비어 있지 않은 display name이 필요합니다. `--effort`, `--alias`,
 `--display-name`에 `-`를 지정하면 해당 값을 지울 수 있습니다. `create`와 `update`는 `set`의
-별칭이고 `delete`는 `remove`의 별칭입니다. 모든 combo 하위 명령은 `ocx route combo ...`에서도 사용할 수 있습니다.
+별칭이고 `delete`는 `remove`의 별칭입니다. 모든 combo 하위 명령은 `orl route combo ...`에서도 사용할 수 있습니다.
 
 ### Management API
 
@@ -262,8 +262,8 @@ ocx combo remove <id> --yes
 ### `combo/<id>`가 404를 반환하는 이유는 무엇인가요?
 
 combo id를 찾을 수 없기 때문입니다. 응답은 HTTP 404와 `invalid_request_error` 유형을 반환합니다.
-`ocx combo list`를 실행하고, 철자와 대소문자를 확인하고, 관리 명령이 모델 요청을 받는 것과 동일한
-opencodex 인스턴스에 기록했는지 확인하세요.
+`orl combo list`를 실행하고, 철자와 대소문자를 확인하고, 관리 명령이 모델 요청을 받는 것과 동일한
+OpenRelay 인스턴스에 기록했는지 확인하세요.
 
 ### `combo_unavailable`이 발생하는 이유는 무엇인가요?
 

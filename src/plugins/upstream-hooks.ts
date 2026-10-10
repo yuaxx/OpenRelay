@@ -68,7 +68,7 @@ export function rewriteUpstream<H extends HeadersInit | undefined>(
       target.url = urlBefore;
       target.headers = headersBefore;
       registration.disabled = true;
-      console.error("[opencodex] plugin upstream rewriter disabled: plugin_exception");
+      console.error("[openrelay] plugin upstream rewriter disabled: plugin_exception");
     }
   }
   return { url: target.url, headers: target.headers };

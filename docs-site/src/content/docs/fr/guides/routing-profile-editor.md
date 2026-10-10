@@ -3,7 +3,7 @@ title: Éditeur de profils de routage
 description: Créez, modifiez, validez, simulez et supprimez des profils de stratégie de routage depuis le tableau de bord OpenCodex.
 ---
 
-L’onglet **Modèles → Routage** du tableau de bord OpenCodex permet de gérer `config.routingProfiles` sans modifier `config.json` manuellement.
+L’onglet **Modèles → Routage** du tableau de bord OpenRelay permet de gérer `config.routingProfiles` sans modifier `config.json` manuellement.
 
 ## Créer un profil
 

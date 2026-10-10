@@ -12,7 +12,7 @@ exécute des fonctionnalités d'assistance autour des demandes du fournisseur.
 | --- | --- | --- | --- |
 | `port` | `number` | `10100` | Port d'écoute proxy. |
 | `hostname?` | `string` | `"127.0.0.1"` | Adresse de liaison. Les liaisons hors bouclage nécessitent `OPENCODEX_API_AUTH_TOKEN`. |
-| `proxy?` | `string` | — | URL du proxy HTTP(S) ou SOCKS5 sortant (`socks5://host:port`) ou `${ENV_VAR}`. Les URL HTTP s’appliquent à `HTTP_PROXY` / `HTTPS_PROXY` si elles sont vides. Les URL SOCKS5 utilisent le tunnel SOCKS5 intégré et sont aussi exposées via `ALL_PROXY` (`ocx start --socks5`); `HTTP(S)_PROXY` héritées sont effacées dans ce processus. Le bouclage reste dans `NO_PROXY`. |
+| `proxy?` | `string` | — | URL du proxy HTTP(S) ou SOCKS5 sortant (`socks5://host:port`) ou `${ENV_VAR}`. Les URL HTTP s’appliquent à `HTTP_PROXY` / `HTTPS_PROXY` si elles sont vides. Les URL SOCKS5 utilisent le tunnel SOCKS5 intégré et sont aussi exposées via `ALL_PROXY` (`orl start --socks5`); `HTTP(S)_PROXY` héritées sont effacées dans ce processus. Le bouclage reste dans `NO_PROXY`. |
 | `emptyCompletionRetry?` | `boolean` | `false` | Active une nouvelle tentative Responses identique lorsqu’une réponse ne contient ni texte ni appel d’outil. Cette tentative peut être facturée. `OCX_EMPTY_COMPLETION_RETRY=0` la désactive sans modifier la configuration ; les combinaisons et les tours de compactage routés restent exclus. |
 | `stallTimeoutSec?` | `number` | `300` (public) / désactivé (local) | Secondes sans progression utile en amont (Responses et Chat natif) avant la coupure du flux. Sans réglage, un amont **local** (loopback, privé ou nom `.local`/`.lan`) est désactivé par défaut et un amont public vaut 300 s ; une valeur positive s'applique aux deux (minimum 1 s) ; `0` désactive partout le watchdog de silence. Pour Responses qui replie le SSE canonique ChatGPT en JSON non-streaming, un plafond total indépendant de 15 minutes subsiste même lorsque ce watchdog est désactivé. Les lectures de corps en attente de `/v1/responses/compact` partagent ce budget mais valent 300 s par défaut même pour un amont local ; une valeur explicite, y compris `0`, prime. |
 | `connectTimeoutMs?` | `number` | `200000` | Délai maximal par tentative pour DNS/TCP/TLS et les en-têtes finaux ; il prend fin avant la génération du corps. |
@@ -23,16 +23,16 @@ exécute des fonctionnalités d'assistance autour des demandes du fournisseur.
 | `storageCleanupPolicy?` | `StorageCleanupPolicy` | désactivé | Politique facultative de nettoyage des sessions archivées. Elle n'est jamais activée implicitement. |
 | `appOwnedMemoryBudgetMb?` | `number` | `256` | Plafond en Mio pour les journaux, caches, objets binaires et charges utiles de continuation évincables qui appartiennent à l'application. Plage : 64–4096 ; il ne s'agit pas d'un plafond RSS. |
 | `metricsExport.enabled?` | `boolean` | `false` | Active les métriques de requêtes agrégées, locales au processus, sur `GET /api/metrics` authentifié. Redémarrage requis ; lorsque désactivé, le chemin renvoie 404 et aucune activité d'export n'est démarrée. |
-| `codexAutoStart?` | `boolean` | `true` | Autorise le lanceur intermédiaire Codex à exécuter `ocx ensure` avant de démarrer Codex. Avec la valeur false, cette vérification ne fait rien. |
+| `codexAutoStart?` | `boolean` | `true` | Autorise le lanceur intermédiaire Codex à exécuter `orl ensure` avant de démarrer Codex. Avec la valeur false, cette vérification ne fait rien. |
 | `codexShimAutoRestore?` | `boolean` | `true` | Restaure le lanceur intermédiaire installé après son remplacement par une mise à jour externe de Codex terminée. Désactivation par variable d'environnement : `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0`. |
-| `syncResumeHistory?` | `boolean` | `true` | Compatibilité historique Codex App réversible. Les métadonnées originales sont sauvegardées et restaurées par `ocx stop` / `ocx restore`. |
+| `syncResumeHistory?` | `boolean` | `true` | Compatibilité historique Codex App réversible. Les métadonnées originales sont sauvegardées et restaurées par `orl stop` / `orl restore`. |
 | `shadowCallIntercept?` | `{ enabled?: boolean; model?: string; sourceModels?: string[] }` | désactivé | Redirigez les appels Codex helper/shadow reconnus vers un modèle choisi tout en conservant l'effort de raisonnement configuré pour la requête. Le préfixe source par défaut est `gpt-6-luna`, `gpt-5.6-luna` ; les clients plus anciens via 0.144.x utilisaient `gpt-5.4-mini`, que `sourceModels` peut restaurer. |
 | `webSearchSidecar?` | `OcxWebSearchSidecarConfig` | activé lorsqu'il est utilisable | Options du service auxiliaire de recherche Web. |
 | `visionSidecar?` | `OcxVisionSidecarConfig` | activé lorsqu'il est utilisable | Options du service auxiliaire de description d'images. |
 | `images?` | `OcxImagesConfig` | sélection automatique OpenAI | Options de relais d'images autonomes pour Codex `image_gen`. |
 
 Si une ancienne version de développement a modifié les métadonnées de l'historique de reprise avant que la prise en charge de la sauvegarde n'existe, exécutez
-`ocx recover-history --legacy-openai --yes` pour forcer la récupération du fournisseur natif.
+`orl recover-history --legacy-openai --yes` pour forcer la récupération du fournisseur natif.
 La commande réétiquette chaque ligne `opencodex` contenant un message utilisateur, y compris l'historique légitime d'un fournisseur dédié ; consultez l'avertissement sur la portée complète dans la référence du cycle de vie avant de l'exécuter.
 
 ### Délais et fin de réponse du Chat natif
@@ -47,11 +47,11 @@ configurée. Pour utiliser le jeton d’environnement, exportez-le avant le dém
 
 ```bash
 export OPENCODEX_API_AUTH_TOKEN="your-secret-token"
-ocx start
+orl start
 ```
 
 Le proxy refuse une liaison distante sans identifiant du plan de données. L’installation d’un service exige
-spécifiquement `OPENCODEX_API_AUTH_TOKEN` ; exportez-le avant `ocx service install` afin que launchd, systemd
+spécifiquement `OPENCODEX_API_AUTH_TOKEN` ; exportez-le avant `orl service install` afin que launchd, systemd
 ou le Planificateur de tâches le reçoive. Les clients du plan de données peuvent envoyer :
 
 ```text
@@ -103,7 +103,7 @@ identifiant. L'écouteur principal reste inchangé : les appelants distants ont
 }
 ```
 
-`ocx sync` écrit ensuite `base_url = "http://127.0.0.1:10200/v1"` dans le bloc du fournisseur Codex géré
+`orl sync` écrit ensuite `base_url = "http://127.0.0.1:10200/v1"` dans le bloc du fournisseur Codex géré
 et omet l'en-tête d'authentification ; un serveur d'applications lancé directement fonctionne ainsi sans avoir à transmettre d'identifiants.
 
 Le port est obligatoire et doit différer du port proxy. Il n'est jamais attribué par le système d'exploitation : un port éphémère
@@ -142,9 +142,9 @@ Les rappels OAuth du fournisseur écoutent sur un port distant fixe. Connectez-v
 ssh -L 20100:localhost:10100 -L 1455:localhost:1455 you@remote
 ```
 
-Si un port de rappel enregistré est déjà utilisé et que la surface de connexion propose une saisie manuelle, OpenCodex
+Si un port de rappel enregistré est déjà utilisé et que la surface de connexion propose une saisie manuelle, OpenRelay
 conserve l'URI de redirection enregistrée et renvoie tout de même l'URL d'autorisation du fournisseur. Terminez la
-connexion au fournisseur, puis collez dans OpenCodex l'URL de redirection finale affichée dans la barre d'adresse du navigateur ou le
+connexion au fournisseur, puis collez dans OpenRelay l'URL de redirection finale affichée dans la barre d'adresse du navigateur ou le
 code d'autorisation. Le flux en attente préserve l'état et la validation PKCE. Pour les appelants sans saisie
 manuelle, l'opération échoue toujours de manière sûre.
 
@@ -165,7 +165,7 @@ avec `POST /api/storage/cleanup-policy/run`.
 
 ## Claude Code (`claudeCode`)
 
-Ces paramètres régissent `/v1/messages`, `/v1/messages/count_tokens`, le lanceur `ocx claude` et la page du tableau de bord Claude.
+Ces paramètres régissent `/v1/messages`, `/v1/messages/count_tokens`, le lanceur `orl claude` et la page du tableau de bord Claude.
 
 | Clé | Type | Par défaut | Description |
 | --- | --- | --- | --- |
@@ -173,7 +173,7 @@ Ces paramètres régissent `/v1/messages`, `/v1/messages/count_tokens`, le lance
 | `claudeCode.bodyMaxBytes?` | `number` | `67108864` | Plafond cumulatif du corps lors d'un transfert natif, pour les réponses diffusées en continu comme pour celles mises en mémoire tampon. La valeur exacte `0` désactive ce plafond. |
 | `claudeCode.authMode?` | `"proxy" \| "subscription"` | automatique | Manière dont le lancement gère `ANTHROPIC_AUTH_TOKEN`. Le mode automatique détecte l'authentification à chaque lancement ; une valeur explicite n'est jamais remplacée. |
 | `claudeCode.authModeMigratedAt?` | `string` | non défini | Marqueur de mise à niveau interne unique. Ne réglez pas manuellement. |
-| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` | hériter | Effort écrit pour générer `~/.claude/agents/ocx-*.md` ; distinct des plafonds d’orientation et de proxy Codex. Redémarrez par `ocx claude` pour régénérer. |
+| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` | hériter | Effort écrit pour générer `~/.claude/agents/ocx-*.md` ; distinct des plafonds d’orientation et de proxy Codex. Redémarrez par `orl claude` pour régénérer. |
 
 L'authentification automatique sélectionne l'abonnement lorsqu'une authentification Claude stockée est trouvée, le proxy lorsqu'aucune ne l'est et
 l'abonnement avec un avertissement lorsque la détection n'est pas concluante. Voir
@@ -222,7 +222,7 @@ l'API Images d'OpenAI et la forme de réponse attendue par Codex.
 
 | Champ | Type | Par défaut | Signification |
 | --- | --- | --- | --- |
-| `enabled?` | `boolean` | activé lorsqu'il est utilisable | Interrupteur principal. Avec `false`, OpenCodex cesse d'intercepter `web_search` et l'intégration Codex écrit `web_search = "disabled"` dans `~/.codex/config.toml`. |
+| `enabled?` | `boolean` | activé lorsqu'il est utilisable | Interrupteur principal. Avec `false`, OpenRelay cesse d'intercepter `web_search` et l'intégration Codex écrit `web_search = "disabled"` dans `~/.codex/config.toml`. |
 | `backend?` | `"openai" \| "anthropic" \| "xai" \| "gemini" \| "exa"` | `openai` | Une valeur explicite est prioritaire ; l'absence de valeur sélectionne toujours `openai`. `anthropic` et `xai` ne s'exécutent que s'ils sont configurés explicitement ; `gemini` et `exa` restent réservés jusqu'à la livraison de leur executor. |
 | `model?` | `string` | dépendant du backend | `gpt-5.6-luna` pour OpenAI, `claude-sonnet-5` pour Anthropic ou `grok-4.6` pour xAI. L'héritage explicite `gpt-5.4-mini` migre au démarrage. |
 | `exaApiKey?` | `string` | aucun | Clé opérateur pour le backend `exa`. Écriture seule : les lectures de gestion ne renvoient jamais la valeur stockée. |
@@ -279,7 +279,7 @@ Le champ `quotaRefresh` de la ligne du compte Codex principal décrit la récup�
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 
@@ -289,7 +289,7 @@ The dashboard warns about old or unknown CLI versions, unavailable targets, and 
 
 ## Continuité de l’historique des pools
 
-Le plafond d’un pool s’applique au fournisseur canonique choisi par le routage, indépendamment du libellé de compte dans les journaux. Pour chaque fournisseur `P` actuellement configuré, OpenCodex associe automatiquement `h(pool, P)`, son alias de pool salé propre à cette installation, à `P` lors de la lecture des soldes. Cela inclut les soldes historiques conservés sous ce même alias. Les plafonds indépendants ne nécessitent ni association manuelle du fournisseur à lui-même ni calcul avec le sel.
+Le plafond d’un pool s’applique au fournisseur canonique choisi par le routage, indépendamment du libellé de compte dans les journaux. Pour chaque fournisseur `P` actuellement configuré, OpenRelay associe automatiquement `h(pool, P)`, son alias de pool salé propre à cette installation, à `P` lors de la lecture des soldes. Cela inclut les soldes historiques conservés sous ce même alias. Les plafonds indépendants ne nécessitent ni association manuelle du fournisseur à lui-même ni calcul avec le sel.
 
 Les autres libellés historiques, y compris ceux contenant un numéro de compte, restent sans propriétaire confirmé. Chaque solde d’origine est compté une seule fois dans son groupe associé ; tout solde positif encore non associé est ajouté, par prudence, une fois à chaque pool candidat. Les montants réglés, réservés et non résolus comptent tous. Un historique inconnu peut donc limiter un pool inutilisé. Les noms actuels et l’ordre des comptes ne prouvent pas à quel fournisseur cet historique appartient. Les plafonds de racine et d’identité restent indépendants.
 

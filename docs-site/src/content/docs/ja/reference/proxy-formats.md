@@ -3,7 +3,7 @@ title: プロキシ API 形式
 description: 応答、チャット完了、人為的メッセージ、モデル カタログ、WebSocket、リアルタイム、および圧縮サーフェスのワイヤ レベルのリファレンス。
 ---
 
-opencodex は、複数のクライアント方言で 1 つのローカル プロキシを表示します。 Codex クライアントは Responses API を話すことができ、OpenAI 互換アプリは Chat Completions を話すことができ、Claude Code は Anthropic Messages を話すことができます。すべての上流プロバイダーがあらゆる形式を実装する必要はありません。
+OpenRelay は、複数のクライアント方言で 1 つのローカル プロキシを表示します。 Codex クライアントは Responses API を話すことができ、OpenAI 互換アプリは Chat Completions を話すことができ、Claude Code は Anthropic Messages を話すことができます。すべての上流プロバイダーがあらゆる形式を実装する必要はありません。
 
 通常の変換パスは次のとおりです。
 
@@ -22,7 +22,7 @@ provider events → internal adapter events → client dialect
 
 一部の xAI Chat Completions 拒否は、HTTP 200 と `finish_reason: content_filter` ではなく、HTTP 403 と `I can't help with that request.` のような拒否文だけを返します。Codex は 403 を転送失敗として扱うため、ユーザーのターンが記録されず、同じリクエストが再送されます。
 
-コンボではない Responses リクエストでは、OpenCodex はその allowlist 対象の 403 を HTTP 200 の Responses、`status: "incomplete"`、`incomplete_details.reason: "content_filter"` に書き換えます。openai-chat アダプタ経路と openai-responses パススルー（grok-4.6 / grok-4.5 OAuth）の両方です。ストリーミングも同じ incomplete 境界です。空本文の 403 はエラーのままです。サブスクリプション、クレジット、権限、`not allowed to use this model` の 403 はエラーのままです。コンボのフェイルオーバーは元の HTTP 403 を見ます。
+コンボではない Responses リクエストでは、OpenRelay はその allowlist 対象の 403 を HTTP 200 の Responses、`status: "incomplete"`、`incomplete_details.reason: "content_filter"` に書き換えます。openai-chat アダプタ経路と openai-responses パススルー（grok-4.6 / grok-4.5 OAuth）の両方です。ストリーミングも同じ incomplete 境界です。空本文の 403 はエラーのままです。サブスクリプション、クレジット、権限、`not allowed to use this model` の 403 はエラーのままです。コンボのフェイルオーバーは元の HTTP 403 を見ます。
 
 ## エンドポイントの概要
 
@@ -38,7 +38,7 @@ provider events → internal adapter events → client dialect
 
 ## `POST /v1/responses`
 
-これは、ネイティブの opencodex データプレーン形状です。リクエスト本文は、空ではない `model` を持つ JSON オブジェクトである必要があります。 `input` は文字列または応答項目の配列です。
+これは、ネイティブの OpenRelay データプレーン形状です。リクエスト本文は、空ではない `model` を持つ JSON オブジェクトである必要があります。 `input` は文字列または応答項目の配列です。
 
 ### 受け入れられたリクエストフィールド
 
@@ -214,7 +214,7 @@ API ではありません。Desktop のキー移行・復旧・切断は既存�
 
 Connections > API keys に音声入力とリアルタイム音声の項目があります。データキーは入力欄のメモリにのみ保持されます。文字起こしは選択したファイルを送信し、音声の接続確認はマイクを使わずセッション応答を待ちます。設定済みの表示は接続成功を意味しません。
 
-`POST /v1/live` は、ChatGPT/Codex アプリのフレームレス通話作成サーフェスを受け入れます。 `POST /v1/realtime/calls` は、OpenAI Realtime 呼び出し作成サーフェスを受け入れます。 opencodex は、適格な OpenAI ファミリ ルートを選択し、アップストリーム認証モードのコール作成リクエストを正規化し、制限付き応答を中継します。
+`POST /v1/live` は、ChatGPT/Codex アプリのフレームレス通話作成サーフェスを受け入れます。 `POST /v1/realtime/calls` は、OpenAI Realtime 呼び出し作成サーフェスを受け入れます。 OpenRelay は、適格な OpenAI ファミリ ルートを選択し、アップストリーム認証モードのコール作成リクエストを正規化し、制限付き応答を中継します。
 
 コールの作成後、クライアントはサポートされている受信フォームを使用してサイドバンド WebSocket に参加できます。
 
@@ -285,12 +285,12 @@ Anthropic オリジンの失敗は Anthropic のエラー エンベロープで�
 
 ## 暗号化されたコンテンツの健全性
 
-プロキシは、本物のバックエンド暗号文を不透明なものとして扱います。構造的に有効な暗号文はバイト単位で保存されます。opencodex は暗号文を復号したり、その内容を変換したり、別のプロバイダー用に再暗号化したりしません。
+プロキシは、本物のバックエンド暗号文を不透明なものとして扱います。構造的に有効な暗号文はバイト単位で保存されます。OpenRelay は暗号文を復号したり、その内容を変換したり、別のプロバイダー用に再暗号化したりしません。
 
-一部のエージェント フックはこれまで、プレーンテキストの制御テキストを `encrypted_content` スロットに配置していました。互換性を確保するために、プロキシは、構造的に有効な Fernet の実行を変更せずに保持しながら、プレーンテキストをテキスト部分に分割します。 `agent_message` が修復中にすべての暗号化された部分を失った場合、それは通常のユーザー メッセージになります。現在の v2 タスクが完全に暗号化されたままであるが、選択したルーティングされたターゲットがネイティブ ChatGPT 暗号文を読み取ることができない場合、opencodex は読み取り不能なバイトをそのプロバイダーに送信する代わりに `unreadable_encrypted_agent_task` で失敗します。ワーカー タスクに関するクライアントの動作については、[サブエージェントサーフェス](/guides/sub-agent-surface/) を参照してください。
+一部のエージェント フックはこれまで、プレーンテキストの制御テキストを `encrypted_content` スロットに配置していました。互換性を確保するために、プロキシは、構造的に有効な Fernet の実行を変更せずに保持しながら、プレーンテキストをテキスト部分に分割します。 `agent_message` が修復中にすべての暗号化された部分を失った場合、それは通常のユーザー メッセージになります。現在の v2 タスクが完全に暗号化されたままであるが、選択したルーティングされたターゲットがネイティブ ChatGPT 暗号文を読み取ることができない場合、OpenRelay は読み取り不能なバイトをそのプロバイダーに送信する代わりに `unreadable_encrypted_agent_task` で失敗します。ワーカー タスクに関するクライアントの動作については、[サブエージェントサーフェス](/guides/sub-agent-surface/) を参照してください。
 
 ### 既存の会話でプロバイダーを切り替える場合
 
-再送される推論アイテムの `encrypted_content` は、それを生成したプロバイダーと認証情報でしか読めません。会話を最後に処理したのが別のプロバイダーだと opencodex が把握している場合は、送信前にその blob を取り除き、アイテムの要約は残します。そのプロバイダーのエンドポイントや認証情報も異なっていた場合は、アイテムの `rs_…` ID も取り除きます。新しい送信先はその ID のアイテムを参照できないためです。プロキシの再起動後など opencodex が把握できない場合は、新しい送信先が blob を拒否します。OpenAI と Azure OpenAI は `400 invalid_encrypted_content` を返します。opencodex はそのリクエストを、前のプロバイダーの推論状態（blob と `rs_…` ID）を除いて一度だけ再送します。ID を残すと `Item with id 'rs_…' not found` になるためです。
+再送される推論アイテムの `encrypted_content` は、それを生成したプロバイダーと認証情報でしか読めません。会話を最後に処理したのが別のプロバイダーだと OpenRelay が把握している場合は、送信前にその blob を取り除き、アイテムの要約は残します。そのプロバイダーのエンドポイントや認証情報も異なっていた場合は、アイテムの `rs_…` ID も取り除きます。新しい送信先はその ID のアイテムを参照できないためです。プロキシの再起動後など OpenRelay が把握できない場合は、新しい送信先が blob を拒否します。OpenAI と Azure OpenAI は `400 invalid_encrypted_content` を返します。OpenRelay はそのリクエストを、前のプロバイダーの推論状態（blob と `rs_…` ID）を除いて一度だけ再送します。ID を残すと `Item with id 'rs_…' not found` になるためです。
 
 この復旧は Responses プロトコルを話すすべてのアダプターに適用されるため、`openai-responses` と `azure-openai` は同じ動作になります。復旧が成功すると、その会話の同じ送信先での後続ターンは、以後 5 分間、最初の送信前にこの状態を取り除きます。再送はリクエストの通常の送信予算から差し引かれます。通常の 400 と 429 はこの方法では再送されず、5xx も同様です。例外は一つだけで、暗号化されたツール出力を含むリクエストに対し、本文がその復号失敗の拒否と完全に一致する 502 は同じ一回の再送の対象になります。2 回目の拒否はそのままクライアントに返ります。その場合は送信先のプロバイダーで新しい会話を始めてください。

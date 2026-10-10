@@ -1,5 +1,5 @@
 /** Exact runtime usage row, including its indentation. No runtime imports. */
-export const MODELS_CONTEXT_USAGE = "  ocx models context <status|value <tokens> [--set-all]|provider <name> on [--value <tokens>]|provider <name> off|all <on|off>> [--json]";
+export const MODELS_CONTEXT_USAGE = "  orl models context <status|value <tokens> [--set-all]|provider <name> on [--value <tokens>]|provider <name> off|all <on|off>> [--json]";
 
 export const MODELS_CONTEXT_DETAILS = [
   "Manage context caps for routed providers.",
@@ -10,8 +10,8 @@ export const MODELS_CONTEXT_DETAILS = [
   "--json: print the result as JSON.",
   "",
   "Examples:",
-  "  ocx models context status --json",
-  "  ocx models context value 128000",
-  "  ocx models context provider openai on --value 128000",
-  "  ocx models context all off",
+  "  orl models context status --json",
+  "  orl models context value 128000",
+  "  orl models context provider openai on --value 128000",
+  "  orl models context all off",
 ] as const;

@@ -502,6 +502,8 @@ export interface OcxClientConnectionConfig {
 }
 
 export interface OcxConfig {
+  /** Opt-in terminal-result compression; absent and malformed values remain disabled. */
+  rtk?: { enabled?: boolean };
   /** Experimental macOS app-server stdout shim; absent or false disables it. */
   chatgptDesktop?: { appServerShim?: boolean };
   port: number;

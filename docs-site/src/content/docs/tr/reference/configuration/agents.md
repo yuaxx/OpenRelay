@@ -3,7 +3,7 @@ title: Ajan Yapılandırması
 description: Çoklu ajan yüzeyleri, yetkilendirme rehberliği, tercih edilen modeller, geri dönüş zincirleri, yerel varsayılan senkronizasyonu ve çaba sınırları.
 ---
 
-Ajan ayarları hangi Codex işbirliği yüzeyinin tanıtılacağını ve opencodex'in
+Ajan ayarları hangi Codex işbirliği yüzeyinin tanıtılacağını ve OpenRelay'in
 devredilen işleri nasıl yönlendireceğini, yönlendireceğini ve sınırlayacağını
 kontrol eder.
 
@@ -12,11 +12,11 @@ kontrol eder.
 | Alan | Tip | Varsayılan | Anlamı |
 | --- | --- | --- | --- |
 | `multiAgentMode?` | `"v1" \| "default" \| "v2"` | `"default"` | `v1` her katalog modelini v1 olarak damgalar; `v2` her modeli v2 olarak damgalar. `default` yukarı akış sabitlemelerini geri yükler (Sol/Terra v2, Luna v1) ve aksi takdirde yerel `multi_agent_v2` bayrağını takip eder. Yeni oturumlara uygulanır. |
-| `subagentModels?` | `string[]` | `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna` | Alt ajan seçicisinde ilk olarak öne çıkan en fazla beş yalın yerel, hesap nitelikli `<secici>/<yerel-openai-modeli>` veya yönlendirilen `saglayici/model` kimliği. Kontrol paneli yalnızca yalın yerel ve yönlendirilen kimlikleri sunar ve kaydederken tam hesap nitelikli seçimleri atlar; tam seçimler için `ocx agent subagents set` kullanın veya yapılandırmayı düzenleyin. [Tek seferlik Astra yükseltmesinden](/reference/configuration/agents/#astra-roster-upgrade) sonra açık bir boş liste korunur. |
+| `subagentModels?` | `string[]` | `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna` | Alt ajan seçicisinde ilk olarak öne çıkan en fazla beş yalın yerel, hesap nitelikli `<secici>/<yerel-openai-modeli>` veya yönlendirilen `saglayici/model` kimliği. Kontrol paneli yalnızca yalın yerel ve yönlendirilen kimlikleri sunar ve kaydederken tam hesap nitelikli seçimleri atlar; tam seçimler için `orl agent subagents set` kullanın veya yapılandırmayı düzenleyin. [Tek seferlik Astra yükseltmesinden](/reference/configuration/agents/#astra-roster-upgrade) sonra açık bir boş liste korunur. |
 | `injectionModel?` | `string` | — | Proxy kaynaklı v2 yetkilendirme rehberliğinde kullanılan tercih edilen yerel veya yönlendirilen alt ajan modeli. |
 | `injectionEffort?` | `string` | — | Yalnızca `injectionModel` ile anlamlı olan tercih edilen çaba (`low` ile `ultra` arası). |
 | `injectionPrompt?` | `string` | — | Yerleşik v2 rehberlik gövdesinin yerini alır. `{{model}}`, `{{effort}}`, `{{roster}}` ve `{{fallback}}` destekler. Yapılandırılmış bir `injectionModel`, özel istemi oluşturmak için yeterlidir. |
-| `multiAgentGuidanceEnabled?` | `boolean` | `true` | Yalnızca opencodex kaynaklı v1/v2 geliştirici rehberliğini denetler; yerel ajan varsayılanlarını, araçları, yönlendirmeyi, kadroları veya çaba sınırlarını değiştirmez. |
+| `multiAgentGuidanceEnabled?` | `boolean` | `true` | Yalnızca OpenRelay kaynaklı v1/v2 geliştirici rehberliğini denetler; yerel ajan varsayılanlarını, araçları, yönlendirmeyi, kadroları veya çaba sınırlarını değiştirmez. |
 | `syncCodexSubagentDefaults?` | `boolean` | `false` | Senkronizasyon/yeniden başlatma sırasında `injectionModel` ve isteğe bağlı `injectionEffort`'ı Codex'in yerel varsayılanları olarak yazmayı etkinleştirin. `injectionModel` gerektirir. |
 | `subagentModelFallback?` | `string[]` | `[]` | Oluşturulan çocuk turları için öncelik sıralı küresel geri dönüş modelleri. |
 | `subagentModelFallbackByModel?` | `Record<string, string[]>` | `{}` | İstenen birincil model kimliğine göre anahtarlanan birincil model başına geri dönüş zincirleri. Bu, rol başına geri dönüş meta verileri için desteklenen yerdir; Codex ajan TOML içindeki `model_fallback`, Codex 0.146+'nın rolü atlamasına neden olur (#1190). |
@@ -28,12 +28,12 @@ kontrol eder.
 Arayüzü kontrol paneli veya `ocx v2 status|on|off|mode <v1|default|v2>|threads
 <n>|mode-hint <metin|--clear>` ile yönetin. Mod değişiklikleri yeni oturumlara
 uygulanır. `maxConcurrentThreadsPerSession`, bir `config.json` anahtarı değil,
-bir `PUT /api/v2` alanıdır; `ocx v2 threads <n>`, v2 etkinleştirildikten sonra
+bir `PUT /api/v2` alanıdır; `orl v2 threads <n>`, v2 etkinleştirildikten sonra
 Codex'in `$CODEX_HOME/config.toml` dosyasındaki `[features.multi_agent_v2]`
 altına `max_concurrent_threads_per_session` yazar.
 
 **Ultra modu** (Alt Ajanlar kontrol paneli anahtarı, `PUT /api/v2` alanı
-`multiAgentModeHintText` ve `ocx v2 mode-hint`), Codex'in
+`multiAgentModeHintText` ve `orl v2 mode-hint`), Codex'in
 `$CODEX_HOME/config.toml` dosyasında
 `features.multi_agent_v2.multi_agent_mode_hint_text` yazar. CLI `ocx v2
 mode-hint` komutu, `multi_agent_v2` devre dışı bırakıldığında bile bu anahtarı
@@ -45,8 +45,8 @@ yürütme çabasını **değiştirmez**. Bir `null` değeri anahtarı kaldırır
 boş veya yalnızca boşluk içeren değerler reddedilir çünkü mevcut bir boş
 geçersiz kılma ultra kaynaklı Proaktif mesajı bile bastırır. Alt Ajanlar kontrol
 panelinin Ultra modu **açık** anahtarı hem yerel özelliği hem de açık bir v2
-yüzeyini (`multiAgentMode: "v2"`, `ocx v2 mode v2` ile eşdeğer) gerektirir; tek
-başına `ocx v2 on` bu kontrol paneli geçidini karşılamaz.
+yüzeyini (`multiAgentMode: "v2"`, `orl v2 mode v2` ile eşdeğer) gerektirir; tek
+başına `orl v2 on` bu kontrol paneli geçidini karşılamaz.
 
 Yönetim API'si `GET`/`PUT /api/v2`, `/api/injection-model`, `/api/effort-caps`,
 `/api/subagent-models` ve `/api/subagent-model-fallback` uç noktalarını sunar.
@@ -109,13 +109,13 @@ Oluşturulan çocuk geri dönüş sırası şöyledir:
    anahtarlanan); ardından
 3. küresel `subagentModelFallback` girdileri.
 
-Rol başına geri dönüş zincirleri opencodex yapılandırmasında yer almalıdır.
+Rol başına geri dönüş zincirleri OpenRelay yapılandırmasında yer almalıdır.
 `$CODEX_HOME/agents/*.toml` içine `model_fallback` yazmak Codex 0.146+'nın tüm
 rol dosyasını bilinmeyen bir alan olarak reddetmesine ve rolü atlamasına neden
 olur (#1190). TOML'daki eski bir `model_fallback` satırı geriye dönük uyumluluk
-için hala okunur, ancak `ocx doctor` bunu bayraklar.
+için hala okunur, ancak `orl doctor` bunu bayraklar.
 
-opencodex devre dışı bırakılmış, yönlendirilemez, sağlıksız, soğumada olan veya
+OpenRelay devre dışı bırakılmış, yönlendirilemez, sağlıksız, soğumada olan veya
 kota eşiği adaylarını atlar. Kullanılabilirlik anlık görüntüsü
 `subagentModelFallbackPollMs` boyunca önbelleğe alınır. Şifrelenmiş çocuk
 görevlerinde zincir, kurallı yerel ChatGPT hedefleriyle ve
@@ -155,10 +155,10 @@ geçmişi, sonraki her turda arka uçta üretilmiş şifreli bir ajan mesajını
 oynatır ([#4089](https://github.com/lidge-jun/opencodex/issues/4089)).
 Varsayılan olarak devre dışıdır.
 Açıkça etkinleştirildiğinde ve nihai yönlendirilen görev aksi takdirde
-okunamayan bir Fernet yükü içerdiğinde, opencodex iletme modu kimlik
+okunamayan bir Fernet yükü içerdiğinde, OpenRelay iletme modu kimlik
 doğrulamasıyla sabit `https://chatgpt.com/backend-api/codex/responses` uç
 noktasına ham bir Responses doğrudan geçiş isteği kullanır. ChatGPT düz metin
-görevini zorunlu bir fonksiyon çağrısı aracılığıyla döndürür; opencodex daha
+görevini zorunlu bir fonksiyon çağrısı aracılığıyla döndürür; OpenRelay daha
 sonra yönlendirilen sağlayıcı dağıtımından önce yalnızca bu görev öğesini
 standart bir kullanıcı mesajına dönüştürür.
 
@@ -189,7 +189,7 @@ Kabul ve saklama kasıtlı olarak dardır:
   bir özetini kullanır;
 - kurtarma isteği yalnızca `authorization`, eşleşen `chatgpt-account-id`,
   `originator` ve isteğe bağlı `openai-beta` ve `user-agent` meta verilerini
-  iletir; opencodex `content-type` ve `accept`'i kendisi ayarlar ve başka hiçbir
+  iletir; OpenRelay `content-type` ve `accept`'i kendisi ayarlar ve başka hiçbir
   arayan başlığı bu sınırı geçmez;
 - kurtarılan düz metin asla günlüğe kaydedilmez veya kalıcı hale getirilmez;
   süreç içi yerel önbellek kimlik bilgisi, üst iş parçacığı ve şifreli metin
@@ -255,7 +255,7 @@ sıkıştırma, inceleme ve bellek birleştirme turları sınırları atlar.
 
 Sınırlar yalnızca çabayı düşürür. Sınırın üzerindeki veya altındaki bildirilen
 en yüksek basamağa otururlar. Bir modelin çaba kontrolü yoksa veya desteklenen
-hiçbir basamak uymuyorsa opencodex çabayı kaldırır ve sağlayıcı varsayılanının
+hiçbir basamak uymuyorsa OpenRelay çabayı kaldırır ve sağlayıcı varsayılanının
 uygulanmasına izin verir. `max` ve `ultra` kabul edilirken kontrol paneli `low`
 ile `xhigh` arasını sunar.
 

@@ -3,7 +3,7 @@ title: Adaptörler
 description: Sağlayıcı adaptörleri — her birinin neyi hedeflediği, istekleri nasıl oluşturduğu ve kendine özgü yanları.
 ---
 
-Bir **adaptör**, opencodex'in dahili istek/yanıt modeli ile bir sağlayıcının hat
+Bir **adaptör**, OpenRelay'in dahili istek/yanıt modeli ile bir sağlayıcının hat
 formatı arasında çeviri yapar. Her adaptör `ProviderAdapter` arayüzünü
 (`src/adapters/base.ts`) uygular:
 
@@ -91,7 +91,7 @@ hedeflerine kimlik bilgisi gönderilmez.
   arabiriminde bunu dayatacak bir `tool_choice` alanı yoktur.
 - **Yapılandırılmış çıktı kanonik Ollama Cloud'da reddedilir.** Ollama şu anda yapılandırılmış
   çıktıyı Cloud'da desteklemediğini belgeliyor ve Cloud `format` alanını zorunlu kılmıyor; bu
-  yüzden OpenCodex, şema tanımlı bir isteğe karşılık serbest metin döndürmek yerine isteği kapatarak
+  yüzden OpenRelay, şema tanımlı bir isteğe karşılık serbest metin döndürmek yerine isteği kapatarak
   başarısız kılar. Yerel ve özel `ollama-native` uç noktaları Ollama'nın yerel `format` eşlemesini
   korur (`json_object` → `"json"`, `json_schema` → şema nesnesinin kendisi).
 
@@ -187,7 +187,7 @@ veya Google Antigravity OAuth.
   `gemini-2.0-flash-preview-image-generation` veya
   `gemini-3-pro-image-preview`), adaptör `responseModalities: ["TEXT", "IMAGE"]`
   gönderir. `gemini-3-pro-image` gibi bağımsız medya oluşturma kimlikleri dahil
-  edilmez. Döndürülen `inlineData` parçaları yapılandırılmış OpenCodex
+  edilmez. Döndürülen `inlineData` parçaları yapılandırılmış OpenRelay
   `artifacts/` dizini altında somutlaştırılır ve kimliği doğrulanmış donuk
   `/v1/opencodex/artifacts/<id>` rotasına markdown görsel bağlantıları olarak
   açığa çıkarılır (`file:` URI'leri veya ana bilgisayar dosya sistemi yolları
@@ -248,7 +248,7 @@ durmaları filtrelenmiş tamamlanmamış çıktı olarak görünür ve gerçek b
 çağrısı olmadan gelen bir `TOOL_USE` durması ilerleme olarak değerlendirilmek
 yerine bir çelişki olarak bildirilir.
 
-Sıradan bir istemci aracı mevcut olduğunda opencodex yukarı akış isteğine özel
+Sıradan bir istemci aracı mevcut olduğunda OpenRelay yukarı akış isteğine özel
 bir `codex_kiro_final_answer` aracı ekler; ilerleme metni yorum olarak akar ve
 turu sonlandıramaz. Adaptör özel çağrıyı tüketir, yanıtını son metin olarak
 yayar ve özel aracı asla Codex veya Claude Code'a açığa çıkarmaz. Durma nedeni
@@ -324,7 +324,7 @@ başlığından Cursor OAuth/erişim belirteci.
 - Olağan fetch/parse yolu yerine `runTurn` kullanır. İstekler ve sunucu olayları `devin/cloud-direct/wire.ts` içindeki elle yazılmış protobuf çerçevelemesiyle işlenir.
 - Modeller hesaba göre `GetCascadeModelConfigs` ile keşfedilir; pakette olmayanlar istek anında hata vermek yerine listeden düşer.
 - Cognition araç açıklamaları için uzunluk sınırı ve birebir ifade engeli uygular. Bağdaştırıcı bilinen ifadeleri yeniden yazar, uzun açıklamaları kırpar.
-- Anahtarlar yenilenmez. Süresi dolduğunda veya iptal edildiğinde `ocx login devin` komutunu yeniden çalıştırın.
+- Anahtarlar yenilenmez. Süresi dolduğunda veya iptal edildiğinde `orl login devin` komutunu yeniden çalıştırın.
 - CLI içe aktarma yolu kullanıldığında yerel olan yalnızca kimlik bilgisidir; tur her iki yolda da Cognition'a gider. Önceki bir sürüm, `devin-cli` kimliği altında turu yerel bir `devin acp` alt sürecine karşı Agent Client Protocol oturumu olarak çalıştıran ikinci bir bağdaştırıcıyla geliyordu. Kaldırıldı: o bağdaştırıcıyı hâlâ adlandıran kayıtlı bir yapılandırma, `"devin-acp"` gibi özel adlı bir satır da dahil olmak üzere başlangıçta `devin`'e yeniden yazılır.
 
 ## `azure-openai` (takma ad: `azure`)

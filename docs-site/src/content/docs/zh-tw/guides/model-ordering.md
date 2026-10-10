@@ -1,9 +1,9 @@
 ---
 title: 模型排序
-description: opencodex 如何確定 Codex 模型選擇器和 spawn_agent 模型 override 的順序。
+description: OpenRelay 如何確定 Codex 模型選擇器和 spawn_agent 模型 override 的順序。
 ---
 
-Codex 模型選擇器不會保留 opencodex 設定中 provider 的宣告順序或模型陣列順序。最終順序由目錄
+Codex 模型選擇器不會保留 OpenRelay 設定中 provider 的宣告順序或模型陣列順序。最終順序由目錄
 priority 決定；priority 相同的路由模型則使用確定性的字母順序。
 
 ## Codex 應用的規則
@@ -12,7 +12,7 @@ Codex 的 models-manager 按 `priority` 升序排列選擇器中可見的目錄�
 丟棄，因此在生成的 JSON 陣列中把某個條目前移，並不會讓它在選擇器中前移。該約束直接記錄在
 `src/codex/catalog/sync.ts` 中。
 
-因此，opencodex 透過分配更低的 priority 控制置頂位置，而不依賴陣列位置。相關 priority 如下：
+因此，OpenRelay 透過分配更低的 priority 控制置頂位置，而不依賴陣列位置。相關 priority 如下：
 
 以下優先級表與範例適用於未啟用完整選擇器排序的情況。
 
@@ -61,7 +61,7 @@ featured 列表非空時，最終順序為：
 3. 在目錄合併過程中被移到 featured 區塊之後的未選中原生模型。
 
 如果沒有 `subagentModels`，路由模型保持 priority `5`，原生 GPT 條目使用正常 priority
-（opencodex 建立的條目通常為 `9`），路由組內部仍按 provider/id 字母排序。
+（OpenRelay 建立的條目通常為 `9`），路由組內部仍按 provider/id 字母排序。
 
 ## 示例
 
@@ -95,7 +95,7 @@ subagentModels = [
 ## 更改順序
 
 要調整 `spawn_agent` 候選模型的順序，請重新排列 `subagentModels`。你可以在儀表板的
-**Sub-agents** 頁面或 opencodex 設定中修改它。該列表最多接受五個模型，其陣列順序有實際意義。
+**Sub-agents** 頁面或 OpenRelay 設定中修改它。該列表最多接受五個模型，其陣列順序有實際意義。
 
 `modelPickerOrder` 只控制選擇器的顯示順序。如果列表只有路由 ID `<provider>/<model>`，
 其中未置頂的列會按列表順序進入獨立的顯示區間（`1000 + i`）。未列出的路由列保留原有優先級，
@@ -121,15 +121,15 @@ subagentModels = [
 整個選擇器的排序，包括置頂列。要保留以前只調整路由列的行為，請移除裸 ID。
 未設定、空列表、只有空白項目的列表以及只有路由 ID 的列表都保留原有行為。
 
-`modelPickerOrder` 保留 OpenCodex 按原有優先級計算最多五個偏好候選項的規則，供子代理指引使用。
+`modelPickerOrder` 保留 OpenRelay 按原有優先級計算最多五個偏好候選項的規則，供子代理指引使用。
 每個移動列的原有優先級與原生 `priority` 分開儲存；僅改變選擇器順序不得改變這項計算結果。
 它也不會限制以精確模型名稱指定 override 的資格：公佈的列表不是允許清單，既有的驗證、模型、
 effort 與後端限制仍然適用。
 
 原生 Codex 按原生 `priority` 排序，從符合條件且在選擇器中可見的模型中取前五個，公佈在
-`spawn_agent` 中。這適用於 V1，以及開放模型 override 的 V2。因此，即使 OpenCodex 的偏好候選項
-不變，原生公佈的五個模型仍可能隨選擇器順序改變。V1 不接收 OpenCodex 注入的偏好模型列表。
-V2 在用戶端目錄狀態允許時，可以額外接收基於原有優先級的 OpenCodex 指引；這些指引不會重排
+`spawn_agent` 中。這適用於 V1，以及開放模型 override 的 V2。因此，即使 OpenRelay 的偏好候選項
+不變，原生公佈的五個模型仍可能隨選擇器順序改變。V1 不接收 OpenRelay 注入的偏好模型列表。
+V2 在用戶端目錄狀態允許時，可以額外接收基於原有優先級的 OpenRelay 指引；這些指引不會重排
 原生工具公佈的列表。
 
 `disabledModels` 和各供應商的 `selectedModels` 仍是可見性欄位。沒有獨立的 `modelOrder`、
@@ -141,4 +141,4 @@ V2 在用戶端目錄狀態允許時，可以額外接收基於原有優先級�
 
 `GET/PUT /api/subagent-models` 的 `chosen`、`available` 保留停用或缺少的已存 roster；`pickerAvailable` 僅包含可選路由 ID。Models 只傳送 `pickerOrder`、`pickerOrderMode`，不傳送 `models`。只儲存 roster 不影響排序；無效輸入或儲存失敗會保留原狀態。
 
-預設保留精選與原生優先級區間，套用於 Codex 目錄和 Claude 探索清單的路由群組。Claude 原生前綴、明確的 Desktop 設定及 alias 歸屬不變。OpenCodex 指引排序和 fallback 設定不變，但原生 Codex 工具顯示的前五個候選與建議預設模型可能改變。儲存不會重新啟動用戶端；目錄更新可能尚未完成，舊清單可能需要重新開啟用戶端。
+預設保留精選與原生優先級區間，套用於 Codex 目錄和 Claude 探索清單的路由群組。Claude 原生前綴、明確的 Desktop 設定及 alias 歸屬不變。OpenRelay 指引排序和 fallback 設定不變，但原生 Codex 工具顯示的前五個候選與建議預設模型可能改變。儲存不會重新啟動用戶端；目錄更新可能尚未完成，舊清單可能需要重新開啟用戶端。

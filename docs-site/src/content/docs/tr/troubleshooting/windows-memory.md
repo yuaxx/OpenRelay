@@ -1,9 +1,9 @@
 ---
 title: Windows Bellek Büyümesi
-description: Windows'ta bun sürecinin neden çok sayıda gigabayt RAM'e kadar büyüyebildiği, opencodex'in bugün bu konuda ne yaptığı ve yukarı akış Bun düzeltmeleri gelene kadar seçenekleriniz.
+description: Windows'ta bun sürecinin neden çok sayıda gigabayt RAM'e kadar büyüyebildiği, OpenRelay'in bugün bu konuda ne yaptığı ve yukarı akış Bun düzeltmeleri gelene kadar seçenekleriniz.
 ---
 
-Bazı Windows kullanıcıları, uzun akış oturumları sırasında opencodex'in
+Bazı Windows kullanıcıları, uzun akış oturumları sırasında OpenRelay'in
 arkasındaki `bun` sürecinin çok sayıda gigabayt RSS'ye kadar büyüdüğünü
 görmektedir ([#314](https://github.com/lidge-jun/opencodex/issues/314) numaralı
 sorun olarak bildirilmiştir). Bu sayfa gerçekte ne olduğunu ve bu konuda
@@ -11,7 +11,7 @@ dürüstçe neler yapabileceğinizi açıklamaktadır.
 
 ## Temel neden: yukarı akış Bun çalışma zamanı sorunları
 
-opencodex, Bun çalışma zamanını (şu anda **1.3.14**) paketler. Bellek büyümesi,
+OpenRelay, Bun çalışma zamanını (şu anda **1.3.14**) paketler. Bellek büyümesi,
 proxy'deki JavaScript düzeyindeki sızıntılardan değil, bilinen yukarı akış Bun
 sorunlarından kaynaklanmaktadır:
 
@@ -21,13 +21,13 @@ sorunlarından kaynaklanmaktadır:
 | [#32111](https://github.com/oven-sh/bun/issues/32111) — bir istemci zaman uyumsuz çekme (async-pull) akışını iptal ettiğinde çökme | Düzeltme [PR #32120](https://github.com/oven-sh/bun/pull/32120) 2026-06-21 tarihinde birleştirildi; 1.3.14'te mevcut olduğu varsayılmıyor. Not: Bu çökme **Windows'a özgü değildir** (macOS/Linux'ta da yeniden üretildi) |
 | [PR #31654](https://github.com/oven-sh/bun/pull/31654) — `node:net` soket tanıtıcısı sızıntısı | Yukarı akışta hala **açık** |
 
-Windows'ta opencodex, #32111 çökmesini önlemek için akış yanıtlarını muhafazakar
+Windows'ta OpenRelay, #32111 çökmesini önlemek için akış yanıtlarını muhafazakar
 bir kod yolunda tutmalıdır ve bu yol, geri basınç sorununa en çok maruz kalan
 yoldur: yavaş veya durmuş bir istemci, çalışma zamanının yukarı akış verilerini
 JavaScript'in sınırlayamayacağı yerel bellekte arabelleğe almasına neden
 olabilir.
 
-## opencodex bugün ne yapıyor
+## OpenRelay bugün ne yapıyor
 
 Sınırlı azaltma ve görünürlük — **bir düzeltme değil**. Paketlenmiş 1.3.14
 çalışma zamanında sızıntının kendisi bir yukarı akış sorunu olarak kalır:
@@ -37,7 +37,7 @@ Sınırlı azaltma ve görünürlük — **bir düzeltme değil**. Paketlenmiş 
   kaydeder. Gözlemlenen bellek, RSS, `external` ve `arrayBuffers`'ın en
   büyüğüdür (toplamları değil), çünkü Windows çalışma kümesi/RSS sayaçları
   taahhüt edilen harici tutmayı eksik bildirebilir.
-- **`ocx doctor`** — bir "Bellek / çalışma zamanı" bölümü *servis* sürecinin Bun
+- **`orl doctor`** — bir "Bellek / çalışma zamanı" bölümü *servis* sürecinin Bun
   sürümünü, RSS'yi, external/ArrayBuffers sayaçlarını, JS yığın bağlamını ve
   akış modu kararını gösterir. Paketlenmiş Bun 1.3.14 çalışma zamanında tek
   başına `heapUsed` / `jscHeap` bir sızıntı ayrımcısı değildir; uygulama
@@ -82,11 +82,11 @@ onu zaten yeniden başlatır.
 ## Seçenekleriniz
 
 1. **Paketlenmiş bir çalışma zamanı güncellemesini bekleyin.** Bir Bun sürümü
-   düzeltmeleri doğrulanabilir şekilde taşıdığında opencodex paketlenmiş çalışma
+   düzeltmeleri doğrulanabilir şekilde taşıdığında OpenRelay paketlenmiş çalışma
    zamanını yükseltecektir ve daha güvenli akış yolu Windows'ta otomatik olarak
    açılacaktır (macOS aşağıdaki açık katılımı gerektirmeye devam eder).
 
-2. **`OPENCODEX_BUN_PATH` ile güvendiğiniz bir Bun çalışma zamanı kullanın.** Aynı kabukta `ocx` başlatılmadan önce değişkeni ayarlayın, ardından seçilen çalışma zamanını hizmet tanımına yazmak için `ocx service repair` çalıştırın. Sonradan yüklenen proje `.env` dosyası seçimi değiştirmez. Yalnızca ortam değişkenini değiştirmek kurulu hizmeti güncellemez.
+2. **`OPENCODEX_BUN_PATH` ile güvendiğiniz bir Bun çalışma zamanı kullanın.** Aynı kabukta `ocx` başlatılmadan önce değişkeni ayarlayın, ardından seçilen çalışma zamanını hizmet tanımına yazmak için `orl service repair` çalıştırın. Sonradan yüklenen proje `.env` dosyası seçimi değiştirmez. Yalnızca ortam değişkenini değiştirmek kurulu hizmeti güncellemez.
 
 3. **`streamMode: "eager-relay"` ile sınırlı aktarıma katılın.** İki yol vardır:
    `config.json` dosyasını düzenleyin (`"streamMode": "eager-relay"` ekleyin)
@@ -102,13 +102,13 @@ onu zaten yeniden başlatır.
 
 Bunlardan herhangi birini gerçek bir Windows iş yükünde denerseniz lütfen
 [#314](https://github.com/lidge-jun/opencodex/issues/314) üzerinde önceki ve
-sonraki `ocx doctor` bellek bölümlerini bildirin — bu azaltmanın beklediği
+sonraki `orl doctor` bellek bölümlerini bildirin — bu azaltmanın beklediği
 doğrulama tam olarak budur.
 
 
 
 ## Windows seçilen çalışma zamanı yazma reddi
 
-Windows hizmet kurulumu ve onarımı ile Codex shim kurulumu ve yenilemesi, seçilen yürütülebilir dosyanın OpenCodex yapılandırma kökünde bir dizin oluşturup kaldırabildiğini denetler. Bu bir yazma politikası denetimidir; bellek düzeltmesi değildir. Başarısızlık hizmet durdurma, indirme, hazırlama, belirteç veya başlatıcı yazma işlemlerinden önce reddedilir. Otomatik shim onarımı yönlendirmeyle ertelenir ve başlangıç devam eder. Sağlıklı veya devre dışı shim denetlenmez. Başka çalışma zamanı aranmaz. İlk zamanlayıcı kurulumu bu denetimden önce görevini kaydeder ve yapılandırma kökünü sahiplenir; ret durumunda yeni kayıt geri alınır ve sahiplenilen kök yeniden deneme için kalır.
+Windows hizmet kurulumu ve onarımı ile Codex shim kurulumu ve yenilemesi, seçilen yürütülebilir dosyanın OpenRelay yapılandırma kökünde bir dizin oluşturup kaldırabildiğini denetler. Bu bir yazma politikası denetimidir; bellek düzeltmesi değildir. Başarısızlık hizmet durdurma, indirme, hazırlama, belirteç veya başlatıcı yazma işlemlerinden önce reddedilir. Otomatik shim onarımı yönlendirmeyle ertelenir ve başlangıç devam eder. Sağlıklı veya devre dışı shim denetlenmez. Başka çalışma zamanı aranmaz. İlk zamanlayıcı kurulumu bu denetimden önce görevini kaydeder ve yapılandırma kökünü sahiplenir; ret durumunda yeni kayıt geri alınır ve sahiplenilen kök yeniden deneme için kalır.
 
 > Seçilen Bun çalışma zamanı yapılandırma dizininde bir dizin oluşturup kaldıramadı. Windows uygulama politikası bu yürütülebilir konumundan yazmayı engelleyebilir. `ocx` başlatılmadan önce `OPENCODEX_BUN_PATH` değerini politikanızın izin verdiği güvenilir Bun yürütülebilir dosyasına ayarlayın veya `npm install -g @bitkyc08/opencodex` ile yeniden kurup tekrar deneyin. Başka çalışma zamanı seçilmedi.

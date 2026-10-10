@@ -3,13 +3,13 @@ title: Geçici dosyaların disk kullanımı
 description: responses-state.json.ocx.*.tmp dosyalarının ne olduğu, neden birikebildikleri ve nasıl temizlenecekleri.
 ---
 
-Bazı kullanıcılar, opencodex ev dizinlerinde (varsayılan `~/.opencodex`)
+Bazı kullanıcılar, OpenRelay ev dizinlerinde (varsayılan `~/.opencodex`)
 `responses-state.json.ocx.<pid>.<seq>.tmp` biçiminde adlandırılmış ve her
 yeniden başlatmadan sonra büyüyen gigabaytlarca dosya buldu.
 
 ## Bu dosyalar nedir?
 
-opencodex, `previous_response_id` zincirlerinin proxy yeniden başlatıldıktan
+OpenRelay, `previous_response_id` zincirlerinin proxy yeniden başlatıldıktan
 sonra da sürmesi için bir devam önbelleği tutar. Anlık görüntüyü atomik olarak
 yazar: içerik önce geçici dosyaya gider, ardından gerçek dosya tek adımda
 değiştirilir. Bu, yazma ortasında bir çökme olduğunda yarım yazılmış bir anlık
@@ -41,7 +41,7 @@ Yeniden başlatmanın ardından işletim sistemi aynı süreç kimliklerini yeni
 verebilir; eski bir dosya kalıcı olarak çalışan bir sürece ait sanılabilirdi.
 Büyümenin yeniden başlatmaları izlemesinin nedeni budur.
 
-## opencodex şimdi ne yapıyor?
+## OpenRelay şimdi ne yapıyor?
 
 Temizlik yalnızca başlangıçta bir kez çalışmak yerine proxy'nin normal arka
 plan zamanlayıcısında yinelenir; çalışan proxy terk edilmiş dosyaları kendi
@@ -65,7 +65,7 @@ izinleri proxy'nin altından değişen dosya ise olduğu gibi bırakılmak yerin
 güçlendirilmiş yoldan yeniden yazılır.
 
 Her olağan arka plan çevrimi en fazla bir tam atomik yeniden yazma yapar. Yazma
-sürerken devam önbelleği değişirse opencodex tüm anlık görüntüyü hemen yeniden
+sürerken devam önbelleği değişirse OpenRelay tüm anlık görüntüyü hemen yeniden
 yazmak yerine normal gecikmeli çevrimde bir takip yazması planlar. Düzgün
 kapatma, devam eden istekler bittikten sonra sınırlı yeniden deneme davranışını
 korur; böylece son anlık görüntü süreç çıkmadan yetişebilir.
@@ -87,7 +87,7 @@ Proxy **başlamıyorsa** — yığının en hızlı büyüdüğü durum — komu
 denetleyip temizleyin:
 
 ```bash
-ocx doctor
+orl doctor
 ```
 
 "Response-state temp files" bölümü, temizlenebilir dosya sayısını ve kullandıkları
@@ -96,7 +96,7 @@ alanı bildirir. Yalnızca raporlar; hiçbir şeyi değiştirmez.
 Bunları gerçekten kaldırmak için:
 
 ```bash
-ocx doctor --reclaim-response-temps
+orl doctor --reclaim-response-temps
 ```
 
 Her iki komut da çalışan proxy olmadan çalışır. Başka bir sürecin kilitlediği

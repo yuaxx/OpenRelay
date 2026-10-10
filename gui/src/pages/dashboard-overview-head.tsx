@@ -5,6 +5,7 @@ import { formatUptime } from "../formatUptime";
 import { navigateHash } from "../hash-routing";
 import type { useDashboardData } from "./use-dashboard-data";
 import { UsageIncompleteNotice } from "../components/usage-incomplete-notice";
+import { Metric } from "../components/ui/Metric";
 
 type Dash = ReturnType<typeof useDashboardData>;
 
@@ -31,7 +32,19 @@ export function DashboardOverviewHead({
   return (
     <>
       <div className="dash-overview-head">
-        <div className="stat-row">
+        <div className="or-metrics or:grid or:grid-cols-2 or:gap-3 or:xl:grid-cols-5">
+          <Metric label={t("dash.status")} busy={healthLoading} tone={!health ? "neutral" : online ? "ok" : "error"}
+            value={!health && healthLoading ? t("common.loading") : <><span className={`dot ${online ? "dot-green" : "dot-red"}`} aria-hidden="true" />{t(online ? "dash.online" : "dash.offline")}</>} />
+          <Metric label={t("dash.version")} busy={healthLoading} value={<span title={health?.version}>{health?.version ?? "—"}</span>} />
+          <Metric label={t("dash.uptime")} busy={healthLoading} value={health ? formatUptime(health.uptime, locale) : "—"} />
+          <Metric label={t("dash.providers")} busy={healthLoading} value={providers.length} />
+          <Metric label={t("dash.tokens30d")} busy={usageLoading}
+            value={usage30d && usage30d.summary.requests > 0 ? formatTokens(usage30d.summary.totalTokens, locale) : "—"}
+            detail={usage30d && usage30d.summary.requests > 0
+              ? t("dash.coverage").replace("{pct}", `${Math.round(usage30d.summary.coverageRatio * 100)}%`) : undefined} />
+        </div>
+
+        <div className="or-runtime-controls">
           <div className="stat">
             <div className="label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
               {t("dash.multiAgent")}
@@ -71,24 +84,6 @@ export function DashboardOverviewHead({
               </div>
             )}
          </div>
-         <div className="stat" aria-busy={healthLoading || undefined}>
-           <div className="label">{t("dash.status")}</div>
-            <div className="value" style={{ display: "flex", alignItems: "center", gap: 9, color: online ? "var(--green)" : "var(--red)" }}>
-              <span className={`dot ${online ? "dot-green" : "dot-red"}`} />{online ? t("dash.online") : t("dash.offline")}
-            </div>
-          </div>
-          <div className="stat" aria-busy={healthLoading || undefined}><div className="label">{t("dash.version")}</div><div className="value mono dash-stat-version" title={health?.version}>{health?.version ?? "—"}</div></div>
-          <div className="stat" aria-busy={healthLoading || undefined}><div className="label">{t("dash.uptime")}</div><div className="value mono">{health ? formatUptime(health.uptime, locale) : "—"}</div></div>
-          <div className="stat" aria-busy={healthLoading || undefined}><div className="label">{t("dash.providers")}</div><div className="value">{providers.length}</div></div>
-          <div className="stat" aria-busy={usageLoading || undefined}>
-            <div className="label">{t("dash.tokens30d")}</div>
-            <div className="value mono">{usage30d && usage30d.summary.requests > 0 ? formatTokens(usage30d.summary.totalTokens, locale) : "—"}</div>
-            <div className="muted text-label dash-stat-coverage">
-              {usage30d && usage30d.summary.requests > 0
-                ? t("dash.coverage").replace("{pct}", `${Math.round(usage30d.summary.coverageRatio * 100)}%`)
-                : "\u00a0"}
-            </div>
-          </div>
         </div>
 
         <div className="startup-health-slot" aria-live="polite">

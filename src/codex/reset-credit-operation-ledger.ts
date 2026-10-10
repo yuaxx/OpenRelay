@@ -941,8 +941,8 @@ function warnLedgerUnavailable(error: unknown): void {
   // Native SQLite and filesystem errors may contain absolute, account-bearing
   // paths. Keep this warning categorical rather than forwarding error.message.
   console.warn(nested
-    ? "[opencodex] Reset-credit operation ledger refused a nested config mutation."
-    : "[opencodex] Reset-credit operation ledger is unavailable.");
+    ? "[openrelay] Reset-credit operation ledger refused a nested config mutation."
+    : "[openrelay] Reset-credit operation ledger is unavailable.");
 }
 
 function reportManualHistoryCapacity(count: number): void {
@@ -955,7 +955,7 @@ function reportManualHistoryCapacity(count: number): void {
   reportedManualHistoryLevel = level;
   try {
     console.warn(
-      `[opencodex] Reset-credit manual operation history is at ${count}/${MAX_MANUAL_RESET_CREDIT_OPERATION_IDS} entries${
+      `[openrelay] Reset-credit manual operation history is at ${count}/${MAX_MANUAL_RESET_CREDIT_OPERATION_IDS} entries${
         level === MAX_MANUAL_RESET_CREDIT_OPERATION_IDS
           ? "; new manual operation IDs, including aliases, are disabled until a maintainer expands capacity or applies an approved retirement policy."
           : "."

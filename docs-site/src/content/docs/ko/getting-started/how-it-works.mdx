@@ -1,11 +1,11 @@
 ---
 title: 작동 방식
-description: opencodex의 전체 요청 수명 주기 — parse, route, adapt, bridge, stream.
+description: OpenRelay의 전체 요청 수명 주기 — parse, route, adapt, bridge, stream.
 ---
 
 import { Steps } from '@astrojs/starlight/components';
 
-Codex는 OpenAI **Responses API**를 사용합니다. opencodex는 HTTP와 Server-Sent Events로 들어오는
+Codex는 OpenAI **Responses API**를 사용합니다. OpenRelay는 HTTP와 Server-Sent Events로 들어오는
 `POST /v1/responses` 요청을 받으며, 같은 경로의 WebSocket upgrade도 선택적으로 지원합니다.
 요청은 프로바이더의 wire 포맷으로, 응답은 다시 Responses 이벤트로 바뀌므로 Codex 쪽에서는
 OpenAI가 아닌 모델과 통신한다는 사실을 알 필요가 없습니다.
@@ -26,7 +26,7 @@ OpenAI가 아닌 모델과 통신한다는 사실을 알 필요가 없습니다.
 
 ## Codex 인증 계정 선택
 
-선택된 프로바이더가 ChatGPT/Codex 패스스루일 때, opencodex는 업스트림으로 전달하기 전에 저장된
+선택된 프로바이더가 ChatGPT/Codex 패스스루일 때, OpenRelay는 업스트림으로 전달하기 전에 저장된
 pool 계정을 고를 수 있습니다. 규칙은 의도적으로 둘로 나뉩니다.
 
 - **기존 thread id는 같은 계정을 유지합니다.** thread는 시작할 때 선택된 account generation에
@@ -79,13 +79,13 @@ reasoning effort를 알려 줍니다. v2 요청은 Codex가 제공하는 멀티 
    (`claude-`, `gpt-`, `o1-`/`o3-`/`o4-`, `llama-`/`mixtral-`/`gemma-`) → 프로바이더의 `models[]` →
    `defaultProvider` 폴백. [모델 라우팅](/ko/guides/model-routing/)을 참고하세요.
 
-3. **Authenticate** — `oauth` 프로바이더의 경우, opencodex가 새로 자동 갱신된 access
+3. **Authenticate** — `oauth` 프로바이더의 경우, OpenRelay가 새로 자동 갱신된 access
    토큰을 bearer 키로 교체하므로, 기존 adapter들은 변경 없이 인증됩니다. ChatGPT/Codex pool
    계정에서는 `codex/auth-context.ts`가 먼저 계정을 해석하고, 필요한 pool credential이 없으면
    passthrough adapter가 계속 진행하지 않습니다.
 
 4. **Vision sidecar(선택)** — 라우팅된 모델이 `provider.noVisionModels`에 나열되어 있고
-   요청에 이미지가 포함된 경우, opencodex는 설정된 ChatGPT vision sidecar로 각 이미지를 설명한
+   요청에 이미지가 포함된 경우, OpenRelay는 설정된 ChatGPT vision sidecar로 각 이미지를 설명한
    뒤 텍스트로 치환합니다. 덕분에 텍스트 전용 모델도 해당 이미지에 대해 추론할 수 있습니다.
    [Sidecar](/ko/guides/sidecars/)를 참고하세요.
 
@@ -94,7 +94,7 @@ reasoning effort를 알려 줍니다. v2 요청은 Codex가 제공하는 멀티 
    프로바이더 응답은 `AdapterEvent`로 변환하지 않고 그대로 전달합니다.
 
 6. **Web-search sidecar(선택)** — Codex가 호스팅 `web_search`를 활성화했지만 라우팅된 모델이
-   OpenAI가 아닌 경우, opencodex는 합성 `web_search` function tool을 노출하고 모델을 작은
+   OpenAI가 아닌 경우, OpenRelay는 합성 `web_search` function tool을 노출하고 모델을 작은
    에이전트 루프로 실행하면서, 기본값인 `gpt-5.6-luna`를 ChatGPT 로그인으로 호출해 실제 검색을 수행하고
    그 결과를 tool result로 다시 주입합니다.
 
@@ -103,7 +103,7 @@ reasoning effort를 알려 줍니다. v2 요청은 Codex가 제공하는 멀티 
    라우팅 모델에서는 도구 없이 요약을 실행해 Codex가 요구하는 대체 대화 기록 형식을 반환합니다.
 
 8. **Adapt** — 그 외의 경우, 선택된 adapter의 `buildRequest()`가 프로바이더의 네이티브
-   포맷으로 업스트림 HTTP 요청(URL, 헤더, 본문)을 생성하고, opencodex가 이를 `fetch`합니다.
+   포맷으로 업스트림 HTTP 요청(URL, 헤더, 본문)을 생성하고, OpenRelay가 이를 `fetch`합니다.
 
 9. **Bridge** — adapter의 `parseStream()`(또는 `parseResponse()`)이 내부 `AdapterEvent`를
    생성합니다(텍스트, reasoning, tool-call start/delta/end, done, error). `bridge.ts`는 그 스트림을
@@ -115,7 +115,7 @@ reasoning effort를 알려 줍니다. v2 요청은 Codex가 제공하는 멀티 
 
 ## 왜 Codex 포크가 아니라 프록시인가?
 
-Codex는 Responses API를 하드코딩하고 있습니다. opencodex는 프로토콜 경계에서 변환을 수행함으로써
+Codex는 Responses API를 하드코딩하고 있습니다. OpenRelay는 프로토콜 경계에서 변환을 수행함으로써
 Codex **CLI, App, SDK**를 변경 없이 그대로 지원하고, Codex 업데이트에도 영향을 받지 않으며,
 Codex 자체를 건드리지 않고 요청마다 프로바이더를 전환할 수 있게 합니다. 이 변환은 양방향이며
 스트리밍에 충실합니다: reasoning 요약, MCP tool 네임스페이스, freeform(`apply_patch`) tool,

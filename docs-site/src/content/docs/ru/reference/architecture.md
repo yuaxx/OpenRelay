@@ -1,9 +1,9 @@
 ---
 title: Архитектура
-description: Внутреннее устройство opencodex — карта модулей, мост AdapterEvent, парсер запросов и кэширование.
+description: Внутреннее устройство OpenRelay — карта модулей, мост AdapterEvent, парсер запросов и кэширование.
 ---
 
-opencodex — это один процесс Bun. Запрос приходит как OpenAI Responses, нормализуется во
+OpenRelay — это один процесс Bun. Запрос приходит как OpenAI Responses, нормализуется во
 внутреннюю модель, маршрутизируется, отправляется провайдеру через адаптер и мостом
 преобразуется обратно в Responses SSE. Сквозной поток описан в разделе
 [Как это работает](/ru/getting-started/how-it-works/).
@@ -12,7 +12,7 @@ opencodex — это один процесс Bun. Запрос приходит 
 
 ```
 src/
-├── cli/                # ocx command dispatch, init, status, provider commands
+├── cli/                # orl command dispatch, init, status, provider commands
 ├── server/             # Bun.serve, /v1/* proxy, /api/* management API, WS bridge
 ├── codex/              # Codex config injection, catalog sync, auth/account integration
 ├── providers/          # provider metadata, API-key pool, quota and labels
@@ -151,7 +151,7 @@ loopback; настроенные записи `corsAllowOrigins` расширя�
 ## Транспорт и compaction
 
 `server/index/serve-options.ts` по умолчанию обслуживает HTTP/SSE на `/v1/responses`. Если Codex пытается
-выполнить WebSocket-апгрейд Responses, пока `websockets` равно `false`, opencodex возвращает
+выполнить WebSocket-апгрейд Responses, пока `websockets` равно `false`, OpenRelay возвращает
 `426 upgrade_required`; Codex тогда откатывается на HTTP для этой сессии. Когда установлено
 `"websockets": true`, та же конечная точка принимает апгрейд и использует WebSocket-мост.
 

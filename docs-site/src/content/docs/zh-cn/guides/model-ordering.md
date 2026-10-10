@@ -1,9 +1,9 @@
 ---
 title: 模型排序
-description: opencodex 如何确定 Codex 模型选择器和 spawn_agent 模型 override 的顺序。
+description: OpenRelay 如何确定 Codex 模型选择器和 spawn_agent 模型 override 的顺序。
 ---
 
-Codex 模型选择器不会保留 opencodex 配置中 provider 的声明顺序或模型数组顺序。最终顺序由目录
+Codex 模型选择器不会保留 OpenRelay 配置中 provider 的声明顺序或模型数组顺序。最终顺序由目录
 priority 决定；priority 相同的路由模型则使用确定性的字母顺序。
 
 ## Codex 应用的规则
@@ -12,7 +12,7 @@ Codex 的 models-manager 按 `priority` 升序排列选择器中可见的目录�
 丢弃，因此在生成的 JSON 数组中把某个条目前移，并不会让它在选择器中前移。该约束直接记录在
 `src/codex/catalog/sync.ts` 中。
 
-因此，opencodex 通过分配更低的 priority 控制置顶位置，而不依赖数组位置。本表中的固定值及下例适用于
+因此，OpenRelay 通过分配更低的 priority 控制置顶位置，而不依赖数组位置。本表中的固定值及下例适用于
 没有有效账户 selector 的配置。存在 `N` 个 selector 时，配置 rank 为 `i` 的置顶裸原生模型会展开为
 priority 为 `i * N + j` 的 selector 行，其中 `j` 是从 0 开始的 selector 位置。置顶的路由行使用
 `i * N`，精确的账户限定原生 id 使用其 selector 对应的 `i * N + j`。Codex 仍只公布选择器中可见的
@@ -67,7 +67,7 @@ priority，因此 Codex 的 priority 排序会保留这个开头序列。
 3. 在目录合并过程中被移到 featured 区块之后的未选中原生模型。
 
 如果没有 `subagentModels`，路由模型保持 priority `5`，原生 GPT 条目使用正常 priority
-（opencodex 创建的条目通常为 `9`），路由组内部仍按 provider/id 字母排序。
+（OpenRelay 创建的条目通常为 `9`），路由组内部仍按 provider/id 字母排序。
 
 ## 示例
 
@@ -103,7 +103,7 @@ subagentModels = [
 ## 更改顺序
 
 自定义开头模型顺序的受支持方式是重新排列 `subagentModels`。仪表盘的 **Sub-agents** 页面可以调整
-裸原生和路由 id 的顺序。配置和 `ocx agent subagents set` 也接受精确的账户限定
+裸原生和路由 id 的顺序。配置和 `orl agent subagents set` 也接受精确的账户限定
 `<selector>/<native-openai-model>` id，仪表盘会保留已保存的 id，即使当前不可用。配置的
 id 请勿超过五个。存在账户 selector 时，一个裸原生选项可能展开为多个 selector-qualified 行，因此
 已配置的选项与公布的行不一定一一对应。
@@ -132,15 +132,15 @@ id 请勿超过五个。存在账户 selector 时，一个裸原生选项可能�
 整个选择器的排序，包括置顶行。要保持以前只调整路由行的行为，请移除裸 ID。
 未设置、空列表、只有空白条目的列表以及只有路由 ID 的列表都保留原有行为。
 
-`modelPickerOrder` 保留 OpenCodex 按原有优先级计算最多五个首选候选项的规则，供子代理指导使用。
+`modelPickerOrder` 保留 OpenRelay 按原有优先级计算最多五个首选候选项的规则，供子代理指导使用。
 每个移动行的原有优先级与原生 `priority` 分开保存；仅改变选择器顺序不得改变这一计算结果。
 它也不会限制通过精确模型名称指定 override 的资格：公布的列表不是允许列表，现有的认证、模型、
 effort 和后端限制仍然适用。
 
 原生 Codex 按原生 `priority` 排序，从符合条件且在选择器中可见的模型中取前五个，公布在
-`spawn_agent` 中。这适用于 V1，以及公开模型 override 的 V2。因此，即使 OpenCodex 的首选候选项
-不变，原生公布的五个模型仍可能随选择器顺序改变。V1 不接收 OpenCodex 注入的首选模型列表。
-V2 在客户端目录状态允许时，可以额外接收基于原有优先级的 OpenCodex 指导；这些指导不会重排
+`spawn_agent` 中。这适用于 V1，以及公开模型 override 的 V2。因此，即使 OpenRelay 的首选候选项
+不变，原生公布的五个模型仍可能随选择器顺序改变。V1 不接收 OpenRelay 注入的首选模型列表。
+V2 在客户端目录状态允许时，可以额外接收基于原有优先级的 OpenRelay 指导；这些指导不会重排
 原生工具公布的列表。
 
 `disabledModels` 和各提供商的 `selectedModels` 仍是可见性字段。没有独立的 `modelOrder`、
@@ -152,4 +152,4 @@ V2 在客户端目录状态允许时，可以额外接收基于原有优先级�
 
 `GET/PUT /api/subagent-models` 的 `chosen`、`available` 保留禁用或缺失的已存 roster；`pickerAvailable` 只包含可选路由 ID。Models 只发送 `pickerOrder`、`pickerOrderMode`，不发送 `models`。只保存 roster 不影响排序，非法输入或保存失败会保留原状态。
 
-预设保留精选、原生优先级区间，应用于 Codex 目录与 Claude 发现列表的路由分组。Claude 原生前缀、明确的 Desktop 配置及 alias 归属不变。OpenCodex 指导排序与 fallback 设置不变，但原生 Codex 工具显示的前五候选及推荐默认模型可能改变。保存不会重启客户端；目录刷新可能尚未完成，旧列表可能需要重新打开客户端。
+预设保留精选、原生优先级区间，应用于 Codex 目录与 Claude 发现列表的路由分组。Claude 原生前缀、明确的 Desktop 配置及 alias 归属不变。OpenRelay 指导排序与 fallback 设置不变，但原生 Codex 工具显示的前五候选及推荐默认模型可能改变。保存不会重启客户端；目录刷新可能尚未完成，旧列表可能需要重新打开客户端。

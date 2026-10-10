@@ -264,7 +264,7 @@ async function tick(): Promise<void> {
     if (outcome.changed) {
       // Privacy scan: no provider names, model ids, paths, or account identifiers.
       console.info(reloadRequired
-        ? "[catalog-auto-refresh] served model set changed; running Codex sessions keep the old list until restarted (ocx sync --restart-codex)"
+        ? "[catalog-auto-refresh] served model set changed; running Codex sessions keep the old list until restarted (orl sync --restart-codex)"
         : "[catalog-auto-refresh] served model set changed");
     }
     const fanout = clientFanout;
@@ -273,9 +273,9 @@ async function tick(): Promise<void> {
       try {
         const failed = (await fanout(current)).filter(result => !result.ok).length;
         // Outcomes can contain private paths and reasons; only the failure count leaves this hook.
-        if (current() && failed > 0) console.warn(`[catalog-auto-refresh] ${failed} client integration(s) were not refreshed; ocx sync retries them`);
+        if (current() && failed > 0) console.warn(`[catalog-auto-refresh] ${failed} client integration(s) were not refreshed; orl sync retries them`);
       } catch {
-        if (current()) console.warn("[catalog-auto-refresh] client integrations were not refreshed; ocx sync retries them");
+        if (current()) console.warn("[catalog-auto-refresh] client integrations were not refreshed; orl sync retries them");
       }
     }
   } catch {

@@ -11,7 +11,7 @@ description: 리스너, 원격 접근, admission 키, 타임아웃, 저장소, �
 | --- | --- | --- | --- |
 | `port` | `number` | `10100` | 프록시 수신 포트입니다. |
 | `hostname?` | `string` | `"127.0.0.1"` | 바인드 주소입니다. 루프백이 아닌 바인드에는 데이터 admission 토큰이 필요하며, `OPENCODEX_API_AUTH_TOKEN` → `OCX_API_TOKEN_FILE` → 설치된 owner-only `service-api-token` 순서로 결정됩니다. 손으로 내보낼 값은 없습니다. [Remote access](#remote-access)를 보세요. |
-| `proxy?` | `string` | — | 송신용 HTTP(S) 또는 SOCKS5 프록시 URL(`socks5://host:port`) 또는 `${ENV_VAR}`입니다. HTTP URL은 해당 변수가 비어 있을 때 `HTTP_PROXY` / `HTTPS_PROXY`에 적용됩니다. SOCKS5 URL은 내장 SOCKS5 터널을 사용하고 `ALL_PROXY`에도 적용되며(`ocx start --socks5`), 이 프로세스에서 상속된 `HTTP(S)_PROXY`를 지웁니다. 루프백은 `NO_PROXY`에 그대로 남습니다. |
+| `proxy?` | `string` | — | 송신용 HTTP(S) 또는 SOCKS5 프록시 URL(`socks5://host:port`) 또는 `${ENV_VAR}`입니다. HTTP URL은 해당 변수가 비어 있을 때 `HTTP_PROXY` / `HTTPS_PROXY`에 적용됩니다. SOCKS5 URL은 내장 SOCKS5 터널을 사용하고 `ALL_PROXY`에도 적용되며(`orl start --socks5`), 이 프로세스에서 상속된 `HTTP(S)_PROXY`를 지웁니다. 루프백은 `NO_PROXY`에 그대로 남습니다. |
 | `emptyCompletionRetry?` | `boolean` | `false` | 텍스트나 도구 호출이 없는 Responses 턴을, 터미널 이벤트 전에 스트림이 종료된 경우를 포함해 동일한 요청으로 한 번 재시도하도록 선택합니다. 재시도에는 비용이 발생할 수 있습니다. `OCX_EMPTY_COMPLETION_RETRY=0`은 설정을 바꾸지 않고 비활성화하며, combo 및 routed-compaction turn은 제외됩니다. |
 | `dropCodexSafetyBuffering?` | `boolean` | `false` | Canonical Codex Responses 응답의 선택적 safety-buffering 헤더 두 개와 SSE 힌트를 제거합니다. 공급자의 안전 정책이나 거절 응답은 바뀌지 않습니다. Native WS 메타데이터와 compact는 제외됩니다. |
 | `stallTimeoutSec?` | `number` | `300`(public) / 비활성(local) | 스트림이 끊기기까지 유효한 업스트림 진행이 없는 시간(초, Responses 및 네이티브 Chat). 미설정 시 **로컬** 업스트림(loopback, private, `.local`/`.lan` 이름)은 비활성이 기본이고 공개 업스트림은 300초. 양수 값은 둘 다에 적용(최소 1초), `0`은 무응답 watchdog을 전면 비활성화한다. canonical ChatGPT SSE를 비스트리밍 JSON으로 접는 Responses 요청에는 이 watchdog이 꺼져도 별도의 15분 전체 상한이 남는다. `/v1/responses/compact`의 보류 바디 읽기도 이 예산을 공유하지만 로컬 업스트림에서도 기본은 300초. 명시 값(`0` 포함)이 우선한다. |
@@ -23,15 +23,15 @@ description: 리스너, 원격 접근, admission 키, 타임아웃, 저장소, �
 | `storageCleanupPolicy?` | `StorageCleanupPolicy` | disabled | 선택적으로 활성화하는 보관 세션 정리 정책입니다. 절대 암묵적으로 활성화되지 않습니다. |
 | `appOwnedMemoryBudgetMb?` | `number` | `256` | 제거 가능한 앱 소유 로그, 캐시, blob, continuation payload에 대한 MiB 단위 상한입니다. 범위는 64–4096이며 RSS 상한은 아닙니다. |
 | `metricsExport.enabled?` | `boolean` | `false` | 인증된 `GET /api/metrics`에서 프로세스 로컬 집계 요청 메트릭을 활성화합니다. 재시작이 필요하며, 비활성화 상태에서는 404를 반환하고 exporter 동작을 시작하지 않습니다. |
-| `codexAutoStart?` | `boolean` | `true` | Codex shim이 Codex를 실행하기 전에 `ocx ensure`를 돌리도록 허용합니다. `false`이면 ensure는 아무 작업도 하지 않습니다. |
+| `codexAutoStart?` | `boolean` | `true` | Codex shim이 Codex를 실행하기 전에 `orl ensure`를 돌리도록 허용합니다. `false`이면 ensure는 아무 작업도 하지 않습니다. |
 | `codexShimAutoRestore?` | `boolean` | `true` | 완료된 외부 Codex 업데이트가 설치된 shim을 교체한 뒤 복원합니다. 환경 변수로 끌 수 있습니다: `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0`. |
-| `syncResumeHistory?` | `boolean` | `true` | 되돌릴 수 있는 Codex App history 호환성입니다. 원래 메타데이터는 `ocx stop` / `ocx restore`가 백업하고 복원합니다. |
+| `syncResumeHistory?` | `boolean` | `true` | 되돌릴 수 있는 Codex App history 호환성입니다. 원래 메타데이터는 `orl stop` / `orl restore`가 백업하고 복원합니다. |
 | `shadowCallIntercept?` | `{ enabled?: boolean; model?: string; sourceModels?: string[] }` | off | 인식된 Codex 보조/섀도 호출을 요청에 설정된 reasoning effort를 유지한 채 선택한 모델로 다시 보냅니다. 기본 source prefix는 `gpt-6-luna`, `gpt-5.6-luna`입니다. 0.144.x 이하의 이전 클라이언트는 `gpt-5.4-mini`를 사용했으며 `sourceModels`로 복원할 수 있습니다. |
 | `webSearchSidecar?` | `OcxWebSearchSidecarConfig` | on when usable | 웹 검색 사이드카 옵션입니다. |
 | `visionSidecar?` | `OcxVisionSidecarConfig` | on when usable | 이미지 설명 사이드카 옵션입니다. |
 | `images?` | `OcxImagesConfig` | automatic OpenAI selection | Codex `image_gen`용 독립형 Images 릴레이 옵션입니다. |
 
-오래된 개발 빌드가 백업 지원이 생기기 전에 resume-history 메타데이터를 바꿨다면, native-provider 복구를 강제로 수행하려면 `ocx recover-history --legacy-openai --yes`를 실행합니다.
+오래된 개발 빌드가 백업 지원이 생기기 전에 resume-history 메타데이터를 바꿨다면, native-provider 복구를 강제로 수행하려면 `orl recover-history --legacy-openai --yes`를 실행합니다.
 이 명령은 정상적인 dedicated-provider history를 포함해 사용자 메시지가 있는 모든 `opencodex` row를 재태깅합니다. 실행하기 전에 lifecycle reference의 전체 범위 경고를 확인하세요.
 
 ### 네이티브 Chat 시간 초과와 완료
@@ -42,15 +42,15 @@ description: 리스너, 원격 접근, admission 키, 타임아웃, 저장소, �
 
 기본 `127.0.0.1` 바인드는 루프백 전용입니다. `0.0.0.0`이나 tailnet IP처럼 루프백이 아닌 주소는 `/api/*`와 데이터 플레인 모두에서 토큰 인증이 필요합니다.
 
-토큰을 직접 만들 필요는 없습니다. 루프백이 아닌 바인드에서 `ocx service install`이 다음 순서로 토큰을 준비합니다: 설치하는 셸의 `OPENCODEX_API_AUTH_TOKEN` → 기존 owner-only `service-api-token` 파일 → 무작위 32바이트 새 값. 결과는 `0600`으로 기록되고 실행 래퍼(launchd plist, systemd unit, Windows 래퍼)가 시작할 때 그 파일을 읽으므로, 값이 서비스 정의나 argv에 들어가지 않습니다. 포그라운드 `ocx start`도 같은 우선순위(환경 변수 → `OCX_API_TOKEN_FILE` → 설치된 `service-api-token`)를 적용하므로 토큰을 내보내지 않아도 루프백이 아닌 hostname에 바인드합니다.
+토큰을 직접 만들 필요는 없습니다. 루프백이 아닌 바인드에서 `orl service install`이 다음 순서로 토큰을 준비합니다: 설치하는 셸의 `OPENCODEX_API_AUTH_TOKEN` → 기존 owner-only `service-api-token` 파일 → 무작위 32바이트 새 값. 결과는 `0600`으로 기록되고 실행 래퍼(launchd plist, systemd unit, Windows 래퍼)가 시작할 때 그 파일을 읽으므로, 값이 서비스 정의나 argv에 들어가지 않습니다. 포그라운드 `orl start`도 같은 우선순위(환경 변수 → `OCX_API_TOKEN_FILE` → 설치된 `service-api-token`)를 적용하므로 토큰을 내보내지 않아도 루프백이 아닌 hostname에 바인드합니다.
 
-**관리자 토큰**은 나타날 수 있는 두 곳 모두에서 거부합니다. 환경 변수이거나 재사용하는 `service-api-token` 파일이며, 메시지는 그 자리에 맞는 해결책을 알려 줍니다. 변수를 unset하거나, 파일을 삭제하고 `ocx service repair`를 실행하세요. 두 검사는 루프백 단축 경로보다 앞에서 실행됩니다. 실행 래퍼가 hostname과 무관하게 파일을 `OPENCODEX_API_AUTH_TOKEN`으로 읽기 때문에, 관리자 토큰이 든 파일은 루프백 바인드에서도 관리 API를 닫아 버립니다. 허브에서는 `ocx status`가 이 상태를 `admin-collision (file)`로 보고합니다.
+**관리자 토큰**은 나타날 수 있는 두 곳 모두에서 거부합니다. 환경 변수이거나 재사용하는 `service-api-token` 파일이며, 메시지는 그 자리에 맞는 해결책을 알려 줍니다. 변수를 unset하거나, 파일을 삭제하고 `orl service repair`를 실행하세요. 두 검사는 루프백 단축 경로보다 앞에서 실행됩니다. 실행 래퍼가 hostname과 무관하게 파일을 `OPENCODEX_API_AUTH_TOKEN`으로 읽기 때문에, 관리자 토큰이 든 파일은 루프백 바인드에서도 관리 API를 닫아 버립니다. 허브에서는 `orl status`가 이 상태를 `admin-collision (file)`로 보고합니다.
 
 값을 직접 관리하려는 운영자는 여전히 변수를 설정할 수 있습니다:
 
 ```bash
 export OPENCODEX_API_AUTH_TOKEN="your-secret-token"
-ocx start
+orl start
 ```
 
 클라이언트는 다음을 보내야 합니다:
@@ -94,9 +94,9 @@ Messages와 `count_tokens`는 라우팅 클라이언트 호환성을 위해 세 
 }
 ```
 
-원격 클라이언트는 자격 증명과 함께 `100.76.170.81:10100`을, 로컬 프로세스는 자격 증명 없이 `127.0.0.1:10100`을 호출합니다. 로컬 통합이 이미 기록하는 주소가 바로 그것이라서, 공개 바인드에 닿을 수 없는 호스트에서도 `ocx claude`, Claude Desktop, Cursor, `system-env` 주입이 그대로 동작합니다.
+원격 클라이언트는 자격 증명과 함께 `100.76.170.81:10100`을, 로컬 프로세스는 자격 증명 없이 `127.0.0.1:10100`을 호출합니다. 로컬 통합이 이미 기록하는 주소가 바로 그것이라서, 공개 바인드에 닿을 수 없는 호스트에서도 `orl claude`, Claude Desktop, Cursor, `system-env` 주입이 그대로 동작합니다.
 
-companion 형태는 `hostname`이 루프백도 와일드카드도 아닌 구체 주소일 때만 허용됩니다. `127.0.0.1`, `localhost`, `0.0.0.0`에서는 공개 리스너가 이미 그 루프백 주소를 쓰고 있으므로, opencodex가 두 번째 바인드를 실패하게 두지 않고 쓰는 시점과 시작 시점에 거부합니다. 그런 바인드에서는 리스너가 필요 없습니다. 루프백 바인드는 이미 로컬 호출자를 허용합니다.
+companion 형태는 `hostname`이 루프백도 와일드카드도 아닌 구체 주소일 때만 허용됩니다. `127.0.0.1`, `localhost`, `0.0.0.0`에서는 공개 리스너가 이미 그 루프백 주소를 쓰고 있으므로, OpenRelay가 두 번째 바인드를 실패하게 두지 않고 쓰는 시점과 시작 시점에 거부합니다. 그런 바인드에서는 리스너가 필요 없습니다. 루프백 바인드는 이미 로컬 호출자를 허용합니다.
 
 `port`를 지정하면 두 표면이 서로 다른 포트에 놓입니다.
 
@@ -108,17 +108,17 @@ companion 형태는 `hostname`이 루프백도 와일드카드도 아닌 구체 
 }
 ```
 
-이때 `ocx sync`는 관리되는 Codex provider 블록에 `base_url = "http://127.0.0.1:10200/v1"`을 기록하고 auth 헤더를 생략합니다. `port`는 프록시 포트와 달라야 하며 OS가 자동 할당하지 않습니다. 임시 포트는 재시작마다 바뀌는데 이미 실행 중인 app-server는 예전 `base_url`을 들고 있기 때문입니다.
+이때 `orl sync`는 관리되는 Codex provider 블록에 `base_url = "http://127.0.0.1:10200/v1"`을 기록하고 auth 헤더를 생략합니다. `port`는 프록시 포트와 달라야 하며 OS가 자동 할당하지 않습니다. 임시 포트는 재시작마다 바뀌는데 이미 실행 중인 app-server는 예전 `base_url`을 들고 있기 때문입니다.
 
 **어느 형태든 이 필드를 바꾸면 프록시를 재시작하세요.** 소켓은 시작할 때 한 번 바인드되고 내보내는 클라이언트 값도 그때 결정된 포트로 기록되므로, 실행 중인 프록시는 예전 답을 유지합니다.
 
-이 리스너는 `POST /v1/responses`와 그 WebSocket 업그레이드, `POST /v1/responses/compact`, `POST /v1/messages`, `POST /v1/chat/completions`, `POST /v1/alpha/search`, `GET /v1/models`, 실시간 음성 표면만 제공합니다. `POST /v1/messages/count_tokens`를 포함해 `/api/*`, `/healthz`, `/readyz`, 대시보드는 모두 `404`입니다. `ocx claude`의 탐색 호출 같은 로컬 관리 읽기는 관리 자격 증명을 들고 인증된 관리 표면으로 갑니다.
+이 리스너는 `POST /v1/responses`와 그 WebSocket 업그레이드, `POST /v1/responses/compact`, `POST /v1/messages`, `POST /v1/chat/completions`, `POST /v1/alpha/search`, `GET /v1/models`, 실시간 음성 표면만 제공합니다. `POST /v1/messages/count_tokens`를 포함해 `/api/*`, `/healthz`, `/readyz`, 대시보드는 모두 `404`입니다. `orl claude`의 탐색 호출 같은 로컬 관리 읽기는 관리 자격 증명을 들고 인증된 관리 표면으로 갑니다.
 
 :::danger[인증 없는 표면입니다]
 컴퓨터의 모든 프로세스가 이 리스너를 사용할 수 있습니다. 계정 쿼터와 유료 provider 비용을 소모합니다.
 :::
 
-`runtimeRole: "hub"`에서는 이 필드가 허브가 **자기 자신의** 로컬 클라이언트 설정을 고칠지 결정하는 게이트이기도 합니다. 리스너가 꺼져 있으면 `ocx sync`, `ocx ensure`, `ocx restore back`이 허브 자신의 Codex/Grok/Claude 쓰기를 건너뛰고, `clientIntegrations` 토글이 아니라 `unauthenticatedLoopbackListener`를 지목해 이유를 밝힙니다.
+`runtimeRole: "hub"`에서는 이 필드가 허브가 **자기 자신의** 로컬 클라이언트 설정을 고칠지 결정하는 게이트이기도 합니다. 리스너가 꺼져 있으면 `orl sync`, `orl ensure`, `orl restore back`이 허브 자신의 Codex/Grok/Claude 쓰기를 건너뛰고, `clientIntegrations` 토글이 아니라 `unauthenticatedLoopbackListener`를 지목해 이유를 밝힙니다.
 
 ### SSH port forwarding
 
@@ -146,7 +146,7 @@ ssh -L 20100:localhost:10100 -L 1455:localhost:1455 you@remote
 
 ## Claude Code (`claudeCode`)
 
-이 설정은 `/v1/messages`, `/v1/messages/count_tokens`, `ocx claude` 실행기, 그리고 Claude 대시보드 페이지를 제어합니다.
+이 설정은 `/v1/messages`, `/v1/messages/count_tokens`, `orl claude` 실행기, 그리고 Claude 대시보드 페이지를 제어합니다.
 
 | 키 | 형식 | 기본값 | 설명 |
 | --- | --- | --- | --- |
@@ -154,7 +154,7 @@ ssh -L 20100:localhost:10100 -L 1455:localhost:1455 you@remote
 | `claudeCode.bodyMaxBytes?` | `number` | `67108864` | 스트리밍 및 버퍼링된 응답에 대한 누적 native-passthrough 본문 상한입니다. 정확히 `0`이면 비활성화됩니다. |
 | `claudeCode.authMode?` | `"proxy" \| "subscription"` | auto | 실행 시 `ANTHROPIC_AUTH_TOKEN`을 어떻게 다룰지입니다. 자동은 매 실행마다 인증을 감지하며, 명시 값은 절대 덮어쓰지 않습니다. |
 | `claudeCode.authModeMigratedAt?` | `string` | unset | 내부적인 일회성 업그레이드 마커입니다. 수동으로 설정하지 마십시오. |
-| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` | inherit | 생성된 `~/.claude/agents/ocx-*.md`에 쓰이는 노력 수준입니다. Codex 지침과 프록시 상한과는 별개입니다. 다시 생성하려면 `ocx claude`로 재시작합니다. |
+| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` | inherit | 생성된 `~/.claude/agents/ocx-*.md`에 쓰이는 노력 수준입니다. Codex 지침과 프록시 상한과는 별개입니다. 다시 생성하려면 `orl claude`로 재시작합니다. |
 
 자동 인증은 저장된 Claude 인증이 있으면 subscription을, 없으면 proxy를 선택합니다. 감지가 불명확할 때는 경고와 함께 subscription을 선택합니다. [Claude Code 인증 모드](/guides/claude-code/#auth-mode)를 보십시오.
 
@@ -195,7 +195,7 @@ Codex는 제목과 커밋 메시지 같은 작업에 작은 보조 모델을 사
 
 | 필드 | 형식 | 기본값 | 의미 |
 | --- | --- | --- | --- |
-| `enabled?` | `boolean` | on when usable | 주 스위치입니다. `false`이면 OpenCodex는 `web_search` 가로채기를 멈추고 Codex 통합이 `~/.codex/config.toml`에 `web_search = "disabled"`를 씁니다. |
+| `enabled?` | `boolean` | on when usable | 주 스위치입니다. `false`이면 OpenRelay는 `web_search` 가로채기를 멈추고 Codex 통합이 `~/.codex/config.toml`에 `web_search = "disabled"`를 씁니다. |
 | `backend?` | `"openai" \| "anthropic" \| "xai" \| "gemini" \| "exa"` | `openai` | 명시값이 우선입니다. 생략하면 항상 `openai`입니다. `anthropic`과 `xai`는 명시적으로 설정할 때만 실행되며, `gemini`와 `exa`는 executor가 제공될 때까지 예약 상태입니다. |
 | `model?` | `string` | backend-dependent | OpenAI는 `gpt-5.6-luna`, Anthropic은 `claude-sonnet-5`, xAI는 `grok-4.6`입니다. 레거시로 명시된 `gpt-5.4-mini`는 시작 시 마이그레이션됩니다. |
 | `exaApiKey?` | `string` | 없음 | `exa` 백엔드용 운영자 키입니다. 쓰기 전용이며 관리 API 조회에서는 저장된 값을 반환하지 않습니다. |
@@ -222,7 +222,7 @@ OpenAI 백엔드는 ChatGPT 로그인과 활성화된 ChatGPT `forward` provider
 
 지원되는 수준은 업스트림 제공자의 역량과 선택한 모델이 공개한 추론 사다리에 따라 제한됩니다. Vision은 provider의 `noVisionModels`에 속한 모델로 보낸 이미지에만 활성화됩니다. OpenAI는 검색과 같은 로그인/forward 요건을 갖고 있으며, 명시적으로 선택한 Anthropic은 사용할 수 있는 자격 증명이 없으면 닫힌 상태로 실패합니다. 성공한 `data:` 설명은 backend, model, detail, image bytes, 그리고 정규화된 메시지 컨텍스트를 키로 하는 bounded cache를 사용합니다. OpenAI 키에는 reasoning effort도 포함됩니다(Anthropic 키에는 없습니다). 히트와 같은 턴의 중복은 한도를 소모하지 않습니다. 원격 `https:` 이미지와 실패했거나 비어 있는 설명은 캐시하지 않습니다.
 
-Anthropic OAuth 사이드카는 opencodex의 기존 Claude Code OAuth fingerprint를 재사용합니다. 의도한 계정과 워크로드로 소크 테스트를 수행합니다.
+Anthropic OAuth 사이드카는 OpenRelay의 기존 Claude Code OAuth fingerprint를 재사용합니다. 의도한 계정과 워크로드로 소크 테스트를 수행합니다.
 
 ## Remote Hub 키와 기본값
 
@@ -231,11 +231,11 @@ Anthropic OAuth 사이드카는 opencodex의 기존 Claude Code OAuth fingerprin
 | 키 | 형식 | 없을 때 기본값 | 역할 |
 | --- | --- | --- | --- |
 | `hub.managementPublicOrigin` | string | 없음 | 허브가 광고하는, 브라우저가 실제로 닿는 관리 Origin입니다. `runtimeRole`이 `hub`일 때 `/readyz`가 `managementUrl`로 보고합니다. 설정하지 않으면 요청이 도착한 Origin으로 대체하므로, 다른 프런트엔드 뒤의 클라이언트가 닿을 수 없는 주소를 받을 수 있습니다. |
-| `hub.dataPublicOrigin` | string | 없음 | 원격 클라이언트가 **데이터** 플레인으로 호출해야 하는 정식 Origin입니다(예: tailnet 바인드 앞의 TLS 프런트엔드가 공개하는 HTTPS Origin). 광고용 값이며 바인드 주소가 아니고, 바꿔도 소켓은 움직이지 않습니다. `ocx hub invite`가 출력하는 `ocx connect` 줄의 위치 인자 URL로 쓰이고, 없으면 `http://<hostname>:<port>`로 대체합니다. 그 대체값은 원격 컴퓨터가 TLS로 닿지 못할 LAN/tailnet 주소이므로 프런트엔드가 있는 허브라면 설정하세요. 대부분의 선택 키와 달리 잘못된 값은 조용히 버리지 않고 쓰는 시점에 거부합니다. 바인드 주소로 대체되는 것이 바로 이 필드가 막으려는 상황입니다. |
+| `hub.dataPublicOrigin` | string | 없음 | 원격 클라이언트가 **데이터** 플레인으로 호출해야 하는 정식 Origin입니다(예: tailnet 바인드 앞의 TLS 프런트엔드가 공개하는 HTTPS Origin). 광고용 값이며 바인드 주소가 아니고, 바꿔도 소켓은 움직이지 않습니다. `orl hub invite`가 출력하는 `orl connect` 줄의 위치 인자 URL로 쓰이고, 없으면 `http://<hostname>:<port>`로 대체합니다. 그 대체값은 원격 컴퓨터가 TLS로 닿지 못할 LAN/tailnet 주소이므로 프런트엔드가 있는 허브라면 설정하세요. 대부분의 선택 키와 달리 잘못된 값은 조용히 버리지 않고 쓰는 시점에 거부합니다. 바인드 주소로 대체되는 것이 바로 이 필드가 막으려는 상황입니다. |
 | `hub.managementIngress` | `{enabled:false}` 또는 `{enabled:true, port}` | `{enabled:false}` | 로컬 HTTPS 프런트엔드용 관리 전용 리스너입니다. hostname은 설정할 수 없고, 켜면 항상 `127.0.0.1`에 바인드하며 GUI·세션 부트스트랩·관리 API 경로만 허용합니다. 데이터 플레인 경로는 dispatch 전에 거부합니다. |
 | `remoteGui.allowedTailscaleUsers` | string[] | `[]`(아무도 없음) | 자동 원격 GUI 세션을 발급받을 수 있는 정확한 Tailscale 로그인 ID입니다. `Tailscale-User-Login` 헤더는 별도 관리 인그레스에서**만** 신뢰합니다. 빈 목록은 실수가 아니라 안전한 기본값입니다. 정확히 비교하므로 오타는 조용히 거부됩니다. |
 
-`dataPublicOrigin`과 `managementPublicOrigin`은 서로 독립적인 광고이며, 실제 배포에서는 서로 다른 소켓입니다. 관리는 443에 공개하는 루프백 전용 인그레스이고, 데이터는 자체 HTTPS 포트에 공개하는 tailnet 바인드입니다. 둘은 `ocx hub invite`가 출력하는 명령의 두 조각이고, 그중 `managementPublicOrigin`이 더 엄격합니다. pairing grant가 이 값을 grant 자신의 server origin으로 기록하고 교환 시 비교하므로, `ocx hub invite --management-url`은 설정값을 *확인*할 수만 있고 다른 값은 거부합니다. `--data-url`은 아무것도 바인드되어 있지 않으므로 실제로 덮어쓰기입니다. `dataPublicOrigin`과 `--data-url`이 모두 없으면 `invite`는 바인드 주소로 대체하는데, 루프백이나 와일드카드 바인드에서는 그것이 이 컴퓨터 자신의 루프백이 되므로 상대가 쓸 수 없는 주소를 광고하는 대신 거부합니다.
+`dataPublicOrigin`과 `managementPublicOrigin`은 서로 독립적인 광고이며, 실제 배포에서는 서로 다른 소켓입니다. 관리는 443에 공개하는 루프백 전용 인그레스이고, 데이터는 자체 HTTPS 포트에 공개하는 tailnet 바인드입니다. 둘은 `orl hub invite`가 출력하는 명령의 두 조각이고, 그중 `managementPublicOrigin`이 더 엄격합니다. pairing grant가 이 값을 grant 자신의 server origin으로 기록하고 교환 시 비교하므로, `orl hub invite --management-url`은 설정값을 *확인*할 수만 있고 다른 값은 거부합니다. `--data-url`은 아무것도 바인드되어 있지 않으므로 실제로 덮어쓰기입니다. `dataPublicOrigin`과 `--data-url`이 모두 없으면 `invite`는 바인드 주소로 대체하는데, 루프백이나 와일드카드 바인드에서는 그것이 이 컴퓨터 자신의 루프백이 되므로 상대가 쓸 수 없는 주소를 광고하는 대신 거부합니다.
 
 허브가 자기 로컬 클라이언트까지 서비스하려면 [`unauthenticatedLoopbackListener`](#토큰을-받을-수-없는-로컬-클라이언트)도 설정합니다. `port` 없는 companion 형태가 허브를 단일 포트 배포로 만들어 주며, 공개 리스너가 이미 `127.0.0.1:<port>`를 쓰는 루프백·와일드카드 `hostname`에서는 거부됩니다.
 
@@ -249,7 +249,7 @@ Anthropic OAuth 사이드카는 opencodex의 기존 Claude Code OAuth fingerprin
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

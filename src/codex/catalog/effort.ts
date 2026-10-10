@@ -595,21 +595,21 @@ export function clampCatalogModelsToCodexSupport(models: RawEntry[], deps: Bundl
       runtimeVersion = resolved.runtime.version;
       process.stderr.write(`${formatRuntimeLogLine(resolved.runtime)}\n`);
       if (resolved.persistError) {
-        console.warn(`[opencodex] Codex runtime selection could not be persisted; a later sync may pick a different binary.`);
+        console.warn(`[openrelay] Codex runtime selection could not be persisted; a later sync may pick a different binary.`);
       }
       if (
         resolved.replacedConfigured
         && resolved.replacedConfigured.from.command !== resolved.runtime.command
       ) {
-        console.warn(`[opencodex] Preferred Codex runtime is unavailable.`);
+        console.warn(`[openrelay] Preferred Codex runtime is unavailable.`);
         console.warn(
-          `[opencodex] Falling back from ${displayCodexRuntimePath(resolved.replacedConfigured.from.command)} to ${displayCodexRuntimePath(runtimePath)}.`,
+          `[openrelay] Falling back from ${displayCodexRuntimePath(resolved.replacedConfigured.from.command)} to ${displayCodexRuntimePath(runtimePath)}.`,
         );
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       const redacted = redactUserPath(redactSecretString(message)).slice(0, 200);
-      console.warn(`[opencodex] Codex runtime resolve failed during catalog clamp: ${redacted}`);
+      console.warn(`[openrelay] Codex runtime resolve failed during catalog clamp: ${redacted}`);
     }
   }
 

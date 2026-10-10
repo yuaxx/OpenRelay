@@ -9,7 +9,7 @@ description: 증분 vacuum을 제한된 범위에서 실행해 Codex 진단 로�
 
 ## 공간 회수의 동작
 
-OpenCodex는 다음 오프라인 유지관리 작업을 정해진 한도 안에서 수행합니다.
+OpenRelay는 다음 오프라인 유지관리 작업을 정해진 한도 안에서 수행합니다.
 
 1. Codex의 실제 `sqlite_home`에서 정식 `logs_2.sqlite`를 찾습니다.
 2. 파일의 정체성과 알려진 Codex 로그 스키마를 확인합니다.
@@ -49,22 +49,22 @@ Log Guard 잠금, SQLite 쓰기 잠금 또는 초기 체크포인트가 사용 �
 먼저 회수 가능한 공간을 확인합니다.
 
 ```bash
-ocx storage codex-logs status
+orl storage codex-logs status
 ```
 
 제한된 유지관리 작업을 한 번 실행합니다.
 
 ```bash
-ocx storage codex-logs compact
+orl storage codex-logs compact
 ```
 
 작업 전후 지표를 기계 판독 형식으로 받으려면 다음 명령을 사용합니다.
 
 ```bash
-ocx storage codex-logs compact --json
+orl storage codex-logs compact --json
 ```
 
-결과에 회수 가능한 공간이 더 남아 있다고 표시되어도, 다른 제한된 작업을 명시적으로 원하지 않는다면 여기서 멈추세요. OpenCodex는 무한히 반복하거나 후속 작업을 자동 예약하지 않습니다.
+결과에 회수 가능한 공간이 더 남아 있다고 표시되어도, 다른 제한된 작업을 명시적으로 원하지 않는다면 여기서 멈추세요. OpenRelay는 무한히 반복하거나 후속 작업을 자동 예약하지 않습니다.
 
 ## 관리 API
 

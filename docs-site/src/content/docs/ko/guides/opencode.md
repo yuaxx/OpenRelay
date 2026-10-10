@@ -1,10 +1,10 @@
 ---
 title: opencode
-description: opencode에서 라우팅된 어떤 모델이든 사용하세요. opencodex가 런타임 provider 블록을 주입하고, 사용자의 opencode 설정은 그대로 둡니다.
+description: opencode에서 라우팅된 어떤 모델이든 사용하세요. OpenRelay가 런타임 provider 블록을 주입하고, 사용자의 opencode 설정은 그대로 둡니다.
 ---
 
 opencode는 환경 변수 대신 병합된 JSON 구성 레이어에서 provider를 읽으므로,
-`ANTHROPIC_BASE_URL`처럼 끼워 넣을 자리가 없습니다. `ocx opencode`는 그 간극을
+`ANTHROPIC_BASE_URL`처럼 끼워 넣을 자리가 없습니다. `orl opencode`는 그 간극을
 메웁니다. 프록시가 실행 중인지 확인하고, 표시된 카탈로그에서 provider 블록을
 만들고, OpenCode의 인라인 런타임 레이어(`OPENCODE_CONFIG_CONTENT`)를 통해
 주입합니다.
@@ -12,12 +12,12 @@ opencode는 환경 변수 대신 병합된 JSON 구성 레이어에서 provider�
 ## 빠른 시작
 
 ```bash
-ocx opencode
+orl opencode
 ```
 
 이 명령은 프록시가 실행 중임을 보장하고, 그 프로세스에는 생성된
 `provider.opencodex`와 `providers.opencodex` 블록을 주입한 채 opencode를 실행합니다. 추가 인자는 그대로
-전달됩니다: `ocx opencode run "hello"`.
+전달됩니다: `orl opencode run "hello"`.
 
 라우팅된 모델은 선택기에서 `opencodex` 공급자 아래에 나타납니다:
 
@@ -34,29 +34,29 @@ opencodex/gpt-5.6-sol      # native slugs stay unprefixed
 확인할 수 있으며, 기존의 공급자, 에이전트, 키 바인딩, MCP 항목, 그리고 상대 경로
 `{file:…}` 참조는 계속 원래 파일을 기준으로 해석됩니다.
 
-이번 실행에서만 opencodex는 생성된 `provider.opencodex`와 `providers.opencodex` 블록을 OpenCode의 인라인
+이번 실행에서만 OpenRelay는 생성된 `provider.opencodex`와 `providers.opencodex` 블록을 OpenCode의 인라인
 런타임 레이어를 통해 추가합니다. 이 레이어는 전역/사용자 지정/프로젝트 구성 뒤에
 병합되며, 자식 프로세스에서는 충돌하는 키만 덮어씁니다.
 
-| 레이어 | `ocx opencode`에서의 동작 |
+| 레이어 | `orl opencode`에서의 동작 |
 | --- | --- |
 | 전역 / 사용자 지정 / 프로젝트 구성 | 사용자가 쓴 그대로 디스크에 남습니다 |
 | 인라인 런타임 (`OPENCODE_CONFIG_CONTENT`) | 생성된 `provider.opencodex`와 `providers.opencodex` 블록을 받습니다(상속된 인라인 config에 병합됨) |
 | 상대 `{file:…}` 경로 | 원래 정의된 구성 파일을 기준으로 계속 해석됩니다 |
 
 전역 또는 프로젝트 구성에도 `provider.opencodex` 또는 `providers.opencodex`가 정의되어 있으면, 런처는 안내
-메시지를 출력합니다. `ocx opencode`의 런타임 레이어가 이번 실행에서는 그것을
+메시지를 출력합니다. `orl opencode`의 런타임 레이어가 이번 실행에서는 그것을
 덮어씁니다.
 
 ## 블록을 사용자 구성에 넣기
 
-`ocx opencode`는 provider 블록을 한 번의 실행에만 주입하므로, 평범한 `opencode`는
+`orl opencode`는 provider 블록을 한 번의 실행에만 주입하므로, 평범한 `opencode`는
 여전히 프록시를 모릅니다. 일반 `opencode`에서, 혹은 런처를 거치지 않는 편집기
-확장에서 라우팅된 모델을 쓰고 싶다면 `ocx export`가 같은 provider 블록을 출력해
+확장에서 라우팅된 모델을 쓰고 싶다면 `orl export`가 같은 provider 블록을 출력해
 주므로 사용자 구성에 병합하면 됩니다:
 
 ```bash
-ocx export --client opencode
+orl export --client opencode
 ```
 
 프록시는 실행 중이어야 합니다. 이 명령은 구성, 표준 대상 위치
@@ -68,16 +68,16 @@ ocx export --client opencode
 :::caution[병합하고, 절대 교체하지 마세요]
 기존 구성에 `provider.opencodex`와 `providers.opencodex` 두 블록을 모두 병합하세요. 내보낸 파일로 전체를 바꾸면
 기존의 공급자, 에이전트, 키 바인딩, MCP 항목이 모두 사라집니다.
-`ocx export --out`이 이미 존재하는 파일을 덮어쓰지 못하게 막는 이유가 바로 이것입니다.
+`orl export --out`이 이미 존재하는 파일을 덮어쓰지 못하게 막는 이유가 바로 이것입니다.
 그러니 `--out`은 임시 경로를 가리키게 두고, 블록만 옮겨 담으세요:
 
 ```bash
-ocx export --client opencode --out ~/opencodex-opencode.json
+orl export --client opencode --out ~/opencodex-opencode.json
 ```
 :::
 
 런처의 런타임 블록과 달리, 병합한 블록은 정적인 스냅샷입니다. 카탈로그를 따라가지
-않습니다. provider를 추가하거나 모델 노출을 바꾼 뒤에는 `ocx export`를 다시
+않습니다. provider를 추가하거나 모델 노출을 바꾼 뒤에는 `orl export`를 다시
 실행하세요.
 
 병합한 뒤에는 opencode를 실행하기 전에 인증 키를 export하세요. 단, 프록시가
@@ -122,7 +122,7 @@ export OPENCODEX_OPENCODE_API_KEY=<your key>
 루프백 바인드(`127.0.0.1`, 기본값)는 아무 인증도 하지 않으므로 `{env:…}` 참조는
 아무 효과가 없고, 변수를 비워 둬도 됩니다. 이것이 중요해지는 것은 `hostname`이
 루프백을 벗어날 때뿐입니다. [원격 접속](/ko/reference/configuration/server/#remote-access)을
-보세요. 이 인증 키는 opencodex 전용이며, [공급자](/guides/providers/) 아래에
+보세요. 이 인증 키는 OpenRelay 전용이며, [공급자](/guides/providers/) 아래에
 설정한 upstream provider 키와는 무관합니다.
 
 ## 되돌리기

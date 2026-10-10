@@ -1,24 +1,24 @@
 ---
 title: Клиенты MiniMax
-description: Направляйте текстовые команды MiniMax Code и MiniMax CLI через OpenCodex, не раскрывая учётные данные MiniMax.
+description: Направляйте текстовые команды MiniMax Code и MiniMax CLI через OpenRelay, не раскрывая учётные данные MiniMax.
 ---
 
-MiniMax выпускает два разных продукта для командной строки. OpenCodex подключает каждый
+MiniMax выпускает два разных продукта для командной строки. OpenRelay подключает каждый
 через тот протокол, который продукт действительно поддерживает:
 
 - **MiniMax Code** (`mcode`) — агент для разработки с пользовательскими провайдерами Anthropic Messages.
 - **MiniMax CLI** (`mmx`) — мультимодальный CLI платформы. Только его ресурс `text` использует
-  Anthropic-совместимый API, который OpenCodex может маршрутизировать.
+  Anthropic-совместимый API, который OpenRelay может маршрутизировать.
 
 ## MiniMax Code
 
 Сначала установите MiniMax Code и войдите в систему по инструкции MiniMax. Затем запустите
-OpenCodex и подключите обратимую файловую интеграцию:
+OpenRelay и подключите обратимую файловую интеграцию:
 
 ```bash
-ocx start
-ocx integration client enable --client mcode
-ocx mcode
+orl start
+orl integration client enable --client mcode
+orl mcode
 ```
 
 ![Интеграция MiniMax Code с изолированными примерными данными](/screenshots/minimax-code-integration.png)
@@ -45,27 +45,27 @@ custom_provider:
 Фактический список моделей, известные размеры контекстных окон и ступени effort берутся
 из работающего каталога OpenCodex. Если для модели нет достоверного размера окна или
 ступеней effort, соответствующее поле опускается, а значение не угадывается. MCode
-хранит выбранный effort в сессии, поэтому OpenCodex экспортирует `effortOptions`, не
+хранит выбранный effort в сессии, поэтому OpenRelay экспортирует `effortOptions`, не
 перезаписывая этот выбор. Блок не записывает настоящий ключ, не заменяет
 `defaultModel` и не меняет ваш вход в MiniMax. В MCode выберите модель в разделе
 `custom_provider:opencodex/...`.
 
-Перед запуском клиента `ocx mcode` проверяет, что этот провайдер указывает на работающий
-прокси. После однократного включения `ocx sync` обновляет принадлежащий интеграции блок
+Перед запуском клиента `orl mcode` проверяет, что этот провайдер указывает на работающий
+прокси. После однократного включения `orl sync` обновляет принадлежащий интеграции блок
 при изменении порта или возможностей каталога. Автоматическая синхронизация никогда не
 создаёт чужой блок, не восстанавливает удалённый вами блок и не перезаписывает файл,
-который изменился после записи OpenCodex; для намеренного повторного подключения
+который изменился после записи OpenRelay; для намеренного повторного подключения
 используйте команду включения. Отключить или восстановить интеграцию можно через ту же
 систему операций с журналом:
 
 ```bash
-ocx integration client disable --client mcode
-ocx integration client history --client mcode
-ocx integration client restore --op <opId> [--confirm-drift]
+orl integration client disable --client mcode
+orl integration client history --client mcode
+orl integration client restore --op <opId> [--confirm-drift]
 ```
 
 Учитываются `MINIMAX_DATA_DIR` и прежняя переменная `MAVIS_DATA_DIR`. Относительные
-переопределения отклоняются: OpenCodex и MCode могут запускаться из разных каталогов.
+переопределения отклоняются: OpenRelay и MCode могут запускаться из разных каталогов.
 
 ## MiniMax CLI (`mmx`)
 
@@ -76,14 +76,14 @@ npm install -g mmx-cli
 mmx --version
 ```
 
-Чтобы направить текстовую команду через OpenCodex, используйте обёртку и id модели OpenCodex:
+Чтобы направить текстовую команду через OpenRelay, используйте обёртку и id модели OpenRelay:
 
 ```bash
-ocx mmx text chat \
+orl mmx text chat \
   --model anthropic/claude-opus-5 \
   --message "Explain this function"
 
-ocx mmx --output json text chat \
+orl mmx --output json text chat \
   --model openai/gpt-5.6-sol \
   --message "Return a JSON summary"
 ```
@@ -91,9 +91,9 @@ ocx mmx --output json text chat \
 MMX жёстко добавляет `/anthropic/v1/messages` к базовому URL API. На время работы
 дочернего процесса обёртка запускает временный мост на loopback. Он принимает только
 POST-запросы к этому пути Messages и `/anthropic/v1/messages/count_tokens`, сопоставляя
-их с существующими эндпоинтами данных OpenCodex `/v1/messages` и
+их с существующими эндпоинтами данных OpenRelay `/v1/messages` и
 `/v1/messages/count_tokens` и сохраняя тела запросов и параметры запроса. При этом
-действуют обычное преобразование запросов OpenCodex, учёт использования и настроенная
+действуют обычное преобразование запросов OpenRelay, учёт использования и настроенная
 аутентификация конечного провайдера: провайдер получает `x-api-key` или bearer-транспорт
 согласно конфигурации. Потоковая передача сохраняет события сообщений и содержимого
 Anthropic. Перед пересылкой мост удаляет входящие заголовки учётных данных допуска и
@@ -106,15 +106,15 @@ MiniMax не загружаются и не копируются.
 
 Следующие ограничения преднамеренны:
 
-- Через OpenCodex маршрутизируются только `text chat` и `text repl`.
+- Через OpenRelay маршрутизируются только `text chat` и `text repl`.
 - Обёртка отклоняет `--api-key`, `--base-url` и `--region`, чтобы учётные данные или
   адрес назначения вызывающей стороны не конфликтовали с изолированным мостом.
 - Обёртка работает только через loopback: MMX не умеет отправлять специальный
-  заголовок допуска OpenCodex `x-opencodex-api-key` для удалённой привязки.
+  заголовок допуска OpenRelay `x-opencodex-api-key` для удалённой привязки.
 - Запускайте обычный `mmx` для `image`, `video`, `speech`, `music`, `vision`, `search`, `quota`,
-  `auth`, `config`, `file` и `update`: эти команды вызывают API MiniMax, которые OpenCodex
+  `auth`, `config`, `file` и `update`: эти команды вызывают API MiniMax, которые OpenRelay
   не эмулирует.
 
 По умолчанию `mmx` использует для текста модель `MiniMax-M3`. Передайте
-`--model <provider/model>`, если нужен конкретный маршрут OpenCodex; иначе обычные
-правила маршрутизации OpenCodex определят, доступен ли id по умолчанию.
+`--model <provider/model>`, если нужен конкретный маршрут OpenRelay; иначе обычные
+правила маршрутизации OpenRelay определят, доступен ли id по умолчанию.

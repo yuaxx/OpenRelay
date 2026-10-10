@@ -3,7 +3,7 @@ title: "組合：failover 與負載平衡"
 description: 將一個虛擬模型路由到多個供應商，以進行 failover 或加權負載平衡。
 ---
 
-**combo** 是一個虛擬模型，背後代表一個有序的真實供應商/模型目標清單。你的客戶端請求 `combo/<id>`；opencodex 選擇一個目標，將請求改寫為該具體的 `provider/model`，並可在第一個目標發生可重試失敗時嘗試另一個目標。
+**combo** 是一個虛擬模型，背後代表一個有序的真實供應商/模型目標清單。你的客戶端請求 `combo/<id>`；OpenRelay 選擇一個目標，將請求改寫為該具體的 `provider/model`，並可在第一個目標發生可重試失敗時嘗試另一個目標。
 
 這在你想要以下任一情況時有用：
 
@@ -17,10 +17,10 @@ Combo 位於一般供應商路由之前。若 `provider/model` 選擇器對你�
 此範例建立 `combo/main`，Anthropic 在前、OpenAI 在後。兩個供應商必須已存在且已啟用。
 
 ```bash
-ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
+orl combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 ```
 
-預設策略為 failover，因此正常請求會送往 `anthropic/claude-opus-4-8`。若該次嘗試發生可重試失敗，opencodex 可跳到 `openai/gpt-5.6-sol`。
+預設策略為 failover，因此正常請求會送往 `anthropic/claude-opus-4-8`。若該次嘗試發生可重試失敗，OpenRelay 可跳到 `openai/gpt-5.6-sol`。
 
 在你平常會提供模型 id 的任何地方使用該虛擬模型：
 
@@ -34,7 +34,7 @@ ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 確認已儲存的定義：
 
 ```bash
-ocx combo show main
+orl combo show main
 ```
 
 :::tip
@@ -43,7 +43,7 @@ ocx combo show main
 
 ## Combo 名稱如何運作
 
-`ocx combo set <id>` 中的 combo id 必須以字母或數字開頭。其後可含字母、數字、`.`、`_` 或 `-`，總長最多 64 字元。其規範模型 id 始終為 `combo/<id>`；例如 id `main` 變成 `combo/main`。
+`orl combo set <id>` 中的 combo id 必須以字母或數字開頭。其後可含字母、數字、`.`、`_` 或 `-`，總長最多 64 字元。其規範模型 id 始終為 `combo/<id>`；例如 id `main` 變成 `combo/main`。
 
 設定 combo 時，`combo/` 命名空間會被保留。名為 `combo` 的供應商無法佔用它，且 combo id 不能與已設定的供應商名稱重複。
 
@@ -66,12 +66,12 @@ ocx combo show main
 某些 Codex Desktop 版本會在 app-server 已載入 `model_catalog_json` 之後，套用只允許原生的遠端
 `available_models` allowlist。因此 `Nova1/codex-gpt-5.6-sol` 這類正常路由 id 在 CLI 可用，卻不會
 出現在 Desktop 的選擇器中。這是上游的 [Codex Desktop bug](https://github.com/openai/codex/issues/19694)，
-由 [opencodex #241](https://github.com/lidge-jun/opencodex/issues/241) 追蹤。
+由 [OpenRelay #241](https://github.com/lidge-jun/opencodex/issues/241) 追蹤。
 
 當你控制一個等效的路由目標時，combo 可以明確接管一個原生 slug：
 
 ```bash
-ocx combo set nova-sol \
+orl combo set nova-sol \
   --targets Nova1/codex/gpt-5.6-sol \
   --alias gpt-5.6-sol \
   --native-alias \
@@ -79,7 +79,7 @@ ocx combo set nova-sol \
 ```
 
 此模式刻意採 opt-in，而且必須同時具備 `--native-alias` 與非空的顯示標籤。別名必須是這個
-opencodex 版本支援的原生模型 id 之一；僅有原生系列前綴不會被接受，因為移除時必須能恢復具權威性的
+OpenRelay 版本支援的原生模型 id 之一；僅有原生系列前綴不會被接受，因為移除時必須能恢復具權威性的
 中繼資料。當路由目標的 discovery 回應只提供模型 id 時，相容性列會從它所取代的原生 id 補上缺少的
 context、modality 與 reasoning 中繼資料。明確的目標限制仍然優先，因此這個 fallback 永遠不會提高
 context 上限或覆寫已宣告的能力。它會改變精確路由的優先順序：`gpt-5.6-sol` 的請求會先解析到
@@ -123,7 +123,7 @@ context 上限或覆寫已宣告的能力。它會改變精確路由的優先順
 建立一個 2:1 combo，每兩個成功請求為一批：
 
 ```bash
-ocx combo set balanced \
+orl combo set balanced \
   --targets anthropic/claude-opus-4-8:2,openai/gpt-5.6-sol:1 \
   --strategy round-robin \
   --sticky 2
@@ -148,7 +148,7 @@ ocx combo set balanced \
 
 ### `least-used`：優先選擇成功次數最少的目標
 
-`least-used` 將每個請求路由至這個 opencodex 行程所記錄成功請求數最少的合格目標。重新啟動後，計數從零開始；若計數相同，則維持設定順序。`weight` 與 `stickyLimit` 不影響此策略。
+`least-used` 將每個請求路由至這個 OpenRelay 行程所記錄成功請求數最少的合格目標。重新啟動後，計數從零開始；若計數相同，則維持設定順序。`weight` 與 `stickyLimit` 不影響此策略。
 
 ### `reset-window`：跟隨最早的配額重設
 
@@ -169,7 +169,7 @@ Combo 失敗分為**跳轉**失敗與**終端**失敗。
 | 由行程內轉接器（`runTurn`）執行的 Responses 回合中，目前請求未宣告的第一個工具呼叫（在任何輸出與不可重播的副作用之前） | 讓該目標進入冷卻，並以相同的工具目錄跳轉到下一個目標。出現可見輸出或不可重播的副作用之後，拒絕即為最終結果。Chat Completions 與 Anthropic Messages 請求不受影響。 |
 | 任何其他未分類錯誤 | 停止並回傳錯誤。 |
 
-跳轉的目標在沒有設定 `cooldownMs` 時使用上游回退冷卻：請求速率限制代碼 `1302`/`1305` 為 5 秒，用量額度耗盡（不論 HTTP 狀態，包括 502）或憑證/計費失敗為 10 分鐘，其他情況為 60 秒。若上游回應包含有效的 `Retry-After` 值，opencodex 改用它；Codex 重設標頭與設定的 `cooldownMs` 優先於這些回退值。接受數字秒與 HTTP-date 值。明確的上游 `Retry-After` 最長為 24 小時；重設推導、設定與回退冷卻最長為 10 分鐘。
+跳轉的目標在沒有設定 `cooldownMs` 時使用上游回退冷卻：請求速率限制代碼 `1302`/`1305` 為 5 秒，用量額度耗盡（不論 HTTP 狀態，包括 502）或憑證/計費失敗為 10 分鐘，其他情況為 60 秒。若上游回應包含有效的 `Retry-After` 值，OpenRelay 改用它；Codex 重設標頭與設定的 `cooldownMs` 優先於這些回退值。接受數字秒與 HTTP-date 值。明確的上游 `Retry-After` 最長為 24 小時；重設推導、設定與回退冷卻最長為 10 分鐘。
 
 目前請求永不重試同一已嘗試目標。後續請求會略過它直到冷卻到期。若無合格目標剩餘，代理回傳 HTTP 503 並帶 `error.code = "combo_unavailable"`。
 
@@ -195,7 +195,7 @@ Failover 是刻意受限的。它有助於目標特定的可用性、認證、�
 
 Codex v2 子代理有一個重要限制（[issue #92](https://github.com/lidge-jun/opencodex/issues/92)）。原生父代只能將新生成 worker 的任務以為原生 ChatGPT 後端鑄造的密文發送。外部供應商無法讀取該 payload。
 
-對於此類請求，combo 將其合格目標過濾為規範的原生 ChatGPT 路由，包括可重試失敗之後。若 combo 無可解密目標，opencodex 在分派前停止並回傳 HTTP 400：
+對於此類請求，combo 將其合格目標過濾為規範的原生 ChatGPT 路由，包括可重試失敗之後。若 combo 無可解密目標，OpenRelay 在分派前停止並回傳 HTTP 400：
 
 ```json
 {
@@ -230,13 +230,13 @@ Codex v2 子代理有一個重要限制（[issue #92](https://github.com/lidge-j
 主要指令為：
 
 ```bash
-ocx combo list
-ocx combo show <id>
-ocx combo set <id> --targets provider/model[:weight],...
-ocx combo remove <id> --yes
+orl combo list
+orl combo show <id>
+orl combo set <id> --targets provider/model[:weight],...
+orl combo remove <id> --yes
 ```
 
-`set` 也接受 `--strategy`、`--sticky`、`--effort`、`--alias` 與 `--rename-from`。用 `-` 作為 `--effort` 或 `--alias` 的值可清除該欄位。`create` 與 `update` 為 `set` 的別名；`delete` 為 `remove` 的別名；且相同子指令在 `ocx route combo` 下也可用。
+`set` 也接受 `--strategy`、`--sticky`、`--effort`、`--alias` 與 `--rename-from`。用 `-` 作為 `--effort` 或 `--alias` 的值可清除該欄位。`create` 與 `update` 為 `set` 的別名；`delete` 為 `remove` 的別名；且相同子指令在 `orl route combo` 下也可用。
 
 ### 管理 API
 
@@ -280,7 +280,7 @@ Combo 儲存於頂層 `combos` 物件中，以 combo id 為 key：
 
 ### 為什麼 `combo/<id>` 回傳 404？
 
-Combo id 未知。回應為 HTTP 404 並帶 type `invalid_request_error`。執行 `ocx combo list`、檢查拼字與大小寫，並確認你的管理指令寫入的是同一個接收模型請求的執行中 opencodex 實例。
+Combo id 未知。回應為 HTTP 404 並帶 type `invalid_request_error`。執行 `orl combo list`、檢查拼字與大小寫，並確認你的管理指令寫入的是同一個接收模型請求的執行中 OpenRelay 實例。
 
 ### 為什麼我得到 `combo_unavailable`？
 

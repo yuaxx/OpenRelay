@@ -1,0 +1,55 @@
+.or-page-intro .page-sub { margin-bottom: 0; }
+.dashboard-workspace-shell.or-redesign { max-width: 1280px; margin-inline: auto; padding: 0; }
+.openrelay-app .main-inner:has(.dashboard-workspace-shell) { max-width: 1440px; }
+.or-redesign .dash-overview-stack { gap: 24px; --dash-controls-width: 24rem; }
+.or-redesign .dash-overview-head { display: grid; gap: 16px; }
+.or-metric { min-height: 128px; }
+.or-metric-label { color: var(--muted); font-size: var(--text-label); font-weight: 500; }
+.or-metric-value { color: var(--text); font-size: 26px; font-weight: 600; letter-spacing: -.04em; font-variant-numeric: tabular-nums; line-height: 1.25; min-width: 0; }
+.or-metric-value > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.or-metric-detail { color: var(--muted); font-size: var(--text-caption); line-height: 1.4; }
+.or-metric[data-tone="ok"] { border-color: color-mix(in srgb, var(--green) 25%, var(--border-soft)); }
+.or-metric[data-tone="ok"] .or-metric-value { color: var(--green); }
+.or-metric[data-tone="error"] .or-metric-value { color: var(--red); }
+.or-metric:first-child .or-metric-value { font-size: 20px; letter-spacing: -.02em; }
+.or-metric[aria-busy="true"] .or-metric-value { opacity: .55; }
+.or-runtime-controls {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  background: var(--or-card-surface);
+}
+.or-runtime-controls > .stat { padding: 0; border: 0; background: transparent; box-shadow: none; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; min-height: 0; }
+.or-runtime-controls .stat .value { margin: 0; }
+.or-redesign .startup-health-slot { min-height: 0; }
+.or-redesign .startup-health-bar { border-radius: 8px; border-color: var(--border-soft); padding: 10px 14px; font-size: var(--text-label); background: var(--rail); }
+.or-redesign .dash-overview-stack .panel { padding: 24px; }
+.or-redesign .dash-overview-stack :is(.panel-title, .injection-label, .dash-delegation-title) { font-size: var(--text-body); font-weight: 600; letter-spacing: -.015em; }
+.or-redesign .dash-overview-stack .setting-hint { margin-top: 8px; font-size: var(--text-control); line-height: 1.6; }
+.or-redesign .dash-overview-stack .dash-delegation-summary,
+.or-redesign .dash-overview-stack .dash-sync-summary,
+.or-redesign .dash-overview-stack .dash-effort-panel .injection-head { gap: 20px; }
+.or-redesign .dash-overview-tools { gap: 24px; }
+.or-redesign .dash-model-head { min-height: 52px; padding: 14px 18px; }
+.or-redesign .dash-model-chips { padding: 14px 18px; gap: 8px; }
+.or-redesign .dash-model-chip { background: var(--rail); font-size: var(--text-label); }
+.or-provider-card h3 { font-size: var(--text-body); letter-spacing: -.015em; overflow-wrap: anywhere; min-width: 0; }
+.or-provider-facts { margin: 20px 0 0; padding-top: 16px; border-top: 1px solid var(--border-soft); }
+.or-provider-facts dt { font-size: var(--text-caption); color: var(--muted); margin-bottom: 4px; }
+.or-provider-facts dd { margin: 0; color: var(--text); overflow-wrap: anywhere; }
+
+@container dashboard-overview (max-width: 64rem) {
+  .or-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@container dashboard-overview (max-width: 46rem) {
+  .or-redesign .dash-overview-stack .dash-delegation-summary,
+  .or-redesign .dash-overview-stack .dash-sync-summary,
+  .or-redesign .dash-overview-stack .dash-effort-panel .injection-head { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .or-redesign .dash-overview-stack .panel { padding: 18px; }
+}
+@container dashboard-overview (max-width: 30rem) {
+  .or-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .or-metric { padding: 16px; min-height: 112px; }
+  .or-metric-value { font-size: 23px; }
+  .or-runtime-controls > .stat { align-items: flex-start; flex-direction: column; }
+}

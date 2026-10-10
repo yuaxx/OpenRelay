@@ -3,14 +3,14 @@ title: Windows Memory Growth
 description: Why the bun process can grow to many gigabytes of RAM on Windows, what opencodex does about it today, and your options until the upstream Bun fixes ship.
 ---
 
-Some Windows users see the `bun` process behind opencodex grow to many
+Some Windows users see the `bun` process behind OpenRelay grow to many
 gigabytes of RSS during long streaming sessions (reported as issue
 [#314](https://github.com/lidge-jun/opencodex/issues/314)). This page explains
 what is actually happening and what you can do about it, honestly.
 
 ## Root cause: upstream Bun runtime issues
 
-opencodex bundles the Bun runtime (currently **1.3.14**). The memory growth is
+OpenRelay bundles the Bun runtime (currently **1.3.14**). The memory growth is
 driven by known upstream Bun issues, not by JavaScript-level leaks in the
 proxy:
 
@@ -20,12 +20,12 @@ proxy:
 | [#32111](https://github.com/oven-sh/bun/issues/32111) — crash when a client aborts an async-pull stream | Fix [PR #32120](https://github.com/oven-sh/bun/pull/32120) merged 2026-06-21; not assumed present in 1.3.14. Note: this crash is **not Windows-specific** (it also reproduced on macOS/Linux) |
 | [PR #31654](https://github.com/oven-sh/bun/pull/31654) — `node:net` socket handle leak | Still **open** upstream |
 
-On Windows, opencodex must keep streaming responses on a conservative code
+On Windows, OpenRelay must keep streaming responses on a conservative code
 path to avoid the #32111 crash, and that path is the one most exposed to the
 backpressure issue: a slow or stalled client can leave the runtime buffering
 upstream data in native memory that JavaScript cannot bound.
 
-## What opencodex does today
+## What OpenRelay does today
 
 Bounded mitigation and visibility — **not a fix**. On the bundled 1.3.14
 runtime the leak itself remains an upstream problem:
@@ -35,7 +35,7 @@ runtime the leak itself remains an upstream problem:
   the largest of RSS, `external`, and `arrayBuffers` (not their sum), because
   Windows working-set/RSS counters can under-report committed external
   retention.
-- **`ocx doctor`** — a "Memory / runtime" section shows the *service*
+- **`orl doctor`** — a "Memory / runtime" section shows the *service*
   process's Bun version, RSS, external/ArrayBuffers counters, JS-heap context,
   and stream-mode decision. On the bundled Bun 1.3.14 runtime, `heapUsed` /
   `jscHeap` alone are not a leak discriminator; compare observed memory with
@@ -96,7 +96,7 @@ runtime the leak itself remains an upstream problem:
   longer, informed recycle than the short drain on `POST /api/stop`.
 
   For a scriptable snapshot of the complete authenticated payload, run
-  `ocx observe memory --json`; the CLI forwards the same response-state fields.
+  `orl observe memory --json`; the CLI forwards the same response-state fields.
 - **A gated alternative stream path** — a bounded single-reader relay that
   removes the unbounded buffering shape entirely. On Windows it becomes the
   default automatically once a bundled Bun release verifiably carries the
@@ -121,11 +121,11 @@ restart it.
 ## Your options
 
 1. **Wait for a bundled runtime update.** Once a Bun release verifiably
-   carries the fixes, opencodex will bump the bundled runtime and the safer
+   carries the fixes, OpenRelay will bump the bundled runtime and the safer
    stream path turns on automatically on Windows (macOS keeps requiring the
    explicit opt-in below).
 
-2. **Run a Bun runtime you trust with `OPENCODEX_BUN_PATH`.** Set the variable before launching `ocx` from that shell, then run `ocx service repair` to bake the selected runtime into the service definition. A later project `.env` does not change selection; changing the environment alone does not update an installed service.
+2. **Run a Bun runtime you trust with `OPENCODEX_BUN_PATH`.** Set the variable before launching `ocx` from that shell, then run `orl service repair` to bake the selected runtime into the service definition. A later project `.env` does not change selection; changing the environment alone does not update an installed service.
 
 3. **Opt into the bounded relay with `streamMode: "eager-relay"`.** Two ways:
    edit `config.json` (add `"streamMode": "eager-relay"`), or call the
@@ -138,12 +138,12 @@ restart it.
    macOS, `"auto"` always stays on tee; explicit `"eager-relay"` is the opt-in.
 
 If you try any of these on a real Windows workload, please report the before
-and after `ocx doctor` memory sections on
+and after `orl doctor` memory sections on
 [#314](https://github.com/lidge-jun/opencodex/issues/314) — that is exactly
 the verification this mitigation is waiting on.
 
 ## Windows selected-runtime write refusal
 
-Windows service installation, repair and Codex shim installation/refresh check whether the selected executable can create and remove a directory inside the OpenCodex config root. This is a write-policy check, not a memory fix. Failure refuses before service stops, downloads, staging, token or launcher writes. Automatic shim repair is deferred with guidance and startup continues. Healthy or disabled shims do not probe. No alternate runtime is discovered. A first-time scheduler install registers its task and claims the config root before this check; on refusal that new registration is rolled back and the claimed root stays for a retry.
+Windows service installation, repair and Codex shim installation/refresh check whether the selected executable can create and remove a directory inside the OpenRelay config root. This is a write-policy check, not a memory fix. Failure refuses before service stops, downloads, staging, token or launcher writes. Automatic shim repair is deferred with guidance and startup continues. Healthy or disabled shims do not probe. No alternate runtime is discovered. A first-time scheduler install registers its task and claims the config root before this check; on refusal that new registration is rolled back and the claimed root stays for a retry.
 
-> The selected Bun runtime could not create and remove a directory in the OpenCodex config directory. Windows application policy may deny writes from this executable location. Set OPENCODEX_BUN_PATH to a trusted Bun executable allowed by your policy before launching ocx, or reinstall opencodex with npm install -g @bitkyc08/opencodex, then retry. No alternate runtime was selected.
+> The selected Bun runtime could not create and remove a directory in the OpenRelay config directory. Windows application policy may deny writes from this executable location. Set OPENCODEX_BUN_PATH to a trusted Bun executable allowed by your policy before launching ocx, or reinstall OpenRelay with npm install -g @bitkyc08/opencodex, then retry. No alternate runtime was selected.

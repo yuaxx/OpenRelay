@@ -16,7 +16,7 @@ sağlayıcıya ve yukarı akış modeline dönüştürür.
 
 ## Model çözümleme sırası
 
-opencodex istenen modeli şu sırayla çözer:
+OpenRelay istenen modeli şu sırayla çözer:
 
 1. İlke değerlendiricisini yürüten ve seçilen adayı yönlendiren yapılandırılmış
    bir `policy/<id>` veya yönlendirme profili takma adı. Çözümlenmemiş bir
@@ -58,7 +58,7 @@ hesabına eşler. `side/gpt-5.6-sol` için bir istek, kurallı `openai` sağlay�
 Doğrudan (Direct) modda olsa bile yalnızca bu hesabı kullanır ve yukarı akışa
 yalın `gpt-5.6-sol` model kimliğini gönderir. Seçiciden sonra yalnızca yalın
 yerel OpenAI ailesi kimlikleri geçerlidir. Codex'in geçerli model kataloğunda
-gözlemlenen hesap kapsamlı kimlikler, henüz opencodex'in statik kümesinin bir
+gözlemlenen hesap kapsamlı kimlikler, henüz OpenRelay'in statik kümesinin bir
 parçası olmadıklarında da tam olarak korunabilir; gözlem gerçek bir katalog
 satırının alan şeklini taşımalıdır, eşleşen hesap seçicisine nitelikli kalır ve
 asla küresel yalın model listesine yükseltilmez. Bu şekil kontrolü hatalı
@@ -86,7 +86,7 @@ Devre dışı bırakılması, oluşturulan seçici nitelikli seçici satırları
 ve sıradan GPT satırlarını geri yükler, ancak eşlemeleri kaldırmaz veya tam
 `<secici>/<model>` yönlendirmesini değiştirmez. Yeniden etkinleştirmek bu
 nedenle aynı genel etiketleri geri yükler. Hesap ve ayar mutasyonları sınırlı
-bir katalog yenilemesinden önce kalıcı hale getirilir; bir `ocx sync` uyarısı
+bir katalog yenilemesinden önce kalıcı hale getirilir; bir `orl sync` uyarısı
 yalnızca seçici kataloğunun hala yakınsamaya ihtiyacı olduğu anlamına gelir,
 yönlendirme değişikliğinin kaybolduğu anlamına gelmez.
 
@@ -203,8 +203,8 @@ yetenek kanıtı sağlayamaz; aday kanıtı API (`POST
 }
 ```
 
-CLI: `ocx route policy list [--json]`, `ocx route policy show <id> [--json]` ve
-`ocx route policy dry-run <id> [--model-context <tokens>] [--tools] [--image]
+CLI: `orl route policy list [--json]`, `orl route policy show <id> [--json]` ve
+`orl route policy dry-run <id> [--model-context <tokens>] [--tools] [--image]
 [--structured-output] [--json]`. Deneme çalıştırması, herhangi bir yukarı akış
 isteği göndermeden adayları değerlendirir.
 
@@ -253,7 +253,7 @@ başına rota kararı izleri kaydedilir.
 
 ### Katalog uygunluğu
 
-Bir kombo listelenemediğinde bile doğrudan yönlendirilebilir kalır. `ocx sync`,
+Bir kombo listelenemediğinde bile doğrudan yönlendirilebilir kalır. `orl sync`,
 `/v1/models` ve Codex seçicisi, bunu yalnızca her hedef kesiştirilebilecek
 yetenekleri açığa çıkardığında listeler:
 
@@ -293,7 +293,7 @@ Döndürülen geçmiş ve rota kararı yükleri yalnızca maskelenmiş istek met
 verilerini açığa çıkarır (örneğin donuk `apiKeyId` etiketleri). Kimlik
 bilgilerini, ham istem gövdelerini veya sağlayıcı sırlarını içermezler.
 
-CLI: `ocx logs explain <request-id>`, `ocx logs rebuild-index`, `ocx logs
+CLI: `orl logs explain <request-id>`, `orl logs rebuild-index`, `ocx logs
 index-status`, `ocx route policy list | show | dry-run | evaluate`.
 
 ## Geçiş
@@ -302,6 +302,6 @@ index-status`, `ocx route policy list | show | dry-run | evaluate`.
 değişmeden yüklenir. `routeDecision` içermeyen eski `usage.jsonl` satırları
 değişmeden ayrıştırılır. Geçmiş dizini tek kullanımlıktır -
 `routing-history.sqlite` dosyasını silmek, bir sonraki sorguda `usage.jsonl`'den
-otomatik bir yeniden oluşturmayı tetikler; `ocx logs rebuild-index` bunu zorlar.
+otomatik bir yeniden oluşturmayı tetikler; `orl logs rebuild-index` bunu zorlar.
 Bu sistemdeki hiçbir şey ağırlıkları, bütçeleri veya aday kümelerini otomatik
 olarak ayarlamaz.

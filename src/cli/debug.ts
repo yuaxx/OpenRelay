@@ -7,7 +7,7 @@ type DebugScope = "provider" | "usage" | "injection" | "claude";
 async function requireLiveProxy() {
   const live = await findLiveProxy();
   if (!live) {
-    console.error("Proxy is not running. Start it with: ocx start");
+    console.error("Proxy is not running. Start it with: orl start");
     process.exit(1);
   }
   return live;
@@ -49,11 +49,11 @@ function printScopeStatus(scope: DebugScope, view: DebugSettingsView): void {
   if (scope === "provider") {
     console.log(`Provider debug: ${view.enabled ? "ON" : "off"}`);
     console.log(`  env=${view.env.debug ? "on" : "off"}, runtime=${view.runtimeOverride.debug === undefined ? "env/default" : view.runtimeOverride.debug ? "on" : "off"}`);
-    console.log("  Tail: ocx debug provider logs [-f]");
+    console.log("  Tail: orl debug provider logs [-f]");
   } else if (scope === "usage") {
     console.log(`Usage debug: ${view.usage ? "ON" : "off"}`);
     console.log(`  env=${view.env.usage ? "on" : "off"}, runtime=${view.runtimeOverride.usage === undefined ? "env/default" : view.runtimeOverride.usage ? "on" : "off"}`);
-    console.log("  Tail: ocx debug usage logs [-f] (via running proxy API)");
+    console.log("  Tail: orl debug usage logs [-f] (via running proxy API)");
   } else if (scope === "injection") {
     console.log(`Injection debug: ${view.injection ? "ON" : "off"}`);
     console.log(`  env=${view.env.injection ? "on" : "off"}, runtime=${view.runtimeOverride.injection === undefined ? "env/default" : view.runtimeOverride.injection ? "on" : "off"}`);
@@ -61,7 +61,7 @@ function printScopeStatus(scope: DebugScope, view: DebugSettingsView): void {
   } else {
     console.log(`Claude inbound debug: ${view.claude ? "ON" : "off"}`);
     console.log(`  env=${view.env.claude ? "on" : "off"}, runtime=${view.runtimeOverride.claude === undefined ? "env/default" : view.runtimeOverride.claude ? "on" : "off"}`);
-    console.log("  View: ocx observe claude-inbound");
+    console.log("  View: orl observe claude-inbound");
   }
 }
 
@@ -118,7 +118,7 @@ async function printUsageLogs(follow: boolean): Promise<void> {
     }
     const entries = await res.json() as { seq: number; line: string }[];
     for (const entry of entries) console.log(entry.line);
-    if (entries.length === 0) console.log("(empty — enable with: ocx debug usage on)");
+    if (entries.length === 0) console.log("(empty — enable with: orl debug usage on)");
     if (entries.length > 0) after = entries[entries.length - 1]!.seq;
   } catch (err) {
     console.error(`Failed to read usage debug logs: ${err instanceof Error ? err.message : String(err)}`);
@@ -170,8 +170,8 @@ async function handleScopeCommand(scope: DebugScope, actionArgv: string[]): Prom
   if (action === "logs") {
     if (scope === "injection" || scope === "claude") {
       console.error(scope === "claude"
-        ? "Use: ocx observe claude-inbound"
-        : "Injection debug has no buffered log stream; use: ocx observe injection");
+        ? "Use: orl observe claude-inbound"
+        : "Injection debug has no buffered log stream; use: orl observe injection");
       process.exit(1);
     }
     const follow = actionArgv.slice(1).some(arg => arg === "-f" || arg === "--follow");
@@ -181,18 +181,18 @@ async function handleScopeCommand(scope: DebugScope, actionArgv: string[]): Prom
   }
 
   console.error(scope === "injection" || scope === "claude"
-    ? `Usage: ocx debug ${scope} on|off|status|reset`
-    : `Usage: ocx debug ${scope} on|off|status|reset|logs [-f]`);
+    ? `Usage: orl debug ${scope} on|off|status|reset`
+    : `Usage: orl debug ${scope} on|off|status|reset|logs [-f]`);
   process.exit(1);
 }
 
 function printTopLevelHelp(): void {
   console.log("Debug commands (proxy must be running):");
   console.log("");
-  console.log("  ocx debug provider on|off|status|reset|logs [-f]");
-  console.log("  ocx debug usage on|off|status|reset|logs [-f]");
-  console.log("  ocx debug injection on|off|status|reset");
-  console.log("  ocx debug claude on|off|status|reset");
+  console.log("  orl debug provider on|off|status|reset|logs [-f]");
+  console.log("  orl debug usage on|off|status|reset|logs [-f]");
+  console.log("  orl debug injection on|off|status|reset");
+  console.log("  orl debug claude on|off|status|reset");
   console.log("");
   console.log("Env defaults on start:");
   console.log("  provider → OCX_DEBUG=1 (legacy OCX_DEBUG_FRAMES still works)");

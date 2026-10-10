@@ -90,7 +90,7 @@ describe("capability table is a checked data graph", () => {
   });
 });
 
-describe("ocx capabilities output", () => {
+describe("orl capabilities output", () => {
   test("--json emits a stable envelope with routes and flags", async () => {
     const cap = captureStdout();
     let code: number;
@@ -105,7 +105,7 @@ describe("ocx capabilities output", () => {
     expect(parsed.capabilities.length).toBe(CAPABILITIES.length);
     expect(parsed.headCapabilities).toHaveLength(HEAD_CAPABILITIES.length);
     for (const entry of parsed.capabilities) {
-      expect(entry.invocation.startsWith("ocx ")).toBe(true);
+      expect(entry.invocation.startsWith("orl ")).toBe(true);
       expect(Array.isArray(entry.routes)).toBe(true);
       expect(Array.isArray(entry.flags)).toBe(true);
       expect(typeof entry.mutates).toBe("boolean");
@@ -122,12 +122,12 @@ describe("ocx capabilities output", () => {
     expect(code).toBe(0);
     const parsed = JSON.parse(cap.lines.join("\n")) as { route: string; capabilities: { invocation: string }[] };
     expect(parsed.route).toBe(target);
-    expect(parsed.capabilities.map(c => c.invocation)).toContain("ocx account list");
+    expect(parsed.capabilities.map(c => c.invocation)).toContain("orl account list");
   });
 
   test("Claude config declares both management methods", () => {
     const claudeConfig = capabilitiesForRoute("/api/claude-code")
-      .find(cap => capabilityInvocation(cap) === "ocx claude config");
+      .find(cap => capabilityInvocation(cap) === "orl claude config");
     expect(claudeConfig?.routes).toEqual([
       { method: "GET", path: "/api/claude-code" },
       { method: "PUT", path: "/api/claude-code" },
@@ -136,13 +136,13 @@ describe("ocx capabilities output", () => {
 
   test("--route accepts the flag in any argv position", async () => {
     // Order-independence is the point: positional flag reading is why
-    // `ocx restore back --json` silently ignored its flag.
+    // `orl restore back --json` silently ignored its flag.
     const cap = captureStdout();
     let code: number;
     try { code = await runCapabilities(["--json", "--route", "/api/usage"]); } finally { cap.restore(); }
     expect(code).toBe(0);
     const parsed = JSON.parse(cap.lines.join("\n")) as { capabilities: { invocation: string }[] };
-    expect(parsed.capabilities.map(c => c.invocation)).toEqual(["ocx usage", "ocx models order set", "ocx combo stats", "ocx companion usage", "ocx observe usage"]);
+    expect(parsed.capabilities.map(c => c.invocation)).toEqual(["orl usage", "orl models order set", "orl combo stats", "orl companion usage", "orl observe usage"]);
   });
 
   test("an unmatched route exits non-zero instead of reporting empty success", async () => {
@@ -163,7 +163,7 @@ describe("ocx capabilities output", () => {
     expect(parsed.capabilities.every(c => c.mutates)).toBe(true);
   });
 
-  test("ocx provider list does not claim GET /api/providers", () => {
+  test("orl provider list does not claim GET /api/providers", () => {
     const cap = CAPABILITIES.find(c => c.command[0] === "provider" && c.command[1] === "list");
     expect(cap).toBeDefined();
     expect(cap?.routes).toEqual([]);
@@ -192,9 +192,9 @@ describe("ocx capabilities output", () => {
  *
  * It exists because the forward gate was one-directional. `cli-capabilities.test.ts`
  * asserted every capability's route exists and never the converse, so 139 routes carried no
- * verb and nothing failed. The user-visible consequence is that `ocx capabilities --route
+ * verb and nothing failed. The user-visible consequence is that `orl capabilities --route
  * /api/keys` -- an agent's discovery entry point -- returns an empty list and exits 4 while
- * `ocx access key` works.
+ * `orl access key` works.
  *
  * Most of these are NOT internal plumbing, which is the important correction: 122 of the 139
  * paths are already referenced from CLI source, and of the remainder only about two are
@@ -226,7 +226,7 @@ describe("capability/route parity is bidirectional", () => {
   test("every management route is capability-covered, exempt, or in the dated ratchet", async () => {
     // The reverse direction. Without it, 139 routes carried no verb and no exemption and the
     // suite stayed green -- which is how `capabilities --route /api/keys` came to return an
-    // empty list while `ocx access key` worked.
+    // empty list while `orl access key` worked.
     const { MANAGEMENT_ROUTES } = await import("../../src/server/management/route-registry");
     const covered = capabilityRouteKeys();
     const ratchet = new Set(UNDECLARED_ROUTES_2026_08_28);

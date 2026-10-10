@@ -1,6 +1,6 @@
 # Byte Accounting
 
-Native result continuations and function-result injection follow [the mode-specific result and control contract](streaming-health.md#experimental-native-function-result-injection); this surface does not infer upstream support or alter its defaults.
+RTK reserves bounded working memory and charges retained shortened output to the existing translator budget; optional compression refuses its own work on capacity failure. Native control-wire preparation includes retained call/echo evidence in its 8 MiB working-memory admission and clears this evidence at exchange teardown. See [terminal-result compression](rtk.md). Native result continuations and function-result injection follow [the mode-specific result and control contract](streaming-health.md#experimental-native-function-result-injection); this surface does not infer upstream support or alter its defaults.
 
 Native steering follows [the shared WebSocket contract](streaming-health.md#experimental-native-mid-turn-steering); this surface's defaults remain unchanged.
 

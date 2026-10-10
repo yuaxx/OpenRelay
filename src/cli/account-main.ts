@@ -14,18 +14,18 @@ import {
 } from "./account-api";
 
 const USAGE = `Usage:
-  ocx account main doctor [--json]
-  ocx account main list [--json]
-  ocx account main register <label> [--json]
-  ocx account main add <label>
-  ocx account main reauth --device [--no-wait] [--json]
-  ocx account main reauth status --flow <id> [--json]
-  ocx account main reauth cancel --flow <id> [--json]
-  ocx account main switch <profile-id-or-label> --yes [--json]
-  ocx account main recover [--rollback --yes] [--json]
+  orl account main doctor [--json]
+  orl account main list [--json]
+  orl account main register <label> [--json]
+  orl account main add <label>
+  orl account main reauth --device [--no-wait] [--json]
+  orl account main reauth status --flow <id> [--json]
+  orl account main reauth cancel --flow <id> [--json]
+  orl account main switch <profile-id-or-label> --yes [--json]
+  orl account main recover [--rollback --yes] [--json]
 
 Native main login profiles change the physical Codex App/CLI login in the effective CODEX_HOME.
-They are independent from the OpenCodex Pool selected by 'ocx account use openai'.`;
+They are independent from the OpenRelay Pool selected by 'orl account use openai'.`;
 
 const STAGE_LEASE_SAFETY_MARGIN_MS = 30_000;
 
@@ -65,7 +65,7 @@ function effectiveCodexHome(result: Record<string, unknown>): string {
     : "the effective CODEX_HOME";
 }
 
-const EMPTY_PROFILES_NOTES = ["No native main login profiles registered.", "Next: ocx account main add <label>"];
+const EMPTY_PROFILES_NOTES = ["No native main login profiles registered.", "Next: orl account main add <label>"];
 
 function printProfiles(profiles: PublicProfile[]): void {
   if (profiles.length === 0) { for (const note of EMPTY_PROFILES_NOTES) console.log(note); return; }
@@ -248,7 +248,7 @@ export async function cmdNativeMainAccount(args: string[], deps: AccountDeps): P
     }
     if (noWait) {
       printStatus({ flowId: startFlowId, ...pending });
-      if (!wantsJson) console.log("follow up: ocx account main reauth status --flow " + startFlowId);
+      if (!wantsJson) console.log("follow up: orl account main reauth status --flow " + startFlowId);
       return 0;
     }
     // Blocking wait bounded by the service flow expiry (15-minute grant + margin).

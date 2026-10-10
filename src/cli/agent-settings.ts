@@ -13,7 +13,7 @@ function usage(sub: SettingCommand): string {
   const fields = sub === "memory-models"
     ? "[--extract-model <model> [--extract-effort <effort>]] [--consolidation-model <model> [--consolidation-effort <effort>]]"
     : "--model <model> [--effort <effort>] [--triggers <manual,auto>] [--sources <selector,...>]";
-  return `Usage: ocx agent ${sub} show|clear [--json]\n       ocx agent ${sub} set (--file <FILE|-> | ${fields}) [--json]`;
+  return `Usage: orl agent ${sub} show|clear [--json]\n       orl agent ${sub} set (--file <FILE|-> | ${fields}) [--json]`;
 }
 
 function scalarBlock(sub: SettingCommand, values: Record<string, string>): Record<string, unknown> {

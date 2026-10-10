@@ -1,4 +1,5 @@
 import { createPhysicalSendReporter } from "../lib/request-execution-budget";
+import { createRtkTransport } from "../compression/rtk/transport";
 import { createInferenceSendBudget } from "./inference/context";
 /**
  * Managed native Messages lane (PF-08, behind `protocols.rollout.managedMessagesNative`).
@@ -457,9 +458,10 @@ export async function handleNativeMessages(options: HandleNativeMessagesOptions)
   // credential, header or stripped block from an earlier build reaches the next one, and a build
   // for another credential domain decides opaque state from the full source again.
   const rejectUnrepresentable = resolveProtocolSettings(config).unrepresentable === "reject";
+  const rtkBody = createRtkTransport(config.rtk?.enabled === true, translatorBudget, false, { signal: req.signal }).prepareBody(body, "messages");
   const buildActiveRequest = () => {
     recordAttemptCredentialSource(attempt, route.providerName, activeProvider, "anthropic");
-    const built = buildAnthropicMessagesPassthroughRequest(activeProvider, route.modelId, body, config, {
+    const built = buildAnthropicMessagesPassthroughRequest(activeProvider, route.modelId, rtkBody, config, {
       callerAnthropicBeta: options.callerAnthropicBeta,
       providerAccountUuid: oauthBinding?.providerAccountUuid,
       clientIdentity: options.clientIdentity,

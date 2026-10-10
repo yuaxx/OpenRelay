@@ -8,14 +8,14 @@ description: Générer des vidéos avec Grok Imagine Video depuis un modèle aut
 Le pont de génération de vidéos vous permet d'utiliser la génération Grok Imagine Video de xAI depuis
 n'importe quel modèle autre qu'OpenAI acheminé par opencodex. Lorsqu'il est activé, un outil synthétique
 `video_gen` est injecté dans la conversation. Le modèle l'appelle comme n'importe quel outil de fonction ;
-opencodex intercepte l'appel, soumet une tâche de génération vidéo à xAI, interroge son état jusqu'à son
+OpenRelay intercepte l'appel, soumet une tâche de génération vidéo à xAI, interroge son état jusqu'à son
 achèvement, puis télécharge le résultat.
 
 ## Prérequis
 
-- Une entrée de fournisseur `xai` avec une **clé API** (`ocx login xai` seul ne suffit pas : le pont vidéo exige une authentification par clé, et non OAuth)
+- Une entrée de fournisseur `xai` avec une **clé API** (`orl login xai` seul ne suffit pas : le pont vidéo exige une authentification par clé, et non OAuth)
 - Un modèle autre qu'OpenAI comme fournisseur routé (par exemple Anthropic Claude ou Google Gemini)
-- opencodex configuré pour acheminer les requêtes vers ce fournisseur autre qu'OpenAI
+- OpenRelay configuré pour acheminer les requêtes vers ce fournisseur autre qu'OpenAI
 
 > **⚠ Clé de fournisseur obligatoire :** le pont vidéo ne s'active que si le fournisseur `xai` utilise
 > l'authentification par clé API. Ajoutez ceci à votre configuration :
@@ -28,7 +28,7 @@ achèvement, puis télécharge le résultat.
 > }
 > ```
 >
-> Si vous avez configuré xAI avec `ocx login xai` (OAuth), le fournisseur reste en `authMode: "oauth"`
+> Si vous avez configuré xAI avec `orl login xai` (OAuth), le fournisseur reste en `authMode: "oauth"`
 > et le pont ne s'activera pas, sans produire d'erreur. Définissez `XAI_API_KEY` dans l'environnement
 > **ou** enregistrez directement la clé comme dans l'exemple ci-dessus.
 
@@ -57,9 +57,9 @@ Ajoutez `videoBridgeEnabled: true` à votre configuration `images` :
 
 ## Fonctionnement
 
-1. opencodex détecte qu'un modèle routé autre qu'OpenAI est utilisé avec `videoBridgeEnabled: true`.
+1. OpenRelay détecte qu'un modèle routé autre qu'OpenAI est utilisé avec `videoBridgeEnabled: true`.
 2. Un outil de fonction synthétique `video_gen` est injecté dans la conversation.
-3. Lorsque le modèle appelle `video_gen`, opencodex soumet une tâche à `/videos/generations` chez xAI.
+3. Lorsque le modèle appelle `video_gen`, OpenRelay soumet une tâche à `/videos/generations` chez xAI.
 4. Le pont interroge l'état de la tâche toutes les 5 à 15 secondes et envoie des messages de maintien afin de garder le flux actif.
 5. Une fois la vidéo prête, elle est téléchargée dans le répertoire des artefacts.
 6. Le chemin du fichier local est renvoyé au modèle comme résultat de l'outil.

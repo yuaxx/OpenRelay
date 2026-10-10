@@ -1,486 +1,196 @@
-<p align="center">
-  <img src="assets/banner.png" alt="opencodex — universal provider proxy for Codex, Claude Code, Claude Desktop and Grok Build" width="100%">
-</p>
+﻿# OpenRelay
 
-<h3 align="center">make codex open!</h3>
-<p align="center"><b>Universal provider proxy for OpenAI Codex, Claude Code, Claude Desktop &amp; Grok Build</b><br>
-Two commands, and every one of them runs any LLM you point it at.</p>
+OpenRelay is a transparent multi-provider AI proxy based on the OpenCodex architecture, extended with selected OmniRoute-inspired features for quota visibility, account management, routing and terminal output optimization.
 
-<p align="center">
-  <a href="https://x.com/claudeebum"><img src="https://img.shields.io/badge/%40claudeebum-000000?logo=x&logoColor=white" alt="Follow @claudeebum on X"></a>
-  <a href="https://www.npmjs.com/package/@bitkyc08/opencodex"><img src="https://img.shields.io/npm/v/@bitkyc08/opencodex?color=cb3837&label=npm&logo=npm" alt="npm version"></a>
-  <a href="https://github.com/lidge-jun/opencodex/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@bitkyc08/opencodex?color=blue" alt="license"></a>
-  <img src="https://img.shields.io/node/v/@bitkyc08/opencodex?logo=node.js&label=node" alt="node version">
-</p>
+OpenRelay is an independent fork. It keeps the simple OpenCodex workflow, where users can launch Codex or Claude clients without manually selecting a provider model, while adding selected functionality inspired by OmniRoute. Upstream attribution and licenses are preserved.
 
-```bash
-npm install -g @bitkyc08/opencodex
-ocx start
+## Why OpenRelay
+
+Coding with AI often involves multiple accounts, rate limits and providers. Switching between different client configs, managing credentials across tools, or manually alternating models when a limit is reached interrupts the developer workflow.
+
+OpenRelay addresses this by acting as a single local relay:
+- Run Codex or Claude tools through one local proxy endpoint.
+- Connect multiple providers and accounts through a single configuration surface.
+- Avoid manually switching model identifiers for everyday requests.
+- Keep the original client workflow and default tools unchanged.
+- Manage providers, accounts, quotas and routing from one dashboard.
+
+## Features
+
+The current implementation includes:
+- **OpenAI Responses and Chat Completions proxy**: Translates incoming client requests to upstream formats with bidirectional streaming, tool calling and reasoning token handling.
+- **Anthropic Messages compatibility**: Inbound support for Claude Code and Anthropic-compatible developer tools.
+- **Transparent provider routing**: Routes model calls across configured providers without requiring client patches.
+- **Fallback handling**: Automatically tries alternative configured providers or accounts when requests fail or limits are hit.
+- **Codex and Claude client integration**: Direct compatibility with Codex CLI, Codex App, Claude Code and desktop client workflows.
+- **Unified Quota Dashboard**: Consolidated view of provider limits, account quotas and reset schedules.
+- **Per-provider and per-account quota visibility**: Distinguishes healthy, pending, stale, unsupported and failed quota readings rather than assuming limits or reporting unknown values as zero percent.
+- **Google Antigravity account support**: Multi-account Google integration with per-account limit groups and reset tracking.
+- **Custom OpenAI-compatible endpoints**: Connect self-hosted or third-party providers using standard endpoint schemas.
+- **Account management through the dashboard**: Add, inspect, reorder and remove accounts directly through the web UI.
+- **OpenRelay black graphical dashboard**: Modern web dashboard with dark graphite surfaces, clean typography, keyboard accessibility and system theme detection.
+- **RTK terminal output compression**: Conservative, opt-in compression for terminal outputs (git status, build logs, test runner output) to prevent context window bloat while preserving error details, warnings, exit codes and metadata.
+- **Native Codex terminal result support for RTK**: RTK compression integrated for native Codex terminal tool execution paths.
+- **Backward-compatible CLI aliases**: Primary command is `orl`, while `ocx` and `opencodex` remain supported as compatibility aliases.
+
+### RTK output compression notes
+
+Terminal output compression via RTK is:
+- Disabled by default: it must be explicitly enabled in the dashboard or configuration.
+- Conservative and opt-in: only recognized command schemas are processed.
+- Safe by design: error outputs, non-zero exit codes, warnings, diagnostics and unrecognized formats are always returned unmodified.
+- Monitored via estimates: token counts and savings in the dashboard are heuristic estimates, not provider billing data.
+- Bounded: some realtime and internal paths remain unsupported to guarantee payload integrity.
+
+## Architecture
+
+OpenRelay runs as a local background or foreground service on loopback:
+
+```text
+Client (Codex CLI, Codex App, Claude Code)
+  │
+  ▼
+OpenRelay Local Proxy (http://127.0.0.1:10100)
+  │
+  ├─► Protocol Ingress (/v1/responses, /v1/chat/completions, /v1/messages)
+  ├─► Routing and Fallback Engine
+  ├─► Optional RTK Terminal Output Compressor (opt-in)
+  │
+  ▼
+Provider Adapters
+  │
+  ├─► OpenAI (Responses API / Chat API)
+  ├─► Anthropic (Messages API)
+  ├─► Google Antigravity (Multi-Account API)
+  └─► Custom OpenAI-compatible / Local Endpoints
 ```
 
-<p align="center">
-  <a href="https://github.com/lidge-jun/opencodex/releases/latest"><img src="https://img.shields.io/badge/macOS-.dmg-24292f?logo=apple&logoColor=white" alt="Download for macOS (.dmg)"></a>
-  <a href="https://github.com/lidge-jun/opencodex/releases/latest"><img src="https://img.shields.io/badge/Windows-.msi-24292f?logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0zIDNoOC41djguNUgzem05LjUgMEgyMXY4LjVoLTguNXpNMyAxMi41aDguNVYyMUgzem05LjUgMEgyMVYyMWgtOC41eiIvPjwvc3ZnPg==" alt="Download for Windows (.msi)"></a>
-  <a href="https://github.com/lidge-jun/opencodex/releases/latest"><img src="https://img.shields.io/badge/Linux-.AppImage-24292f?logo=linux&logoColor=white" alt="Download for Linux (.AppImage)"></a>
-  <a href="https://github.com/lidge-jun/opencodex/releases/latest"><img src="https://img.shields.io/badge/Linux-.deb-24292f?logo=debian&logoColor=white" alt="Download for Linux (.deb)"></a>
-</p>
+Adapters preserve protocol-specific request and response shapes rather than forcing all backends into an identical internal abstraction.
 
-<table>
-<tr>
-<td width="50%" valign="middle">
+## Quick start on Windows
 
-### Claude Code, running any model
+OpenRelay runs on Windows using Bun.
 
-The picker is stock Claude Code. The brain behind it isn't.
+### 1. Prerequisites
 
-</td>
-<td width="50%">
-  <img src="assets/claude-code-models.gif" alt="Claude Code running a routed model through opencodex — the status bar shows gpt-5.6-luna-medium as the active model" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-### Codex, running any model
-
-Pick a provider and go — same workflow, different brain.
-
-</td>
-<td width="50%">
-  <img src="https://raw.githubusercontent.com/lidge-jun/opencodex/main/assets/demo.gif" alt="opencodex demo — running a task in the Codex app on a routed non-OpenAI model" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-### Claude Desktop, running any model
-
-Opus answers, then hands the task to a GPT-5.6 Sol subagent.
-
-</td>
-<td width="50%">
-  <img src="https://raw.githubusercontent.com/lidge-jun/opencodex/main/assets/claude-desktop-subagent.gif" alt="Claude Desktop answering as Claude Opus 4.8, then dispatching a GPT-5.6 Sol subagent through opencodex" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-### Grok Build, running any model
-
-Sol drives the session and calls a Kimi K3 subagent.
-
-</td>
-<td width="50%">
-  <img src="https://raw.githubusercontent.com/lidge-jun/opencodex/main/assets/grok-build-subagent.gif" alt="Grok Build running GPT-5.6 Sol through opencodex and calling a Kimi K3 subagent" width="100%">
-</td>
-</tr>
-</table>
-
-<p align="center">
-  <a href="README.md">English</a> · <a href="readme/README.fr.md">Français</a> · <a href="readme/README.ko.md">한국어</a> · <a href="readme/README.zh-CN.md">简体中文</a> · <a href="readme/README.zh-TW.md">繁體中文</a> · <a href="readme/README.ru.md">Русский</a> · <a href="readme/README.ja.md">日本語</a> · <a href="readme/README.tr.md">Türkçe</a> · 📖 <a href="https://opencodex.me/"><b>Full documentation →</b></a>
-</p>
-
-opencodex is a lightweight local proxy that translates Codex's Responses API into whatever your
-provider speaks — streaming, tool calls, reasoning tokens, images, in both directions. Use Claude,
-Gemini, Grok, GLM, DeepSeek, Kimi, Qwen, Ollama, or any other LLM with Codex, Claude Code, Claude
-Desktop, and Grok Build. It can also manage a **ChatGPT account pool** for Codex auth: add accounts,
-refresh their quotas in the dashboard, and let new sessions auto-route to the lowest-usage healthy
-account while existing threads stay pinned to the account that started them.
-
-## Quick start
-
-### Personal install (CLI)
-
-```bash
-npm install -g @bitkyc08/opencodex   # Node 18+; the Bun runtime is bundled automatically
-ocx start                         # proxy + dashboard on localhost:10100
-```
-
-Use `ocx service` to run it in the background.
-
-Open **http://localhost:10100** and configure everything in the web dashboard — add providers
-(40+ built-ins, or any OpenAI-compatible endpoint), pick models, manage accounts. `ocx gui`
-re-opens the dashboard at any time.
-
-<details>
-<summary><b>Desktop app (beta)</b></summary>
-
-The desktop app is the same proxy and dashboard in a native window, with a tray and bundled `ocx`.
-It attaches to a proxy that is already running, or starts its bundled one, and the dashboard stays
-on the proxy port (**http://localhost:10100** unless you configured another). Pick the file for your
-platform from the [latest release](https://github.com/lidge-jun/opencodex/releases/latest):
-
-| Platform | File | Notes |
-|---|---|---|
-| macOS 13+ (Apple Silicon and Intel) | `OpenCodex-<version>-macos.dmg` | Universal build, signed with a Developer ID and notarized |
-| Windows (x64) | `OpenCodex-<version>-windows-x64.msi` | Not code-signed yet: SmartScreen asks once, choose **More info → Run anyway** |
-| Linux (x86_64) | `OpenCodex-<version>-linux-x86_64.AppImage` or `-linux-amd64.deb` | The tray needs an AppIndicator-capable desktop |
-
-Every file has a `.sha256` next to it on the release page. On macOS 14+ the app also ships a
-WidgetKit extension that shows proxy status, today's usage and provider quotas; the snapshot model
-it renders lives in [`app/`](./app) (`MenuBarCore`). To build the app yourself, run
-`bun install && bun run build:gui` at the repository root, then in `desktop/` run
-`bun install && bun run prepare-sidecar && bun run prepare-widget && bun run build:local` on macOS,
-or `bun install && bun run prepare-sidecar && bun run build:local` on Windows and Linux (the widget
-step needs macOS). The [Desktop App guide](https://opencodex.me/guides/desktop-app/) and the
-[macOS Menu Bar App guide](https://opencodex.me/guides/macos-menu-bar/) cover first launch, and
-[`AGENTS_INSTALL.md`](./AGENTS_INSTALL.md#where-things-are-installed) lists everything written to disk.
-
-</details>
-
-### ChatGPT account pool
-
-opencodex can also manage a **ChatGPT account pool** for Codex auth. Add multiple ChatGPT / Codex accounts,
-refresh their 5h / weekly / 30d quota in the dashboard. Under quota routing, new sessions can use
-the lowest-usage healthy account; round-robin and fill-first use their own policies. Existing Codex
-threads normally retain affinity to the account that started them, so long SSH, tmux, or
-mobile-connected sessions do not jump accounts mid-conversation — but quota re-evaluation, failover,
-account exclusion, affinity expiry, or 401/403 and 429 recovery can rebind them. Give the accounts a
-selection order when one of them — usually your Codex Desktop login — should only be reached for
-once the others are drained.
-
-### Sponsors
-
-Sponsors keep opencodex maintained across every upstream protocol change. Interested?
-See [SPONSORS.md](./SPONSORS.md).
-
-<!-- sponsors:main — one banner, model developers only; empty until a Main sponsor signs -->
-
-<!-- sponsors:standard — one row per sponsor, in order of signing -->
-<table>
-<tbody>
-<tr>
-<td width="180"><a href="https://www.orcarouter.ai/?utm_source=opencodex&utm_medium=readme"><img src="assets/sponsors/orcarouter.png" alt="OrcaRouter" width="150"></a></td>
-<td>Thanks to <a href="https://www.orcarouter.ai/?utm_source=opencodex&utm_medium=readme">OrcaRouter</a> for sponsoring this project! OrcaRouter is one OpenAI-compatible AI gateway for production AI: adaptive routing that grades every prompt and sends it to the model that clears your bar, automatic failover, routing rules as code, zero-markup provider pricing with prompt caching, and guardrails, an agent firewall, and request logs on every call across 200+ models. Pick <code>OrcaRouter</code> in the Add provider picker or run <code>ocx provider add orcarouter</code>; <code>orcarouter/auto</code> is the adaptive router.</td>
-</tr>
-<tr>
-<td width="180"><a href="https://www.packyapi.com/register?aff=k5KT"><img src="assets/sponsors/packycode.png" alt="PackyCode" width="150"></a></td>
-<td>Thanks to <a href="https://www.packyapi.com/register?aff=k5KT">PackyCode</a> for sponsoring this project! PackyCode is a stable, high-performance API relay provider, offering relay services for Claude Code, Codex, Gemini, and more. With automatic failover, smart routing, and unlimited concurrency, it turns AI into a real productivity tool. <a href="https://www.packyapi.com/register?aff=k5KT">Register via this link</a> and get started! Pick <code>PackyCode</code> in the Add provider picker or run <code>ocx provider add packycode</code>.<br><sub>PackyCode 是一家稳定、高效的 API 中转服务商，提供 Claude Code、Codex、Gemini 等多种中转服务。具备自动故障转移、智能路由和无限并发等多种功能，让 AI 编程成为真正的生产力工具。<a href="https://www.packyapi.com/register?aff=k5KT">点此链接注册</a>，立即开始使用！</sub></td>
-</tr>
-<tr>
-<td width="180"><a href="https://tokenlab.sh/r/OPENCODEX"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/tokenlab-dark.png"><img src="assets/sponsors/tokenlab-light.png" alt="TokenLab" width="150"></picture></a></td>
-<td>Thanks to <a href="https://tokenlab.sh/r/OPENCODEX">TokenLab</a> for sponsoring this project! TokenLab gives coding agents one API key for leading models, supporting OpenAI Responses and Chat Completions, Anthropic Messages, and Gemini's native API formats, with streaming and tool calling. It also provides an MCP server and agent Skills for easy integration. Choose your delivery mode and pay as you go. Pick <code>TokenLab</code> in the Add provider picker or run <code>ocx provider add tokenlab</code>.<br><sub>TokenLab 为编程智能体提供统一的多模型 API，一枚 API Key 即可接入主流模型，支持 OpenAI Responses、Chat Completions、Anthropic Messages 和 Gemini 原生 API 格式，以及流式输出和工具调用。同时提供 MCP 服务器和 Agent Skills，方便接入现有工作流；交付模式可选，按量付费。</sub></td>
-</tr>
-</tbody>
-</table>
-
----
-
-<details>
-<summary>Docker Compose</summary>
-
-The repository ships a digest-pinned, non-root Compose build. The build generates and verifies the
-canonical compatibility manifest from the selected Git snapshot. A local clone needs Git and
-Docker Compose; a remote Git context needs Docker Compose. Neither path needs host Bun or a
-preparation step. Initialize the data-plane token once through stdin and start the hub:
-
-```bash
-git clone https://github.com/lidge-jun/opencodex.git
-cd opencodex
-docker compose build
-openssl rand -hex 32 | docker compose run --rm -T hub bun run docker/bootstrap-token.ts
-docker compose up -d
-curl --fail --silent http://127.0.0.1:10100/healthz
-curl --fail --silent http://127.0.0.1:10100/readyz
-```
-
-The default host binding is `127.0.0.1:10100`. Remote exposure requires explicit
-`OPENCODEX_BIND_ADDRESS=<LAN-or-Tailscale-IP> docker compose up -d`; `0.0.0.0` opts into
-all host interfaces. Restrict access with a firewall and an authenticated TLS/tailnet frontend.
-The generated JSON stays untracked. The build context admits only `.git/index` and `.git/HEAD` — the
-inventory `git ls-files` reads, about 1 MB rather than the full object store — and they are visible
-only to the build-only manifest stage through a read-only mount, so no `COPY` includes `.git`. An existing host-generated manifest
-is still accepted only after validation; otherwise the build generates one itself. The build rejects
-stale manifests, missing or mismatched files, extra source files, and symlinks.
-It checks every recorded SHA-256 against the build context and copied runtime files, including
-`package.json`, `bun.lock`, and the specifically included `scripts/model-metadata.source.json`.
-
-A remote Git context needs BuildKit to retain Git metadata. This Compose build fragment selects the
-remote snapshot and passes the required built-in argument:
-
-```yaml
-services:
-  hub:
-    pull_policy: build
-    build:
-      context: https://github.com/lidge-jun/opencodex.git#main
-      dockerfile: Dockerfile
-      target: runtime
-      args:
-        BUILDKIT_CONTEXT_KEEP_GIT_DIR: "1"
-```
-
-The token and mutable state stay in the `ocx-state` named volume; no credential is placed in the
-image, Compose file, environment, or shell arguments. See the
-[Remote Hub deployment guide](https://opencodex.me/guides/remote-hub/#docker-compose) for provider
-setup, authenticated acceptance checks, remote management, and rollback.
-
-</details>
-
-<details>
-<summary>Install from source (latest dev)</summary>
-
-**macOS / Linux:**
-
-```bash
-curl -fsSL https://bun.sh/install | bash
-git clone -b dev https://github.com/lidge-jun/opencodex.git
-cd opencodex && ~/.bun/bin/bun install
-~/.bun/bin/bun run build:gui
-~/.bun/bin/bun run src/cli/index.ts start
-```
-
-**Windows (PowerShell):**
-
+Install Bun (version 1.4 or newer):
 ```powershell
 irm bun.sh/install.ps1 | iex
-git clone -b dev https://github.com/lidge-jun/opencodex.git
-cd opencodex; bun install
-bun run build:gui
-bun run src/cli/index.ts start
 ```
 
-Source install runs the latest `dev` branch. Memory ownership
-patches, runtime GC improvements, and unreleased fixes are available here before
-they reach the npm package.
+### 2. Clone and install
 
-</details>
-
-<details>
-<summary>For agents</summary>
-
-```bash
-npm install -g @bitkyc08/opencodex
-ocx start     # or `ocx service`
-ocx init      # interactive setup: writes ~/.opencodex/config.json and wires Codex
+```powershell
+git clone https://github.com/lidge-jun/opencodex.git openrelay
+cd openrelay
+bun install
+cd gui
+bun install
+cd ..
 ```
 
-`ocx init` never starts the proxy; start it first (or after — either order works, but headless
-commands like `ocx provider add` and `ocx combo set` talk to the **live** proxy and exit nonzero
-when it is unreachable). `ocx status` / `ocx doctor` / `ocx health` report the running state.
+### 3. Start OpenRelay
 
-> **Agents installing or running opencodex:** read
-> [`AGENTS_INSTALL.md`](./AGENTS_INSTALL.md). An interactive `ocx start` may ask once whether to
-> star this repository — that is the user's decision, never an agent's. The CLI suppresses the
-> prompt for agent-driven runs and the API refuses them with `403 agent_consent_required`.
-
-</details>
-
-## Supported platforms
-
-| OS | Status | Service manager | Desktop app (beta) |
-|---|---|---|---|
-| macOS (arm64 / x64) | Fully supported | launchd | Universal `.dmg` |
-| Linux (x64 / arm64) | Fully supported | systemd (user unit) | x86_64 `.AppImage` / `.deb` |
-| Windows (x64) | Fully supported | Task Scheduler (hidden) / opt-in native service (`--native`, WinSW) | x64 `.msi` |
-
-The CLI install requires [Node](https://nodejs.org) 18+; the desktop app needs neither Node nor Bun. The Bun runtime is bundled on `npm install` — no separate
-Bun install needed, no WSL needed on Windows. If npm blocked the bundled runtime's install scripts,
-see the [installation docs](https://opencodex.me/getting-started/installation/).
-
-## Highlights
-
-- **Use any LLM with Codex, Claude Code, Claude Desktop, and Grok Build** — 40+ providers out of
-  the box, each keeping its own native UI.
-- **Pool ChatGPT accounts** — thread affinity, quota-aware auto-switching, cooldown and
-  fail-closed auth handling.
-
-  > **Provider-policy note:** Account pooling is for routing and operational resilience only; it does
-  > not guarantee protection from provider rate limits, enforcement, suspension, or other account
-  > actions. OpenCodex does not endorse using additional accounts to circumvent provider limits or
-  > sharing account credentials between people. You are responsible for complying with each
-  > provider's current terms. See the
-  > [Codex Auth account-pool guidance](https://opencodex.me/guides/web-dashboard/#codex-auth-and-account-pools)
-  > and [OpenAI's current Terms of Use](https://openai.com/policies/terms-of-use/).
-- **Combos** — one virtual model id with failover or weighted round-robin across providers. See
-  the [combo guide](https://opencodex.me/guides/combos/).
-- **Sub-agents on any model** — feature routed models in Codex's sub-agent picker, with v1/v2
-  surface control and fallback chains. See the
-  [sub-agent guide](https://opencodex.me/guides/sub-agent-surface/).
-<!-- sponsors:main-first-mention -->
-- **Log in once, skip the API key** — OAuth for xAI, Anthropic, and Kimi; or forward
-  `codex login`, paste a key, or use `${ENV_VAR}` references.
-- **Web search & vision sidecars** — non-OpenAI models get real web search and image understanding
-  through a sidecar over your ChatGPT login.
-- **See what's happening** — the dashboard shows providers, OAuth status, model selection, and a
-  live request log with cache token counts.
-- **Clean exit, zero residue** — `ocx stop` restores Codex to its original configuration.
-- **Bounded memory ownership** — every long-lived cache, ring buffer, and protocol-translation
-  store has a finite cap, byte budget, or active reconciliation. No unbounded `Map` or `Set`
-  survives a config reload.
-
-<details>
-<summary>Memory ownership details</summary>
-
-OpenCodex tracks process-retained state in the categories below. Each has a documented bound:
-
-- **14 retained stores** (request log, debug rings, image cache, model cache, vision
-  descriptions, cursor blobs, responses continuation, etc.) are byte-accounted and
-  evicted by the app-owned memory budget (default 256 MiB), except the native control replay
-  store, which is pinned and never evicted.
-- **4 observed buffers** (translator accumulators, image/OAuth/Grok tails) are
-  monitored for in-flight byte pressure without eviction.
-- **31 state-store registrations** handle expiry sweeps (60 s interval) and
-  config-generation reconciliation so stale provider/account keys are removed.
-- **Path and fingerprint memos** (workspace metadata, hardened identities, installation
-  salts, mode-hint capabilities) use insertion-order LRU caps (8–128 entries).
-- **Model-cache generation tombstones** are deleted after reconciliation; a global
-  generation increment prevents stale in-flight discoveries from repopulating removed
-  providers.
-- **Lab event-id deduplication** runs under a ledger lock from disk, with no
-  process-level RAM index.
-
-Run `GET /api/system/memory` (with the admin token) to inspect live retained bytes,
-eviction counters, and watchdog samples.
-
-</details>
-
-## Model routing
-
-Target any configured provider and model with the `provider/model` syntax:
-
-```bash
-codex -m "anthropic/claude-opus-5" "Explain this stack trace"
-codex -m "google/gemini-3-pro" "Write unit tests for auth.ts"
-codex -m "ollama/llama3" "Refactor this function"
+```powershell
+bun run orl start
 ```
 
-Omit the `provider/` prefix to use the default provider or auto-match by model name pattern.
-Provider model ids containing `/` are exposed with inner slashes aliased to `-`; the raw
-full-slash form keeps working too. Details: [model routing docs](https://opencodex.me/guides/model-routing/).
+The proxy starts by default on port 10100. Open the web dashboard in your browser:
+**http://127.0.0.1:10100**
 
-### JEV Auto routing (optional)
+### 4. Basic CLI commands
 
-TypeSafe JEV can choose the first model and reasoning effort for an opt-in Combo while the normal
-model picker and every direct route stay unchanged. Add the credential with `ocx login jev`, from
-**Providers → TypeSafe JEV → Add API key**, or through `TYPESAFE_API_KEY`/`JEV_API_KEY`. Then open
-**Models → Combos → Create JEV Auto**, choose the allowed target models, and check the exact efforts
-JEV may select for each target. Leaving a target's effort setting untouched allows all efforts that
-model currently advertises.
+When running from source or using standalone builds, the primary command is `orl`:
+- `orl --help`: view available commands and arguments.
+- `orl status`: inspect proxy status, PID and active port.
+- `orl logs`: view live request logs and token accounting.
+- `orl stop`: stop the running proxy and cleanly restore native client configuration.
 
-JEV is consulted only for `jev-auto` and only once per logical model call. Missing credentials,
-network failures, or invalid decisions fail open to the first currently eligible target; caller
-cancellation still cancels the request. Automated tests use a mocked TypeSafe endpoint and do not
-validate a live JEV account.
+Standalone compiled packages also expose `ocx` and `opencodex` alongside `orl`. The command `orl` is preferred, and the other two are compatibility aliases.
 
-A JEV Combo can instead ask a self-hosted decision model, such as Ollama's keyless `tev1`: add a
-`jev-decision` provider whose `baseUrl` is the full `/v1/systemone` endpoint and set the Combo's
-`decisionProvider` to it. TypeSafe credentials are never sent there. Details:
-[System One-compatible server](https://opencodex.me/guides/combos/#system-one-compatible-server).
+## Dashboard
 
-## Providers & adapters
+OpenRelay includes a web interface served directly by the proxy at `http://127.0.0.1:10100`:
+- **Provider overview**: list configured providers, latency and connection status.
+- **Quota windows and reset times**: view rolling usage windows (5-hour, daily, weekly, monthly) and time until next quota reset.
+- **Account status**: review individual accounts and authentication states.
+- **Provider and account management**: add, configure, reorder or remove provider credentials.
+- **RTK settings and process statistics**: toggle terminal compression on or off, view checked/compressed counts, and inspect estimated byte savings.
 
-<!-- sponsors:main-first-mention -->
-OpenAI (ChatGPT login or API key), Anthropic, Google Gemini, xAI, Kimi, Azure OpenAI, Ollama
-(local + Cloud), Cursor (experimental), and every OpenAI-compatible endpoint — plus DeepSeek,
-Groq, OpenRouter, OpenGateway, Together, Fireworks, Cerebras, Mistral, Hugging Face, NVIDIA NIM, MiniMax,
-Qwen Cloud, Qoder Global and CN (official PAT + CLI), SiliconFlow, and more. Full list: `ocx init` or the
-[provider docs](https://opencodex.me/guides/providers/).
+Quota windows are only displayed when supported by the provider integration. Providers without quota APIs are identified as unsupported rather than showing inaccurate data.
 
-## CLI
+## Configuration and compatibility
 
-```bash
-ocx init                       # interactive setup (writes config, wires Codex, offers the shim)
-ocx start [--port 10100] [--socks5 [host:port] | --socks5-off]  # SOCKS5 defaults to socks5://127.0.0.1:10808
-ocx stop                       # stop + restore native Codex
-ocx service [install|repair|restart|start|stop|status|uninstall|remove]  # background service
-ocx codex-shim install         # start the proxy on demand whenever `codex` launches
-ocx health [--json]            # check immediate proxy liveness
-ocx ready [--json] [--wait [--timeout <seconds>]]  # check post-sync readiness
-ocx status                     # is the proxy running?
-ocx gui                        # open the web dashboard
-ocx provider <...>             # manage providers (list/add/edit/test/remove)
-ocx account <...>              # manage ChatGPT accounts & API-key pools
-ocx combo <...>                # manage failover / round-robin combos
-ocx v2 <...>                   # multi-agent v1/v2 surface controls
-ocx update [--tag preview]     # update opencodex
-```
+Existing OpenCodex profiles continue to work without modification:
+- Stored configurations in `.opencodex` (`~/.opencodex/config.json` or `$OPENCODEX_HOME/config.json`) continue to load without conversion.
+- Environment variables such as `OPENCODEX_*` (including `OPENCODEX_HOME` and `OPENCODEX_ADMIN_AUTH_TOKEN`) and `OCX_*` are fully recognized.
+- Client configuration entries referencing `[model_providers.opencodex]` remain functional.
+- Management API compatibility headers and session endpoints continue to work.
 
-A start whose preferred port is busy stops and names the holder instead of moving to another port,
-so it can never leave a second proxy running beside the first. Free the port, or name a different
-one with `--port`. Full reference: [CLI docs](https://opencodex.me/reference/cli/).
-
-### Health and readiness
-
-`GET /healthz` reports immediate proxy liveness. The unauthenticated `GET /readyz` endpoint reports
-post-sync readiness with the sanitized JSON identity `{service, version, uptime, pid, port, status}`.
-It returns `200` when `status` is `ready`; `pending` and terminal `failed` return `503` with
-`Retry-After: 1`.
-
-`ocx ready [--json] [--wait [--timeout <seconds>]]` performs one probe by default. `--wait` polls
-for up to 45 seconds by default, but exits immediately when it observes terminal `failed`;
-`--timeout <seconds>` sets a 1–300 second limit, requires `--wait`, and accepts only positive integers. CLI `--json` output is
-`{ready, status, pid, port}`, where `status` is `ready`, `pending`, `failed`, or `unreachable`.
-
-| Exit | Result |
-| --- | --- |
-| `0` | Ready |
-| `1` | Not ready: pending, failed, timeout, or unreachable |
-| `64` | Invalid arguments |
-
-An older proxy without `/readyz` fails closed as `unreachable` with exit 1, while `ocx health`
-remains compatible.
-
-### Autostart: service vs shim
-
-Use the **service** (`ocx service`) for an always-on proxy that restarts on crash. Use the
-**shim** (`ocx codex-shim install`) for lightweight, on-demand startup without a background
-daemon. Remove them with `ocx service uninstall` / `ocx codex-shim uninstall`.
-
-### Uninstall
-
-```bash
-ocx uninstall                  # stop, remove service/shim, restore native Codex, clean up state
-npm uninstall -g @bitkyc08/opencodex
-```
-
-## Remote access
-
-By default opencodex binds to `127.0.0.1` and needs no extra authentication. Binding beyond
-loopback (`"hostname": "0.0.0.0"`) **requires** a bearer token — the proxy refuses to start
-without `OPENCODEX_API_AUTH_TOKEN`, and every client request must carry it as
-`x-opencodex-api-key`. Details: [configuration reference](https://opencodex.me/reference/configuration/).
-
-## Documentation
-
-The public docs — install, providers, routing, combos, sub-agents, sidecars, integrations, and
-the CLI/config/management-API references — are built from [`docs-site/`](./docs-site) and
-published to **[opencodex.me](https://opencodex.me/)**.
-
-Maintainer source-of-truth notes live under [`structure/`](./structure), contributor setup in
-[`CONTRIBUTING.md`](./CONTRIBUTING.md), and security reporting in [`SECURITY.md`](./SECURITY.md).
-Report undisclosed vulnerabilities privately through
-[GitHub private vulnerability reporting](https://github.com/lidge-jun/opencodex/security/advisories/new),
-not a public issue.
-That form is the only technical channel — there is no security email. Follow-ups stay in the
-private report itself; a public issue may carry coordination only, never vulnerability details.
-Acknowledging a report is not the same as triaging it, and no first-response target is promised.
+These identifiers are retained for compatibility and are not the preferred visible branding.
 
 ## Development
 
-Source development requires the `bun` CLI on your `PATH`. The published npm package bundles its own
-Bun runtime for installed `ocx` commands; package scripts may also resolve Bun through that bundled dependency.
+Source development requires the `bun` CLI on your `PATH`. The published npm package bundles its own Bun runtime for installed `ocx` commands; package scripts may also resolve Bun through that bundled dependency.
 
+Development commands from `package.json`:
 ```bash
-git clone https://github.com/lidge-jun/opencodex.git
-cd opencodex
+# Install root and GUI dependencies
 bun install
+cd gui && bun install && cd ..
+
+# Strict TypeScript typecheck
 bun run typecheck
-bun run test
+
+# Focused branding and compatibility tests
+bun test tests/cli/openrelay-branding.test.ts
+
+# Focused RTK compression tests
+bun test tests/responses/rtk-compression.test.ts
+
+# Lint GUI source code
+bun run lint:gui
+
+# Build GUI distribution bundle
+cd gui && bun run build && cd ..
+
+# Structure SSOT check
+bun run structure:check
+
+# CLI skill surface check
+bun run skill:surface:check
+
+# Build standalone binary distribution
+bun run build:standalone
 ```
 
-See **[Contributing](./CONTRIBUTING.md)**.
+## Testing and platform notes
 
-Contributor work that landed through a maintainer carry or reimplementation,
-where the commit does not name its original author, is recorded in
-**[CREDITS.md](./CREDITS.md)**.
+- Bun 1.4.0 is required by the test runner (`testRunnerBun`), while the runtime pin is 1.4.2.
+- Focused tests are preferred during everyday development over executing the entire multi-platform test suite.
+- On some Windows systems, non-elevated permissions or PowerShell security policies can cause `EPERM` errors when Bun spawns child processes for test queue locks. Use `OCX_TEST_NO_QUEUE=1` to bypass lock contention during test runs.
+- Claude Code certificate interception requires local CA configuration. On Windows systems where UAC is disabled or ACLs are restricted, manual security adjustments may be needed.
+- Full suite status should not be described as green unless it actually passed.
 
-## Disclaimer
+## Known limitations
 
-opencodex is an independent, community-maintained project and is **not affiliated with or endorsed by OpenAI, Anthropic, or any other provider**.
+- **RTK remains conservative and opt-in**: output compression runs only on recognized command schemas and is disabled by default.
+- **Unsupported realtime and internal paths**: opaque, binary, internal and speculative realtime WebSocket streams remain unchanged.
+- **Windows CA and ACL handling**: Claude interception can fail on Windows systems with incompatible ACL or UAC settings.
+- **npm distribution**: npm publishing is not currently enabled. Run from source checkout or standalone binary releases.
+- **Quota reporting**: quota availability depends on the provider and account integration. Providers without usage APIs report an unsupported state.
 
-Some providers — notably Anthropic (Claude) — may suspend or restrict accounts that route API traffic through third-party proxies. **Use at your own risk (UAYOR).** Before connecting a provider, review its Terms of Service to confirm that proxy-based access is permitted. The opencodex maintainers are not responsible for any account actions taken by upstream providers.
+## Origin and attribution
+
+- OpenRelay is based on OpenCodex.
+- Selected RTK and quota-management ideas were adapted or inspired by OmniRoute.
+- The exact license and attribution requirements from both projects are preserved.
+- Upstream repositories:
+  - OpenCodex: https://github.com/lidge-jun/opencodex
+  - OmniRoute: https://github.com/diegosouzapw/OmniRoute
+- Detailed attribution and third-party notices are documented in [`src/compression/rtk/NOTICE.md`](./src/compression/rtk/NOTICE.md) and repository license files.
+- OpenRelay is an independent project and is not endorsed by or affiliated with OpenCodex or OmniRoute.
 
 ## License
 
-MIT
+This project is licensed under the MIT License. See [`LICENSE`](./LICENSE) and upstream NOTICE files for details.

@@ -1,9 +1,9 @@
 ---
 title: Application de bureau
-description: Installez et utilisez l’application de bureau OpenCodex sur macOS, Windows et Linux.
+description: Installez et utilisez l’application de bureau OpenRelay sur macOS, Windows et Linux.
 ---
 
-L’application de bureau OpenCodex associe une icône native de zone de notification au tableau de bord web. Son CLI intégré cherche un proxy local existant ; l’application ne démarre son environnement d’exécution intégré que si l’absence de proxy est établie.
+L’application de bureau OpenRelay associe une icône native de zone de notification au tableau de bord web. Son CLI intégré cherche un proxy local existant ; l’application ne démarre son environnement d’exécution intégré que si l’absence de proxy est établie.
 
 Le tableau de bord est servi depuis le point de terminaison du proxy local trouvé (port `10100` par défaut). L’application de bureau est une enveloppe locale autour de ce tableau de bord et de son environnement d’exécution intégré.
 
@@ -40,11 +40,11 @@ L’icône de zone de notification nécessite un environnement de bureau compati
 
 ## Premier lancement
 
-L’application demande à son CLI intégré d’exécuter `ocx resolve --json` et se connecte à un proxy local accessible s’il en existe déjà un. Elle ne démarre son environnement d’exécution intégré que lorsque le CLI établit l’absence de proxy ; un résultat incertain est affiché comme un échec de démarrage. Le tableau de bord s’ouvre alors dans la vue web de l’application, au point de terminaison loopback trouvé. Un lancement à l’ouverture de session qui démarre masqué dans la zone de notification conserve plutôt la page de démarrage légère et ne charge le tableau de bord qu’à sa première ouverture depuis la zone de notification ou à un nouveau lancement de l’application.
+L’application demande à son CLI intégré d’exécuter `orl resolve --json` et se connecte à un proxy local accessible s’il en existe déjà un. Elle ne démarre son environnement d’exécution intégré que lorsque le CLI établit l’absence de proxy ; un résultat incertain est affiché comme un échec de démarrage. Le tableau de bord s’ouvre alors dans la vue web de l’application, au point de terminaison loopback trouvé. Un lancement à l’ouverture de session qui démarre masqué dans la zone de notification conserve plutôt la page de démarrage légère et ne charge le tableau de bord qu’à sa première ouverture depuis la zone de notification ou à un nouveau lancement de l’application.
 
 Utilisez l’action **Open dashboard** ou **Open in browser** de la zone de notification pour passer du tableau de bord intégré à votre navigateur habituel. Le menu permet aussi de rechercher les mises à jour.
 
-Sur macOS, fermer le tableau de bord laisse l’application active dans la barre des menus. Ouvrez à nouveau OpenCodex depuis le Dock ou le Finder pour réafficher le tableau de bord sans redémarrer le proxy.
+Sur macOS, fermer le tableau de bord laisse l’application active dans la barre des menus. Ouvrez à nouveau OpenRelay depuis le Dock ou le Finder pour réafficher le tableau de bord sans redémarrer le proxy.
 
 ## Utilisation dans la zone de notification
 
@@ -70,11 +70,11 @@ Les mises à jour sont vérifiées avec la clé publique signée de l’outil de
 
 ## Widget
 
-L’application macOS comprend l’extension OpenCodex WidgetKit. Consultez le [guide de l’application de barre de menus macOS](/fr/guides/macos-menu-bar/) pour installer le widget et comprendre les instantanés locaux.
+L’application macOS comprend l’extension OpenRelay WidgetKit. Consultez le [guide de l’application de barre de menus macOS](/fr/guides/macos-menu-bar/) pour installer le widget et comprendre les instantanés locaux.
 
 ## Désinstallation
 
-Sur macOS, faites glisser `OpenCodex.app` d’Applications vers la Corbeille. Sous Windows, supprimez OpenCodex depuis **Installed apps**. Sous les systèmes Linux fondés sur Debian, exécutez :
+Sur macOS, faites glisser `OpenCodex.app` d’Applications vers la Corbeille. Sous Windows, supprimez OpenRelay depuis **Installed apps**. Sous les systèmes Linux fondés sur Debian, exécutez :
 
 ```bash
 sudo apt remove opencodex

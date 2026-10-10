@@ -71,19 +71,19 @@ export interface ClientCatalogProbeDeps extends CatalogCompatibilityDeps {
 }
 
 export const CONNECT_USAGE = `Usage:
-  ocx connect --link --key-stdin --tunnel-port <port> --link-id <id>
+  orl connect --link --key-stdin --tunnel-port <port> --link-id <id>
       [--clients codex,claude] [--catalog-timeout <seconds>] [--no-sync]
-  ocx connect <url> [--management-url <url>]
+  orl connect <url> [--management-url <url>]
       (--pairing-code-stdin | --admin-token-stdin)
       [--clients codex,claude] [--management-transport direct|relay]
       [--catalog-timeout <seconds>] [--no-sync]
-  ocx connect status [--json]
-  ocx connect rotate (--pairing-code-stdin | --admin-token-stdin)
+  orl connect status [--json]
+  orl connect rotate (--pairing-code-stdin | --admin-token-stdin)
       [--json]
-  ocx connect revoke --admin-token-stdin [--json]`;
+  orl connect revoke --admin-token-stdin [--json]`;
 
 export const DISCONNECT_USAGE = `Usage:
-  ocx disconnect [--keep-catalog] [--json]`;
+  orl disconnect [--keep-catalog] [--json]`;
 
 export type ClientConnectionStatus = {
   state: "disconnected" | "connected" | "invalid" | "mismatched";
@@ -333,7 +333,7 @@ export function connectCompletionReport(
     };
   }
   return {
-    lines: [verdict, `The connection to ${connection.serverUrl} as key ${connection.apiKeyId} was saved; run 'ocx connect status' to see it.`],
+    lines: [verdict, `The connection to ${connection.serverUrl} as key ${connection.apiKeyId} was saved; run 'orl connect status' to see it.`],
     failure: `client_not_ready: ${safeReason}`,
   };
 }
@@ -565,7 +565,7 @@ export async function handleDisconnectCommand(
         ? ["Previous Desktop settings were not recorded; the managed profile was switched to standard mode."] : []),
       ...(result.restartRequired ? ["Fully quit and reopen Claude Desktop; local cleanup cannot revoke an in-memory credential."] : []),
       ...(teardown.homeRevoke === "failed" && teardown.linkId
-        ? [`Home revoke failed; run ocx link revoke --link-id ${teardown.linkId} on the home.`] : []),
+        ? [`Home revoke failed; run orl link revoke --link-id ${teardown.linkId} on the home.`] : []),
       ...(teardown.tunnel?.tunnel === "unresolved"
         ? [`A link tunnel (pid ${teardown.tunnel.pid}) may still be running; stop it if it is.`] : []),
       teardown.homeRevoke === "revoked"

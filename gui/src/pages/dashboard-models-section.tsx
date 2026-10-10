@@ -4,6 +4,7 @@ import type { TFn } from "../i18n/shared";
 import { EmptyState } from "../ui";
 import { formatProviderDisplayName } from "../provider-icons";
 import type { ModelInfo } from "./dashboard-shared";
+import { Input } from "../components/ui/controls";
 
 export function DashboardModelsSection({
   t,
@@ -36,9 +37,9 @@ export function DashboardModelsSection({
         <>
           <div className="pws-search-wrap">
             <IconSearch className="pws-search-icon" width={14} height={14} aria-hidden="true" />
-            <input
+            <Input
               type="search"
-              className="input pws-search-input"
+              className="pws-search-input"
               placeholder={t("models.search")}
               value={modelQuery}
               onChange={e => setModelQuery(e.target.value)}

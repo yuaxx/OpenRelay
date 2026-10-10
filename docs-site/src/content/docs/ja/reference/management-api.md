@@ -1,15 +1,15 @@
 ---
 title: 管理 API
-description: opencodex コントロール プレーンの認証、エラー、エンドポイント参照。
+description: OpenRelay コントロール プレーンの認証、エラー、エンドポイント参照。
 ---
 
-Management API は opencodex のコントロール プレーンです。 `http://localhost:10100` のダッシュボードはそのクライアントの 1 つです。 headless `ocx` プロバイダー、モデル、コンボ、アカウント、設定、診断、ライフサイクル コマンドもクライアントです。 API はプロキシの実行中にのみ使用できます。
+Management API は OpenRelay のコントロール プレーンです。 `http://localhost:10100` のダッシュボードはそのクライアントの 1 つです。 headless `ocx` プロバイダー、モデル、コンボ、アカウント、設定、診断、ライフサイクル コマンドもクライアントです。 API はプロキシの実行中にのみ使用できます。
 
 対話型クライアントには [ウェブダッシュボード](/guides/web-dashboard/) を使用するか、自動化を構築する場合はこのリファレンスを使用します。永続値は最終的に [構成](/reference/configuration/) に従います。
 
 ## 認証モデル
 
-Management API には、データプレーン API キーとは独立した独自の管理者資格情報があります。起動時に、opencodex は次の順序で解決します。
+Management API には、データプレーン API キーとは独立した独自の管理者資格情報があります。起動時に、OpenRelay は次の順序で解決します。
 
 1. `OPENCODEX_ADMIN_AUTH_TOKEN`、設定時。
 2. 強化されたシークレット ファイル内に生成された `ocx_admin_*` トークン。
@@ -73,7 +73,7 @@ Authorization: Bearer <admin-token>
 | `GET /api/claude-desktop/status` |保存済みプロファイルと適用済みプロファイルおよびデスクトップの健全性を検査する | 400 ステータス読み取り失敗 |
 | `GET, PUT /api/claude-code` |クロード コードのゲートウェイ、認証モード、モデル マップ、コンテキスト、エージェント、サイドカー設定の読み取りまたは更新 | 400 無効なフィールドまたは図形 |
 
-ダッシュボードは **Providers > xAI Grok > Accounts** から両方のクーポン パスを操作します。サインイン済みの各アカウント行には残りのクーポン数を示すチケット バッジがあり、バッジは有効期限ウィンドウを一覧し、期限が最も近いクーポンを換金するダイアログを開きます。ダイアログはクライアントが発行した `operationId` を送り、再試行せずタイムアウト後に送信を止めます。ジャーナル記録がまだ開いている換金は再実行されてしまうためです。`ocx account grok-reset-coupons` はターミナル側の同等コマンドです。
+ダッシュボードは **Providers > xAI Grok > Accounts** から両方のクーポン パスを操作します。サインイン済みの各アカウント行には残りのクーポン数を示すチケット バッジがあり、バッジは有効期限ウィンドウを一覧し、期限が最も近いクーポンを換金するダイアログを開きます。ダイアログはクライアントが発行した `operationId` を送り、再試行せずタイムアウト後に送信を止めます。ジャーナル記録がまだ開いている換金は再実行されてしまうためです。`orl account grok-reset-coupons` はターミナル側の同等コマンドです。
 
 Claude の使用量リセットも **Providers > Anthropic > Accounts** から同様に操作できます。サインイン済みの各アカウント行には残りのリセット回数を示すチケットバッジがあり、ダイアログで再度確認した後に 1 回分を使用します。リセットすると、週次枠のリセット曜日を変えずに 5 時間枠と週次枠が補充されます。請求に応答がない場合、ダイアログは `operationId` を保持し、10 分間は同じ ID で再試行できます。Claude Code クライアント自体もこの方法で復旧し、その間は同じ付与に対する新しい操作が拒否されます。使用できるのはダッシュボードからのみで、管理者トークンだけでは `403 session_required` が返されます。
 
@@ -307,7 +307,7 @@ CLI コマンドは Anthropic OAuth アカウントを id または一意の別�
 | --- | --- | --- |
 | `GET /api/system/memory` |スカラー プロセス、ヒープ、ストリーム、応答状態、ウォッチドッグ、およびアクティブ ターン メトリックを返します。 — |
 | `POST /api/system/restart` |クライアント インジェクションを削除せずに、ドレイン対応プロセスの再起動を開始します。 202 を返します。繰り返しの呼び出しにより、既存の排水が報告されます。
-| `POST /api/stop` | サービスを停止し、ネイティブ Codex を復元し、マネージド Grok インジェクションを削除し、プロキシをドレインします | 409 サービス所有権の競合、409 `respawnable_service`（Windows タスク スケジューラのラッパーがプロキシを再起動しうる状態で、呼び出し元が `ocx stop` でない場合。何も変更されません）、409 インストール済みマネージャが停止を拒否した場合、409 `service_state_unknown`（タスク スケジューラの状態を読み取れない場合。何も変更されません。クエリを修復して再試行してください） |
+| `POST /api/stop` | サービスを停止し、ネイティブ Codex を復元し、マネージド Grok インジェクションを削除し、プロキシをドレインします | 409 サービス所有権の競合、409 `respawnable_service`（Windows タスク スケジューラのラッパーがプロキシを再起動しうる状態で、呼び出し元が `orl stop` でない場合。何も変更されません）、409 インストール済みマネージャが停止を拒否した場合、409 `service_state_unknown`（タスク スケジューラの状態を読み取れない場合。何も変更されません。クエリを修復して再試行してください） |
 
 ### Codex認証の委任
 
@@ -380,7 +380,7 @@ HTTP: 400 invalid/unsupported; 404 missing account; `oauth_mutation_busy` on loc
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

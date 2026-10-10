@@ -4,7 +4,7 @@ import { runCatalogAction } from "./catalog-command-result";
 import { clientIntegrationPath, validateAsideProfile } from "./integration-input";
 import { CliUsageError, printData, runtimeRequest, takeFlag, takeOption, type RuntimeApiDeps } from "./runtime-api";
 
-const USAGE = "Usage: ocx integration client history remove --op <opId> --yes [--client aside [--profile <id>]] [--json]";
+const USAGE = "Usage: orl integration client history remove --op <opId> --yes [--client aside [--profile <id>]] [--json]";
 const receiptSchema = z.object({
   ok: z.literal(true), opId: z.string(),
   clientId: z.string().refine(isExportClientId),

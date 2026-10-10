@@ -7,28 +7,28 @@ These commands control agent policy and routing, inspect the live proxy, and con
 
 ## Agent policy
 
-### `ocx agent <status|injection|effort|subagents|fallback|roles|sidecar|memory-models|compaction-routing> ...`
+### `orl agent <status|injection|effort|subagents|fallback|roles|sidecar|memory-models|compaction-routing> ...`
 
 Manage the headless multi-agent roster, effort caps, prompt injection, fallback, and sidecar settings.
 Use `status` for the current policy. See [Sub-agent surfaces](/guides/sub-agent-surface/) for how
 surface modes, delegation, effort, and fallback behavior fit together.
 
 ```bash
-ocx agent subagents set ark/model-a,openai/gpt-5.5
+orl agent subagents set ark/model-a,openai/gpt-5.5
 ```
 
-`ocx agent roles` is for omo (Codex / LazyCodex). It lists each Codex agent role in
+`orl agent roles` is for omo (Codex / LazyCodex). It lists each Codex agent role in
 `$CODEX_HOME/agents` with its model pin and whether `~/.omo/omo.jsonc` can be updated, or says
-LazyCodex is not installed, in which case `set` is refused. `ocx agent roles set <role> <model> [--effort <level>]` rewrites only
+LazyCodex is not installed, in which case `set` is refused. `orl agent roles set <role> <model> [--effort <level>]` rewrites only
 that role's root `model` line, and its `model_reasoning_effort` line with `--effort`, and mirrors both into omo.jsonc at
 `[codex].agents.<role>` as `model` and `reasoning`. An effort LazyCodex has no level for, such as `ultra`, is written to the role file only. A missing omo.jsonc, or one containing comments, is left unchanged
 and the command says so. See [omo (Codex / LazyCodex) role models](/guides/integrations/#omo-codex--lazycodex-role-models).
 
 ```bash
-ocx agent roles set explorer xai/grok-4.5 --effort medium
+orl agent roles set explorer xai/grok-4.5 --effort medium
 ```
 
-`ocx agent roles suggest` is omo (Codex / LazyCodex) only, refused like `set` when LazyCodex is not
+`orl agent roles suggest` is omo (Codex / LazyCodex) only, refused like `set` when LazyCodex is not
 installed. It sizes every role with one call to the default Codex model (or `--model`) and
 prints a proposed model and effort per role without writing anything. `--apply` writes every proposal
 through the same write as `set`, skipping and naming the roles whose model and effort already match.
@@ -37,12 +37,12 @@ See [Auto-assign](/guides/integrations/#auto-assign).
 Human-readable suggestion output displays terminal control characters as visible escapes.
 Use `--json` when you need the original suggestion values without presentation escaping.
 
-`ocx agent injection suggest <work>` does the same for the delegation model: it sizes the described
+`orl agent injection suggest <work>` does the same for the delegation model: it sizes the described
 work, proposes the cheapest sufficient model and an effort from the delegation picker's list, and writes
 nothing unless `--apply` is given, which saves through the same write as `injection set`. See
 [Delegation model and effort](/guides/sub-agent-surface/#delegation-model-and-effort).
 
-`ocx agent sidecar web --list` and `ocx agent sidecar vision --list` print the models the
+`orl agent sidecar web --list` and `orl agent sidecar vision --list` print the models the
 server currently offers for each sidecar — the exact filtered set the dashboard picker shows
 (picker-visible rows plus the login-entitled Luna/Haiku auth slots, intersected with executor
 availability for web search, minus provably text-only models for vision). Human-readable lists
@@ -54,29 +54,29 @@ set (closed membership), while vision refuses only a model provably unable to se
 stay writable).
 
 ```bash
-ocx agent sidecar web --list
-ocx agent sidecar web --model gpt-5.6-luna
-ocx agent sidecar web --enabled off
+orl agent sidecar web --list
+orl agent sidecar web --model gpt-5.6-luna
+orl agent sidecar web --enabled off
 ```
 
-`--enabled off` is the same switch as the Dashboard's Off row: OpenCodex stops running the
+`--enabled off` is the same switch as the Dashboard's Off row: OpenRelay stops running the
 sidecar and the Codex integration writes `web_search = "disabled"` into `~/.codex/config.toml`,
 which is what lets an MCP search server be the only search path. `--enabled on` removes that
 marker-owned line again. When the save actually moves the switch, the command reports the
 Codex-side write it triggered (`codexWebSearch` in `--json`, a trailing `Codex config:` line
-otherwise) and points at `ocx sync` when it could not happen; a save that leaves the switch
+otherwise) and points at `orl sync` when it could not happen; a save that leaves the switch
 where it was has nothing to report and prints no `Codex config:` line. The flag works for
 `vision` too.
 
 ### Injection defaults and sidecar runtime settings
 
 ```bash
-ocx agent injection status --json
-ocx agent injection set --sync-codex-defaults off --json
-ocx agent injection status --json
-ocx agent sidecar web --stream-routed-output on --json
-ocx agent sidecar vision --timeout-ms 30000 --json
-ocx agent sidecar status --json
+orl agent injection status --json
+orl agent injection set --sync-codex-defaults off --json
+orl agent injection status --json
+orl agent sidecar web --stream-routed-output on --json
+orl agent sidecar vision --timeout-ms 30000 --json
+orl agent sidecar status --json
 ```
 
 Run writes only for the requested change. Injection `--sync-codex-defaults on|off`
@@ -97,12 +97,12 @@ settings, including web reasoning. Do not retry blindly on ownership refusal.
 ### Memory and compaction routing overrides
 
 ```bash
-ocx agent memory-models show --json
-ocx agent memory-models set --extract-model <route> --extract-effort high --consolidation-model <route> --json
-ocx agent memory-models show --json
-ocx agent compaction-routing show --json
-ocx agent compaction-routing set --model <route> --effort high --triggers manual,auto --sources '<exact-source>,<provider>/*' --json
-ocx agent compaction-routing show --json
+orl agent memory-models show --json
+orl agent memory-models set --extract-model <route> --extract-effort high --consolidation-model <route> --json
+orl agent memory-models show --json
+orl agent compaction-routing show --json
+orl agent compaction-routing set --model <route> --effort high --triggers manual,auto --sources '<exact-source>,<provider>/*' --json
+orl agent compaction-routing show --json
 ```
 
 Each set replaces the entire block. Memory accepts extract/consolidation model
@@ -115,7 +115,7 @@ Omitted phases use their existing/default route, not a stopped pipeline.
 ```
 
 An explicit memory file `{}` is valid and remains an empty override block;
-`ocx agent memory-models clear --json` writes null. Both mean no custom override,
+`orl agent memory-models clear --json` writes null. Both mean no custom override,
 not disabled memory processing. File mode is exclusive with scalar options.
 Regular UTF-8 files or piped `--file -` use the 4 MiB/30-second bounded-input
 contract, including a 4 MiB serialized request limit.
@@ -124,7 +124,7 @@ Compaction files contain required `model`, optional `reasoningEffort`, `triggers
 and `sourceModels`. Triggers are unique `manual`/`auto`; source selectors must be
 exact and unique, or provider/* patterns. Omitted triggers use server defaults;
 omitted sources select all sources, not the previous custom scope.
-`ocx agent compaction-routing clear --json` writes null and restores ordinary
+`orl agent compaction-routing clear --json` writes null and restores ordinary
 compaction routing without disabling compaction. No synthetic model call verifies
 these saves.
 
@@ -133,7 +133,7 @@ Writes add `catalogRefreshPending`: false exits 0 without promising every client
 applied, true exits 1 after saving. Missing/malformed pending evidence is null with
 `verification:"unverified"` and exit 1. Read back before recovery.
 
-### `ocx effort [status|set|clear]`
+### `orl effort [status|set|clear]`
 
 Inspect or change main and subagent reasoning-effort caps through the live proxy, or the local
 configuration when no proxy is available. Cap values are `low`, `medium`, `high`, `xhigh`, `max`,
@@ -142,19 +142,19 @@ before probing the proxy or submitting an update, including when another option 
 They remain valid for `--injection`, which sets the separate injection effort rather than a cap.
 
 ```bash
-ocx effort status --json
-ocx effort set --main high --subagent low
-ocx effort set --subagent -
+orl effort status --json
+orl effort set --main high --subagent low
+orl effort set --subagent -
 ```
 
 Status preserves existing stored/runtime cap values and reports unsupported values in `warnings`
 (an empty array when none are unsupported). The same warnings appear in human output and name the
 field that is ignored with a correction command. Status never repairs or rewrites those values.
-An ignored subagent field does not remove a valid main cap. `ocx effort clear` clears both caps
+An ignored subagent field does not remove a valid main cap. `orl effort clear` clears both caps
 while retaining the separate injection-effort setting. See [Sub-agent surfaces](/guides/sub-agent-surface/)
 for the request surfaces where caps apply.
 
-### `ocx v2 <status|on|off|mode <v1|default|v2>|keep-native-v1 <on|off>|threads <n>|mode-hint <text|--clear>>`
+### `orl v2 <status|on|off|mode <v1|default|v2>|keep-native-v1 <on|off>|threads <n>|mode-hint <text|--clear>>`
 
 Manage the Codex `multi_agent_v2` feature flag and the three-state multi-agent surface mode.
 These operate locally by default. `--live` uses the selected running proxy with no
@@ -175,16 +175,16 @@ after a change and distinguish stored settings from new-session behavior.
 | `mode-hint --clear` | Remove the hint so the effort-derived policy (ultra = proactive) resumes. |
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
-ocx v2 mode default
-ocx v2 on
-ocx v2 threads 16
-ocx v2 mode-hint "Proactive multi-agent delegation is active."
-ocx v2 mode-hint --clear
+orl v2 status
+orl v2 mode v1
+orl v2 mode default
+orl v2 on
+orl v2 threads 16
+orl v2 mode-hint "Proactive multi-agent delegation is active."
+orl v2 mode-hint --clear
 ```
 
-The `mode` subcommand writes `multiAgentMode` to the opencodex config and resyncs the Codex catalog.
+The `mode` subcommand writes `multiAgentMode` to the OpenRelay config and resyncs the Codex catalog.
 Mode and flag transitions move the current numeric thread limit between the valid v1/v2 Codex keys;
 a failed transition restores the original `config.toml`. Changes apply to new Codex sessions, while
 running sessions keep their pinned surface.
@@ -202,15 +202,15 @@ receives the Proactive delegation prompt. It does **not** change reasoning effor
 itself. A missing argument or a whitespace-only value is rejected; only `--clear`
 removes the hint. The Subagents dashboard's Ultra mode **on** toggle has a stricter
 gate: it requires the native feature to be enabled with an explicit v2 surface
-(`ocx v2 mode v2`); `ocx v2 on` alone does not satisfy that dashboard gate.
+(`orl v2 mode v2`); `orl v2 on` alone does not satisfy that dashboard gate.
 
 #### Explicit v2 target and outcome
 
 ```bash
-ocx v2 status --json
-ocx v2 status --live --json
-ocx v2 mode v1 --live --json
-ocx v2 status --live --json
+orl v2 status --json
+orl v2 status --live --json
+orl v2 mode v1 --live --json
+orl v2 status --live --json
 ```
 
 The live write uses the existing management route. Only explicit live `mode`
@@ -221,7 +221,7 @@ it. There is no automatic acknowledgment.
 For literal reserved hint text, pass one quoted operand after `--`:
 
 ```bash
-ocx v2 mode-hint --live --json -- '--clear'
+orl v2 mode-hint --live --json -- '--clear'
 ```
 
 This stores literal `--clear`; without `--`, `mode-hint --clear` removes the hint.
@@ -240,15 +240,15 @@ Local usage errors retain exit 1; new live usage errors use exit 2.
 
 ## Combo routing
 
-### `ocx combo <list|show|set|remove|stats> ...` · `ocx route combo ...`
+### `orl combo <list|show|set|remove|stats> ...` · `orl route combo ...`
 
-Manage combo failover and round-robin virtual models. `ocx route combo` is the hierarchical alias;
+Manage combo failover and round-robin virtual models. `orl route combo` is the hierarchical alias;
 combos and routing profiles are distinct resources. Combo targets use
 `provider/model[:weight],provider/model[:weight]`.
 
 ```bash
-ocx combo list
-ocx route combo set reliable --targets ark/model-a:2,openai/gpt-5.5
+orl combo list
+orl route combo set reliable --targets ark/model-a:2,openai/gpt-5.5
 ```
 
 `set` accepts `--strategy`, `--sticky`, `--effort`, `--alias`, `--rename-from`, `--native-alias`, and
@@ -260,22 +260,22 @@ Read the safety and visibility contract in the guide before enabling the compati
 With `--strategy jev` only, the decision method is chosen by one of two mutually exclusive flags.
 `--decision-provider <provider|->` names a configured `jev-decision` row (for example a self-hosted
 Ollama `tev1`) as a System One-compatible server. `--decision-model <route|->` names an ordinary
-opencodex route (for example `ollama/qwen3:4b`) that answers the same choice as JSON; it cannot be
+OpenRelay route (for example `ollama/qwen3:4b`) that answers the same choice as JSON; it cannot be
 this combo or any JEV combo. Omitting both uses TypeSafe. `--decision-timeout <ms|->` sets the
 decision deadline (1000–120000, default 4000); `-` clears any of the three.
 
-`ocx combo test [--combo <id>] [--decision-provider <provider|jev> | --decision-model <route>]
+`orl combo test [--combo <id>] [--decision-provider <provider|jev> | --decision-model <route>]
 [--decision-timeout <ms>]` sends one synthetic decision probe through a saved combo's method or an
 unsaved selection and reports the gate, backend, and latency; it may spend one decision call.
-`ocx combo discover [--query <text>]` lists configured System One rows and catalog models that look
+`orl combo discover [--query <text>]` lists configured System One rows and catalog models that look
 like decision models, with the derived endpoint.
 
 For structured target metadata, inspect offline help and the current combo:
 
 ```bash
-ocx combo set --help
-ocx combo list --json
-ocx combo show reliable --json
+orl combo set --help
+orl combo list --json
+orl combo show reliable --json
 ```
 
 A `--targets-file` document is a nonempty ordered array, for example this shape
@@ -292,8 +292,8 @@ empty/none/minimal custom-model semantics do not apply. Files or explicit piped
 must also fit 4 MiB. Unknown fields refuse before the write.
 
 ```bash
-ocx combo set reliable --targets-file targets.json --image-input auto --reasoning-effort-mode strict --json
-ocx combo show reliable --json
+orl combo set reliable --targets-file targets.json --image-input auto --reasoning-effort-mode strict --json
+orl combo show reliable --json
 ```
 
 `--targets-file` and `--targets` are mutually exclusive. Omitting both preserves
@@ -311,7 +311,7 @@ skipped, failed or degraded catalog refresh returns nonzero after saving.
 ### Observe combo decision statistics
 
 ```bash
-ocx combo stats reliable --range 30d --json
+orl combo stats reliable --range 30d --json
 ```
 
 Use the exact stored combo ID from list/show, not its public model or alias.
@@ -331,9 +331,9 @@ See [Combos](/guides/combos/) for routing behavior and configuration guidance.
 Existing profiles support inspection and evaluation through the live API:
 
 ```bash
-ocx route policy list --json
-ocx route policy show reliable --json
-ocx route policy dry-run reliable --model-context 128000 --tools --image --structured-output --json
+orl route policy list --json
+orl route policy show reliable --json
+orl route policy dry-run reliable --model-context 128000 --tools --image --structured-output --json
 ```
 
 Only run this evaluation with authority to activate Lab on the target. The management POST can activate Lab and start automation that is already enabled there, including upstream probes. Use list/show for observation without that activation effect.
@@ -351,8 +351,8 @@ probes. Only run them with that authority. List/show are observational; first
 read offline help and save the intended profile:
 
 ```bash
-ocx route policy update --help
-ocx route policy show reliable --json > profile.observed.json
+orl route policy update --help
+orl route policy show reliable --json > profile.observed.json
 jq 'del(.id, .model, .revision) | if .alias == null then del(.alias) else . end' profile.observed.json > profile.next.json
 ```
 
@@ -364,14 +364,14 @@ validates provider, alias and policy semantics. `--file -` accepts piped stdin;
 regular UTF-8 files/stdin have the 4 MiB and 30-second bounded read contract.
 
 ```bash
-ocx route policy update reliable --file profile.next.json --expected-revision '<exact-revision-from-observed-show>' --json
-ocx route policy show reliable --json
+orl route policy update reliable --file profile.next.json --expected-revision '<exact-revision-from-observed-show>' --json
+orl route policy show reliable --json
 ```
 
 Use the original opaque revision explicitly. HTTP 409 / exit 5 means read show
 again, review concurrent changes and rebuild the edit. Never silently fetch a
 replacement revision, retry or convert update into create. For an authorized new
-ID use `ocx route policy create <new-id> --file profile.next.json --json` without a
+ID use `orl route policy create <new-id> --file profile.next.json --json` without a
 revision. Authorized removal is `ocx route policy remove <id> --yes --json` and
 has no revision guard.
 
@@ -386,12 +386,12 @@ Lab is local inspection **and** explicit evidence/automation management. Reads
 use the local projection and do not require a running management API:
 
 ```bash
-ocx lab status --json
-ocx lab catalog --json
-ocx lab subjects --limit 10 --json
-ocx lab automation status --json
-ocx lab automation runs --limit 10 --json
-ocx lab public community --json
+orl lab status --json
+orl lab catalog --json
+orl lab subjects --limit 10 --json
+orl lab automation status --json
+orl lab automation runs --limit 10 --json
+orl lab public community --json
 ```
 
 `subject`, `observations`, `event`, `artifact`, and `production-signals` follow
@@ -408,20 +408,20 @@ editing and run cancellation are not exposed by these CLI controls.
 
 ## Observability and debug
 
-### `ocx observe <logs|usage|storage|memory|debug|claude-inbound|injection> ...`
+### `orl observe <logs|usage|storage|memory|debug|claude-inbound|injection> ...`
 
 Inspect proxy requests, usage, storage, memory, and debug data. The direct aliases are:
 
 | Alias | Equivalent resource |
 | --- | --- |
-| `ocx logs [filters] [--follow] [--json|--jsonl|--events]` | `ocx observe logs` |
-| `ocx usage [--range <today|1d|7d|30d|all>] [--since <timestamp> --until <timestamp>] [--surface <all|codex|claude|grok>] [--provider <name>] [--model <id>] [--api-key-id <id>] [--json]` | `ocx observe usage` |
-| `ocx storage [--json]` | `ocx observe storage` |
-| `ocx memory [--json]` | `ocx observe memory` |
+| `orl logs [filters] [--follow] [--json|--jsonl|--events]` | `orl observe logs` |
+| `orl usage [--range <today|1d|7d|30d|all>] [--since <timestamp> --until <timestamp>] [--surface <all|codex|claude|grok>] [--provider <name>] [--model <id>] [--api-key-id <id>] [--json]` | `orl observe usage` |
+| `orl storage [--json]` | `orl observe storage` |
+| `orl memory [--json]` | `orl observe memory` |
 
 ```bash
-ocx observe usage --range 30d --json
-ocx usage --since 2026-09-01T09:00:00Z --until 2026-09-01T10:59:59.999Z --json
+orl observe usage --range 30d --json
+orl usage --since 2026-09-01T09:00:00Z --until 2026-09-01T10:59:59.999Z --json
 ```
 
 `--since` and `--until` must be supplied together. They accept integer epoch milliseconds or
@@ -442,7 +442,7 @@ separately, and requests with no matching price row are counted as
 `unpriced`/`unmetered` rather than folded in as zero.
 
 ```bash
-ocx usage --range today --provider xai
+orl usage --range today --provider xai
 ```
 
 When some usage records cannot be included, human output warns, including when there are zero readable rows.
@@ -453,10 +453,10 @@ the warning and guidance instead of total lines; skipped records may contain mat
 ### Filter a bounded log snapshot
 
 ```bash
-ocx logs filter --surface claude --status errors --time-window 1h --scan-limit 2000 --limit 50 --json
+orl logs filter --surface claude --status errors --time-window 1h --scan-limit 2000 --limit 50 --json
 ```
 
-`ocx observe logs filter` is the equivalent family form. This reads one recent
+`orl observe logs filter` is the equivalent family form. This reads one recent
 window, filters locally, then keeps the newest matches in their original order.
 `--scan-limit` controls fetched rows (1–2000, default 2000); `--limit` controls
 returned rows (1–2000, default 200). JSON reports
@@ -484,7 +484,7 @@ change the fetch. For streaming use the separate follow forms below.
 ### Search usage model rows
 
 ```bash
-ocx usage --range 7d --search 'model-a' --json
+orl usage --range 7d --search 'model-a' --json
 ```
 
 `--search` matches a trimmed case-insensitive substring in model, provider or
@@ -503,8 +503,8 @@ self scope and is never sent as a new Hub API query parameter.
 ### Saved companion usage totals
 
 ```bash
-ocx companion show --json
-ocx companion usage --json
+orl companion show --json
+orl companion usage --json
 ```
 
 The second command reads saved companion settings, then today and 30d usage
@@ -528,9 +528,9 @@ without late results.
 ### Follow request windows or injection sequences
 
 ```bash
-ocx logs --help
-ocx logs --limit 200 --json
-ocx logs --follow --events --limit 200
+orl logs --help
+orl logs --limit 200 --json
+orl logs --follow --events --limit 200
 ```
 
 `--events` requires follow and implies JSONL; redundant `--jsonl` is accepted.
@@ -542,15 +542,15 @@ remain silent. Legacy arrays are snapshots with cursor null, not invented cursor
 These are observed windows, not a lossless replay of traffic missed between polls
 or after ring eviction.
 
-`ocx logs --follow --jsonl --limit 200` retains row-shaped output. It re-emits changed
+`orl logs --follow --jsonl --limit 200` retains row-shaped output. It re-emits changed
 occurrences, including same-ID status/token amendments and repeated IDs. Do not
 collapse everything by request ID. This legacy output cannot encode removals,
 resets or exact window order; choose events when those distinctions matter.
 Log follow limit is 1–2000, default 200.
 
 ```bash
-ocx observe injection --limit 500 --json
-ocx observe injection --follow --jsonl --limit 500
+orl observe injection --limit 500 --json
+orl observe injection --follow --jsonl --limit 500
 ```
 
 Injection emits ordered `{seq,at,line}` rows, where `at` is epoch milliseconds;
@@ -569,8 +569,8 @@ and retained rows instead of treating cancellation as complete history.
 ### Companion timeline and key-scoped usage
 
 ```bash
-ocx companion timeline --help
-ocx companion timeline --hours 24 --bucket-minutes 60 --metric total --aggregation sum --grouping model --model example/model-a --hide-provider excluded-provider --json
+orl companion timeline --help
+orl companion timeline --hours 24 --bucket-minutes 60 --metric total --aggregation sum --grouping model --model example/model-a --hide-provider excluded-provider --json
 ```
 
 Replace fictional IDs with the selected filters. Repeat `--model` for individual
@@ -590,8 +590,8 @@ remain visible: zero-filled points do not prove complete zero usage.
 On a non-client management host:
 
 ```bash
-ocx access key list --json
-ocx usage --api-key-id key-example --range 7d --json
+orl access key list --json
+orl usage --api-key-id key-example --range 7d --json
 ```
 
 Use a non-secret actual key ID. The CLI requires exact response acknowledgment in
@@ -601,38 +601,38 @@ Keep incomplete/custom-window facts. Connected clients reject `--api-key-id`
 before enrolled-key access or transport; omit it for existing self-only Hub usage
 or perform the selected-key view on the Hub. No data key grants management authority.
 
-### `ocx debug <provider|usage|injection|claude> <on|off|status|reset|logs [-f]>`
+### `orl debug <provider|usage|injection|claude> <on|off|status|reset|logs [-f]>`
 
 Read or change runtime debug overrides through the running proxy's management API.
 
 ```bash
-ocx debug provider on|off|status|reset
-ocx debug provider logs [-f|--follow]
-ocx debug usage on|off|status|reset
-ocx debug usage logs [-f|--follow]
+orl debug provider on|off|status|reset
+orl debug provider logs [-f|--follow]
+orl debug usage on|off|status|reset
+orl debug usage logs [-f|--follow]
 ```
 
-With no scope, `ocx debug` prints usage and, when the proxy is stopped, the next-start environment
+With no scope, `orl debug` prints usage and, when the proxy is stopped, the next-start environment
 defaults. Provider debug defaults from `OCX_DEBUG=1` (legacy `OCX_DEBUG_FRAMES=1` also works); usage
 debug defaults from `OPENCODEX_USAGE_DEBUG=1`.
 
 ## API access
 
-### `ocx access <key|endpoints|models|test|audio> ...`
+### `orl access <key|endpoints|models|test|audio> ...`
 
 Inspect admission keys, external endpoints and models with the access family.
-`ocx api-key` aliases the access-key family. Creation and rotation-start return a
+`orl api-key` aliases the access-key family. Creation and rotation-start return a
 one-time plaintext credential in text and JSON output. Agents must leave those
 steps to a human-operated terminal outside the agent session; request only
 confirmation and non-secret key/rotation IDs, never the credential.
 
 ```bash
-ocx access key list --json
+orl access key list --json
 ```
 
 After the human configures and verifies the replacement, committing its rotation
 or removing the old key requires separate explicit revocation authority. Safe
-non-secret follow-ups are `ocx access key rotate commit <id> <rotation-id> --json`
+non-secret follow-ups are `orl access key rotate commit <id> <rotation-id> --json`
 and `ocx access key rotate abort <id> <rotation-id> --json`, with authority for
 the chosen action. Re-list afterward. Missing pending state alone does not prove
 commit: expiry or abort can also clear it. Do not route around consent by issuing
@@ -641,8 +641,8 @@ the secret-returning management request directly.
 ### Rename one key without changing its access policy
 
 ```bash
-ocx access key rename key-example 'Research client' --json
-ocx access key list --json
+orl access key rename key-example 'Research client' --json
+orl access key list --json
 ```
 
 Use an actual unique ID or unambiguous name. Rename sends only `{id,name}` and
@@ -658,9 +658,9 @@ root `api-key rename` alias uses the same command.
 Discover the installed syntax without contacting upstream:
 
 ```bash
-ocx access test --help
-ocx access audio transcribe --help
-ocx access audio live-check --help
+orl access test --help
+orl access audio transcribe --help
+orl access audio live-check --help
 ```
 
 Model requests, audio uploads and live-session checks require explicit operator
@@ -671,9 +671,9 @@ or ask for it in chat. Never put it in argv/environment. These are the ocx side
 of that private pipe, not direct interactive key prompts or an agent-run batch:
 
 ```bash
-ocx access test example/model --protocol responses --api-key-stdin --json
-ocx access audio transcribe sample.wav --model gpt-4o-mini-transcribe --api-key-stdin --json
-ocx access audio live-check --model gpt-live-1-codex --api-key-stdin --json
+orl access test example/model --protocol responses --api-key-stdin --json
+orl access audio transcribe sample.wav --model gpt-4o-mini-transcribe --api-key-stdin --json
+orl access audio live-check --model gpt-live-1-codex --api-key-stdin --json
 ```
 
 Choose only the authorized task and real model/file. TTY input is refused. Input
@@ -734,23 +734,23 @@ Signals exit 130/143. This checks readiness/closure only, not microphone, upload
 tool execution, full voice roundtrip or server lease release. Opening the upstream
 session is not guaranteed free. No reconnect or retry is automatic.
 
-### `ocx api <protocols|explain|policy> ...`
+### `orl api <protocols|explain|policy> ...`
 
 Inspect and set how requests travel between the client APIs and provider wires. See
 [Protocol paths](/guides/protocol-paths/) for the vocabulary.
 
 | Command | Route | Changes state |
 | --- | --- | --- |
-| `ocx api protocols [--provider <name>] [--json]` | `GET /api/protocols` | No |
-| `ocx api explain --model <id> --inbound <responses\|chat\|messages> [--feature <key>]... [--json]` | `POST /api/protocols/plan` | No |
-| `ocx api policy [--json]` | `GET /api/protocols` | No |
-| `ocx api policy [--messages <on\|off>] [--unrepresentable <legacy\|reject>] [--rollout <switch>=<on\|off>]... [--json]` | `PATCH /api/protocols/settings` | Yes |
+| `orl api protocols [--provider <name>] [--json]` | `GET /api/protocols` | No |
+| `orl api explain --model <id> --inbound <responses\|chat\|messages> [--feature <key>]... [--json]` | `POST /api/protocols/plan` | No |
+| `orl api policy [--json]` | `GET /api/protocols` | No |
+| `orl api policy [--messages <on\|off>] [--unrepresentable <legacy\|reject>] [--rollout <switch>=<on\|off>]... [--json]` | `PATCH /api/protocols/settings` | Yes |
 
 - `protocols` prints the contract version, whether each client API is served and why, the
   unrepresentable policy, every rollout switch, and the policy revision. `--provider` adds the
   upstream wire that provider receives, who decided it, and the models on another wire.
 - `explain` previews the path a model would take from one client API. `--feature` is repeatable
-  and accepts a comma-separated list; `ocx api protocols --json` lists the known feature keys. The
+  and accepts a comma-separated list; `orl api protocols --json` lists the known feature keys. The
   preview is computed from configuration: nothing is sent upstream, no combo rotation advances, and
   the input is not logged.
 - `policy` without a setting flag only reads. With one it sends a single change to the running
@@ -761,8 +761,8 @@ Inspect and set how requests travel between the client APIs and provider wires. 
   already on or turned on in the same command.
 
 ```bash
-ocx api explain --model combo/main --inbound chat --feature request.seed,request.tools
-ocx api policy --rollout shadowPlan=on
+orl api explain --model combo/main --inbound chat --feature request.seed,request.tools
+orl api policy --rollout shadowPlan=on
 ```
 
 Usage errors exit 2 before any request is sent. `--json` prints the management API body as is.
@@ -773,13 +773,13 @@ Usage errors exit 2 before any request is sent. `--json` prints the management A
 
 | Command | Action |
 | --- | --- |
-| `ocx integration client status [--client <id>] [--profile <id>] [--json]` | Read all managed file integrations, one client, or Aside profiles. `show` and `list` alias `status`. |
-| `ocx integration client history [--client <id>] [--profile <id>] [--json]` | Read rollback operations and snapshot availability. `journal` aliases `history`. |
-| `ocx integration client enable --client <id> [--profile <id>] [--overwrite-conflict] [--json]` | Apply the managed file integration. Overwriting a conflicting block requires the explicit flag. |
-| `ocx integration client disable --client <id> [--profile <id>] [--json]` | Remove the selected managed integration through its runtime owner. |
-| `ocx integration client restore --op <opId> [--client aside --profile <id>] [--confirm-drift] [--json]` | Restore a recorded operation; replacing later edits requires explicit drift confirmation. |
-| `ocx integration native [list] [--json]` | Read native integration state. |
-| `ocx integration native <claude\|claude-desktop\|codex\|grok> <on\|off> [--json]` | Write the selected native client's configuration through its runtime owner. |
+| `orl integration client status [--client <id>] [--profile <id>] [--json]` | Read all managed file integrations, one client, or Aside profiles. `show` and `list` alias `status`. |
+| `orl integration client history [--client <id>] [--profile <id>] [--json]` | Read rollback operations and snapshot availability. `journal` aliases `history`. |
+| `orl integration client enable --client <id> [--profile <id>] [--overwrite-conflict] [--json]` | Apply the managed file integration. Overwriting a conflicting block requires the explicit flag. |
+| `orl integration client disable --client <id> [--profile <id>] [--json]` | Remove the selected managed integration through its runtime owner. |
+| `orl integration client restore --op <opId> [--client aside --profile <id>] [--confirm-drift] [--json]` | Restore a recorded operation; replacing later edits requires explicit drift confirmation. |
+| `orl integration native [list] [--json]` | Read native integration state. |
+| `orl integration native <claude\|claude-desktop\|codex\|grok> <on\|off> [--json]` | Write the selected native client's configuration through its runtime owner. |
 
 These commands require a running proxy. `--profile` selects a nonnegative Aside account ID and
 requires `--client aside`; omitted profiles select the aggregate for reads and all profiles for
@@ -789,8 +789,8 @@ inspection commands below. For preview and bound-write options, continue with th
 ### Preview and recover managed file integrations
 
 ```bash
-ocx integration client preview --client hermes --operation apply --json
-ocx integration client restore --op op-example --preview --json
+orl integration client preview --client hermes --operation apply --json
+orl integration client restore --op op-example --preview --json
 ```
 
 `op-example` is fictional; use an ID from history. Preview operations are apply,
@@ -808,12 +808,12 @@ preserves the map. Repeat the exact map in preview and commit; see
 [Droid defaults](/guides/integrations/#factory-droid).
 
 History removal is irreversible and requires an exact opId plus `--yes`:
-`ocx integration client history remove --op op-example --yes --json` addresses the
+`orl integration client history remove --op op-example --yes --json` addresses the
 global journal. Only `--client aside` and optional `--profile N` provide narrower
 delete scopes. The newest row is protected. `snapshotRemoved:false` exits 1 after
 retirement with cleanup incomplete; do not retry deletion or claim rollback.
 
-`ocx integration client sync --client aside --json` refreshes eligible profiles
+`orl integration client sync --client aside --json` refreshes eligible profiles
 through the attested owner, with no profile selector or local fallback. Empty
 `results` is successful observation of no eligible profiles; a failed row makes
 the aggregate nonzero while preserving other successes. Read status and recovery
@@ -823,8 +823,8 @@ explain profile intent versus file state.
 ### Inspect Cursor without installing it
 
 ```bash
-ocx integration native cursor status --json
-ocx integration native cursor local-installer --json
+orl integration native cursor status --json
+orl integration native cursor local-installer --json
 ```
 
 Status can gather model inventory; installer lookup may fetch a public manifest.
@@ -833,12 +833,12 @@ from placeholder gateway mode; the placeholder is not an access credential.
 Installer `{available:false,url:null,version:null,reason:null}` is valid, including
 when Private Inference is already installed. A valid unavailable read exits 0.
 
-### `ocx integration <claude|grok> ...`
+### `orl integration <claude|grok> ...`
 
 Manage supported Claude and Grok integrations. The direct command families below expose their
 client-specific controls.
 
-### `ocx claude [claude args...]`
+### `orl claude [claude args...]`
 
 Ensure the proxy is running, then launch Claude Code with `ANTHROPIC_BASE_URL`,
 `ANTHROPIC_AUTH_TOKEN`, `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, and model slots from
@@ -849,18 +849,18 @@ User-exported `ANTHROPIC_*` variables always take precedence.
 Claude Desktop profile commands are:
 
 ```text
-ocx claude desktop [apply]                         Save and apply the four-family profile
-ocx claude desktop show [--json]                   Show routes, families, and defaults
-ocx claude desktop status [--json]                 Show applied state, drift, and health
-ocx claude desktop move <route> <family> [--default]
-ocx claude desktop default <family> <route|none>
-ocx claude desktop export <path|->                 Export versioned JSON (`-` = stdout)
-ocx claude desktop import <path> [--apply]         Validate and import JSON
+orl claude desktop [apply]                         Save and apply the four-family profile
+orl claude desktop show [--json]                   Show routes, families, and defaults
+orl claude desktop status [--json]                 Show applied state, drift, and health
+orl claude desktop move <route> <family> [--default]
+orl claude desktop default <family> <route|none>
+orl claude desktop export <path|->                 Export versioned JSON (`-` = stdout)
+orl claude desktop import <path> [--apply]         Validate and import JSON
 ```
 
 The families are `opus`, `fable`, `sonnet`, and `haiku`; new routes start in `opus`. `none` is valid
 only when that family is empty. Legacy apply flags `--static`, `--hybrid`, and `--discovery-only`
-remain supported. Use `ocx claude config <status|set> ...` for Claude Code settings.
+remain supported. Use `orl claude config <status|set> ...` for Claude Code settings.
 
 #### Read or save the selected runtime's Desktop profile
 
@@ -868,7 +868,7 @@ The existing show/import commands above are local. The `profile` family targets
 the running management runtime and can gather model inventory:
 
 ```bash
-ocx claude desktop profile show --json > desktop-observed.json
+orl claude desktop profile show --json > desktop-observed.json
 jq '.profile' desktop-observed.json > desktop-profile.json
 ```
 
@@ -876,8 +876,8 @@ Edit/review the versioned profile, preserving server-owned applied markers. For
 an authorized save, then read-back:
 
 ```bash
-ocx claude desktop profile import desktop-profile.json --json
-ocx claude desktop profile show --json
+orl claude desktop profile import desktop-profile.json --json
+orl claude desktop profile show --json
 ```
 
 Import accepts the profile itself, not the outer `{profile,models,rendered,port}`
@@ -887,7 +887,7 @@ native-mode flags are rejected; failed runtime save has no local fallback. Apply
 is a separate existing Desktop action on its machine, so verify host/context
 before choosing it. Rendered models are not proof of native application.
 
-### `ocx opencode [opencode args...]`
+### `orl opencode [opencode args...]`
 
 Ensure the proxy is running, then launch opencode with the generated `provider.opencodex` and
 `providers.opencodex` blocks in OpenCode's inline runtime layer (`OPENCODE_CONFIG_CONTENT`). The
@@ -897,13 +897,13 @@ for this launch. Global or project `opencode.json` files may be read to warn abo
 override, but on-disk files are never modified. Routed models appear as
 `opencodex/<provider>/<model>`. Launching plain `opencode` later behaves exactly as before.
 
-### `ocx grok <status|exclude|include|set|clear|apply> ...`
+### `orl grok <status|exclude|include|set|clear|apply> ...`
 
 Manage and apply the Grok Build model fence.
 
 ## Client config export
 
-### `ocx export --client <opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh|mcode|zcode|prime|aside|raycast|omo|cline|kilo|commandcode|droid>`
+### `orl export --client <opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh|mcode|zcode|prime|aside|raycast|omo|cline|kilo|commandcode|droid>`
 
 Print a client config wired to the running proxy. The command serializes the
 `opencodex` provider block — base URL, model list, and the client's credential
@@ -925,10 +925,10 @@ See [client integrations](/guides/integrations/) for managed refresh and upgrade
 | `--force` | Allow `--out` to replace an existing file. |
 
 ```bash
-ocx export --client opencode                     # config plus destination, merge warning, and counts
-ocx export --client pi --json > pi-models.json   # JSON document for a pipe or a diff
-ocx export --client omp --out ./omp-models.yml    # native OMP YAML
-ocx export --client opencode --out ~/opencodex-opencode.json
+orl export --client opencode                     # config plus destination, merge warning, and counts
+orl export --client pi --json > pi-models.json   # JSON document for a pipe or a diff
+orl export --client omp --out ./omp-models.yml    # native OMP YAML
+orl export --client opencode --out ~/opencodex-opencode.json
 ```
 
 Without `--json` the generated config leads, then the canonical destination path, the merge warning, the env
@@ -988,15 +988,15 @@ file is meant.
 ZCode 3.8.1 may save runtime-derived `reasoning`, `limit.output`, and default context metadata back
 into the generated `provider.opencodex.models` entries. Managed integration status treats only
 those documented additions as refreshable drift. Provider identity and connection settings,
-including `options.baseURL`, model membership, names, modalities, and any context limit OpenCodex
+including `options.baseURL`, model membership, names, modalities, and any context limit OpenRelay
 emitted authoritatively remain protected; editing them reports `conflict / foreign-edit` instead of
-overwriting the file. An ownership record created by an older OpenCodex version can recover
+overwriting the file. An ownership record created by an older OpenRelay version can recover
 automatically when the generated catalog is otherwise unchanged. If both the catalog and the block
 changed, re-apply only after reviewing the file because the older record cannot prove which change
 was ZCode-derived.
 
 :::caution[Merge, never replace]
-`ocx export` never writes your real client config. The destination is printed for you to merge by
+`orl export` never writes your real client config. The destination is printed for you to merge by
 hand, and `--out` refuses to overwrite an existing file without `--force`, because replacing a
 config destroys the other providers, agents, and MCP entries already in it.
 :::
@@ -1016,17 +1016,17 @@ the CLI, the API, and the GUI use the same bytes.
 
 ## Runtime and configuration
 
-### `ocx system <status|settings|startup|diagnostics|sync|codex-app-server|codex-restart|update|codex-cli-update> ...`
+### `orl system <status|settings|startup|diagnostics|sync|codex-app-server|codex-restart|update|codex-cli-update> ...`
 
 Manage headless runtime settings, startup, sync, diagnostics, and updates.
 
-`ocx system codex-restart --yes` restarts Codex app-servers and fully quits and relaunches the
-Codex desktop app, through the same module as `ocx sync --restart-codex`. When the proxy itself
+`orl system codex-restart --yes` restarts Codex app-servers and fully quits and relaunches the
+Codex desktop app, through the same module as `orl sync --restart-codex`. When the proxy itself
 is running inside the Codex app, the command refuses with an actionable message instead of
 promising a handoff it cannot complete.
 
 ```bash
-ocx system settings --stream-mode eager-relay
+orl system settings --stream-mode eager-relay
 ```
 
 Additional system booleans take on/off: `--show-codex-credits`, `--account-picker`,
@@ -1044,9 +1044,9 @@ does not create missing declarations or restore removed models. Turning it off
 removes Ultra Fast from ordinary routed rows on the next catalog regeneration.
 
 ```bash
-ocx system settings --json
-ocx system settings --show-codex-credits on --json
-ocx system settings --json
+orl system settings --json
+orl system settings --show-codex-credits on --json
+orl system settings --json
 ```
 
 New-option writes report `{ok:true, settings: observedFields, catalogRefreshPending}`.
@@ -1057,10 +1057,10 @@ substituted for observations. Combined desktop switches retain stored/effective
 and apply facts. Pending catalog or deferred/refused native apply is distinct from
 a saved setting. False pending is not proof that every client has reloaded.
 
-`ocx system update` updates OpenCodex itself. The separate Codex CLI inspection surface is:
+`orl system update` updates OpenRelay itself. The separate Codex CLI inspection surface is:
 
 ```bash
-ocx system codex-cli-update check --json
+orl system codex-cli-update check --json
 ```
 
 `check` makes no package-registry request and inspects bounded configured-candidate provenance evidence,
@@ -1085,8 +1085,8 @@ On Windows, a captured bare command such as `CODEX_CLI_PATH=codex`, a remote pat
 #### Explicit installation observation on Windows x64
 
 ```text
-ocx system codex-cli-update attest [--json]
-ocx system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
+orl system codex-cli-update attest [--json]
+orl system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
 ```
 
 `attest` is an opt-in, read-only observation of a Windows x64 npm installation. With no options it identifies the selected candidate from the proof-bound launcher snapshot — the configured `CODEX_CLI_PATH` or the first `codex` on the captured PATH, with an OpenCodex wrapper resolving to its renamed `codex.opencodex-real.cmd` npm backing. Supplying all four absolute paths overrides discovery; discovery only proposes paths and the held-handle observation remains the authority. `--candidate` must name the standard npm `<prefix>/codex.cmd` or `<prefix>/node_modules/@openai/codex/bin/codex.js`. `--npm-cli` must end in `node_modules/npm/bin/npm-cli.js`; `--node` names an explicit `node.exe`. App bundles, recognized version-manager layouts, opencodex-owned shims without their npm backing, and custom wrappers are refused.
@@ -1095,11 +1095,11 @@ Native handles hold the ancestor directories and files during bounded reads. Uns
 
 An observed identity or digest describes those files during this observation. It is not a durable update permit and does not prove the selected runtime, the past installer, effective npm configuration, or tool authenticity. The supplied Node is observed only, not proven to be the Node a launcher would select. No target is executed; no registry request, installation, configuration write, or process control occurs. The existing Windows `check` command still performs no candidate/configuration filesystem I/O.
 
-### `ocx config [show|get|set|unset|validate|export|import] ...`
+### `orl config [show|get|set|unset|validate|export|import] ...`
 
-`ocx config [show] [--json] [--source]` displays the local configuration without a running proxy. Omitting `show` also works with either flag or both, in either order. `--source` includes diagnostic source, error, and warning fields and is only accepted for display. `--json` may precede an explicit action; it does not change which action runs. Repeated `--json` or `--source` flags and unknown arguments are rejected.
+`orl config [show] [--json] [--source]` displays the local configuration without a running proxy. Omitting `show` also works with either flag or both, in either order. `--source` includes diagnostic source, error, and warning fields and is only accepted for display. `--json` may precede an explicit action; it does not change which action runs. Repeated `--json` or `--source` flags and unknown arguments are rejected.
 
-Inspect and safely modify validated OpenCodex configuration. `show` and `get` mask secrets. Import
+Inspect and safely modify validated OpenRelay configuration. `show` and `get` mask secrets. Import
 validates before writing and requires `--yes`.
 
 Display and mutation output strip credentials from proxy URLs while retaining the host and port.
@@ -1108,17 +1108,17 @@ backup can restore the configuration; store exported files as secrets.
 
 ### Usage from a connected client
 
-`ocx usage` reads the connected hub with this client's enrolled data key. Human output identifies the hub source and client-key scope; `--json` returns the same scoped data. Range, surface, provider/model filters and custom `--since`/`--until` bounds remain available. Account breakdowns and other clients' records are not shared. An old or unavailable hub produces an explicit error instead of substituting local usage; upgrade the hub if it does not support this read.
+`orl usage` reads the connected hub with this client's enrolled data key. Human output identifies the hub source and client-key scope; `--json` returns the same scoped data. Range, surface, provider/model filters and custom `--since`/`--until` bounds remain available. Account breakdowns and other clients' records are not shared. An old or unavailable hub produces an explicit error instead of substituting local usage; upgrade the hub if it does not support this read.
 
 The read-only data-plane endpoint is `GET /v1/usage`, using `x-opencodex-api-key` with a configured client key. Environment-wide and admin keys are refused. It accepts `range`, `surface`, `provider`, `model`, `since`, and `until`; unknown/repeated options and caller-selected key IDs are rejected. Oversized skipped rows retain the explicit incomplete-history warning.
 
 ## Explain a listed request
 
-Human `ocx logs` output includes `id=<request-id>`. Pass that value to `ocx logs explain <request-id>` to inspect routing decisions. Rows without an ID or with control characters in their ID omit the field instead of displaying a different lookup key. JSON and JSONL output retain their existing schema.
+Human `orl logs` output includes `id=<request-id>`. Pass that value to `orl logs explain <request-id>` to inspect routing decisions. Rows without an ID or with control characters in their ID omit the field instead of displaying a different lookup key. JSON and JSONL output retain their existing schema.
 
 ## Routing profile lookup status
 
-`ocx route policy show <id>` exits 4 when the profile does not exist. Missing or invalid command arguments exit 2. Scripts can distinguish a missing profile from incorrect usage.
+`orl route policy show <id>` exits 4 when the profile does not exist. Missing or invalid command arguments exit 2. Scripts can distinguish a missing profile from incorrect usage.
 
 ## Upstream error details
 
@@ -1128,7 +1128,7 @@ When an upstream error envelope contains several message fields, OpenCodex uses 
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

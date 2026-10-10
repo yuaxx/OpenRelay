@@ -3,7 +3,7 @@ title: Форматы API прокси
 description: Справочник протокольного уровня для Responses, Chat Completions, Anthropic Messages, каталога моделей, WebSocket, Realtime и компактизации.
 ---
 
-opencodex предоставляет один локальный прокси сразу в нескольких клиентских диалектах. Клиент
+OpenRelay предоставляет один локальный прокси сразу в нескольких клиентских диалектах. Клиент
 Codex может говорить на Responses API, OpenAI-совместимое приложение — на Chat Completions, а
 Claude Code — на Anthropic Messages, при этом от каждого upstream-провайдера не требуется
 реализовывать все эти форматы.
@@ -29,7 +29,7 @@ control и safety ответа всё равно происходят на гр�
 
 Некоторые отказы xAI Chat Completions приходят как HTTP 403 с точной фразой отказа, например `I can't help with that request.`, а не как HTTP 200 с `finish_reason: content_filter`. Codex считает 403 транспортным сбоем, поэтому ход пользователя не записывается и тот же запрос повторяется.
 
-На non-combo запросе Responses OpenCodex переписывает такой allowlist-ованный 403 в HTTP 200 Responses со `status: "incomplete"` и `incomplete_details.reason: "content_filter"`. Это работает и на пути адаптера openai-chat, и на openai-responses passthrough (OAuth grok-4.6 / grok-4.5). Поток использует ту же incomplete-границу. Пустой 403 остаётся ошибкой. 403 подписки, кредитов, прав доступа и `not allowed to use this model` остаются ошибками. Combo failover по-прежнему видит исходный HTTP 403.
+На non-combo запросе Responses OpenRelay переписывает такой allowlist-ованный 403 в HTTP 200 Responses со `status: "incomplete"` и `incomplete_details.reason: "content_filter"`. Это работает и на пути адаптера openai-chat, и на openai-responses passthrough (OAuth grok-4.6 / grok-4.5). Поток использует ту же incomplete-границу. Пустой 403 остаётся ошибкой. 403 подписки, кредитов, прав доступа и `not allowed to use this model` остаются ошибками. Combo failover по-прежнему видит исходный HTTP 403.
 
 ## Обзор endpoint'ов
 
@@ -280,7 +280,7 @@ HTTP 400. В обоих случаях дата не удаляется и др�
 В Connections > API keys есть отдельные разделы диктовки и голоса. Ключ данных остаётся только в памяти формы. Диктовка отправляет выбранный файл, а проверка голоса ждёт подтверждения сеанса без микрофона. Наличие конфигурации не означает успешное подключение.
 
 `POST /v1/live` принимает surface Frameless call-creation из ChatGPT/Codex App.
-`POST /v1/realtime/calls` принимает surface call-creation OpenAI Realtime. opencodex выбирает
+`POST /v1/realtime/calls` принимает surface call-creation OpenAI Realtime. OpenRelay выбирает
 подходящий маршрут семейства OpenAI, нормализует запрос call-creation под нужный режим
 upstream-аутентификации и ретранслирует ограниченный ответ.
 
@@ -364,7 +364,7 @@ origin превращается в 403 `permission_error`, а не в OpenAI-sty
 ## Гигиена `encrypted_content`
 
 Proxy относится к подлинному ciphertext backend'а как к непрозрачным данным. Структурно валидный
-ciphertext сохраняется байт в байт: opencodex его не расшифровывает, не переводит содержимое и не
+ciphertext сохраняется байт в байт: OpenRelay его не расшифровывает, не переводит содержимое и не
 перешифровывает для другого провайдера.
 
 Исторически некоторые agent hook'и клали plaintext control text в слот `encrypted_content`. Ради
@@ -372,19 +372,19 @@ ciphertext сохраняется байт в байт: opencodex его не р
 структурно валидные фрагменты Fernet. Если после такой починки у `agent_message` не остаётся ни
 одной шифрованной части, сообщение становится обычным user-message. Если текущая задача v2
 остаётся по-настоящему зашифрованной, а выбранная routed-цель не умеет читать ciphertext нативного
-ChatGPT, opencodex завершит запрос ошибкой `unreadable_encrypted_agent_task`, вместо того чтобы
+ChatGPT, OpenRelay завершит запрос ошибкой `unreadable_encrypted_agent_task`, вместо того чтобы
 отправить нечитаемые байты этому провайдеру. О поведении клиента вокруг worker-task'ов см.
 [Поверхность подагентов](/guides/sub-agent-surface/).
 
 ### Смена провайдера в существующем разговоре
 
 Повторно отправляемый элемент рассуждений содержит `encrypted_content`, который может прочитать
-только создавший его провайдер с тем же ключом доступа. Если opencodex знает, что разговор в последний
+только создавший его провайдер с тем же ключом доступа. Если OpenRelay знает, что разговор в последний
 раз обслуживал другой провайдер, он удаляет этот blob перед отправкой и сохраняет summary элемента.
 Если у того провайдера был ещё и другой endpoint или ключ, удаляется и идентификатор `rs_…`: он
-указывает на элемент, который новое назначение найти не может. Если opencodex этого знать не может,
+указывает на элемент, который новое назначение найти не может. Если OpenRelay этого знать не может,
 например после перезапуска proxy, новое назначение отклоняет blob: OpenAI и Azure OpenAI отвечают
-`400 invalid_encrypted_content`. Тогда opencodex один раз повторяет запрос без состояния рассуждений
+`400 invalid_encrypted_content`. Тогда OpenRelay один раз повторяет запрос без состояния рассуждений
 предыдущего провайдера, то есть без blob и без `rs_…`, иначе ответом было бы
 `Item with id 'rs_…' not found`.
 

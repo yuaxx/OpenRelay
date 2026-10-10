@@ -4,12 +4,12 @@ description: Ce que sont les fichiers responses-state.json.ocx.*.tmp, pourquoi i
 ---
 
 Des utilisateurs ont trouvé plusieurs gigaoctets de fichiers nommés comme
-`responses-state.json.ocx.<pid>.<seq>.tmp` dans leur répertoire opencodex
+`responses-state.json.ocx.<pid>.<seq>.tmp` dans leur répertoire OpenRelay
 (`~/.opencodex` par défaut), dont le nombre augmentait après chaque redémarrage.
 
 ## À quoi servent ces fichiers
 
-opencodex conserve un cache de continuation pour que les chaînes
+OpenRelay conserve un cache de continuation pour que les chaînes
 `previous_response_id` survivent au redémarrage du proxy. Il écrit cet
 instantané de façon atomique : le contenu va d'abord dans un fichier
 temporaire, puis remplace le fichier réel en une seule étape. Cela évite
@@ -45,7 +45,7 @@ réattribue couramment les mêmes identifiants ; un ancien fichier pouvait donc
 être pris indéfiniment pour celui d'un processus actif. C'est pourquoi la
 croissance suivait les redémarrages.
 
-## Ce que fait désormais opencodex
+## Ce que fait désormais OpenRelay
 
 Le nettoyage se répète sur le minuteur habituel du proxy en arrière-plan, au
 lieu de ne s'exécuter qu'au démarrage. Un proxy actif récupère ainsi lui-même
@@ -73,7 +73,7 @@ permissions ont été modifiés sous le proxy est réécrit par la voie sécuris
 
 Chaque cycle ordinaire en arrière-plan effectue au plus une réécriture
 atomique complète. Si le cache de continuation change pendant cette écriture,
-opencodex programme une seule écriture supplémentaire au cycle différé
+OpenRelay programme une seule écriture supplémentaire au cycle différé
 normal, au lieu de réécrire aussitôt l'instantané entier. L'arrêt gracieux
 conserve ses nouvelles tentatives limitées après la fin des requêtes en cours,
 pour que l'instantané final soit à jour avant la sortie du processus.
@@ -98,7 +98,7 @@ Si le proxy ne démarre **pas** — le cas où les fichiers s'accumulent le plus
 vite — vérifiez l'état depuis la ligne de commande :
 
 ```bash
-ocx doctor
+orl doctor
 ```
 
 La section "Response-state temp files" indique le nombre de fichiers
@@ -108,7 +108,7 @@ sans rien modifier.
 Pour les supprimer effectivement :
 
 ```bash
-ocx doctor --reclaim-response-temps
+orl doctor --reclaim-response-temps
 ```
 
 Les deux commandes fonctionnent sans proxy actif. Les fichiers actuellement

@@ -1,6 +1,6 @@
 ---
 title: Model Yönlendirme
-description: opencodex'in belirli bir model kimliğine hangi sağlayıcının hizmet vereceğine nasıl karar verdiği.
+description: OpenRelay'in belirli bir model kimliğine hangi sağlayıcının hizmet vereceğine nasıl karar verdiği.
 ---
 
 Codex bir model istediğinde, `router.ts` bunu tam olarak bir yapılandırılmış

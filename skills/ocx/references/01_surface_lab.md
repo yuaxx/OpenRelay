@@ -10,9 +10,9 @@ Non-mutating probes may still contact providers, consume quota or refresh caches
 
 Declared capabilities: 21.
 
-### `ocx lab status`
+### `orl lab status`
 
-Usage: `ocx lab status [--json]`
+Usage: `orl lab status [--json]`
 
 Read local Lab projection status.
 
@@ -28,9 +28,9 @@ JSON mode: `envelope`.
 
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 
-### `ocx lab verdicts`
+### `orl lab verdicts`
 
-Usage: `ocx lab verdicts [--subject <subject>] [--layer <layer>] [--suite <suite>] [--verdict <verdict>] [--from <ms>] [--to <ms>] [--limit <n>] [--cursor <cursor>] [--json]`
+Usage: `orl lab verdicts [--subject <subject>] [--layer <layer>] [--suite <suite>] [--verdict <verdict>] [--from <ms>] [--to <ms>] [--limit <n>] [--cursor <cursor>] [--json]`
 
 Read local Lab verdicts.
 
@@ -55,9 +55,9 @@ JSON mode: `envelope`.
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 - Read commands do not start probes or scheduler ticks.
 
-### `ocx lab subjects`
+### `orl lab subjects`
 
-Usage: `ocx lab subjects [--kind <kind>] [--limit <n>] [--cursor <cursor>] [--json]`
+Usage: `orl lab subjects [--kind <kind>] [--limit <n>] [--cursor <cursor>] [--json]`
 
 Read local Lab subjects.
 
@@ -77,9 +77,9 @@ JSON mode: `envelope`.
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 - Read commands do not start probes or scheduler ticks.
 
-### `ocx lab observations`
+### `orl lab observations`
 
-Usage: `ocx lab observations [--subject <subject>] [--layer <layer>] [--suite <suite>] [--scenario <scenario>] [--outcome <outcome>] [--execution-mode <execution-mode>] [--from <ms>] [--to <ms>] [--limit <n>] [--cursor <cursor>] [--json]`
+Usage: `orl lab observations [--subject <subject>] [--layer <layer>] [--suite <suite>] [--scenario <scenario>] [--outcome <outcome>] [--execution-mode <execution-mode>] [--from <ms>] [--to <ms>] [--limit <n>] [--cursor <cursor>] [--json]`
 
 Read local Lab observations.
 
@@ -106,9 +106,9 @@ JSON mode: `envelope`.
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 - Read commands do not start probes or scheduler ticks.
 
-### `ocx lab events`
+### `orl lab events`
 
-Usage: `ocx lab events [--event-kind <event-kind>] [--subject <subject>] [--from <ms>] [--to <ms>] [--excluded <true|false>] [--limit <n>] [--cursor <cursor>] [--json]`
+Usage: `orl lab events [--event-kind <event-kind>] [--subject <subject>] [--from <ms>] [--to <ms>] [--excluded <true|false>] [--limit <n>] [--cursor <cursor>] [--json]`
 
 Read local Lab events.
 
@@ -132,9 +132,9 @@ JSON mode: `envelope`.
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 - Read commands do not start probes or scheduler ticks.
 
-### `ocx lab artifacts`
+### `orl lab artifacts`
 
-Usage: `ocx lab artifacts [--status <status>] [--artifact-class <artifact-class>] [--limit <n>] [--cursor <cursor>] [--json]`
+Usage: `orl lab artifacts [--status <status>] [--artifact-class <artifact-class>] [--limit <n>] [--cursor <cursor>] [--json]`
 
 Read local Lab artifacts.
 
@@ -155,9 +155,9 @@ JSON mode: `envelope`.
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 - Read commands do not start probes or scheduler ticks.
 
-### `ocx lab catalog`
+### `orl lab catalog`
 
-Usage: `ocx lab catalog [--layer <layer>] [--suite <suite>] [--json]`
+Usage: `orl lab catalog [--layer <layer>] [--suite <suite>] [--json]`
 
 Read local Lab catalog.
 
@@ -176,9 +176,9 @@ JSON mode: `envelope`.
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 - Read commands do not start probes or scheduler ticks.
 
-### `ocx lab subject`
+### `orl lab subject`
 
-Usage: `ocx lab subject <subjectId> [--json]`
+Usage: `orl lab subject <subjectId> [--json]`
 
 Inspect one local Lab subject.
 
@@ -194,9 +194,9 @@ JSON mode: `envelope`.
 
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 
-### `ocx lab event`
+### `orl lab event`
 
-Usage: `ocx lab event <eventId> [--json]`
+Usage: `orl lab event <eventId> [--json]`
 
 Inspect one local Lab event.
 
@@ -212,9 +212,9 @@ JSON mode: `envelope`.
 
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 
-### `ocx lab artifact`
+### `orl lab artifact`
 
-Usage: `ocx lab artifact <digest> [--json]`
+Usage: `orl lab artifact <digest> [--json]`
 
 Inspect one local Lab artifact.
 
@@ -230,9 +230,9 @@ JSON mode: `envelope`.
 
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 
-### `ocx lab production-signals`
+### `orl lab production-signals`
 
-Usage: `ocx lab production-signals --subject <id> [--limit <n>] [--json]`
+Usage: `orl lab production-signals --subject <id> [--limit <n>] [--json]`
 
 Read passive production context for one exact Lab route subject.
 
@@ -251,9 +251,9 @@ JSON mode: `envelope`.
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 - Passive production context is not verification evidence.
 
-### `ocx lab public preview`
+### `orl lab public preview`
 
-Usage: `ocx lab public preview --event <eventId> [--event <eventId> ...] [--json]`
+Usage: `orl lab public preview --event <eventId> [--event <eventId> ...] [--json]`
 
 Preview unsigned local public evidence.
 
@@ -271,9 +271,9 @@ JSON mode: `envelope`.
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 - No remote publishing occurs. Preview creates no publisher key; export can create local signing identity and bundle files.
 
-### `ocx lab public export`
+### `orl lab public export`
 
-Usage: `ocx lab public export --event <eventId> [--event <eventId> ...] [--json]`
+Usage: `orl lab public export --event <eventId> [--event <eventId> ...] [--json]`
 
 Export signed local public evidence.
 
@@ -291,9 +291,9 @@ JSON mode: `envelope`.
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 - No remote publishing occurs. Preview creates no publisher key; export can create local signing identity and bundle files.
 
-### `ocx lab public verify`
+### `orl lab public verify`
 
-Usage: `ocx lab public verify --file <bundle.json> [--json]`
+Usage: `orl lab public verify --file <bundle.json> [--json]`
 
 Verify a public evidence file.
 
@@ -312,9 +312,9 @@ JSON mode: `envelope`.
 - Signature validity proves integrity/continuity, not local verification.
 - A verification failure emits its structured summary and then returns nonzero.
 
-### `ocx lab public import`
+### `orl lab public import`
 
-Usage: `ocx lab public import --file <bundle.json> [--json]`
+Usage: `orl lab public import --file <bundle.json> [--json]`
 
 Import public evidence as untrusted community context.
 
@@ -333,9 +333,9 @@ JSON mode: `envelope`.
 - Signature validity proves integrity/continuity, not local verification.
 - Imported community evidence never becomes locally verified evidence.
 
-### `ocx lab public community`
+### `orl lab public community`
 
-Usage: `ocx lab public community [--json]`
+Usage: `orl lab public community [--json]`
 
 List local untrusted community evidence context.
 
@@ -351,9 +351,9 @@ JSON mode: `envelope`.
 
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 
-### `ocx lab automation status`
+### `orl lab automation status`
 
-Usage: `ocx lab automation [status] [--json]`
+Usage: `orl lab automation [status] [--json]`
 
 Read local automation policy, queue and run state.
 
@@ -369,9 +369,9 @@ JSON mode: `envelope`.
 
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 
-### `ocx lab automation enable`
+### `orl lab automation enable`
 
-Usage: `ocx lab automation enable [--protocol] [--live] [--json]`
+Usage: `orl lab automation enable [--protocol] [--live] [--json]`
 
 Enable local Lab automation layers.
 
@@ -391,9 +391,9 @@ JSON mode: `envelope`.
 - These flags already exist in the local handler. With neither flag, preserve current layer selection; with either flag, select only requested layers.
 - Persists local policy, reconciles the queue and starts a scheduler in this CLI process; this is not a remote scheduler control API. Task-effectiveness background remains disabled.
 
-### `ocx lab automation disable`
+### `orl lab automation disable`
 
-Usage: `ocx lab automation disable [--json]`
+Usage: `orl lab automation disable [--json]`
 
 Disable local Lab automation.
 
@@ -410,9 +410,9 @@ JSON mode: `envelope`.
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 - Persists disabled policy, reconciles the local queue and stops this process scheduler.
 
-### `ocx lab automation runs`
+### `orl lab automation runs`
 
-Usage: `ocx lab automation runs [--limit <n>] [--cursor <c>] [--json]`
+Usage: `orl lab automation runs [--limit <n>] [--cursor <c>] [--json]`
 
 List locally persisted automation runs.
 
@@ -430,9 +430,9 @@ JSON mode: `envelope`.
 
 - Local Lab helpers and storage only; no management HTTP. Remote/live-proxy equivalence is not implied.
 
-### `ocx lab run`
+### `orl lab run`
 
-Usage: `ocx lab run --layer <protocol_conformance|live_route_compatibility|task_effectiveness> --scenario <id> [--provider <name>] [--model <id>] [--json]`
+Usage: `orl lab run --layer <protocol_conformance|live_route_compatibility|task_effectiveness> --scenario <id> [--provider <name>] [--model <id>] [--json]`
 
 Plan and enqueue an explicit local Lab run.
 

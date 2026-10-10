@@ -144,7 +144,7 @@ export function isOcxCommandLine(commandLine: string): boolean {
     || normalized.includes("src/cli/index.ts")
     || normalized.includes("@bitkyc08/opencodex")
     || /@bitkyc08\/\.opencodex-/.test(normalized)
-    || /(?:^|[\s/"'])(?:ocx|opencodex)(?:\.cmd|\.exe)?(?:$|[\s"'])/.test(normalized);
+    || /(?:^|[\s/"'])(?:orl|ocx|opencodex)(?:\.cmd|\.exe)?(?:$|[\s"'])/.test(normalized);
 }
 
 export function isOcxStartCommandLine(commandLine: string): boolean {

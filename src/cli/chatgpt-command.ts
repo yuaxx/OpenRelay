@@ -14,9 +14,9 @@ import { darwinDefaultExec, darwinDesktopAppAdapter } from "../codex/desktop-app
 import type { DesktopAppInstall } from "../codex/desktop-app/types";
 
 const USAGE = `Usage (experimental, macOS only):
-  ocx chatgpt launch   Relaunch ChatGPT with the experimental app-server shim (requires appServerShim: true)
-  ocx chatgpt restore  Relaunch ChatGPT without the experimental shim and remove its launcher
-  ocx chatgpt status   Inspect experimental flag, launcher and running app environment`;
+  orl chatgpt launch   Relaunch ChatGPT with the experimental app-server shim (requires appServerShim: true)
+  orl chatgpt restore  Relaunch ChatGPT without the experimental shim and remove its launcher
+  orl chatgpt status   Inspect experimental flag, launcher and running app environment`;
 
 function run(command: string, args: string[]) {
   const result = spawnSync(command, args, { encoding: "utf8", timeout: 5000 });

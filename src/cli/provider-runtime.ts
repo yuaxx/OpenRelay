@@ -39,20 +39,20 @@ interface QuotaResetsDto {
 }
 
 const USAGE = `Usage:
-  ocx provider edit <name> [--adapter <id>] [--base-url <url>] [--default-model <id|->]
+  orl provider edit <name> [--adapter <id>] [--base-url <url>] [--default-model <id|->]
       [--auth-mode <key|forward|oauth|local|->] [--note <text|->]
       [--api-key-transport <x-api-key|bearer|->]
       [--headers <json>] [--enabled <on|off>] [--live-models <on|off>]
       [--retain-models <id,id|->] [--model <id> --text-only]
       [--xai-chat <on|off>] [--upstream-http-version <http1.1|->] [--fast <on|off>] [--context-window <tokens|->]
       [--allow-private-network <on|off>] [--model-context-tier <model=default|long_context>] [--json]
-  ocx provider test <name> [--json]
-  ocx provider quota [--refresh] [--json]
-  ocx provider resets [--limit <n>] [--json]
-  ocx provider presets [--json]
-  ocx provider account-mode <pool|direct> [--json]
-  ocx provider selected <name> [--set <model,model...>] [--clear] [--json]
-  ocx provider keychain <name> [status|store|restore] [--json]`;
+  orl provider test <name> [--json]
+  orl provider quota [--refresh] [--json]
+  orl provider resets [--limit <n>] [--json]
+  orl provider presets [--json]
+  orl provider account-mode <pool|direct> [--json]
+  orl provider selected <name> [--set <model,model...>] [--clear] [--json]
+  orl provider keychain <name> [status|store|restore] [--json]`;
 
 function cleared(value: string | undefined): string | undefined {
   return value === "-" ? "" : value;

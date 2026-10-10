@@ -1,9 +1,9 @@
 ---
 title: Configuration Reference
-description: Where opencodex stores configuration, how edits are applied, and links to every configuration domain.
+description: Where OpenRelay stores configuration, how edits are applied, and links to every configuration domain.
 ---
 
-opencodex stores its persistent configuration in `$OPENCODEX_HOME/config.json`, normally
+OpenRelay stores its persistent configuration in `$OPENCODEX_HOME/config.json`, normally
 `~/.opencodex/config.json`. On Windows, the default is
 `%USERPROFILE%\.opencodex\config.json`.
 
@@ -12,8 +12,8 @@ opencodex stores its persistent configuration in `$OPENCODEX_HOME/config.json`, 
 Choose the editing channel that fits the task:
 
 - **Dashboard:** use the web UI for guided provider, model, agent, access, and storage settings.
-- **CLI:** `ocx init` creates the initial file, while commands such as `ocx provider`, `ocx models`,
-  `ocx combo`, `ocx agent`, and `ocx config` update or inspect their owned settings.
+- **CLI:** `orl init` creates the initial file, while commands such as `orl provider`, `orl models`,
+  `orl combo`, `orl agent`, and `orl config` update or inspect their owned settings.
 - **File:** edit `config.json` directly for fields without a dedicated UI or CLI command. The file must
   remain valid JSON.
 
@@ -23,7 +23,7 @@ later live save can rewrite unrelated hand edits from its snapshot. Live saves m
 `claudeCode` and listener-binding fields where those paths have explicit conflict protection, but that
 protection does not cover every subtree.
 
-If the file cannot be parsed, opencodex backs it up as
+If the file cannot be parsed, OpenRelay backs it up as
 `config.json.invalid-<timestamp>`, warns on the console, and starts with defaults. A missing file also
 uses the fresh-install default: one `openai` forward provider.
 
@@ -88,7 +88,7 @@ the two surfaces cannot disagree about which natives have Fast.
 
 Scope: this covers the request-serving surfaces — `/v1/models`, Claude Code discovery, and the
 `/v1/responses`, `/v1/chat/completions`, `/v1/messages`, `/v1/messages/count_tokens`, and
-`/v1/responses/compact` endpoints, plus `ocx export`, managed client integrations, and
+`/v1/responses/compact` endpoints, plus `orl export`, managed client integrations, and
 the OpenCode launcher. After disabling Fast rows, refresh saved client configs and select a base
 model instead of a previously saved Fast selector.
 
@@ -119,9 +119,9 @@ stored in separate credential stores rather than in `config.json`. Account ids a
 remain private; use public selector aliases where supported.
 
 :::note[Atomic writes]
-opencodex writes managed `config.toml` and `opencodex-catalog.json` files through a temporary file
+OpenRelay writes managed `config.toml` and `opencodex-catalog.json` files through a temporary file
 followed by rename (`atomicWriteFile`).
-This prevents partial files when concurrent writers, such as `ocx stop` and the proxy shutdown handler,
+This prevents partial files when concurrent writers, such as `orl stop` and the proxy shutdown handler,
 restore Codex at the same time.
 If a managed TOML file contains an integer outside JavaScript's safe range, the rewrite is refused
 instead of rounding the value, and the file is left unchanged.

@@ -10,7 +10,7 @@ Codex를 Claude, Gemini, Grok 같은 OpenAI가 아닌 모델로 라우팅하면 
 ## 사전 조건
 
 - 구성에서 `images.bridgeEnabled: true`로 설정해 브리지를 켭니다. 예상치 못한 xAI 요금을 피하려고 기본값은 꺼져 있습니다. 아래 [Configuration](#설정)을 참고합니다.
-- API 키가 있는 `xai` provider 항목이 필요합니다. 브리지는 처리를 레지스트리의 xAI Images endpoint (`https://api.x.ai/v1`)에 고정하며, 이미지 호출에서는 설정된 `baseUrl` override를 무시합니다. OAuth / `ocx login xai`만으로는 이 sidecar 루프가 켜지지 않습니다. 같은 `bridgeEnabled` 플래그는 별도의 Codex `/v1/images` relay를 켜서, 내장 `image_gen` 클라이언트가 Grok CLI grant로 Imagine을 호출할 수 있게 합니다. 그 grant(또는 xAI API key)가 없으면 `/v1/images`는 ChatGPT로 넘어가지 않고 오류를 반환합니다. 이 relay가 경로를 맡는 건 `images.bridgeEnabled`가 `true`이고 `images.provider`를 비워둔 경우뿐입니다. `images.provider`를 지정하면 `/v1/images`는 그 provider가 담당하고, 그쪽 검증 오류는 xAI로 재시도하지 않고 그대로 반환합니다. [Built-in image generation](/guides/codex-integration/#built-in-image-generation-image_gen)을 참고하세요.
+- API 키가 있는 `xai` provider 항목이 필요합니다. 브리지는 처리를 레지스트리의 xAI Images endpoint (`https://api.x.ai/v1`)에 고정하며, 이미지 호출에서는 설정된 `baseUrl` override를 무시합니다. OAuth / `orl login xai`만으로는 이 sidecar 루프가 켜지지 않습니다. 같은 `bridgeEnabled` 플래그는 별도의 Codex `/v1/images` relay를 켜서, 내장 `image_gen` 클라이언트가 Grok CLI grant로 Imagine을 호출할 수 있게 합니다. 그 grant(또는 xAI API key)가 없으면 `/v1/images`는 ChatGPT로 넘어가지 않고 오류를 반환합니다. 이 relay가 경로를 맡는 건 `images.bridgeEnabled`가 `true`이고 `images.provider`를 비워둔 경우뿐입니다. `images.provider`를 지정하면 `/v1/images`는 그 provider가 담당하고, 그쪽 검증 오류는 xAI로 재시도하지 않고 그대로 반환합니다. [Built-in image generation](/guides/codex-integration/#built-in-image-generation-image_gen)을 참고하세요.
 
   ```json
   {
@@ -53,9 +53,9 @@ Image Bridge 옵션은 `~/.opencodex/config.json`의 `images` 아래에 있습�
 
 Image Bridge는 선택된 모델이 OpenAI가 아닌 상태에서, `/v1/responses`의 `tools` 배열에 hosted `image_generation` 도구가 들어 있는 **Responses** 턴에서만 활성화됩니다. Codex의 내장 `image_gen` 도구는 가로채지 않습니다. 이 도구는 `/v1/images/generations`(또는 `/images/edits`)로 직접 POST하며, 해당 경로는 [Codex Integration](/guides/codex-integration/#built-in-image-generation-image_gen)에서 따로 다룹니다.
 
-1. Responses 요청의 `tools`에 `image_generation`이 들어 있으면, OpenCodex가 요청 사전 처리 과정에서 이를 감지합니다.
+1. Responses 요청의 `tools`에 `image_generation`이 들어 있으면, OpenRelay가 요청 사전 처리 과정에서 이를 감지합니다.
 2. hosted tool은 라우팅된 모델이 정상적으로 호출할 수 있는 합성된 `function` 도구로 바뀝니다. 이렇게 하면 모델이 실행할 수 없는 opaque hosted tool 대신 호출 가능한 도구를 보게 됩니다.
-3. 모델이 그 도구를 호출하면, OpenCodex가 호출을 가로채서 프롬프트를 xAI의 이미지 생성 API로 보냅니다.
+3. 모델이 그 도구를 호출하면, OpenRelay가 호출을 가로채서 프롬프트를 xAI의 이미지 생성 API로 보냅니다.
 4. 생성된 이미지는 `~/.opencodex/artifacts/`에 저장되고, 로컬 파일 경로가 도구 결과로 모델에 반환됩니다.
 5. 모델은 생성된 이미지와 그 위치를 알고 있는 상태로 대화를 이어갑니다.
 

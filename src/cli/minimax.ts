@@ -206,7 +206,7 @@ export function startMmxTextBridge(
       } catch {
         return Response.json({
           type: "error",
-          error: { type: "api_error", message: "OpenCodex proxy unavailable" },
+          error: { type: "api_error", message: "OpenRelay proxy unavailable" },
         }, { status: 502 });
       } finally {
         // Once response headers arrive, streaming body cancellation remains
@@ -402,7 +402,7 @@ export async function cmdMcode(args: string[]): Promise<number> {
   if (isStandaloneInformationalInvocation(args, "mcode")) return spawnClient("mcode", args, process.env, MCODE_INSTALL_HINT);
   const config = loadConfig();
   if (!isLoopbackHostname(config.hostname)) {
-    console.error("❌ MiniMax Code integration is loopback-only; its config cannot carry OpenCodex's dedicated remote-admission header.");
+    console.error("❌ MiniMax Code integration is loopback-only; its config cannot carry OpenRelay's dedicated remote-admission header.");
     return 2;
   }
   const live = await ensureProxy(config);
@@ -422,12 +422,12 @@ export async function cmdMcode(args: string[]): Promise<number> {
     }
   }
   if (!configuredBase) {
-    console.error("❌ MiniMax Code is not connected. Run: ocx integration client enable --client mcode");
+    console.error("❌ MiniMax Code is not connected. Run: orl integration client enable --client mcode");
     return 2;
   }
   const expected = `http://${probeHostname(live.hostname)}:${live.port}`;
   if (normalizedMcodeBaseUrl(configuredBase) !== normalizedMcodeBaseUrl(expected)) {
-    console.error("❌ MiniMax Code's OpenCodex provider points at a stale proxy address. Re-run: ocx integration client enable --client mcode");
+    console.error("❌ MiniMax Code's OpenRelay provider points at a stale proxy address. Re-run: orl integration client enable --client mcode");
     return 2;
   }
   console.error(`✅ MiniMax Code wired to ${expected}; select custom_provider:opencodex/<model> in MCode.`);
@@ -438,17 +438,17 @@ export async function cmdMmx(args: string[]): Promise<number> {
   if (isStandaloneInformationalInvocation(args, "mmx")) return spawnClient("mmx", args, process.env, MMX_INSTALL_HINT);
   const unsafe = mmxUnsafeOverride(args);
   if (unsafe) {
-    console.error(`❌ ${unsafe} is not accepted by ocx mmx because it could bypass the proxy or expose a caller credential.`);
+    console.error(`❌ ${unsafe} is not accepted by orl mmx because it could bypass the proxy or expose a caller credential.`);
     return 2;
   }
   const commandPath = mmxCommandPath(args);
   if (commandPath[0] !== "text") {
-    console.error("❌ ocx mmx supports only `mmx text` commands. Use plain `mmx` for MiniMax image, video, speech, music, vision, search, quota, auth, config, file, and update APIs.");
+    console.error("❌ orl mmx supports only `mmx text` commands. Use plain `mmx` for MiniMax image, video, speech, music, vision, search, quota, auth, config, file, and update APIs.");
     return 2;
   }
   const config = loadConfig();
   if (!isLoopbackHostname(config.hostname)) {
-    console.error("❌ ocx mmx is loopback-only; MMX has no field for OpenCodex's dedicated remote-admission header.");
+    console.error("❌ orl mmx is loopback-only; MMX has no field for OpenRelay's dedicated remote-admission header.");
     return 2;
   }
   const live = await ensureProxy(config);

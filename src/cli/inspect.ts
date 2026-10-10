@@ -24,19 +24,19 @@ import {
 } from "./runtime-api";
 
 const USAGE = `Usage:
-  ocx inspect config [--json]
-  ocx inspect catalog [--json]
-  ocx inspect routing-analytics [--json]
-  ocx inspect pacing [--name <provider>] [--json]
-  ocx inspect key-providers [--json]
-  ocx inspect codex-prompt [--text] [--json]
-  ocx inspect client-config --client <id> [--json]
-  ocx inspect star [--json]
-  ocx inspect windows-tray [--json]
-  ocx integration native [list] [--json]
-  ocx integration native <claude|claude-desktop|codex|grok> <on|off> [--json]
-  ocx integration native cursor [status|local-installer] [--json]
-  ocx agent request-user-input [on|off] [--json]`;
+  orl inspect config [--json]
+  orl inspect catalog [--json]
+  orl inspect routing-analytics [--json]
+  orl inspect pacing [--name <provider>] [--json]
+  orl inspect key-providers [--json]
+  orl inspect codex-prompt [--text] [--json]
+  orl inspect client-config --client <id> [--json]
+  orl inspect star [--json]
+  orl inspect windows-tray [--json]
+  orl integration native [list] [--json]
+  orl integration native <claude|claude-desktop|codex|grok> <on|off> [--json]
+  orl integration native cursor [status|local-installer] [--json]
+  orl agent request-user-input [on|off] [--json]`;
 
 /** A read that takes no arguments beyond `--json`. */
 async function read(path: string, argv: string[], deps: RuntimeApiDeps): Promise<void> {

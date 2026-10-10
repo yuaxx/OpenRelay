@@ -1,9 +1,9 @@
 ---
 title: Codex Entegrasyonu
-description: opencodex'in kendisini Codex'e nasıl enjekte ettiği, model kataloğunu nasıl senkronize ettiği, dolguları (shims) nasıl kurduğu ve nasıl temiz bir şekilde geri yüklediği.
+description: OpenRelay'in kendisini Codex'e nasıl enjekte ettiği, model kataloğunu nasıl senkronize ettiği, dolguları (shims) nasıl kurduğu ve nasıl temiz bir şekilde geri yüklediği.
 ---
 
-opencodex, Codex'in okuduğu iki şeyi düzenleyerek Codex'in proxy üzerinden
+OpenRelay, Codex'in okuduğu iki şeyi düzenleyerek Codex'in proxy üzerinden
 yönlendirilmesini sağlar: yapılandırması (`$CODEX_HOME/config.toml`, varsayılan
 `~/.codex/config.toml`) ve model kataloğu. Her düzenleme eşkuvvetli (idempotent)
 ve geri alınabilirdir.
@@ -18,14 +18,14 @@ korur.
 
 ## Yapılandırma enjeksiyonu
 
-`ocx init`, `ocx start` ve `ocx sync` enjektörü çağırır. Varsayılan geri döngü
+`orl init`, `orl start` ve `orl sync` enjektörü çağırır. Varsayılan geri döngü
 (loopback) bağlantısında, Codex'in yerleşik `openai` sağlayıcı kimliğini korur
-ve bu sağlayıcıyı opencodex'e yönlendirir:
+ve bu sağlayıcıyı OpenRelay'e yönlendirir:
 
 ```toml
 # kök anahtarlar, ilk tablodan önce
 model_catalog_json = "/absolute/path/to/opencodex-catalog.json"
-# Auto-injected by opencodex (undo: ocx restore)
+# Auto-injected by opencodex (undo: orl restore)
 openai_base_url = "http://127.0.0.1:10100/v1"
 
 # yalnızca fastMode ayarlandığında; ayarlanmadığında [features] tablosu eklenmez
@@ -48,7 +48,7 @@ Codex'in yerleşik `image_gen` aracı `/v1/responses` üzerinden geçmez — cod
 uzantısı, sohbet için kullandığı aynı ChatGPT taşıyıcı kimlik doğrulamasıyla
 doğrudan `{base_url}/images/generations` (veya referans görseller eklendiğinde
 `/images/edits`) uç noktasına POST gönderir. Enjekte edilen `base_url`
-opencodex'i işaret ettiğinden proxy bu çağrıları OpenAI yukarı akışına iletir.
+OpenRelay'i işaret ettiğinden proxy bu çağrıları OpenAI yukarı akışına iletir.
 
 Bu, yalnızca OpenAI harici bir model seçiliyken bir **Responses** turu
 barındırılan `image_generation` aracını listelediğinde etkinleşen [Görsel
@@ -86,10 +86,10 @@ Köprüsü (Image Bridge)](/tr/guides/image-bridge/) özelliğinden ayrıdır. B
   false`) ile devre dışı bırakın.
 
 Araç bildirimi modelin Responses isteğiyle birlikte gitmeye devam eder. API
-anahtarlı Responses sağlayıcıları için opencodex, Codex'in özel `image_gen` ad
+anahtarlı Responses sağlayıcıları için OpenRelay, Codex'in özel `image_gen` ad
 alanını yukarı akış açısından güvenli bir `image_gen__<dahili-ad>` takma adına
 (örneğin `image_gen__imagegen`) indirir. Bu kullanılabilir takma ad istemci
-bildiriminin yerini aldığında opencodex yinelenen bir barındırılan
+bildiriminin yerini aldığında OpenRelay yinelenen bir barındırılan
 `image_generation` bildirimini kaldırır. Fonksiyon çağrısını Codex görmeden önce
 açık `image_gen` ad alanıyla eşler ve daha sonraki geçmiş yukarı akışta yeniden
 oynatıldığında yerel çağrıyı tekrar kodlar. Bu, istemci tarafı görsel
@@ -134,7 +134,7 @@ model_provider = "opencodex"
 model_catalog_json = "/absolute/path/to/opencodex-catalog.json"
 
 # dosyanın sonuna eklenir
-# Auto-injected by opencodex (undo: ocx restore)
+# Auto-injected by opencodex (undo: orl restore)
 [model_providers.opencodex]
 name = "OpenCodex Proxy"
 base_url = "http://your-host:10100/v1"
@@ -144,7 +144,7 @@ env_key = "OPENCODEX_API_AUTH_TOKEN"
 # supports_websockets = true   # yalnızca config.websockets true olduğunda
 ```
 
-OpenCodex yönlendirmeye sahip olduğunda, her iki mod da bir referans/geri dönüş
+OpenRelay yönlendirmeye sahip olduğunda, her iki mod da bir referans/geri dönüş
 yapılandırması olarak `$CODEX_HOME/opencodex.config.toml` dosyasını yazar. Geri
 döngüde otomatik enjeksiyon kaldırılmışsa manuel olarak birleştirebileceğiniz
 kök anahtarları içerir; geri döngü olmayanda ise özel sağlayıcı formunu içerir.
@@ -160,7 +160,7 @@ günceller ancak yönlendirmenin enjekte edilmediğini bildirir.
 
 ## Paylaşılan model kataloğu
 
-Codex CLI, TUI, App ve SDK'nın tümü aynı Codex evini okur. opencodex bu dizini
+Codex CLI, TUI, App ve SDK'nın tümü aynı Codex evini okur. OpenRelay bu dizini
 `CODEX_HOME`'dan çözer, `~/.codex`'e geri döner ve şunları yönetir:
 
 ```text
@@ -171,34 +171,34 @@ $CODEX_HOME/models_cache.json
 ```
 
 WSL üzerinde, `CODEX_HOME` ayarlanmamışsa ve Linux `~/.codex` dizini mevcut
-değilse ya da hiçbir Codex durumu (`config.toml`, `auth.json`, `sessions`, `history.jsonl`) içermiyorsa, opencodex `/mnt/c/Users/*/.codex/config.toml` konumunda tek bir Windows
+değilse ya da hiçbir Codex durumu (`config.toml`, `auth.json`, `sessions`, `history.jsonl`) içermiyorsa, OpenRelay `/mnt/c/Users/*/.codex/config.toml` konumunda tek bir Windows
 Codex Desktop evini de kontrol eder. Tam olarak bir aday mevcut olduğunda bu
 dizini kullanır, böylece WSL app-server modu ve Windows Codex Desktop aynı
 yapılandırma ve kimlik doğrulama dosyalarını paylaşır. Bu algılamayı geçersiz
 kılmak için `CODEX_HOME`'u açıkça ayarlayın.
 
 Codex, SQLite destekli iş parçacığı durumunu ayrı bir dizinde tutabilir.
-OpenCodex geçmiş işlemleri Codex ile aynı önceliği kullanır: `config.toml`
+OpenRelay geçmiş işlemleri Codex ile aynı önceliği kullanır: `config.toml`
 içindeki kök `sqlite_home`, ardından `CODEX_SQLITE_HOME`, ardından geçerli
 `CODEX_HOME`. Göreli SQLite evleri geçerli çalışma dizininden çözümlenir. Servis
 kurulumu veya onarımı sırasında açık bir `CODEX_SQLITE_HOME` mevcut olduğunda,
 kalıcı başlatıcı kurulum zamanındaki mutlak yolunu saklar, böylece arka plan
 proxy'si aynı veritabanını adreslemeye devam eder. `config.toml` veya kök
-`sqlite_home` anahtarı yoksa OpenCodex ortam/ev geri dönüşüne devam eder. Dosya
+`sqlite_home` anahtarı yoksa OpenRelay ortam/ev geri dönüşüne devam eder. Dosya
 okunamıyor veya ayrıştırılamıyorsa ya da anahtar mevcut ancak boş veya dize
 değilse, SQLite-ev çözümlemesi farklı bir veritabanına karşı geçmiş işlemlerini
 riske atmak yerine durur.
 
 Windows'ta bir Orca kabuğu, ChatGPT/Codex uygulaması hala `%USERPROFILE%\.codex`
 okurken hem `CODEX_HOME` hem de `ORCA_CODEX_HOME`'u Orca'nın paketlenmiş çalışma
-zamanı evine ayarlayabilir. `ocx status` ve `ocx doctor` bu tam uyumsuzluk
+zamanı evine ayarlayabilir. `orl status` ve `orl doctor` bu tam uyumsuzluk
 hakkında uyarır ve maskelenmiş hedef yollarını yazdırır. Bu Orca kabuğundan bir
 arka plan servisi kurulmuşsa, önce orijinal kabuktan kaldırın, ardından
 `CODEX_HOME`'u uygulama evine ayarlayın, `ORCA_CODEX_HOME`'u kaldırın,
 senkronizasyon/geri yüklemeyi yeniden çalıştırın ve servisi tekrar kurun.
 
 Özel sağlayıcı modunda `requires_openai_auth = true`, Codex App/TUI hesap
-geçişli yüzeylerini yerel Codex ile hizalı tutar. opencodex ayrıca WebSocket
+geçişli yüzeylerini yerel Codex ile hizalı tutar. OpenRelay ayrıca WebSocket
 üzerinden `/v1/responses` sunar. Özel sağlayıcı yalnızca `"websockets": true`
 olduğunda `supports_websockets = true` bildirir; geri döngüde Codex'in yerleşik
 sağlayıcısı önce WebSocket'i deneyebilir ve devre dışı bırakılmış bir proxy
@@ -212,7 +212,7 @@ yeniden eşlenmesi gerekmez. Sync ve restore yalnızca eşleşen bir yedek manif
 uygular ve her iş parçacığının özgün provider, source ve event marker değerlerini
 tam olarak geri yükler. Manifesti olmayan bir `opencodex` satırı değişmeden kalır;
 legacy yeniden etiketlemeyi açıkça zorlamak istediğinizde yalnızca
-`ocx recover-history --legacy-openai --yes` kullanın. Bu komut bilinçli olarak geniş kapsamlıdır:
+`orl recover-history --legacy-openai --yes` kullanın. Bu komut bilinçli olarak geniş kapsamlıdır:
 kullanıcı iletisi bulunan ve şu anda `opencodex` olarak etiketlenmiş her thread'i `openai`
 olarak yeniden etiketler, `exec` değerini `cli` olarak normalleştirir ve event marker'ı ayarlar;
 geçerli dedicated-provider geçmişi de buna dahildir. Durumu yedekleyin ve yalnızca bu kapsamın
@@ -224,8 +224,8 @@ yedeklenen meta verileri geri yükler. Geçmişe dokunulmadan bırakmak için
 ## Model kataloğu senkronizasyonu
 
 Codex modelleri diskteki bir katalogdan gösterir (varsayılan olarak
-`$CODEX_HOME/opencodex-catalog.json`). Başlangıçta ve `ocx sync` sırasında
-opencodex:
+`$CODEX_HOME/opencodex-catalog.json`). Başlangıçta ve `orl sync` sırasında
+OpenRelay:
 
 1. Öne çıkarmanın geri alınabilir olması için bozulmamış kataloğu
    `~/.opencodex/catalog-backup.json` konumuna bir kez **yedekler**.
@@ -252,12 +252,12 @@ veya sabitlenir.
 Yerel olmayan yönlendirilen katalog satırları `tool_mode: "code_mode_only"`
 kullanır. Bu, Codex'in resmi `exec` giriş noktasını ve Tarayıcı ile Bilgisayar
 Kullanımı dahil olmak üzere iç içe geçmiş MCP araçlarını açığa çıkarmasını
-sağlarken, opencodex yalnızca modelin sıradan fonksiyon çağrısını yönlendirir.
-Araç yürütme, izinler ve onaylar Codex'e yerel kalır; opencodex ikinci bir
+sağlarken, OpenRelay yalnızca modelin sıradan fonksiyon çağrısını yönlendirir.
+Araç yürütme, izinler ve onaylar Codex'e yerel kalır; OpenRelay ikinci bir
 tarayıcı veya masaüstü denetim yürütücüsü uygulamaz.
 
 Codex'in `exec` özel araç dilbilgisini kabul etmeyen anahtar kimlik doğrulamalı
-Responses sağlayıcıları için opencodex bu bildirimi ve geçmişini bir yukarı akış
+Responses sağlayıcıları için OpenRelay bu bildirimi ve geçmişini bir yukarı akış
 fonksiyon aracı olarak kodlar, ardından akışlı fonksiyon çağrısı yaşam döngüsünü
 Codex görmeden önce `custom_tool_call`'a geri yükler. Yerel OpenAI iletme
 yönlendirmesi ve desteklenen `apply_patch` özel aracı değişmeden kalır.
@@ -266,7 +266,7 @@ Yönlendirilen code-mode turlarına, ilk çağrıdan önce iç içe geçmiş yar
 ana makine kuralları da bildirilir: `tools.apply_patch`, yalnızca yama işaretçilerinden oluşan
 satırlarla başlayan ve biten tek bir dize alır; isolate içinde `import` yoktur ve uzun süren
 komutlar `write_stdin` üzerinden yoklanır. Yerel yönlendirilmiş Responses, Kiro veya Cursor yolundaki
-bir code-mode exec sonucu hâlâ ana makinenin hata mesajlarından birini içeriyorsa opencodex,
+bir code-mode exec sonucu hâlâ ana makinenin hata mesajlarından birini içeriyorsa OpenRelay,
 ilgili kuralı belirten tek satırlık bir ipucu ekler. Bu değişiklik modelin kodunu veya yama metnini
 yeniden yazmaz.
 
@@ -274,7 +274,7 @@ Seçilen sağlayıcı fonksiyon/araç çağrısını desteklemelidir. Araç ça�
 olmayan salt metin bir sağlayıcı `exec`, Tarayıcı veya Bilgisayar Kullanımını
 kullanamaz. Yerel OpenAI satırları yukarı akış araç modunu değiştirmeden tutar.
 
-`ocx sync` bu meta verileri değiştirdikten sonra Codex App'i yeniden başlatın ve
+`orl sync` bu meta verileri değiştirdikten sonra Codex App'i yeniden başlatın ve
 yeni bir görev açın. Mevcut app-server süreçleri ve görevleri başlangıçta
 yükledikleri kataloğu ve araç planını koruyabilir.
 
@@ -290,7 +290,7 @@ pazarlama adlarının tümü dokunulmadan bırakılır.
 CLI'dan bir görünen ad ekleyin (proxy canlıyken kataloğu hemen senkronize eder):
 
 ```bash
-ocx models add deepseek deepseek-v4 --display-name "DeepSeek V4" --context-window 128000
+orl models add deepseek deepseek-v4 --display-name "DeepSeek V4" --context-window 128000
 ```
 
 Uzak Codex istemcileri oluşturulan aynı kataloğu yönetim API'si üzerinden
@@ -302,7 +302,7 @@ tmp="$(mktemp "${dest}.XXXXXX")"
 curl -fsS -H "x-opencodex-api-key: $OPENCODEX_API_AUTH_TOKEN" \
   "https://proxy.example.com/v1/catalog" > "$tmp" \
   && mv "$tmp" "$dest"
-ocx sync-cache
+orl sync-cache
 ```
 
 Yanıt ham `opencodex-catalog.json` belgesidir (sağlayıcı kimlik bilgisi yoktur).
@@ -318,13 +318,13 @@ ayarlayabilir veya düzenleyebilirsiniz. Yönlendirilen slug ayırıcısıyla
 `GET /v1/catalog`, bir model listesini okumanın yönetici belirtecine mal olmaması için vardır. Rota salt okunurdur (`GET` ve `HEAD`), `x-opencodex-api-key`, bearer belirteci veya `x-api-key` kabul eder ve yönetim rotasıyla tamamen aynı baytları sunar. Yanıtlar güçlü bir `ETag` taşır — tam belge yerine `304` almak için `If-None-Match` ile geri gönderin — ve `Cache-Control: private, no-cache` içerir. Burada kabul edilen bir veri düzlemi anahtarı yönetim düzleminde **hiçbir şey** kazanmaz: `/api/catalog` ve tüm `/api/*` rotaları hâlâ yönetici belirteci veya pano oturumu gerektirir.
 
 Görünen ad **yalnızca görüntüleme amaçlıdır ve yeniden oluşturma boyunca
-kararlıdır**. Her `ocx sync` ve katalog yenilemesi yönlendirilen girdileri
+kararlıdır**. Her `orl sync` ve katalog yenilemesi yönlendirilen girdileri
 `config.json`'dan (`customModels` dahil) yeniden türetir, böylece yapılandırılan
 ad yönlendirilen slug'a geri dönmek yerine yeniden uygulanır. Yönetilen bir
 servis yeniden başlatması da proxy bağlandıktan kısa bir süre sonra bu
 senkronizasyonu dener. Bu en iyi çaba açılış senkronizasyonu başarısız olursa,
 örneğin çevrimdışı bir oturum açma sırasında, daha önce kalıcı hale getirilen
-katalog korunur ve bir sonraki başarılı `ocx sync` yapılandırılan adı yeniden
+katalog korunur ve bir sonraki başarılı `orl sync` yapılandırılan adı yeniden
 uygular. Gerçek yukarı akış yerel adları (örneğin `gpt-5.6-sol` → "GPT-5.6-Sol")
 sabitlenmiş yukarı akış anlık görüntüsünden gelir ve özel bir görünen ad
 tarafından asla geçersiz kılınmaz.
@@ -332,23 +332,23 @@ tarafından asla geçersiz kılınmaz.
 ### Harici sağlayıcı yöneticileri
 
 `config.toml` zaten `openai` veya `opencodex` dışında bir sağlayıcı seçiyorsa
-OpenCodex dosyayı değiştirmeden bırakır ve profil yazmalarını, katalog/önbellek
+OpenRelay dosyayı değiştirmeden bırakır ve profil yazmalarını, katalog/önbellek
 yenilemesini ve Codex geçmiş meta verilerinin hem anlık hem de arka planda geri yüklenmesini atlar. Özel bir
 sağlayıcıyı yöneten araçlar genellikle mevcut oturumları bu sağlayıcı kimliğiyle
 etiketler; etkin kimliği değiştirmek bu bozulmamış oturumların Codex'in geçmiş
 görünümünden kaybolmasına neden olabilir. Aynı koruma eski bir kök profil
 tarafından seçilen harici bir sağlayıcı için de geçerlidir.
 
-Codex sağlayıcı yapılandırmasının sahibi olarak tek bir araç tutun. OpenCodex'i
+Codex sağlayıcı yapılandırmasının sahibi olarak tek bir araç tutun. OpenRelay'i
 mevcut bir sağlayıcı yöneticisinin arkasında kullanmak için, bu sağlayıcıyı Chat
 Completions çevirisiyle değil, Responses doğrudan geçişiyle (`Codex TOML'da
 wire_api = "responses"`) `http://127.0.0.1:10100/v1` adresine yönlendirin. Proxy
 API kimlik doğrulaması etkinleştirildiğinde yukarıdaki geri döngü olmayan
 sağlayıcı formuyla eşleşecek şekilde `OPENCODEX_API_AUTH_TOKEN`'dan
-`x-opencodex-api-key` değerini de iletin. OpenCodex'in yönlendirmeyi doğrudan
+`x-opencodex-api-key` değerini de iletin. OpenRelay'in yönlendirmeyi doğrudan
 enjekte etmesine izin vermek için önce Codex'i yerleşik `openai` sağlayıcısına
 geri döndürün ve kullanıcıya ait herhangi bir kök `openai_base_url`'i kaldırın,
-ardından `ocx start`'ı yeniden çalıştırın.
+ardından `orl start`'ı yeniden çalıştırın.
 
 ### Katalog sorunlarını giderme
 
@@ -373,12 +373,12 @@ sırayla kontrol edin:
    değil, protobuf `GetUsableModels` RPC'si üzerinden keşfeder; bu nedenle
    Cursor tarafındaki bir değişiklik diğer sağlayıcılardan bağımsız olarak hangi
    kimliklerin görünür olduğunu değiştirebilir.
-5. **Önbellek ve `ocx sync`** — canlı kataloglar yaklaşık beş dakika önbelleğe
+5. **Önbellek ve `orl sync`** — canlı kataloglar yaklaşık beş dakika önbelleğe
    alınır (`modelCacheTtlMs`, varsayılan `300000`). Yeni bir getirmeye zorlamak
-   ve kataloğu hemen yeniden yazmak için `ocx sync` çalıştırın.
+   ve kataloğu hemen yeniden yazmak için `orl sync` çalıştırın.
 6. **Çalışan Codex `app-server`** — uzun ömürlü bir Codex `app-server` (Desktop
    / CLI arka plan ana bilgisayarı) önceki listeyi bellekte tuttuğu sürece
-   diskteki kataloğu yeniden yazmak yeterli değildir. `ocx sync` ve `ocx
+   diskteki kataloğu yeniden yazmak yeterli değildir. `orl sync` ve `ocx
    sync-cache` bu süreçler algılandığında uyarır. `ocx sync --restart-codex` bu
    süreçleri yeniden başlatır ve seçicinin kataloğu yeniden okuması için Codex
    masaüstü uygulamasını macOS, Linux ve Windows'ta tamamen kapatıp yeniden
@@ -386,15 +386,15 @@ sırayla kontrol edin:
    iletin veya eşleşen `app-server` süreçlerini kendiniz durdurun.
 
 :::caution[Diğer yerel yazıcılar]
-Katalog yazmaları (`opencodex-catalog.json`, `config.toml`) opencodex **içinde**
-atomiktir, bu da yalnızca opencodex'e ait iki yazıcı yarıştığında yarı yazılmış
-dosyaları önler. Bu, opencodex yazdıktan sonra başka bir yerel sürecin, dosya
+Katalog yazmaları (`opencodex-catalog.json`, `config.toml`) OpenRelay **içinde**
+atomiktir, bu da yalnızca OpenRelay'e ait iki yazıcı yarıştığında yarı yazılmış
+dosyaları önler. Bu, OpenRelay yazdıktan sonra başka bir yerel sürecin, dosya
 izleyicisinin veya senkronizasyon ajanının katalog görünürlüğünü veya sırasını
 yeniden yazmasını **engellemez**. Codex ayrı `models_cache.json` dosyasını tutar
 ve bunu bağımsız olarak yenileyebilir, `opencodex-catalog.json` dosyasını
 yeniden yazmadan görünür listeyi değiştirebilir. Proxy çalışırken modeller
 beklenmedik bir şekilde değişirse yarışan yazıcıları durdurun veya yeniden
-yapılandırın, ardından `ocx sync` çalıştırın — bu onaylanmış bir opencodex
+yapılandırın, ardından `orl sync` çalıştırın — bu onaylanmış bir OpenRelay
 hatası değil, harici bir yazıcı tehlikesidir.
 :::
 
@@ -403,17 +403,17 @@ hatası değil, harici bir yazıcı tehlikesidir.
 Codex yeniden dener ve ardından `stream disconnected before completion: error
 sending request for url (http://127.0.0.1:10100/v1/responses)` gibi bir hatayla
 başarısız olursa — veya Claude Code benzer bir bağlantı hatası bildirirse —
-opencodex proxy'si çalışmıyordur: yapılandırılmış portu hiçbir şey
+OpenRelay proxy'si çalışmıyordur: yapılandırılmış portu hiçbir şey
 dinlemiyordur, bu nedenle istemci bu ham bağlantı hatasını kendisi işler.
 Proxy'yi yeniden başlatın:
 
 ```bash
-ocx start              # ön plan
-ocx service install    # kalıcı: girişte otomatik başlar ve çökmede yeniden doğar
+orl start              # ön plan
+orl service install    # kalıcı: girişte otomatik başlar ve çökmede yeniden doğar
 ```
 
-`ocx status` proxy'nin çalışıp çalışmadığını gösterir ve çalışmadığında aynı
-yeniden başlatma ipucunu yazdırır; `ocx doctor` yeniden başlatma güvenliğini
+`orl status` proxy'nin çalışıp çalışmadığını gösterir ve çalışmadığında aynı
+yeniden başlatma ipucunu yazdırır; `orl doctor` yeniden başlatma güvenliğini
 (servis/dolgu kapsamı) bildirir.
 
 ## Alt ajan seçicisi
@@ -430,7 +430,7 @@ Hesap ekleme veya yeniden kimlik doğrulama, normalde kaydetmeden önce `respons
 
 Yeni OAuth belirteciyle yapılan kota sorgusu 5 saatlik, haftalık veya aylık kotanın tükendiğini doğrularsa hesap model çağrısı olmadan kaydedilir ve **Doğrulama bekleniyor** gösterilir. Yeniden başlatma veya belirteç yenileme yönlendirmeyi açmaz. Kota geri geldiğinde kotaları yenileyin: kullanılabilir kapasite gösteren eksiksiz güncel veri küçük bir doğrulama isteğine izin verir. Yalnızca tamamlanan yanıt hesabı etkinleştirir. Hatalarda kısıtlama korunur. Pasif sorgulama bu isteği göndermez. İlk kayıtta bilinmeyen kota normal doğrulamayı gerektirir.
 
-`ocx account refresh openai` ve `ocx account list openai --quota --refresh` yalnızca kullanımı okur. Model doğrulaması kota tüketir ve insanın pano oturumunu gerektirir: kota yenilendikten sonra `ocx gui` açıp **Refresh quotas** düğmesine tıklayın. Grafik arayüzü olmayan bir sunucunun panosuna da tarayıcınızdan erişin; yalnızca yönetici belirteci doğrulama yetkisi vermez. Duraklatılmış hesap doğrulanabilir, ancak devam ettirilmez veya seçilmez. Model yetkilendirme hataları başarılı doğrulama veya yeniden girişe kadar görünür kalır.
+`orl account refresh openai` ve `orl account list openai --quota --refresh` yalnızca kullanımı okur. Model doğrulaması kota tüketir ve insanın pano oturumunu gerektirir: kota yenilendikten sonra `orl gui` açıp **Refresh quotas** düğmesine tıklayın. Grafik arayüzü olmayan bir sunucunun panosuna da tarayıcınızdan erişin; yalnızca yönetici belirteci doğrulama yetkisi vermez. Duraklatılmış hesap doğrulanabilir, ancak devam ettirilmez veya seçilmez. Model yetkilendirme hataları başarılı doğrulama veya yeniden girişe kadar görünür kalır.
 
 **Codex Set → Multi-auth** bölümünde **Codex Auth** başlığındaki **Codex kredileri** anahtarını açarak ana hesap ve havuz hesaplarının son gözlenen kredilerini Week satırının hemen altında görebilirsiniz. Varsayılan olarak kapalıdır ve `showCodexCredits` olarak kaydedilir. Bakiye yerel sayı biçiminde gösterilir; bildirildiğinde sınırsız kullanım veya aşım sınırı uyarısı görünür. Toplam kredi sınırı verilmediği için çubuk yüzdeyi değil kullanılabilirliği gösterir. Anahtar yalnızca görünümü değiştirir; yeni giriş kendi gözlemini bekler.
 
@@ -447,7 +447,7 @@ Tamamlanmayan bir ana hesap yenilemesi, yeniden denemede başarılı olabileceğ
 `codexPool.excludedPlans`, otomatik havuz seçiminin atladığı plan anahtarlarını listeler ve her hesapta saklanan planla büyük/küçük harf gözetmeden karşılaştırır. Varsayılan olarak yoktur; mevcut bir kurulum tam olarak eskisi gibi rotasyon yapar.
 
 ```bash
-ocx config set codexPool '{"excludedPlans":["free"]}'
+orl config set codexPool '{"excludedPlans":["free"]}'
 ```
 
 Bu bir engelleme değil, seçim politikasıdır. Dışarıda bırakılan hesap kimlik bilgisini, kota geçmişini ve iş parçacığı bağını korur, hesap listesinde görünmeye devam eder ve `work/gpt-5.5` gibi açık bir seçimle hâlâ erişilebilir. Değişen tek şey, otomatik rotasyonun onu artık seçmemesidir; hesap zaten etkin olsa ya da bir iş parçacığına bağlı olsa bile. Süresi dolan bir abonelik tam olarak bu durumu bırakır.
@@ -455,26 +455,26 @@ Bu bir engelleme değil, seçim politikasıdır. Dışarıda bırakılan hesap k
 Ana Codex hesabı plan hariç tutma politikasından muaftır; yalnızca seçim yapan yönlendirme korunan yerel kimlik bilgilerini okumaz. Kullanılabilir tüm havuz hesapları hariç tutulursa otomatik seçim hesap döndürmez. Açıkça hesap belirten yollar kullanılabilir; duraklatma, kimlik doğrulama ve model yetkisi denetimleri korunur. Hesap kartı ve CLI, hariç tutulan yönlendirme planını kimlik bilgisi durumundan ayrı gösterir. Planların tam sıralaması olmadığından `minimumPlan` ayarı yoktur.
 ## Yerel Codex'i geri yükleme
 
-`ocx stop`, proxy'yi ve kurulu arka plan servisini durdurur, ardından yerel Codex'i geri yüklemeyi dener. OpenCodex yalnızca sahipliğini doğrulayabildiği yönlendirme öğelerini kaldırır; yapılandırma dosyaları güvenle geri yüklenemiyorsa işlemin tamamlanmadığını bildirir.
+`orl stop`, proxy'yi ve kurulu arka plan servisini durdurur, ardından yerel Codex'i geri yüklemeyi dener. OpenRelay yalnızca sahipliğini doğrulayabildiği yönlendirme öğelerini kaldırır; yapılandırma dosyaları güvenle geri yüklenemiyorsa işlemin tamamlanmadığını bildirir.
 
 Mevcut yapılandırma veya profil kayıtlı özgün içerikten farklıysa ve günlükte o dosyanın enjekte edilmiş durumunun karması yoksa otomatik kurtarma iki dosyayı ve günlüğü değiştirmeden korur. Özgün içerikle zaten aynı olan dosya yeniden yazılmaz. Yönlendirilmiş bir yapılandırmaya yeniden enjeksiyon da bu belirsiz durumu reddeder; yerel yapılandırma yeni bir anlık görüntü oluşturabilir. [Kurtarma kurallarına](/guides/codex-integration/#recovery-without-injection-hashes) bakın.
 
 ```bash
-ocx stop       # proxy'yi + servisi durdurun, yerel Codex'i geri yükleyin
-ocx restore    # durdurmadan geri yükleyin  (takma ad: ocx eject)
-ocx restore back # düz Codex'i çalışan proxy'ye yeniden yönlendirin
+orl stop       # proxy'yi + servisi durdurun, yerel Codex'i geri yükleyin
+orl restore    # durdurmadan geri yükleyin  (takma ad: orl eject)
+orl restore back # düz Codex'i çalışan proxy'ye yeniden yönlendirin
 ```
 
-opencodex yönetilen bir [arka plan servisi](/tr/reference/cli/lifecycle/#ocx-service-installrepairrestartstartstopstatusuninstallremove)
+OpenRelay yönetilen bir [arka plan servisi](/tr/reference/cli/lifecycle/#ocx-service-installrepairrestartstartstopstatusuninstallremove)
 olarak çalıştığında `OCX_SERVICE=1` ayarlar, böylece servis odaklı bir yeniden
-başlatma Codex yapılandırmasını **bozmaz** — yalnızca açık bir `ocx stop` / `ocx
+başlatma Codex yapılandırmasını **bozmaz** — yalnızca açık bir `orl stop` / `ocx
 service stop` yerel Codex'i geri yükler.
 
 ## Sayfalanmış geçmiş için güvenlik reddi
 
-Etkilenen geçmiş deposu sayfalamayı destekliyorsa sağlayıcı değişimi `history_paginated_requires_native_writer` döndürebilir; legacy satırlar da buna dahildir. Bu neden artık Codex yapılandırmasını, başvuru profilini veya model kataloğunu reddetmez. `ocx sync` ve `ocx start` bu dosyaları yazmaya ve `model_catalog_json` yolunu ayarlamaya devam eder; böylece Codex model seçicisi OpenCodex üzerinden yönlendirilen her modeli göstermeyi sürdürür. Konuşma geçmişinin yeniden etiketlenmesini durduran yalnızca bu nedendir, çünkü sayfalanmış geçmiş sıra numaralarını Codex’in kendi yerel yazıcısı atar ve yeniden denemek bunu değiştirmez. Okunamayan bir durum veritabanı, kimliği değişmiş bir geçmiş veya çalıştırılamayan bir ön kontrol gibi diğer geçmiş ön kontrol nedenleri, daha sonra başarılı olabilecekleri için hâlâ tüm değişimi reddeder ve geri alır. Bu durumda OpenCodex sayfalanmış geçmiş dosyalarını veya iş parçacığı satırlarını değiştirmez. Mevcut konuşmalar zaten etiketlendikleri sağlayıcıda kalır ve taşınmaz; yeni konuşmalar proxy üzerinden normal şekilde yönlendirilir. Yeniden etiketleme durduğunda, ev dizininde zaten bulunan bir `[model_providers.opencodex]` tablosu kaldırılmaz, kök-override (loopback) biçimde bile tutulur; böylece satırları `opencodex` olarak etiketlenmiş konuşmalar hâlâ var olan bir sağlayıcı kimliğini korur. CLI şunu yazdırır: `Codex resume history: left to Codex's native writer (history_paginated_requires_native_writer)`. `ocx restore`, `ocx stop` ve `ocx uninstall` artık `history_paginated_requires_native_writer` nedeniyle reddetmez. OpenCodex'in yazdığı tüm kök yönlendirme anahtarlarını kaldırır ve `[model_providers.opencodex]` tanımını diskte bırakır; böylece satırları hâlâ o sağlayıcıyı adlandıran konuşmalar çözülmeye devam ederken düz `codex` proxy'yi göstermeyi bırakır. Sonuç, bırakılan satırları adlandıran kısmi bir geri yükleme olarak raporlanır; `ocx restore --remove-codex-provider-table` onları da kaldırır ve ardından o konuşmalar açılmaz. Ayrıca, `openai` etiketli konuşmaları Codex'in zaten sayfaladığı bir ev dizininde entegrasyonu sağlayıcı tablosu biçiminde açmak eskiden `history_paginated_openai_requires_native_writer` ile tümüyle reddediliyordu: hiçbir şey yazılmıyor ve entegrasyon devre dışı kalıyordu. OpenCodex bu geçişi artık yönetilen kök `openai_base_url` geçersiz kılmasını `[model_providers.opencodex]` tablosunun yanında tutarak tamamlar. Codex bu geçersiz kılmayı yerleşik `openai` sağlayıcısıyla birleştirdiği için o konuşmalar yeniden etiketlenmeden proxy'ye ulaşmayı sürdürür ve hiçbir geçmiş baytı veya iş parçacığı satırı değişmez. Yalnızca `x-opencodex-api-key` kabul başlığını gerektiren yönlendirme biçimi hâlâ reddeder, çünkü Codex'in yerleşik sağlayıcısı bu başlığı taşıyamaz; mesajı bunu çözen iki ayarı adlandırır: geçersiz kılmanın korunabilmesi için Codex'i loopback dinleyicisi üzerinden yönlendirin ya da `syncResumeHistory` değerini `false` yaparak o konuşmaların Codex'in kendi OpenAI uç noktasına gitmesini kabul edin.
+Etkilenen geçmiş deposu sayfalamayı destekliyorsa sağlayıcı değişimi `history_paginated_requires_native_writer` döndürebilir; legacy satırlar da buna dahildir. Bu neden artık Codex yapılandırmasını, başvuru profilini veya model kataloğunu reddetmez. `orl sync` ve `orl start` bu dosyaları yazmaya ve `model_catalog_json` yolunu ayarlamaya devam eder; böylece Codex model seçicisi OpenRelay üzerinden yönlendirilen her modeli göstermeyi sürdürür. Konuşma geçmişinin yeniden etiketlenmesini durduran yalnızca bu nedendir, çünkü sayfalanmış geçmiş sıra numaralarını Codex’in kendi yerel yazıcısı atar ve yeniden denemek bunu değiştirmez. Okunamayan bir durum veritabanı, kimliği değişmiş bir geçmiş veya çalıştırılamayan bir ön kontrol gibi diğer geçmiş ön kontrol nedenleri, daha sonra başarılı olabilecekleri için hâlâ tüm değişimi reddeder ve geri alır. Bu durumda OpenRelay sayfalanmış geçmiş dosyalarını veya iş parçacığı satırlarını değiştirmez. Mevcut konuşmalar zaten etiketlendikleri sağlayıcıda kalır ve taşınmaz; yeni konuşmalar proxy üzerinden normal şekilde yönlendirilir. Yeniden etiketleme durduğunda, ev dizininde zaten bulunan bir `[model_providers.opencodex]` tablosu kaldırılmaz, kök-override (loopback) biçimde bile tutulur; böylece satırları `opencodex` olarak etiketlenmiş konuşmalar hâlâ var olan bir sağlayıcı kimliğini korur. CLI şunu yazdırır: `Codex resume history: left to Codex's native writer (history_paginated_requires_native_writer)`. `orl restore`, `orl stop` ve `orl uninstall` artık `history_paginated_requires_native_writer` nedeniyle reddetmez. OpenRelay'in yazdığı tüm kök yönlendirme anahtarlarını kaldırır ve `[model_providers.opencodex]` tanımını diskte bırakır; böylece satırları hâlâ o sağlayıcıyı adlandıran konuşmalar çözülmeye devam ederken düz `codex` proxy'yi göstermeyi bırakır. Sonuç, bırakılan satırları adlandıran kısmi bir geri yükleme olarak raporlanır; `orl restore --remove-codex-provider-table` onları da kaldırır ve ardından o konuşmalar açılmaz. Ayrıca, `openai` etiketli konuşmaları Codex'in zaten sayfaladığı bir ev dizininde entegrasyonu sağlayıcı tablosu biçiminde açmak eskiden `history_paginated_openai_requires_native_writer` ile tümüyle reddediliyordu: hiçbir şey yazılmıyor ve entegrasyon devre dışı kalıyordu. OpenRelay bu geçişi artık yönetilen kök `openai_base_url` geçersiz kılmasını `[model_providers.opencodex]` tablosunun yanında tutarak tamamlar. Codex bu geçersiz kılmayı yerleşik `openai` sağlayıcısıyla birleştirdiği için o konuşmalar yeniden etiketlenmeden proxy'ye ulaşmayı sürdürür ve hiçbir geçmiş baytı veya iş parçacığı satırı değişmez. Yalnızca `x-opencodex-api-key` kabul başlığını gerektiren yönlendirme biçimi hâlâ reddeder, çünkü Codex'in yerleşik sağlayıcısı bu başlığı taşıyamaz; mesajı bunu çözen iki ayarı adlandırır: geçersiz kılmanın korunabilmesi için Codex'i loopback dinleyicisi üzerinden yönlendirin ya da `syncResumeHistory` değerini `false` yaparak o konuşmaların Codex'in kendi OpenAI uç noktasına gitmesini kabul edin.
 
-Kök URL geçersiz kılma biçimine dönülürken OpenCodex, geçmiş ön kontrolü başarılı olsa bile yapılandırmayı kaydetmeden önce mevcut `[model_providers.opencodex]` tanımını korur. Böylece Codex, kayıttan sonra veya arka plan geçmiş işlemi başlarken geçmiş biçimini değiştirirse eski `opencodex` konuşmaları sağlayıcılarını bulmaya devam eder. Yeni konuşmalar seçili kök sağlayıcıyı kullanır; açıkça istenen geri yükleme, mevcut ayrı kaldırma kontrollerini korur.
+Kök URL geçersiz kılma biçimine dönülürken OpenRelay, geçmiş ön kontrolü başarılı olsa bile yapılandırmayı kaydetmeden önce mevcut `[model_providers.opencodex]` tanımını korur. Böylece Codex, kayıttan sonra veya arka plan geçmiş işlemi başlarken geçmiş biçimini değiştirirse eski `opencodex` konuşmaları sağlayıcılarını bulmaya devam eder. Yeni konuşmalar seçili kök sağlayıcıyı kullanır; açıkça istenen geri yükleme, mevcut ayrı kaldırma kontrollerini korur.
 
 Konuşmaları kendiniz taşımak için etkin sayfalanmış geçmişi veya iş parçacığı satırını yeniden yazmayın. Kurtarmadan önce konuşmayı kapatın ve özel geçmişi yayımlamadan tam hatayı ve sürümleri bildirin. Yedek veya başarılı betik görüntünün düzeldiğini kanıtlamaz; Codex’i yeniden açıp konuşmayı kontrol edin.
 

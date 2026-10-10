@@ -1,9 +1,9 @@
 ---
 title: Web Kontrol Paneli
-description: Proxy sağlığı, sağlayıcılar, modeller, yetkilendirme rehberliği, kimlik doğrulama havuzları, kullanım ve günlükler için opencodex GUI'si.
+description: Proxy sağlığı, sağlayıcılar, modeller, yetkilendirme rehberliği, kimlik doğrulama havuzları, kullanım ve günlükler için OpenRelay GUI'si.
 ---
 
-opencodex, proxy'den sunulan yerel bir web kontrol paneli (`gui/` altında bir
+OpenRelay, proxy'den sunulan yerel bir web kontrol paneli (`gui/` altında bir
 Vite/React uygulaması) ile birlikte gelir. Sağlayıcıları, Codex/ChatGPT
 hesaplarını, katalog modellerini, sidecar'ları, alt ajan ayarlarını ve istek
 trafiğini yönetmenin en kısa yoludur.
@@ -11,7 +11,7 @@ trafiğini yönetmenin en kısa yoludur.
 ## Açma
 
 ```bash
-ocx gui
+orl gui
 ```
 
 Bu, gerekirse önce proxy'yi otomatik olarak başlatarak tarayıcınızda
@@ -19,7 +19,7 @@ Bu, gerekirse önce proxy'yi otomatik olarak başlatarak tarayıcınızda
 sunucusunu çalışan bir proxy'ye karşı ayrı olarak çalıştırabilirsiniz:
 
 ```bash
-ocx start
+orl start
 bun run dev:gui
 ```
 
@@ -66,12 +66,12 @@ zaman yukarı akışta yenilemeye zorlamaz.
 | Alan | Ne yapar |
 | --- | --- |
 | **Kontrol paneli özeti** | Çoklu ajan modu, çevrimiçi durum, sürüm, çalışma süresi, sağlayıcı sayısı, 30 günlük token toplamı, aktif sağlayıcılar ve kullanılabilir yerel/yönlendirilen modeller. |
-| **Alt ajan yetkilendirmesi** | OpenCodex yetkilendirme rehberliği ve ayrı yerel varsayılan katılımı tarafından paylaşılan yerel veya yönlendirilen bir model ve isteğe bağlı akıl yürütme çabası seçin. Bu, proxy tarafında spawn başına bir yönlendirici değildir; aşağıya bakın. |
+| **Alt ajan yetkilendirmesi** | OpenRelay yetkilendirme rehberliği ve ayrı yerel varsayılan katılımı tarafından paylaşılan yerel veya yönlendirilen bir model ve isteğe bağlı akıl yürütme çabası seçin. Bu, proxy tarafında spawn başına bir yönlendirici değildir; aşağıya bakın. |
 | **Sidecar'lar** | Web arama modelini ve çabasını artı vizyon açıklama modelini seçin. Değişiklikler bir sonraki istekte geçerli olur. |
 | **Bakım** | Codex model kataloğunu yeniden senkronize edin, projeye özel yapılandırma atlama uyarılarını inceleyin, en son veya önizleme sürümünü kontrol edin ve isteğe bağlı proxy yeniden başlatmasıyla bir güncelleme çalıştırın. Masaüstü kabuğunda güncelleme öğesi, paket güncelleyicisini çalıştırmak yerine yerel uygulama güncelleme sayfasını açar. |
 | **Başlangıç güvenliği** | Ayrı servis ve başlatıcı dolgu sağlığı artı tam onarım komutlarıyla enjekte edilen Codex yönlendirmesinin yeniden başlatmada hayatta kalıp kalmadığını gösterin. |
 | **Windows sistem tepsisi** | Tek tıklamayla proxy başlatma, durdurma, yeniden başlatma, kontrol paneli erişimi ve durum için kullanıcı başına bir oturum açma tepsisi yükleyin. Tepsi bir kontrolördür, bir proxy yeniden başlatma servisi değildir. |
-| **Codex otomatik başlatma** | Zaten kurulu bir Codex başlatıcı dolgusunun `ocx ensure` çalıştırmasına izin verin. Bu anahtar bir dolgu veya arka plan servisi kurmaz. |
+| **Codex otomatik başlatma** | Zaten kurulu bir Codex başlatıcı dolgusunun `orl ensure` çalıştırmasına izin verin. Bu anahtar bir dolgu veya arka plan servisi kurmaz. |
 | **Sağlayıcılar** | Sağlayıcıları ekleyin, düzenleyin, varsayılanı ayarlayın (yalnızca etkin sağlayıcılar), etkinleştirin/devre dışı bırakın ve kaldırın; desteklendiğinde OAuth hesap havuzlarını ve API anahtarı havuzlarını yönetin. Geçerli varsayılanı kaldırmak, bir tane varsa kalan ilk etkin sağlayıcıya geçer; aksi takdirde silme reddedilir ve geçerli varsayılan tutulur. Sağlayıcı Ayarları, eksik, yavaş veya aşırı büyük `/models` kataloglarına sahip uç noktalar için canlı model keşfini devre dışı bırakabilir. Claude (Anthropic) OAuth havuzları için oturum açmış her hesap kendi 5 saatlik ve haftalık hız sınırı çubuklarını gösterir (kullanım kimlik bilgisi başınadır); başarısız bir araştırma bilinen son çubukları tutar ve bir sonraki başarılı yenilemeye kadar bunları kullanılamaz olarak işaretler. |
 | **Sağlayıcı ekle** | Hesap girişi, API anahtarı hizmetleri, yerel sunucular veya özel bir uç nokta için kayıt defteri destekli önayarları arayın. |
 | **Codex Auth** | ChatGPT/Codex havuz hesapları ekleyin, sonraki oturum hesabını seçin, 5 saatlik / haftalık / 30 günlük kotaları yenileyin, kota otomatik geçişini etkinleştirin veya devre dışı bırakın, %1–100 eşiğini ayarlayın ve geçici arıza yük devretmesini yapılandırın. |
@@ -80,7 +80,7 @@ zaman yukarı akışta yenilemeye zorlamaz.
 | **Günlükler** | Belirteçler, talep edilen çaba ve (varsa) etkili giden çaba, çözümlenen model, sağlayıcı, durum, istek kimliği, süre ve hata ayrıntılarıyla son istekleri otomatik yenileyin. Ayrıntı görünümü, adaptör bir tane yaydığında tam akıl yürütme hat alanını içerir. Yüklenen Günlükler halkası için toplam belirteçleri ve tahmini liste fiyatı maliyetini görmek üzere donuk görüşme/oturum kimliğine göre (istemci bir tane gönderdiğinde) filtreleyin. |
 | **Kullanım / Hata Ayıklama** | Belirteç kullanımı kapsamını ve eğilimlerini inceleyin veya isteğe bağlı sağlayıcı aktarımı ve kullanım çıkarma tanılamalarını etkinleştirin. |
 | **Depolama** | Salt okunur CODEX_HOME disk dökümü (oturumlar, arşivler, DB'ler, ekler). İsteğe bağlı arşivlenmiş temizleme: en eski %N'yi önizleyin, ardından `CODEX_HOME/.trash` konumuna karantinaya alın (varsayılan) veya açık bir onay kutusu arkasında kalıcı olarak silin. **Otomatik temizleme politikası** isteğe bağlıdır ve **varsayılan olarak KAPALIDIR** (`storageCleanupPolicy.enabled`); Depolama sayfasında eşik/hedef/zamanlama/mod yapılandırın veya **Şimdi çalıştır (Run now)**'ı tetikleyin. Karantinaya alınan girdiler Depolama sayfasından geri yüklenebilir (JSONL + iş parçacıkları). Aktif oturumlar salt okunur kalır. Codex en yeni/aktif `state_*.sqlite` dosyasını kilitli tuttuğu sürece temizleme ve geri yükleme reddedilir. |
-| **Durdur** | Proxy'yi ve kurulu arka plan servisini zarif bir şekilde durdurun, yerel Codex'i geri yükleyin ve çıkın (`POST /api/stop`). Windows'ta Görev Zamanlayıcı arka ucunda panel reddeder ve `ocx stop` çalıştırmanızı ister: görev bittikten sonra sarmalayıcı proxy'yi yeniden başlatabilir ve bu yeniden başlatma penceresini istemci yapılandırmanız geri yüklenmeden önce yalnızca proxy dışında çalışan bir stop doğrulayabilir. Reddedildiğinde hiçbir şey değiştirilmez. |
+| **Durdur** | Proxy'yi ve kurulu arka plan servisini zarif bir şekilde durdurun, yerel Codex'i geri yükleyin ve çıkın (`POST /api/stop`). Windows'ta Görev Zamanlayıcı arka ucunda panel reddeder ve `orl stop` çalıştırmanızı ister: görev bittikten sonra sarmalayıcı proxy'yi yeniden başlatabilir ve bu yeniden başlatma penceresini istemci yapılandırmanız geri yüklenmeden önce yalnızca proxy dışında çalışan bir stop doğrulayabilir. Reddedildiğinde hiçbir şey değiştirilmez. |
 
 Kullanım, panel, sağlayıcı çalışma alanı, sağlayıcı kataloğu ve API anahtarı görünümleri, okunabilir kayıt kalmasa bile dışlanan kayıtlar için uyarı gösterir. Sayılar, tarihler ve kullanım sıralamaları yalnızca okunabilir kayıtlara dayanır. Geçmiş eksikse en çok kullanılan model sırası kaydedilmez; başka bir sıra seçin veya yeniden denemeden önce geçmişi onarın.
 
@@ -136,14 +136,14 @@ Seçim rozetleri ve keşif bilgileri bu sayıdan ayrıdır.
 ## Yetkilendirme seçicisi ve spawn yönlendirmesi
 
 Kontrol Panelinin **Alt ajan yetkilendirmesi** seçicisi `injectionModel`'i ve
-isteğe bağlı olarak `injectionEffort`'ı saklar. **OpenCodex çoklu ajan
+isteğe bağlı olarak `injectionEffort`'ı saklar. **OpenRelay çoklu ajan
 rehberliği**, bu değerleri kullanan yetkilendirme talimatlarını bağımsız olarak
 denetler. Uygun v2 turlarında bu rehberlik ana ajana `spawn_agent`'a hangi tam
 modeli ve akıl yürütme çabasını ileteceğini söyler; modeli temizlemek saklanan
 çabayı da temizler.
 
 Varsayılan olarak kapalı olan **Yerel Codex alt ajan varsayılanları olarak
-kullan (Use as native Codex subagent defaults)** anahtarı, OpenCodex aktif Codex
+kullan (Use as native Codex subagent defaults)** anahtarı, OpenRelay aktif Codex
 yönlendirmesini yönettiğinde bir sonraki senkronizasyonda/yeniden başlatmada
 aynı seçimi Codex'in yerel `[agents]` varsayılanlarına uygular. Harici kullanıcı
 tarafından yönetilen sağlayıcı yapılandırmaları dokunulmadan kalır. Bu
@@ -154,7 +154,7 @@ kılmaya devam edebilirler.
 
 :::caution
 Hiçbir kontrol proxy tarafında modeller arası bir spawn yönlendiricisi değildir.
-OpenCodex rehberliği Codex'ten `spawn_agent`'a geçersiz kılmalar iletmesini
+OpenRelay rehberliği Codex'ten `spawn_agent`'a geçersiz kılmalar iletmesini
 ister; yerel `[agents]` varsayılanları yalnızca Codex senkronize edildikten
 sonra yeni bir görev oluşturduğunda geçerlidir. Kurallı v1/base/v2 davranışı
 için [Alt Ajan Arayüzü](/tr/guides/sub-agent-surface/) sayfasına bakın.
@@ -215,7 +215,7 @@ ve diğer sağlayıcılardan ayrıdır.
   bir sıraya düşer. Değişen bir sıra bir sonraki bağımsız istekten itibaren
   geçerlidir ve zaten bağlı olan bir iş parçacığını asla taşımaz. Codex Desktop
   (ana) hesabı diğerleri gibi sıralanır, böylece **Son** olarak ayarlanabilir ve
-  yedek olarak tutulabilir. Bu beş önayarın dışındaki `ocx account priority`'den
+  yedek olarak tutulabilir. Bu beş önayarın dışındaki `orl account priority`'den
   ayarlanan bir sıra kartta görünür ve seçilebilir kalır.
 - İş parçacığı bağlılığı istek başına dalgalanmayı önler. `pool.cacheAffinity`
   varsayılan olarak açıkken uzun süredir çalışan bir iş parçacığı, kullanım eşiğe
@@ -257,7 +257,7 @@ ve diğer sağlayıcılardan ayrıdır.
 - Hesap ekleme, kaldırma ve seçici ayarı değişiklikleri model kataloğu
   yenilenmeden önce kaydedilir. Bu sınırlı yenileme tamamlanamazsa kontrol
   paneli sarı renkli bir kurtarma ile başarı bildirimi gösterir; yeniden denemek
-  için `ocx sync` çalıştırın. Hesabın veya ayarın kendisi kaydedilmiş olarak
+  için `orl sync` çalıştırın. Hesabın veya ayarın kendisi kaydedilmiş olarak
   kalır.
 
 Sağlayıcılar genel bakışı, etkin hesabın ham kotası ve bir sonraki kapasite
@@ -269,14 +269,14 @@ bölümüne bakın.
 
 ## Yıldız vermek ajanın değil sizin kararınızdır
 
-Kenar çubuğunun yıldız düğmesi — ve etkileşimli bir terminalde `ocx start`'ın
-sorduğu tek seferlik soru — **kendi `gh` girişinizden** geçer. opencodex hiçbir
+Kenar çubuğunun yıldız düğmesi — ve etkileşimli bir terminalde `orl start`'ın
+sorduğu tek seferlik soru — **kendi `gh` girişinizden** geçer. OpenRelay hiçbir
 GitHub belirteci tutmaz ve öğrendiği tek şey evet veya hayır cevabınızdır.
 
 Bu GitHub hesabınıza yazdığından, ajan odaklı arayanların sizin adınıza yanıt
 vermesine izin verilmek yerine reddedilir:
 
-- `ocx start` ve `ocx service install`, bir ajan veya CI donanımı onları
+- `orl start` ve `orl service install`, bir ajan veya CI donanımı onları
   çalıştırdığında (`CLAUDECODE`, `CODEX_THREAD_ID`, `CURSOR_TRACE_ID`, `CI` ve
   benzeri) **istemi tamamen atlar**. Tek seferlik işaretçi yazılmadan kalır, bu
   nedenle gerçek istem bir sonraki elle yazılan çalıştırmanızda yine de görünür.

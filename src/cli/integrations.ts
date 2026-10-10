@@ -17,30 +17,30 @@ import { asideProfileRecoveryLines } from "./aside-profile-recovery";
 import type { IntegrationClientId } from "../integrations/registry";
 
 const CLAUDE_USAGE = `Usage:
-  ocx claude config [status] [--json]
-  ocx claude config set [--enabled <on|off>] [--auth-mode <auto|proxy|subscription>]
+  orl claude config [status] [--json]
+  orl claude config set [--enabled <on|off>] [--auth-mode <auto|proxy|subscription>]
       [--system-env <on|off>] [--fast-mode <on|off>] [--auto-context <on|off>]
       [--compact-window <tokens|default>] [--context-accounting <1m|200k>] [--inject-agents <on|off>]
       [--small-fast-model <id|->] [--model-map <from=to,from=to|->]
       [--blocked-skills <name,name|->] [--web-model <id|->] [--web-backend <openai|anthropic|xai|gemini|exa|->]
       [--vision-model <id|->] [--vision-backend <openai|anthropic|->] [--json]
-  ocx claude config set --first-party <on|off> [--json]`;
+  orl claude config set --first-party <on|off> [--json]`;
 
 const GROK_USAGE = `Usage:
-  ocx grok [status] [--json]
-  ocx grok <exclude|include|set> <model,model...> [--json]
-  ocx grok clear [--json]
-  ocx grok apply [--json]`;
+  orl grok [status] [--json]
+  orl grok <exclude|include|set> <model,model...> [--json]
+  orl grok clear [--json]
+  orl grok apply [--json]`;
 
 const CLIENT_USAGE = `Usage:
-  ocx integration client [status] [--client <id>] [--profile <id>] [--json]
-  ocx integration client <enable|disable> --client <id> [--profile <id>] [--overwrite-conflict] [--json]
-  ocx integration client history [--client <id>] [--profile <id>] [--json]
-  ocx integration client restore --op <opId> [--client aside --profile <id>] [--confirm-drift] [--json]
-  ocx integration client preview --client <id> --operation <apply|overwrite|disable> [--profile <id>] [--json]
-  ocx integration client restore --op <opId> --preview [--client aside --profile <id>] [--confirm-drift] [--json]
-  ocx integration client history remove --op <opId> --yes [--client aside] [--profile <id>] [--json]
-  ocx integration client sync --client aside [--json]
+  orl integration client [status] [--client <id>] [--profile <id>] [--json]
+  orl integration client <enable|disable> --client <id> [--profile <id>] [--overwrite-conflict] [--json]
+  orl integration client history [--client <id>] [--profile <id>] [--json]
+  orl integration client restore --op <opId> [--client aside --profile <id>] [--confirm-drift] [--json]
+  orl integration client preview --client <id> --operation <apply|overwrite|disable> [--profile <id>] [--json]
+  orl integration client restore --op <opId> --preview [--client aside --profile <id>] [--confirm-drift] [--json]
+  orl integration client history remove --op <opId> --yes [--client aside] [--profile <id>] [--json]
+  orl integration client sync --client aside [--json]
   enable/disable/restore accept --plan-fingerprint <token>; bound Aside operations require one profile.
   Droid enable/preview accept repeatable --reasoning-default <model=effort> or --clear-reasoning-defaults.
   --profile selects one Aside account-backed profile; omitted Aside toggles affect all profiles.`;
@@ -133,7 +133,7 @@ export async function handleClaudeConfigCommand(argv: string[], deps: RuntimeApi
       "Claude Code settings updated.",
       // The route kept the shared proxy env because Claude Desktop may still rely on it. Say so,
       // or an operator who turned first-party off believes the local interception is gone.
-      ...(retained ? ["Warning: Claude Desktop still uses the shared proxy settings. Run `ocx claude desktop apply --gateway` to release them."] : []),
+      ...(retained ? ["Warning: Claude Desktop still uses the shared proxy settings. Run `orl claude desktop apply --gateway` to release them."] : []),
     ]);
   });
 }
@@ -362,10 +362,10 @@ export async function handleClientIntegrationCommand(
 export const INTEGRATION_USAGE = { claude: CLAUDE_USAGE, grok: GROK_USAGE, client: CLIENT_USAGE };
 
 const ZCODE_USAGE = `Usage:
-  ocx zcode [status] [--json]
-  ocx zcode <enable|disable> [--json]
-  ocx zcode history [--json]
-  ocx zcode restore --op <opId> [--confirm-drift] [--json]`;
+  orl zcode [status] [--json]
+  orl zcode <enable|disable> [--json]
+  orl zcode history [--json]
+  orl zcode restore --op <opId> [--confirm-drift] [--json]`;
 
 /**
  * Thin alias over the client-integration surface for ZCode (Z.ai's desktop
@@ -401,7 +401,7 @@ export async function handleClaudeInterceptCommand(argv: string[], deps: Runtime
     const args = [...argv];
     const action = args.shift();
     const wantsJson = takeFlag(args, "--json");
-    const usage = "Usage: ocx claude intercept start [--json]";
+    const usage = "Usage: orl claude intercept start [--json]";
     rejectArgs(args, usage);
     if (action !== "start") throw new CliUsageError("Expected start", usage);
     const result = await runtimeRequest("/api/claude-intercept/start", { method: "POST" }, deps);
@@ -409,7 +409,7 @@ export async function handleClaudeInterceptCommand(argv: string[], deps: Runtime
   });
 }
 
-const COMMANDCODE_USAGE = "Usage: ocx commandcode [status|show|list|enable|disable|history|journal|restore] [--json]";
+const COMMANDCODE_USAGE = "Usage: orl commandcode [status|show|list|enable|disable|history|journal|restore] [--json]";
 
 export async function handleCommandcodeCommand(argv: string[], deps: RuntimeApiDeps = {}): Promise<number> {
   const args = [...argv];

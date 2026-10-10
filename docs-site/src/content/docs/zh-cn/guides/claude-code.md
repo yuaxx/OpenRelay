@@ -1,9 +1,9 @@
 ---
 title: Claude Code 指南
-description: 在 Claude Code 中使用任意已路由模型——opencodex 在同一端口提供 Anthropic Messages API 和网关模型发现功能。
+description: 在 Claude Code 中使用任意已路由模型——OpenRelay 在同一端口提供 Anthropic Messages API 和网关模型发现功能。
 ---
 
-opencodex 在 `/v1/responses` 之外还提供 `POST /v1/messages`（以及 `count_tokens`），因此 Claude
+OpenRelay 在 `/v1/responses` 之外还提供 `POST /v1/messages`（以及 `count_tokens`），因此 Claude
 Code 可以使用每一个已路由的提供商——包括 OAuth 登录、账户池、密钥故障转移和 sidecar——
 而无需进行任何额外的身份验证配置。
 
@@ -17,10 +17,10 @@ Code 可以使用每一个已路由的提供商——包括 OAuth 登录、账�
 ## 快速开始
 
 ```bash
-ocx claude
+orl claude
 ```
 
-`ocx claude` 会确保代理正在运行，然后在接好环境变量的情况下启动 Claude Code：
+`orl claude` 会确保代理正在运行，然后在接好环境变量的情况下启动 Claude Code：
 
 | 变量 | 值 |
 | --- | --- |
@@ -34,11 +34,11 @@ ocx claude
 | `CLAUDE_CODE_ALWAYS_ENABLE_EFFORT` | 启用 `alwaysEnableEffort` 时设为 `1`（条件注入） |
 | `ENABLE_TOOL_SEARCH` | 设置了 `claudeCode.toolSearch` 时注入（条件注入，默认关闭） |
 | `CLAUDE_CODE_MAX_CONTEXT_TOKENS` | 设置 `maxContextTokens` 时使用的旧版上下文覆盖项（条件注入） |
-你自行导出的变量始终优先。额外参数会直接透传：`ocx claude -p "hello"`。
+你自行导出的变量始终优先。额外参数会直接透传：`orl claude -p "hello"`。
 
 ### Claude 路由关闭时的原生回退
 
-以前当 Claude 路由被关闭时，`ocx claude` 会直接报错退出。现在它会改为启动原生 `claude`
+以前当 Claude 路由被关闭时，`orl claude` 会直接报错退出。现在它会改为启动原生 `claude`
 可执行文件，因此在关闭路由的情况下该命令依然可用：
 
 | 路由关闭的位置 | 行为 |
@@ -48,9 +48,9 @@ ocx claude
 | `claudeCode.enabled` 缺失或为 `true` | 与以往一致，经代理路由 |
 
 只有显式的 `false` 才会触发回退，因此早于该字段的旧代理仍会保持路由。代理缺失同样不是触发条件
-——只要路由是开启的，`ocx claude` 仍会照常启动代理。
+——只要路由是开启的，`orl claude` 仍会照常启动代理。
 
-原生会话不应继承代理状态，因此回退只移除能够**证明**属于 OpenCodex 的值：仅当
+原生会话不应继承代理状态，因此回退只移除能够**证明**属于 OpenRelay 的值：仅当
 `ANTHROPIC_BASE_URL` 指向本代理自身的回环地址与配置端口、且配对的 admission 令牌确实由代理签发
 时才移除；此外还会移除 `CLAUDE_CODE_*` 的发现与自动上下文开关，以及只能经由代理解析的模型槽位
 （路由别名与 `provider/model` 形式）。其余都属于你自己的配置并被保留——无关的
@@ -61,19 +61,19 @@ ocx claude
 
 ## 系统环境集成（macOS）
 
-当 `claudeCode.systemEnv` 设置为 `true`（默认：**关闭**）时，`ocx start` 会使用 `launchctl setenv`
+当 `claudeCode.systemEnv` 设置为 `true`（默认：**关闭**）时，`orl start` 会使用 `launchctl setenv`
 在系统范围内注入 `ANTHROPIC_BASE_URL` 和相关的 Claude Code 环境变量。因此，新打开的终端窗口和
-标签页可以直接通过代理路由普通的 `claude` 命令，无需使用 `ocx claude` 包装器。已经打开的
+标签页可以直接通过代理路由普通的 `claude` 命令，无需使用 `orl claude` 包装器。已经打开的
 shell 不受影响，必须重新打开。
 
-`ocx stop` 和代理关闭操作会**取消设置已注入的键**（不会恢复之前的值——只会移除 opencodex
-注入的键）。代理还会写入 `~/.opencodex/claude-env.sh`；`ocx start` 会安装一个 `.zshrc`
+`orl stop` 和代理关闭操作会**取消设置已注入的键**（不会恢复之前的值——只会移除 OpenRelay
+注入的键）。代理还会写入 `~/.opencodex/claude-env.sh`；`orl start` 会安装一个 `.zshrc`
 source hook，以自动加载该文件，但仅限 `PATH` 中存在可执行的 Claude Code CLI。Claude Code
-不存在或系统环境集成未启用时，启动过程和 `ocx ensure` 会移除 OpenCodex 自己写入的 hook。
+不存在或系统环境集成未启用时，启动过程和 `orl ensure` 会移除 OpenRelay 自己写入的 hook。
 Claude Desktop 使用独立 profile，不会触发 shell hook 安装。
 
 可以在配置中设置 `claudeCode.systemEnv: false`，或使用 GUI 开关来禁用。此功能仅适用于
-macOS；在其他平台上，请使用 `ocx claude`。
+macOS；在其他平台上，请使用 `orl claude`。
 
 ## 原生 Claude 透传（订阅直通）
 
@@ -90,7 +90,7 @@ Anthropic。若任一提供方请求头包含代理准入密钥，该密钥会�
 
 只有同时满足以下所有条件时才会触发透传：`nativePassthrough` 不为 `false`；模型以
 `claude` 或 `anthropic` 开头；bearer 令牌或 `x-api-key` 以 `sk-ant-` 开头；并且别名/模型映射
-解析后返回的模型保持不变；并且在非回环绑定上，专用代理准入请求头有效。这也意味着使用 `ocx claude` 时不再出现
+解析后返回的模型保持不变；并且在非回环绑定上，专用代理准入请求头有效。这也意味着使用 `orl claude` 时不再出现
 “claude.ai connectors are disabled”警告。
 
 在使用调用方凭据的这条透传路径中，请求体只会改动工具调用 ID。Anthropic 会拒绝的 `tool_use.id` 或 `tool_result.tool_use_id`（含 `a-zA-Z0-9_-` 以外的字符或超过 64 个字符，例如会话早先由路由模型生成的 ID）会被改写为合规 ID，并保持调用与结果的配对。合规 ID 原样发送，空 ID 会在本地直接返回 400。
@@ -103,11 +103,11 @@ Anthropic。若任一提供方请求头包含代理准入密钥，该密钥会�
 ## Claude Desktop 模式：网关（默认）与第一方
 
 在控制台的 **连接 → Claude Desktop → 连接模式** 中，或使用
-`ocx claude desktop apply --first-party|--gateway` 选择互斥的模式。
+`orl claude desktop apply --first-party|--gateway` 选择互斥的模式。
 
 ### 网关（默认）
 
-新安装默认应用网关配置档案：包括聊天标签页在内的整个应用都通过 OpenCodex。
+新安装默认应用网关配置档案：包括聊天标签页在内的整个应用都通过 OpenRelay。
 仅限 claude.ai 的功能此时不可用。旧版 `--static`、`--hybrid` 和 `--discovery-only`
 选项也会选择网关。
 
@@ -119,11 +119,11 @@ Anthropic 可能认为这违反其条款并暂停你的账户。默认模式是�
 只有接受这一风险时才选择第一方模式。
 :::
 
-Desktop 第一方模式通过 OpenCodex 处理 Code 标签页及其子代理。独立的 Claude Code CLI 有单独开关。两者读取同一份 `settings.json` 代理与 CA 设置：只开启其中一个时，另一个仍会经过本地代理，TLS 在本地终止，但 Messages 请求会原样转发给 Anthropic。
+Desktop 第一方模式通过 OpenRelay 处理 Code 标签页及其子代理。独立的 Claude Code CLI 有单独开关。两者读取同一份 `settings.json` 代理与 CA 设置：只开启其中一个时，另一个仍会经过本地代理，TLS 在本地终止，但 Messages 请求会原样转发给 Anthropic。
 
 模式保存在 `claudeCode.desktopMode`。此前明确应用第一方模式或在本版本之前应用过
 第一方模式的安装会保留该模式；现有网关安装也保持不变。没有明确设置时，依次检查
-OpenCodex 拥有的已选网关条目、保存的网关指纹、`settings.json` 中属于 OpenCodex 的
+OpenRelay 拥有的已选网关条目、保存的网关指纹、`settings.json` 中属于 OpenRelay 的
 第一方设置；都没有时使用网关。仅为 CLI 第一方模式写入的环境变量，不能证明 Desktop 处于第一方模式。目录同步和模型列表更新绝不会在已解析为第一方模式的
 安装上写入网关配置档案。若 `claudeCode.intercept.enabled: false`，现有第一方安装的
 应用操作会以 `intercept_disabled` 拒绝，新安装则应用网关。不会覆盖其他代理的设置。
@@ -131,44 +131,44 @@ OpenCodex 拥有的已选网关条目、保存的网关指纹、`settings.json` 
 
 ### Claude Code CLI 第一方模式
 
-在 连接 → Claude 中开启 CLI 开关，或运行 `ocx claude config set --first-party on`；关闭时用 `off`。若本地代理不可用、CA 无法准备、设置无法读取，或代理键由其他程序所有，开启请求会被拒绝。关闭操作始终可以保存。仅开启 Desktop 第一方模式时，要让终端完全原生直连，请在 shell 中设置 `NO_PROXY='*'`。上述账户风险也适用于 CLI。
-关闭 Claude 路由会保留由 OpenCodex 管理的代理设置。监听器仍运行时，所有 Messages 请求原样转发；停止后，运行 OpenCodex 或关闭 Desktop/CLI 第一方模式之前，直接运行 `claude` 无法连接。`ocx claude` 原生启动仅在有自有设置且未继承外部 HTTPS 代理时设置 `NO_PROXY=*`。否则保留外部代理，并警告设置中的拦截仍生效；请关闭第一方模式或取消该设置。
-界面区分设置不可读（unknown）、带 opencodex 令牌的代理 URL 却搭配外部 CA（foreign：手动修正 HTTPS_PROXY / NODE_EXTRA_CA_CERTS），以及 Claude 路由已关闭但仍有监听器原样转发请求（disabled：重启前关闭第一方模式以清除设置）。没有监听器时为 stopped；使用受管理的 CA 但端口或令牌不匹配时为 broken。第一方模式开启但无法提供拦截服务时，stopped 和 broken 都显示 routingOff：Claude 路由或拦截功能已关闭，或此设备是另一台 opencodex 中枢的客户端；请在此设备上重新启用拦截服务，或关闭第一方模式以移除设置。仅在拦截服务可用时，stopped 才提示启动 opencodex，broken 才提示运行 `ocx ensure` 或重启。CLI 已开启但没有代理设置为未应用；仅开启一个客户端且代理正常时提示共享转发；两个客户端都关闭但代理设置仍在时提示残留。
-unknown 表示 opencodex 无法确定设置是否仍指向自己的代理。外部 CA 搭配 127.0.0.1 上无令牌的代理时显示 local：归属无法确认；如果不再使用，请从 ~/.claude/settings.json 中删除 HTTPS_PROXY。disabled 仅在设置与运行中的监听器匹配时出现；端口或令牌不匹配时，即使路由关闭也显示 broken。
+在 连接 → Claude 中开启 CLI 开关，或运行 `orl claude config set --first-party on`；关闭时用 `off`。若本地代理不可用、CA 无法准备、设置无法读取，或代理键由其他程序所有，开启请求会被拒绝。关闭操作始终可以保存。仅开启 Desktop 第一方模式时，要让终端完全原生直连，请在 shell 中设置 `NO_PROXY='*'`。上述账户风险也适用于 CLI。
+关闭 Claude 路由会保留由 OpenRelay 管理的代理设置。监听器仍运行时，所有 Messages 请求原样转发；停止后，运行 OpenRelay 或关闭 Desktop/CLI 第一方模式之前，直接运行 `claude` 无法连接。`orl claude` 原生启动仅在有自有设置且未继承外部 HTTPS 代理时设置 `NO_PROXY=*`。否则保留外部代理，并警告设置中的拦截仍生效；请关闭第一方模式或取消该设置。
+界面区分设置不可读（unknown）、带 OpenRelay 令牌的代理 URL 却搭配外部 CA（foreign：手动修正 HTTPS_PROXY / NODE_EXTRA_CA_CERTS），以及 Claude 路由已关闭但仍有监听器原样转发请求（disabled：重启前关闭第一方模式以清除设置）。没有监听器时为 stopped；使用受管理的 CA 但端口或令牌不匹配时为 broken。第一方模式开启但无法提供拦截服务时，stopped 和 broken 都显示 routingOff：Claude 路由或拦截功能已关闭，或此设备是另一台 OpenRelay 中枢的客户端；请在此设备上重新启用拦截服务，或关闭第一方模式以移除设置。仅在拦截服务可用时，stopped 才提示启动 OpenRelay，broken 才提示运行 `orl ensure` 或重启。CLI 已开启但没有代理设置为未应用；仅开启一个客户端且代理正常时提示共享转发；两个客户端都关闭但代理设置仍在时提示残留。
+unknown 表示 OpenRelay 无法确定设置是否仍指向自己的代理。外部 CA 搭配 127.0.0.1 上无令牌的代理时显示 local：归属无法确认；如果不再使用，请从 ~/.claude/settings.json 中删除 HTTPS_PROXY。disabled 仅在设置与运行中的监听器匹配时出现；端口或令牌不匹配时，即使路由关闭也显示 broken。
 
-### Picker 模式：在第一方 Code 标签页中显示 opencodex 模型
+### Picker 模式：在第一方 Code 标签页中显示 OpenRelay 模型
 
 Picker 模式是第一方模式的一部分。在 macOS 上选择第一方时默认开启；设置
 `claudeCode.intercept.picker: false` 后会保持关闭。它会修改第一方 Desktop 的 Code 标签页模型选择器，
-按名称列出可用的 opencodex 模型。首次开启时，macOS 可能会要求你在登录钥匙串中信任本地证书颁发机构。
+按名称列出可用的 OpenRelay 模型。首次开启时，macOS 可能会要求你在登录钥匙串中信任本地证书颁发机构。
 该颁发机构限制为 `claude.ai` 及其子域名。可导出的签名身份由 OS 凭据存储保护，普通重启会复用同一证书和密钥。
-OpenCodex 配置目录中不保存明文 Picker 签名密钥。受限 CA 的完整验证和 OS 信任检查仍然适用。
+OpenRelay 配置目录中不保存明文 Picker 签名密钥。受限 CA 的完整验证和 OS 信任检查仍然适用。
 已批准的身份不变且凭据存储可用时，重启不会添加或删除证书信任设置。启动恢复绝不会安装信任：
-若信任缺失、被撤销或无法确认，Picker 会保持待处理状态。请明确运行 `ocx claude desktop picker on`
-或 `ocx claude desktop picker trust` 来授予信任。
+若信任缺失、被撤销或无法确认，Picker 会保持待处理状态。请明确运行 `orl claude desktop picker on`
+或 `orl claude desktop picker trust` 来授予信任。
 
 从旧身份进行一次性迁移时，清除原有信任可能需要同意。清理未完成时，Picker 不可用，已应用的配置档案
 会使用不解密的中继。macOS 还可能单独要求解锁钥匙串或批准应用访问凭据，重启或升级时也可能出现这些提示。
 Windows 和 Linux 仍不支持 Picker，不会启动 Picker CA、凭据存储或代理工作。主要 Claude 拦截功能仍可用，
 其本地 CA 文件受到所有者、符号链接、文件权限及 Windows ACL 检查保护。
 
-Picker 模式开启期间，Claude Desktop 通过 OpenCodex 访问网络。如果 OpenCodex 停止，Desktop 会处于离线状态，
-直到你完全重启 Desktop 或关闭 Picker 模式。使用 `ocx claude desktop picker status` 查看状态，使用
-`ocx claude desktop picker trust` 重复信任步骤，或使用 `ocx claude desktop picker off` 关闭。
+Picker 模式开启期间，Claude Desktop 通过 OpenRelay 访问网络。如果 OpenRelay 停止，Desktop 会处于离线状态，
+直到你完全重启 Desktop 或关闭 Picker 模式。使用 `orl claude desktop picker status` 查看状态，使用
+`orl claude desktop picker trust` 重复信任步骤，或使用 `orl claude desktop picker off` 关闭。
 控制台 **连接 → Claude Desktop** 中也有同样的开关。选择 Picker 配置档案后，请完全退出并重新打开 Claude Desktop。
 
 Picker 模式属于第一方模式，因此[第一方账户风险](#第一方主动选择)同样适用。
 
 ## 连接远程 hub 的 Claude Desktop
 
-已连接的机器运行 `ocx claude desktop apply` 或 `ocx claude desktop` 时，会读取 hub 的
+已连接的机器运行 `orl claude desktop apply` 或 `orl claude desktop` 时，会读取 hub 的
 Desktop 快照，将 hub origin 和 hub 发放的完整模型 ID 原样写入本机 Desktop 配置，不再本地
 生成别名。static/hybrid 模式也复制模型列表；discovery-only 模式使用 hub origin，不嵌入列表。
 
 Desktop 配置、模型家族分组及默认值由 hub 管理。在 hub 上修改后，请在客户端重新应用，
 并在 Desktop 中重新选择模型。以前只在客户端生成的别名也需要重新应用、重新选择，不会自动
 迁移。`show`、本地编辑和 import/export 仍只操作本地配置。连接期间不支持
-`ocx claude desktop import <path> --apply`，会在保存前拒绝；不带 `--apply` 的 import 仍是本地操作。
+`orl claude desktop import <path> --apply`，会在保存前拒绝；不带 `--apply` 的 import 仍是本地操作。
 
 读取使用现有连接的数据访问凭证，不需要管理员令牌，也不上传配置。旧版 hub 不支持快照、
 响应无效或 Desktop 列表为空时，应用会失败，不会改用本地目录或回环地址。
@@ -178,17 +178,17 @@ Desktop 配置、模型家族分组及默认值由 hub 管理。在 hub 上修�
 只有代理接入凭证不会启用原生 Anthropic 透传，但经过转换的 Anthropic 路由仍可使用提示缓存。
 重放保真和缓存命中率对比仍是独立工作。
 
-### 在 Desktop Code 标签页使用 opencodex 模型（第一方绑定）
+### 在 Desktop Code 标签页使用 OpenRelay 模型（第一方绑定）
 
 在第一方模式下，Code 标签页的模型选择器属于 claude.ai：其中的条目（Opus 5.5、Sonnet 5、
-Haiku 4.5 以及 **More models** 下的旧模型）来自你的账户，任何本地设置都无法添加 opencodex
-条目。OpenCodex 在每个请求中收到的是选择器里的 Anthropic 模型 ID，因此改为把选择器条目绑定到
-opencodex 路由：
+Haiku 4.5 以及 **More models** 下的旧模型）来自你的账户，任何本地设置都无法添加 OpenRelay
+条目。OpenRelay 在每个请求中收到的是选择器里的 Anthropic 模型 ID，因此改为把选择器条目绑定到
+OpenRelay 路由：
 
 ```bash
-ocx claude desktop bind claude-sonnet-4-6 xai/grok-4.7
-ocx claude desktop bind claude-opus-4-6 native/gpt-6.1-sol
-ocx claude desktop unbind claude-opus-4-6
+orl claude desktop bind claude-sonnet-4-6 xai/grok-4.7
+orl claude desktop bind claude-opus-4-6 native/gpt-6.1-sol
+orl claude desktop unbind claude-opus-4-6
 ```
 
 也可以在仪表板中通过 **连接 → Claude Desktop → Code 标签页模型绑定** 完成同样操作。绑定之后，在
@@ -201,9 +201,9 @@ Claude Code 的系统提示仍会把模型介绍为那个 Claude 模型，所以
 - 带日期的选择器 ID（`claude-haiku-4-5-20251001`）会匹配无日期的绑定（`claude-haiku-4-5`），
   `[1m]` 和快速模式选择也遵循同一绑定。
 - 绑定保存在 `claudeCode.intercept.modelMap` 中，仅适用于经由本地拦截代理的 Claude Code 流量：
-  第一方模式下的 Desktop Code 标签页和独立的 `claude` CLI。`ocx claude` 会话和公开的
+  第一方模式下的 Desktop Code 标签页和独立的 `claude` CLI。`orl claude` 会话和公开的
   `/v1/messages` 端点会忽略绑定；全局 `claudeCode.modelMap` 仍然处处生效，同一 ID 时绑定优先。
-- `ocx claude desktop status --json` 在 `firstParty.modelBindings` 中报告当前生效的绑定。
+- `orl claude desktop status --json` 在 `firstParty.modelBindings` 中报告当前生效的绑定。
 
 ### 密钥轮换、恢复与断开连接
 
@@ -214,7 +214,7 @@ Claude Code 的系统提示仍会把模型介绍为那个 Claude 模型，所以
 结果不确定或恢复未完成时，不会报告轮换成功。
 
 首次连接应用会保存原先的管理设置和选择，用于恢复；后续 apply 和轮换不会覆盖这份初始记录。
-`ocx disconnect` 恢复连接管理的设置，同时保留用户新增字段和其他配置。只有管理配置仍被选中
+`orl disconnect` 恢复连接管理的设置，同时保留用户新增字段和其他配置。只有管理配置仍被选中
 时才恢复之前的选择；用户后来选择的其他有效配置保持不变。新建配置若已包含用户新增内容，
 会保留为可读取的标准模式，而不是删除这些内容。`--keep-catalog` 保留的是目录，不是 Desktop
 连接密钥。
@@ -246,9 +246,9 @@ UI。真实 Anthropic 模型保留其原始 id。合成的 2026 日期是内部�
 中输入任意路由 id（Claude Code 会原样传递字符串）。
 
 Claude Code 2.1.129+ 通过 `GET /v1/models?limit=1000` 发现网关模型，并在原生 `/model`
-选择器中列出。没有 `description` 的行显示为“From gateway”；opencodex 会为 Claude Code CLI 的每一行发送
+选择器中列出。没有 `description` 的行显示为“From gateway”；OpenRelay 会为 Claude Code CLI 的每一行发送
 `description`（`Routed by OpenCodex to <provider>/<model>`；原生行为 `Routed by OpenCodex to native <model>`，Fast 行末尾加 ` · Fast`，1M 行沿用基础描述），Claude Code 2.1.257+ 会改为显示它。
-Claude Code 2.1.278 接受包含 `claude` 或 `anthropic` 的 ID。以 `claude-` 开头的未知 ID 在不关闭 compact 时按 200k 计算，因此 opencodex 会将已路由模型公开为包含 `claude`、但不以 `claude-` 开头的稳定且可逆别名：
+Claude Code 2.1.278 接受包含 `claude` 或 `anthropic` 的 ID。以 `claude-` 开头的未知 ID 在不关闭 compact 时按 200k 计算，因此 OpenRelay 会将已路由模型公开为包含 `claude`、但不以 `claude-` 开头的稳定且可逆别名：
 
 | 界面 | 格式 | 示例 |
 | --- | --- | --- |
@@ -265,8 +265,8 @@ user-agent 会获得易读的 CLI 形式，其他客户端会获得 Desktop 代�
 Claude Desktop 1.46388.4 时，无论通过底部选择器还是 `/model` 更改模型，对话都会继续使用
 最初的模型。该报告并未确定是哪个客户端组件或路由组件导致了这一行为。
 
-也可以尝试在 OpenCodex 的 Claude Desktop 配置档案中选择所需的默认模型，重新应用配置档案，
-然后开始新对话。这是一项排查步骤，不保证能解决问题。OpenCodex 无法读取选择器状态，
+也可以尝试在 OpenRelay 的 Claude Desktop 配置档案中选择所需的默认模型，重新应用配置档案，
+然后开始新对话。这是一项排查步骤，不保证能解决问题。OpenRelay 无法读取选择器状态，
 而是根据每个请求携带的模型 ID 进行路由。请在 **Logs → requestedModel** 中确认客户端实际发送的内容。
 
 **别名语法规则：**provider 不得包含 `/` 或 `--`，也不得等于 `native`。
@@ -322,30 +322,30 @@ v1 别名按字面解码（历史上 model ID 中包含的两字符序列 `~s` /
 
 ### 上下文计算方式（默认 1M，200k 需选择启用）
 
-`claudeCode.contextAccounting` 决定 opencodex 默认选用的值。未设置（`1m`，默认）时，长上下文模型在启动环境槽位、
+`claudeCode.contextAccounting` 决定 OpenRelay 默认选用的值。未设置（`1m`，默认）时，长上下文模型在启动环境槽位、
 Desktop 选择器、Desktop 3P（`prefer1m`）和生成的子代理中按 1M 提供。设为 `200k` 即可退出：不再自动添加 `[1m]` 标记，
 不注入 `CLAUDE_CODE_AUTO_COMPACT_WINDOW`，Desktop 3P 保留 `supports1m` 但去掉 `prefer1m`。你自己标记 `[1m]` 的选择仍可使用
 （生成的子代理和强制子代理仍会去掉模型窗口无法承载的标记），发现列表中真正 1M 模型的 `· 1M` 条目也仍然存在。`200k` 优先于
-自动上下文：你自行导出的压缩值不会重新启用自动标记，但 opencodex 不会改动你导出的值。
+自动上下文：你自行导出的压缩值不会重新启用自动标记，但 OpenRelay 不会改动你导出的值。
 
 ```bash
-ocx claude config set --context-accounting 200k
+orl claude config set --context-accounting 200k
 ```
 
 ### 有效模型环境变量
 
-`effectiveModelEnv` 会计算由 `ocx claude` / 系统环境 / shell 文件注入的六个槽位：
+`effectiveModelEnv` 会计算由 `orl claude` / 系统环境 / shell 文件注入的六个槽位：
 `ANTHROPIC_MODEL`、四个 `ANTHROPIC_DEFAULT_{OPUS,SONNET,HAIKU,FABLE}_MODEL`，以及旧版
 `ANTHROPIC_SMALL_FAST_MODEL`。有效 Haiku 值为 `tierModels.haiku ?? smallFastModel`，并会
 提供给两个 Haiku 变量。
 
-以订阅模式启动 `ocx claude` 时，Claude Code 自身的登录会把 `claude-sonnet-5` 这类裸 Claude ID 直接发送给 Anthropic，因此无论其他提供方为同一 ID 列出什么，这些 ID 的上下文窗口都取自提供方注册表。未设置的 Opus、Sonnet 或 Fable 槽位会填入 Claude Code 为该别名解析出的原生 ID，并带上 `[1m]` 标记，因为在网关之后，Claude Code 会把不带标记的 ID 按 200k 计算。上限低于 1M 的 `anthropic` 行或 `claudeCode.modelMap` 条目会让对应 ID 保持无标记，Haiku 永远不会被填入或标记。以代理认证启动或关闭 `nativePassthrough` 时，由路由器决定，只有路由行的窗口生效。系统环境和 shell 文件会让未设置的槽位保持为空，因为它们的值也会传到经由 hub 的启动。
+以订阅模式启动 `orl claude` 时，Claude Code 自身的登录会把 `claude-sonnet-5` 这类裸 Claude ID 直接发送给 Anthropic，因此无论其他提供方为同一 ID 列出什么，这些 ID 的上下文窗口都取自提供方注册表。未设置的 Opus、Sonnet 或 Fable 槽位会填入 Claude Code 为该别名解析出的原生 ID，并带上 `[1m]` 标记，因为在网关之后，Claude Code 会把不带标记的 ID 按 200k 计算。上限低于 1M 的 `anthropic` 行或 `claudeCode.modelMap` 条目会让对应 ID 保持无标记，Haiku 永远不会被填入或标记。以代理认证启动或关闭 `nativePassthrough` 时，由路由器决定，只有路由行的窗口生效。系统环境和 shell 文件会让未设置的槽位保持为空，因为它们的值也会传到经由 hub 的启动。
 
-当 `tierModels.haiku` 和 `smallFastModel` 均未设置时，OpenCodex 会让两个辅助模型变量保持未设置；随后 Claude Code 会选择其原生辅助模型（目前为 Sonnet），并可能产生原生提供方费用。
+当 `tierModels.haiku` 和 `smallFastModel` 均未设置时，OpenRelay 会让两个辅助模型变量保持未设置；随后 Claude Code 会选择其原生辅助模型（目前为 Sonnet），并可能产生原生提供方费用。
 
 ## 名册代理（injectAgents）
 
-代理启动/ensure、`ocx claude` 和相关的控制面板保存会把你的精选子代理名册（Subagents 标签页，最多 5 个模型）
+代理启动/ensure、`orl claude` 和相关的控制面板保存会把你的精选子代理名册（Subagents 标签页，最多 5 个模型）
 和 `ocx-self` 同步到 `~/.claude/agents/ocx-*.md`。
 
 - **`ocx-self`** 固定你在 `/model` 选择器中的默认模型（回退到 `claudeCode.model`）；两者均
@@ -365,7 +365,7 @@ ocx claude config set --context-accounting 200k
 
 Claude Code 内置的 `claude-api` 技能会注入约 840KB（约 136k token）的 Anthropic 文档，
 并在提及 Claude 模型时自动触发。已路由模型并未针对该文档包进行训练，因此默认情况下，
-opencodex 会在**已路由**请求中将该技能内容替换为一个短占位说明。原生 Anthropic 透传不受影响。
+OpenRelay 会在**已路由**请求中将该技能内容替换为一个短占位说明。原生 Anthropic 透传不受影响。
 
 **会处理两种载体：**
 
@@ -399,7 +399,7 @@ opencodex 会在**已路由**请求中将该技能内容替换为一个短占位
 
 ## Sidecar 矩阵：Web Search 与图像理解
 
-不同路由模型拥有的托管工具和图像能力并不相同。opencodex 会在主模型回答前补齐这些能力：
+不同路由模型拥有的托管工具和图像能力并不相同。OpenRelay 会在主模型回答前补齐这些能力：
 
 - **Web-search sidecar** 执行真实的托管搜索，再把答案和来源作为工具结果交给路由模型。
 - **Vision sidecar** 在调用 `noVisionModels` 中的模型前描述附件图像，并用文字描述替换图像。
@@ -476,7 +476,7 @@ Search 和图像描述沿用仓库已有的 Claude Code OAuth fingerprint 先例
 | `max_tokens` | `max_output_tokens` |
 | `stop_sequences` | `stop` |
 
-Claude Code 自动模式总是发送 `stop_sequences`。对于路由目标提供方 `noStopModels` 列表中的模型，OpenCodex 在 Chat Completions 和 Responses 两种线路上都会省略 `stop`，因此 grok-4.7、grok-4.6 等 xAI 推理模型不会返回 `400 invalid-argument` 并被标记为暂时不可用。参见 [`noStopModels`](/zh-cn/reference/configuration/providers/)。
+Claude Code 自动模式总是发送 `stop_sequences`。对于路由目标提供方 `noStopModels` 列表中的模型，OpenRelay 在 Chat Completions 和 Responses 两种线路上都会省略 `stop`，因此 grok-4.7、grok-4.6 等 xAI 推理模型不会返回 `400 invalid-argument` 并被标记为暂时不可用。参见 [`noStopModels`](/zh-cn/reference/configuration/providers/)。
 
 在预期的 Anthropic 适配器上，保留未隐藏的签名块（包括空 thinking）和不透明的 redacted 块。`hideThinkingSummary` 策略不变：不会向 Claude 客户端公开本地隐藏的签名文本，尚未证明经过此隐藏边界的无损重放。旧版组合信封在流式文本发出后无法恢复原始块顺序。`claudeCode.compatibility: "enforce"` 仍拒绝 thinking 重放。这不证明真实 Anthropic 接受请求或缓存命中改善；[#3719](https://github.com/lidge-jun/opencodex/issues/3719) 仍未关闭。
 
@@ -526,7 +526,7 @@ role；`tool_result` 缺少 `tool_use_id`；`tool_use` 缺少 id/name；指定�
 
 ## 调试捕获
 
-`ocx debug claude on|off|status|reset`、`OCX_CLAUDE_DEBUG=1` 或
+`orl debug claude on|off|status|reset`、`OCX_CLAUDE_DEBUG=1` 或
 `PUT /api/debug {"claude": true}` 控制入站捕获。`GET /api/claude/inbound-debug` 返回
 `{enabled, entries}`（最新条目在前，环形缓冲区大小为 20）。
 
@@ -542,7 +542,7 @@ HMAC 等值标签。**不会存储提示文本、原始对象或跨运行稳定�
 页面从上到下依次显示：
 
 - **Claude Code CLI 第一方** 开关。
-- **开始使用**：`ocx claude` 和手动环境变量块。
+- **开始使用**：`orl claude` 和手动环境变量块。
 - **常规**：Fast Mode、自动上下文、压缩阈值和子代理自动注册设置。
 - **后台辅助模型**：选择用于聊天摘要、主题识别等后台工作的模型。
 - **模型拦截**：将特定模型请求重定向到其他模型的 `modelMap` 编辑器。
@@ -560,29 +560,29 @@ context/blocklist/compact-window 值。
 **Claude Code 显示“Did 0 searches”**——当前版本会把已完成的 Responses
 `web_search_call` 转换成配对的 Anthropic `server_tool_use` 和 `web_search_tool_result` block，
 并写入 `usage.server_tool_use.web_search_requests`。如果旧版本已经完成搜索却仍计为 0，请更新
-opencodex。
+OpenRelay。
 
 **Sidecar 未启用**——使用 `backend: "openai"` 时，请确认已登录 ChatGPT，并存在已启用的
 `authMode: "forward"` provider。使用 `backend: "anthropic"` 时，请确认已存储的 Anthropic
 OAuth 活动账户未标记 `needsReauth`。显式选择 Anthropic 却没有可用凭据时会按设计关闭失败。
 
 **“claude.ai connectors are disabled”**——你的 shell 中设置了 `ANTHROPIC_API_KEY` 或
-`ANTHROPIC_AUTH_TOKEN`。`ocx claude` 特意**不会**设置 `ANTHROPIC_API_KEY`；如果你已将其
-导出，请取消设置。`ocx claude` 会注入 `ANTHROPIC_BASE_URL`、发现相关变量、自动上下文和已配置的模型槽位，但绝不会注入 `ANTHROPIC_API_KEY`。
+`ANTHROPIC_AUTH_TOKEN`。`orl claude` 特意**不会**设置 `ANTHROPIC_API_KEY`；如果你已将其
+导出，请取消设置。`orl claude` 会注入 `ANTHROPIC_BASE_URL`、发现相关变量、自动上下文和已配置的模型槽位，但绝不会注入 `ANTHROPIC_API_KEY`。
 
 **模型未显示在 /model 选择器中**——确认已设置
-`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`（使用 `ocx claude` 时会自动设置）。运行
-`ocx claude` 以刷新 `~/.claude/cache/gateway-models.json` 中的网关模型缓存。检查
+`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`（使用 `orl claude` 时会自动设置）。运行
+`orl claude` 以刷新 `~/.claude/cache/gateway-models.json` 中的网关模型缓存。检查
 `claudeCode.enabled` 不为 `false`。
 
 **端口更改后环境变量过时**——如果代理端口发生变化，旧 shell 中的
-`ANTHROPIC_BASE_URL` 可能已经过时。请打开一个新终端，或重新运行 `ocx claude`。
+`ANTHROPIC_BASE_URL` 可能已经过时。请打开一个新终端，或重新运行 `orl claude`。
 
 **大模型仍受 200k 上下文上限限制**——在选择器中选择 `[1m]` 变体，或启用自动上下文
 （默认开启）。如果选择器中没有 `[1m]` 条目，该模型的权威上下文窗口可能低于固定的 829,800 token 下限。
 
 **技能加载导致 token 数量过高**——内置的 `claude-api` 技能（约 136k token）会在提及
-Claude 模型时自动加载。对于原生透传，这是正常现象；对于已路由模型，opencodex 默认会将其
+Claude 模型时自动加载。对于原生透传，这是正常现象；对于已路由模型，OpenRelay 默认会将其
 替换为占位说明（`blockedSkills: ["claude-api"]`）。
 
 **子代理派发到错误模型**——名册代理（`ocx-*`）使用 `<!-- ocx-route: ... -->` 指令，
@@ -594,13 +594,13 @@ Claude 模型时自动加载。对于原生透传，这是正常现象；对于�
 
 ### 第一方模型选择器的上下文标记
 
-对于权威上下文窗口至少为一百万 token，或不低于默认压缩阈值 829,800（例如选择了 872k 窗口的原生 GPT-6 模型）的路由模型，Desktop Code 标签页的模型选择器会添加 `[1m]`，使 Claude 按 1M 窗口计量，而不是使用自定义模型较小的默认窗口。Anthropic 路由上的 Claude 模型仍必须真正达到 1M。标签、配置中的顺序和提供方路由保持不变。窗口未知或更短的模型不添加标记。选择器无法保证 Desktop 或远程运行器收到配套的压缩环境设置，因此超出真实窗口的长窗口模型会收到 `prompt is too long` 错误，Claude Code 会据此压缩。Desktop 3P 的 `supports1m`/`prefer1m` 和生成的子代理遵循同一规则。`ocx claude` 的自动上下文与压缩配套设置保持不变。现有对话会保留已保存的选择器，直到你在刷新后的模型选择器中重新选择该模型。
+对于权威上下文窗口至少为一百万 token，或不低于默认压缩阈值 829,800（例如选择了 872k 窗口的原生 GPT-6 模型）的路由模型，Desktop Code 标签页的模型选择器会添加 `[1m]`，使 Claude 按 1M 窗口计量，而不是使用自定义模型较小的默认窗口。Anthropic 路由上的 Claude 模型仍必须真正达到 1M。标签、配置中的顺序和提供方路由保持不变。窗口未知或更短的模型不添加标记。选择器无法保证 Desktop 或远程运行器收到配套的压缩环境设置，因此超出真实窗口的长窗口模型会收到 `prompt is too long` 错误，Claude Code 会据此压缩。Desktop 3P 的 `supports1m`/`prefer1m` 和生成的子代理遵循同一规则。`orl claude` 的自动上下文与压缩配套设置保持不变。现有对话会保留已保存的选择器，直到你在刷新后的模型选择器中重新选择该模型。
 
 ### Forced Claude Code subagent model
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` when the authoritative window reaches the fixed 829,800-token floor, and only for a genuine 1M window on Anthropic Claude models and bare `claude-*` selectors; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

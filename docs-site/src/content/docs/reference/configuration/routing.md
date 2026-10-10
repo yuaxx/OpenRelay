@@ -48,7 +48,7 @@ can retry it; only a successful sink is marked `delivered`.
 
 ## Model resolution order
 
-opencodex resolves the requested model in this order:
+OpenRelay resolves the requested model in this order:
 
 1. A configured `policy/<id>` or routing-profile alias, executing the policy evaluator and routing
    the selected candidate. An unresolved `policy/<id>` falls through to the later rules.
@@ -106,7 +106,7 @@ Redirected routes record `blocked-model-redirect`; omitting the setting leaves r
 request for `side/gpt-5.6-sol` uses only that account, even when the canonical `openai` provider is
 in Direct mode, and sends the bare `gpt-5.6-sol` model id upstream. Only bare native OpenAI-family
 ids are valid after the selector. Account-scoped ids observed in Codex's current model catalog may
-also be preserved exactly when they are not yet part of opencodex's static set; the observation must
+also be preserved exactly when they are not yet part of OpenRelay's static set; the observation must
 carry the field shape of a real catalog row, stays qualified to its matching account selector, and
 is never promoted into the global bare model list. That shape check filters malformed and minimal
 rows — it is not a trust control, because the models cache is a user-owned file and a complete
@@ -125,7 +125,7 @@ stored account is missing are not advertised. Selector validation, collision rul
 The Codex Auth page exposes this picker behavior as an opt-in. Disabling it hides generated
 selector-qualified picker rows and restores the ordinary GPT rows, but it does not remove the
 mappings or change exact `<selector>/<model>` routing. Re-enabling therefore restores the same public
-labels. Account and setting mutations are persisted before a bounded catalog refresh; an `ocx sync`
+labels. Account and setting mutations are persisted before a bounded catalog refresh; an `orl sync`
 warning means only that the picker catalog still needs convergence, not that the routing change was
 lost.
 
@@ -152,7 +152,7 @@ namespace, and cannot use reserved bare native families such as `gpt-*`, `o1-*`,
 | `nativeAlias?` | `boolean` | `false` | Let a currently supported bare native id take precedence only for that unqualified id. Bare `gpt-5.6-*` ids use Codex Pool/Direct credentials. Account-qualified routes remain distinct. Provider-qualified routes such as `openai-apikey/gpt-5.6-*` use their configured API-key route and never fall through to the native alias. |
 | `displayName?` | `string` | — | Display-only catalog label, required and non-empty for a native alias. |
 | `decisionProvider?` | `string` | `"jev"` | `strategy: "jev"` only. `"jev"` (the same as omitting it, and stored as omission) is the TypeSafe decision service, valid without a provider row; any other value must name a configured provider with `adapter: "jev-decision"` and a full HTTPS decision `baseUrl` (any path) or a local HTTP `/systemone` endpoint. Userinfo, query strings, and fragments are refused. |
-| `decisionModel?` | `string` | unset | `strategy: "jev"` only, mutually exclusive with `decisionProvider`. An ordinary opencodex route (for example `ollama/qwen3:4b`) asked to pick one offered option as JSON. It runs with the selected provider's stored credentials, never the caller's, and cannot resolve to this combo, any JEV combo, or a `jev-decision` row. |
+| `decisionModel?` | `string` | unset | `strategy: "jev"` only, mutually exclusive with `decisionProvider`. An ordinary OpenRelay route (for example `ollama/qwen3:4b`) asked to pick one offered option as JSON. It runs with the selected provider's stored credentials, never the caller's, and cannot resolve to this combo, any JEV combo, or a `jev-decision` row. |
 | `decisionTimeoutMs?` | `number` | `4000` | `strategy: "jev"` only. Decision deadline before failing open, 1000–120000 ms. |
 
 ```json
@@ -225,7 +225,7 @@ sent — none when it is unset — and a key referencing the TypeSafe environmen
 provider's keychain entry is refused, so TypeSafe credentials never reach it. Options are sent as
 description strings, which Ollama requires. `tev1` was trained on 2–24 options, so keep target ×
 effort pairs at 24 or fewer (fewer than 2 or more than 26 fail open without a request);
-its effective context is about 2k tokens and OpenCodex clips the task text to 500 characters. Keep the
+its effective context is about 2k tokens and OpenRelay clips the task text to 500 characters. Keep the
 model resident (`OLLAMA_KEEP_ALIVE=-1`) and raise `decisionTimeoutMs` for slow services; see
 [System One-compatible server](/guides/combos/#system-one-compatible-server).
 In the dashboard, choose **System One-compatible server** in the JEV Combo's **Decision method**
@@ -294,8 +294,8 @@ candidate evidence is provided through the API (`POST /api/routing-profiles/dry-
 }
 ```
 
-CLI: `ocx route policy list [--json]`, `ocx route policy show <id> [--json]`, and
-`ocx route policy dry-run <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]`.
+CLI: `orl route policy list [--json]`, `orl route policy show <id> [--json]`, and
+`orl route policy dry-run <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]`.
 Dry-run evaluates candidates without sending any upstream request.
 
 Quota evidence (`optimize.quota`, `require.minQuotaHeadroom`, `unknownEvidence.quota`) comes from
@@ -332,7 +332,7 @@ candidate ineligible. Per-request route-decision traces are recorded when a poli
 
 ### Catalog eligibility
 
-A combo remains directly routable even when it cannot be listed. `ocx sync`, `/v1/models`, and the
+A combo remains directly routable even when it cannot be listed. `orl sync`, `/v1/models`, and the
 Codex picker list it only when every target exposes capabilities that can be intersected:
 
 - a positive `contextWindow`, from live metadata, registry hints, provider
@@ -367,8 +367,8 @@ Returned history and route-decision payloads expose only masked request metadata
 (for example opaque `apiKeyId` labels). They do not include credentials, raw
 prompt bodies, or provider secrets.
 
-CLI: `ocx logs explain <request-id>`, `ocx logs rebuild-index`,
-`ocx logs index-status`, `ocx route policy list | show | dry-run | evaluate`.
+CLI: `orl logs explain <request-id>`, `orl logs rebuild-index`,
+`orl logs index-status`, `orl route policy list | show | dry-run | evaluate`.
 
 ## Migration
 

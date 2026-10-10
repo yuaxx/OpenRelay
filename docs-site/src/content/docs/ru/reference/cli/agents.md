@@ -8,7 +8,7 @@ description: Multi-agent, combo, observability, access, integration, system и c
 
 ## Политика агентов
 
-### `ocx agent <status|injection|effort|subagents|fallback|sidecar> ...`
+### `orl agent <status|injection|effort|subagents|fallback|sidecar> ...`
 
 Управляйте headless-ростером multi-agent, effort cap'ами, prompt injection, fallback'ом и
 настройками sidecar'ов. Для просмотра текущей политики используйте `status`. Как соотносятся
@@ -16,19 +16,19 @@ surface mode, delegation, effort и fallback, описано в
 [Поверхности подагентов](/guides/sub-agent-surface/).
 
 ```bash
-ocx agent subagents set ark/model-a,openai/gpt-5.5
-ocx agent sidecar web --enabled off
+orl agent subagents set ark/model-a,openai/gpt-5.5
+orl agent sidecar web --enabled off
 ```
 
-`--enabled off` — тот же переключатель, что и строка **Выкл. (Off)** в дашборде: OpenCodex
+`--enabled off` — тот же переключатель, что и строка **Выкл. (Off)** в дашборде: OpenRelay
 перестаёт запускать сайдкар, а интеграция Codex записывает `web_search = "disabled"` в
 `~/.codex/config.toml`, что и позволяет использовать MCP-сервер как единственный путь поиска.
 `--enabled on` снова удаляет эту строку. Когда сохранение действительно переключает
 состояние, команда сообщает о записи на стороне Codex (`codexWebSearch` в `--json`,
-иначе завершающая строка `Codex config:`) и предлагает `ocx sync`, если запись не
+иначе завершающая строка `Codex config:`) и предлагает `orl sync`, если запись не
 удалась. Флаг работает и для `vision`.
 
-### `ocx v2 <status|on|off|mode <v1|default|v2>|threads <n>>`
+### `orl v2 <status|on|off|mode <v1|default|v2>|threads <n>>`
 
 Управляйте feature flag'ом Codex `multi_agent_v2` и трёхсостоянием multi-agent surface mode.
 
@@ -43,14 +43,14 @@ ocx agent sidecar web --enabled off
 | `threads <n>` | Задать активный v1/v2 thread limit как целое число не меньше 1. |
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
-ocx v2 mode default
-ocx v2 on
-ocx v2 threads 16
+orl v2 status
+orl v2 mode v1
+orl v2 mode default
+orl v2 on
+orl v2 threads 16
 ```
 
-Подкоманда `mode` записывает `multiAgentMode` в конфиг opencodex и заново синхронизирует каталог
+Подкоманда `mode` записывает `multiAgentMode` в конфиг OpenRelay и заново синхронизирует каталог
 Codex. При переходах mode и feature flag текущий числовой thread limit переносится между
 допустимыми ключами Codex для v1/v2; если переход не удался, исходный `config.toml`
 восстанавливается. Изменения применяются к новым сессиям Codex, а уже запущенные сохраняют свою
@@ -58,75 +58,75 @@ Codex. При переходах mode и feature flag текущий число�
 
 ## Combo routing
 
-### `ocx combo <list|show|set|remove> ...` · `ocx route combo ...`
+### `orl combo <list|show|set|remove> ...` · `orl route combo ...`
 
-Управляйте virtual-моделями combo с failover и round-robin. `ocx route combo` — это иерархический
+Управляйте virtual-моделями combo с failover и round-robin. `orl route combo` — это иерархический
 alias; на данный момент combo — единственный поддерживаемый routing-resource. Цели используют
 форму `provider/model[:weight],provider/model[:weight]`.
 
 ```bash
-ocx combo list
-ocx route combo set reliable --targets ark/model-a:2,openai/gpt-5.5
+orl combo list
+orl route combo set reliable --targets ark/model-a:2,openai/gpt-5.5
 ```
 
 О поведении маршрутизации и рекомендациях по конфигурации см. [Combos](/guides/combos/).
 
 ## Observability и debug
 
-### `ocx observe <logs|usage|storage|memory|debug|claude-inbound|injection> ...`
+### `orl observe <logs|usage|storage|memory|debug|claude-inbound|injection> ...`
 
 Проверяйте proxy-request'ы, usage, storage, memory и debug-data. Прямые alias'ы:
 
 | Алиас | Эквивалентный ресурс |
 | --- | --- |
-| `ocx logs [filters] [--follow] [--json|--jsonl]` | `ocx observe logs` |
-| `ocx usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--provider <name>] [--model <id>] [--json]` | `ocx observe usage` |
-| `ocx storage [--json]` | `ocx observe storage` |
-| `ocx memory [--json]` | `ocx observe memory` |
+| `orl logs [filters] [--follow] [--json|--jsonl]` | `orl observe logs` |
+| `orl usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--provider <name>] [--model <id>] [--json]` | `orl observe usage` |
+| `orl storage [--json]` | `orl observe storage` |
+| `orl memory [--json]` | `orl observe memory` |
 
 ```bash
-ocx observe usage --range 30d --json
+orl observe usage --range 30d --json
 ```
 
 Если часть записей нельзя учесть, человекочитаемый вывод показывает предупреждение, даже если нет читаемых строк. Отображаемые итоги учитывают только читаемые записи. Если фильтр не находит читаемых совпадений, вместо строк итогов выводятся предупреждение и подсказки; пропущенные записи могут содержать совпадения. `--json` сохраняет диагностику `usageIncomplete` и её причину из ответа.
 
-### `ocx debug <provider|usage|injection|claude> <on|off|status|reset|logs [-f]>`
+### `orl debug <provider|usage|injection|claude> <on|off|status|reset|logs [-f]>`
 
 Прочитать или изменить runtime debug-override'ы через management API работающего прокси.
 
 ```bash
-ocx debug provider on|off|status|reset
-ocx debug provider logs [-f|--follow]
-ocx debug usage on|off|status|reset
-ocx debug usage logs [-f|--follow]
+orl debug provider on|off|status|reset
+orl debug provider logs [-f|--follow]
+orl debug usage on|off|status|reset
+orl debug usage logs [-f|--follow]
 ```
 
-Без указания scope `ocx debug` печатает usage и, если прокси остановлен, environment-default'ы
+Без указания scope `orl debug` печатает usage и, если прокси остановлен, environment-default'ы
 для следующего запуска. Provider debug по умолчанию берётся из `OCX_DEBUG=1`
 (legacy `OCX_DEBUG_FRAMES=1` тоже работает); usage debug — из `OPENCODEX_USAGE_DEBUG=1`.
 
 ## Доступ к API
 
-### `ocx access <key|endpoints|models|test> ...`
+### `orl access <key|endpoints|models|test> ...`
 
-Просматривайте список API-ключей доступа к OpenCodex, внешние конечные точки и модели. `ocx api-key` — псевдоним семейства команд `ocx access key`.
+Просматривайте список API-ключей доступа к OpenRelay, внешние конечные точки и модели. `orl api-key` — псевдоним семейства команд `orl access key`.
 
 Создание ключа и начало ротации возвращают секрет в открытом виде, показываемый только один раз, как в текстовом формате, так и в JSON. Агент должен передать эти действия человеку, который выполнит их вручную в терминале вне сеанса агента. Не запрашивайте сам ключ в чате: нужны только подтверждение настройки и проверки подключения, а также несекретные идентификаторы ключа и ротации.
 
 ```bash
-ocx access key list --json
+orl access key list --json
 ```
 
 Подтверждение работы нового ключа не является разрешением отозвать старый. Для завершения ротации или удаления старого ключа требуется отдельное явное разрешение на отзыв именно этого ключа. После разрешённой операции снова проверьте список. Не обходите этот порядок прямым вызовом API.
 
 ## Интеграции клиентов
 
-### `ocx integration <claude|grok> ...`
+### `orl integration <claude|grok> ...`
 
 Управляйте поддерживаемыми интеграциями Claude и Grok. Прямые семейства команд ниже
 предоставляют элементы управления, специфичные для каждого клиента.
 
-### `ocx claude [claude args...]`
+### `orl claude [claude args...]`
 
 Убедиться, что прокси запущен, а затем запустить Claude Code с `ANTHROPIC_BASE_URL`,
 `ANTHROPIC_AUTH_TOKEN`, `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` и model slot'ами из
@@ -138,20 +138,20 @@ slot-alias'ы, начиная с Claude Code 2.1.129. На более стары
 Команды для профиля Claude Desktop:
 
 ```text
-ocx claude desktop [apply]                         Save and apply the four-family profile
-ocx claude desktop show [--json]                   Show routes, families, and defaults
-ocx claude desktop move <route> <family> [--default]
-ocx claude desktop default <family> <route|none>
-ocx claude desktop export <path|->                 Export versioned JSON (`-` = stdout)
-ocx claude desktop import <path> [--apply]         Validate and import JSON
+orl claude desktop [apply]                         Save and apply the four-family profile
+orl claude desktop show [--json]                   Show routes, families, and defaults
+orl claude desktop move <route> <family> [--default]
+orl claude desktop default <family> <route|none>
+orl claude desktop export <path|->                 Export versioned JSON (`-` = stdout)
+orl claude desktop import <path> [--apply]         Validate and import JSON
 ```
 
 Семейства — `opus`, `fable`, `sonnet` и `haiku`; новые маршруты по умолчанию попадают в `opus`.
 `none` допустимо только когда соответствующее семейство пусто. Legacy-flags `--static`,
 `--hybrid` и `--discovery-only` для apply по-прежнему поддерживаются. Для настроек Claude Code
-используйте `ocx claude config <status|set> ...`.
+используйте `orl claude config <status|set> ...`.
 
-### `ocx opencode [opencode args...]`
+### `orl opencode [opencode args...]`
 
 Убедиться, что прокси запущен, и затем запустить opencode со сгенерированными блоками
 `provider.opencodex` и `providers.opencodex` в inline runtime layer OpenCode (`OPENCODE_CONFIG_CONTENT`). Существующая
@@ -160,13 +160,13 @@ inline-конфигурация сохраняется, а для этого з�
 override, но файлы на диске никогда не меняются. Маршрутизируемые модели появляются как
 `opencodex/<provider>/<model>`. Последующий запуск обычного `opencode` работает ровно как раньше.
 
-### `ocx grok <status|exclude|include|set|clear|apply> ...`
+### `orl grok <status|exclude|include|set|clear|apply> ...`
 
 Управляйте fence'ом моделей для Grok Build и применяйте его.
 
 ## Экспорт client config
 
-### `ocx export --client <opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh|mcode|zcode|prime|aside|raycast|omo|cline|kilo|commandcode|droid>`
+### `orl export --client <opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh|mcode|zcode|prime|aside|raycast|omo|cline|kilo|commandcode|droid>`
 
 Печатает client config, направленный на работающий прокси. Команда сериализует блок
 провайдера `opencodex` в нативном формате выбранного клиента: base URL, список моделей и,
@@ -183,10 +183,10 @@ override, но файлы на диске никогда не меняются. 
 | `--force` | Разрешить `--out` заменить существующий файл. |
 
 ```bash
-ocx export --client opencode                     # config plus destination, merge warning, and counts
-ocx export --client pi --json > pi-models.json   # JSON document for a pipe or a diff
-ocx export --client omp --out ./omp-models.yml    # native OMP YAML
-ocx export --client opencode --out ~/opencodex-opencode.json
+orl export --client opencode                     # config plus destination, merge warning, and counts
+orl export --client pi --json > pi-models.json   # JSON document for a pipe or a diff
+orl export --client omp --out ./omp-models.yml    # native OMP YAML
+orl export --client opencode --out ~/opencodex-opencode.json
 ```
 
 Без `--json` сначала идёт сгенерированная конфигурация в нативном формате выбранного клиента,
@@ -224,14 +224,14 @@ ocx export --client opencode --out ~/opencodex-opencode.json
 `api_keys` не создаётся, поэтому этот экспорт работает только через loopback, а привязка вне loopback
 отклоняется.
 
-opencode интерполирует `{env:OPENCODEX_OPENCODE_API_KEY}`. Сгенерированный opencodex экспорт для
+opencode интерполирует `{env:OPENCODEX_OPENCODE_API_KEY}`. Сгенерированный OpenRelay экспорт для
 Pi не требует переменной окружения и несёт литеральную заглушку `opencodex-loopback`. Это значение
 обязательно: Pi разрешает `apiKey`, когда строит список моделей, и прячет провайдера целиком, если
 существующий конфиг содержит ссылку на незаданную переменную окружения. На loopback прокси не
 проверяет сгенерированную заглушку.
 
 :::caution[Сливать, а не заменять]
-`ocx export` никогда не пишет в ваш реальный клиентский конфиг. Путь назначения лишь
+`orl export` никогда не пишет в ваш реальный клиентский конфиг. Путь назначения лишь
 печатается, чтобы вы вручную выполнили merge, а `--out` без `--force` отказывается перезаписать
 существующий файл именно потому, что полная замена уничтожила бы остальные провайдеры, агенты и
 MCP-записи.
@@ -250,20 +250,20 @@ env-reference, либо несекретную loopback-заглушку. Адр
 
 ## Runtime и configuration
 
-### `ocx system <status|settings|startup|diagnostics|sync|codex-app-server|codex-restart|update|codex-cli-update> ...`
+### `orl system <status|settings|startup|diagnostics|sync|codex-app-server|codex-restart|update|codex-cli-update> ...`
 
 Управляйте headless runtime-setting'ами, startup, sync, diagnostics и update.
 
-`ocx system codex-restart --yes` перезапускает Codex app-server'ы и полностью закрывает и заново запускает Desktop-приложение Codex тем же модулем, что и `ocx sync --restart-codex`. Если сам proxy запущен внутри приложения Codex, команда отказывается с actionable-сообщением вместо handoff, который она не может завершить.
+`orl system codex-restart --yes` перезапускает Codex app-server'ы и полностью закрывает и заново запускает Desktop-приложение Codex тем же модулем, что и `orl sync --restart-codex`. Если сам proxy запущен внутри приложения Codex, команда отказывается с actionable-сообщением вместо handoff, который она не может завершить.
 
 ```bash
-ocx system settings --stream-mode eager-relay
+orl system settings --stream-mode eager-relay
 ```
 
-`ocx system update` обновляет сам OpenCodex. Для Codex CLI используйте отдельную read-only команду:
+`orl system update` обновляет сам OpenCodex. Для Codex CLI используйте отдельную read-only команду:
 
 ```bash
-ocx system codex-cli-update check --json
+orl system codex-cli-update check --json
 ```
 
 `check` не обращается к реестру пакетов и в строго ограниченном объёме проверяет данные о происхождении настроенного кандидата, включая замаскированный путь к исполняемому файлу и подтверждения его принадлежности. Доверенный контекст опубликованного средства запуска подтверждает только подлинность снимка данных о кандидате, но не факт успешного запуска Codex. Поскольку команда выполняет только такую проверку и никогда не запускает Codex, кандидаты из окружения и сохранённых данных отображаются только в отчёте (`managed: false`, обычно `selection_unattested`). В выводе JSON присутствуют `candidateAvailable`, `candidateVersion`, `candidateSource` и `selectionAttested`, причём значение `selectionAttested` всегда равно `false`. Для проверки настроенного кандидата нужен доверенный контекст опубликованного средства запуска. При прямом запуске через Bun или из исходного кода такого подтверждения нет; в этом случае команда игнорирует кандидатов из окружения и сохранённых данных и может вернуть `candidate_unavailable` в POSIX-системах. В Windows этот первый этап вообще не выполняет файловый ввод-вывод по путям кандидата или конфигурации. Только абсолютный кандидат из окружения, зафиксированный доверенным средством запуска, может получить лексическую метку комплекта приложения или менеджера версий; все остальные кандидаты Windows отклоняются по принципу fail-closed. Поскольку этот этап вообще не читает сохранённое состояние выбора, запуск в Windows без захваченного кандидата из окружения возвращает `windows_inspection_deferred`, а не `candidate_unavailable`: команда не может определить, установлен ли Codex CLI, поэтому сообщает об отложенной проверке, а не утверждает, что кандидата нет. Команда не запускает Codex или менеджер пакетов, не восстанавливает shim, ничего не записывает в конфигурацию или кеш, не останавливает процессы и ничего не устанавливает. Кандидаты, входящие в комплект приложения, найденные в распознанных путях менеджеров версий, являющиеся непроверенными автономными установками или имеющие неоднозначное состояние shim, отображаются как `unmanaged` или `unknown` и никогда не классифицируются как `managed`.
@@ -273,19 +273,19 @@ ocx system codex-cli-update check --json
 #### Явное наблюдение установки Windows x64
 
 ```text
-ocx system codex-cli-update attest [--json]
-ocx system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
+orl system codex-cli-update attest [--json]
+orl system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
 ```
 
-`attest` — необязательная операция только для чтения выбранной или явно указанной установки npm на Windows x64. Без параметров команда наблюдает выбранный кандидат, определённый доверенным снимком средства запуска (настроенный `CODEX_CLI_PATH` или первый `codex` в захваченном PATH), а обёртка opencodex разрешается в переименованную npm-резервную копию `codex.opencodex-real.cmd`. Передача всех четырёх абсолютных путей переопределяет поиск; поиск лишь предлагает пути, а наблюдение с удерживаемыми дескрипторами остаётся окончательным. `--candidate` указывает стандартный npm `<prefix>/codex.cmd` или `<prefix>/node_modules/@openai/codex/bin/codex.js`. Путь `--npm-cli` должен заканчиваться на `node_modules/npm/bin/npm-cli.js`, а `--node` явно указывает `node.exe`. Встроенные в приложения установки, распознанные каталоги менеджеров версий, shim opencodex без npm-резервной копии и пользовательские обёртки отклоняются.
+`attest` — необязательная операция только для чтения выбранной или явно указанной установки npm на Windows x64. Без параметров команда наблюдает выбранный кандидат, определённый доверенным снимком средства запуска (настроенный `CODEX_CLI_PATH` или первый `codex` в захваченном PATH), а обёртка OpenRelay разрешается в переименованную npm-резервную копию `codex.opencodex-real.cmd`. Передача всех четырёх абсолютных путей переопределяет поиск; поиск лишь предлагает пути, а наблюдение с удерживаемыми дескрипторами остаётся окончательным. `--candidate` указывает стандартный npm `<prefix>/codex.cmd` или `<prefix>/node_modules/@openai/codex/bin/codex.js`. Путь `--npm-cli` должен заканчиваться на `node_modules/npm/bin/npm-cli.js`, а `--node` явно указывает `node.exe`. Встроенные в приложения установки, распознанные каталоги менеджеров версий, shim OpenRelay без npm-резервной копии и пользовательские обёртки отклоняются.
 
 При ограниченном чтении нативные дескрипторы удерживают родительские каталоги и файлы. Неподдерживаемые платформы, точки повторной обработки/junction, конфликтующая запись, небезопасные пути и слишком большие файлы отклоняются. Отчёт фиксированной формы не содержит путей: `status` равен `observed` или `refused`, также возвращается `installationIdentityObserved`. Поля `selectionAttested`, `managed` и `applyAllowed` остаются `false`. Проверяйте `status`: отказ в отчёте может сопровождаться кодом выхода 0.
 
 Идентификатор или хеш описывает файлы в момент наблюдения, а не выдаёт постоянное разрешение на обновление. Он не доказывает выбранный runtime, прошлый установщик, действующую конфигурацию npm или подлинность инструментов. Указанный Node лишь наблюдается; выбор его запускателем не подтверждается. Команда не запускает цели, не обращается к реестру пакетов, не устанавливает ПО, не пишет конфигурацию и не управляет процессами. Существующий Windows `check` по-прежнему не выполняет файловый ввод-вывод кандидатов или конфигурации.
 
-### `ocx config [show|get|set|unset|validate|export|import] ...`
+### `orl config [show|get|set|unset|validate|export|import] ...`
 
-`ocx config [show] [--json] [--source]` показывает локальную конфигурацию без запущенного прокси. `show` можно опустить при использовании любого из флагов или обоих в любом порядке. `--source` добавляет источник, ошибки и предупреждения диагностики и разрешён только при просмотре. `--json` может предшествовать явно указанному действию, не меняя его. Повторные флаги `--json` или `--source` и неизвестные аргументы отклоняются.
+`orl config [show] [--json] [--source]` показывает локальную конфигурацию без запущенного прокси. `show` можно опустить при использовании любого из флагов или обоих в любом порядке. `--source` добавляет источник, ошибки и предупреждения диагностики и разрешён только при просмотре. `--json` может предшествовать явно указанному действию, не меняя его. Повторные флаги `--json` или `--source` и неизвестные аргументы отклоняются.
 
 Проверяйте и безопасно меняйте валидированную конфигурацию OpenCodex. `show` и `get`
 маскируют секреты. Импорт выполняет валидацию перед записью и требует `--yes`.
@@ -294,7 +294,7 @@ ocx system codex-cli-update attest --candidate <absolute-path> --npm-prefix <abs
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

@@ -3,7 +3,7 @@ title: Agent Configuration
 description: Multi-agent surfaces, delegation guidance, preferred models, fallback chains, native-default sync, and effort caps.
 ---
 
-Agent settings control which Codex collaboration surface is advertised and how opencodex guides,
+Agent settings control which Codex collaboration surface is advertised and how OpenRelay guides,
 routes, and limits delegated work.
 
 ## Agent fields
@@ -11,7 +11,7 @@ routes, and limits delegated work.
 ### Skills catalog refresh
 
 `skills.catalog_refresh` accepts `"per_session"` (the default) or `"per_turn"`
-in opencodex's `config.json`. Session mode reuses the first received skills
+in OpenRelay's `config.json`. Session mode reuses the first received skills
 instructions for a conversation, protecting the prompt cache prefix from catalog
 changes between turns. Turn mode forwards the client's current catalog.
 See [Keeping the skills catalog stable](/guides/codex-prompt/#keeping-the-skills-catalog-stable)
@@ -47,7 +47,7 @@ still depends on upstream support for your account.
 | --- | --- | --- | --- |
 | `multiAgentMode?` | `"v1" \| "default" \| "v2"` | `"default"` | `v1` stamps every catalog model as v1; `v2` stamps every model as v2. `default` restores upstream pins (Sol/Terra v2, Luna v1) and otherwise follows the native `multi_agent_v2` flag. Applies to new sessions. |
 | `keepNativeChatGptOnV1?` | `boolean` | `false` | When `multiAgentMode` is `"v2"`, disable the global V2 override, stamp ChatGPT-native rows as v1, and keep routed rows on v2. Codex resolves the global override before catalog pins, so both parts are required for a ChatGPT parent to spawn routed children without backend-encrypted tasks ([#92](https://github.com/lidge-jun/opencodex/issues/92)). Ignored in `v1` and `default`. |
-| `subagentModels?` | `string[]` | `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna` | Up to five bare native, account-qualified `<selector>/<native-openai-model>`, or routed `provider/model` ids featured first in the sub-agent picker. The dashboard offers only bare native and routed ids and omits exact account-qualified choices when it saves; use `ocx agent subagents set` or edit the configuration for exact choices. After the [one-time Astra upgrade](#astra-roster-upgrade), an explicit empty list is preserved. |
+| `subagentModels?` | `string[]` | `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna` | Up to five bare native, account-qualified `<selector>/<native-openai-model>`, or routed `provider/model` ids featured first in the sub-agent picker. The dashboard offers only bare native and routed ids and omits exact account-qualified choices when it saves; use `orl agent subagents set` or edit the configuration for exact choices. After the [one-time Astra upgrade](#astra-roster-upgrade), an explicit empty list is preserved. |
 | `injectionModel?` | `string` | — | Preferred native or routed sub-agent model used in proxy-authored v2 delegation guidance. |
 | `injectionEffort?` | `string` | — | Preferred effort (`low` through `ultra`), meaningful only with `injectionModel`. |
 | `injectionPrompt?` | `string` | — | Replaces the built-in v2 guidance body. Supports `{{model}}`, `{{effort}}`, `{{roster}}`, and `{{fallback}}`. A configured `injectionModel` is sufficient to render the custom prompt. |
@@ -63,25 +63,25 @@ still depends on upstream support for your account.
 | `agentTaskRecovery?` | `object` | — | Experimental opt-in recovery for backend-encrypted v2 tasks sent to routed providers. Disabled unless `enabled: true`; see [Encrypted v2 task recovery](#encrypted-v2-task-recovery). |
 
 Manage the surface with the dashboard or
-`ocx v2 status|on|off|mode <v1|default|v2>|keep-native-v1 <on|off>|threads <n>|mode-hint <text|--clear>`.
+`orl v2 status|on|off|mode <v1|default|v2>|keep-native-v1 <on|off>|threads <n>|mode-hint <text|--clear>`.
 Mode changes apply to new sessions. `maxConcurrentThreadsPerSession` is a `PUT /api/v2` field, not a
-`config.json` key; `ocx v2 threads <n>` writes `max_concurrent_threads_per_session` under
+`config.json` key; `orl v2 threads <n>` writes `max_concurrent_threads_per_session` under
 `[features.multi_agent_v2]` in Codex's `$CODEX_HOME/config.toml` after v2 is enabled.
 
 **Always proactive delegation** in Subagents → Advanced (formerly **Ultra mode**) changes the
 delegation trigger without changing reasoning effort. Its preset preserves user instructions,
 authority boundaries, task scope, and tool rules. The dashboard toggle, `PUT /api/v2` field
-`multiAgentModeHintText`, and `ocx v2 mode-hint` write
+`multiAgentModeHintText`, and `orl v2 mode-hint` write
 `features.multi_agent_v2.multi_agent_mode_hint_text` in Codex's
-`$CODEX_HOME/config.toml`. The CLI `ocx v2 mode-hint` command persists this key even
+`$CODEX_HOME/config.toml`. The CLI `orl v2 mode-hint` command persists this key even
 when `multi_agent_v2` is disabled; it does not toggle the feature. The hint replaces
 codex-rs's effort-derived multi-agent policy when that native surface is active.
 A `null` value removes the key so the effort-derived policy (ultra = proactive,
 otherwise explicit) resumes; empty or whitespace-only values are rejected because a
 present empty override would suppress even the ultra-derived Proactive message. The
 Subagents dashboard's **Always proactive delegation** toggle requires both the native feature and
-an explicit v2 surface (`multiAgentMode: "v2"`, equivalent to `ocx v2 mode v2`);
-`ocx v2 on` alone does not satisfy that dashboard gate.
+an explicit v2 surface (`multiAgentMode: "v2"`, equivalent to `orl v2 mode v2`);
+`orl v2 on` alone does not satisfy that dashboard gate.
 
 `GET` and `PUT /api/v2` also return `multiAgentModeHintRecommendation: { text, revision }`.
 The dashboard uses this server-provided text when enabling or restoring the preset, with no
@@ -90,7 +90,7 @@ preset installation and restoration are unavailable; editing or clearing an exis
 remains available. **Restore preset** changes only the local draft; **Save** persists it.
 
 Reading settings, unrelated updates, and upgrades do not migrate a stored hint. Only an explicit
-hint update that matches either of the two recognized legacy OpenCodex presets byte-for-byte is
+hint update that matches either of the two recognized legacy OpenRelay presets byte-for-byte is
 replaced with the current recommendation. Other valid custom text, including whitespace variants,
 is preserved byte-for-byte. Mode-hint support is still checked before writing, and changes apply
 to new Codex sessions.
@@ -154,12 +154,12 @@ Spawned-child fallback order is:
 2. per-model chains from `subagentModelFallbackByModel` (keyed by the primary model); then
 3. global `subagentModelFallback` entries.
 
-Per-role fallback chains must live in opencodex config. Writing `model_fallback` into
+Per-role fallback chains must live in OpenRelay config. Writing `model_fallback` into
 `$CODEX_HOME/agents/*.toml` makes Codex 0.146+ reject the whole role file as an unknown
 field and skip the role (#1190). A legacy `model_fallback` line in the TOML is still
-read for backwards compatibility, but `ocx doctor` flags it.
+read for backwards compatibility, but `orl doctor` flags it.
 
-opencodex skips disabled, unroutable, unhealthy, cooling-down, or quota-threshold candidates. The
+OpenRelay skips disabled, unroutable, unhealthy, cooling-down, or quota-threshold candidates. The
 availability snapshot is cached for `subagentModelFallbackPollMs`. Encrypted child tasks restrict
 the chain to canonical native ChatGPT targets plus direct key-auth Responses routes explicitly
 trusted with `allowEncryptedV2AgentTasks: true`; if none can consume the encrypted payload, the
@@ -194,7 +194,7 @@ Codex forward transport: `adapter: "openai-responses"`, `authMode: "forward"`, a
 gateways, routes whose final destination is another provider, and non-Responses callers are never
 rewritten.
 
-For an eligible v2 request, opencodex recognizes the catalog by a top-level `collaboration`
+For an eligible v2 request, OpenRelay recognizes the catalog by a top-level `collaboration`
 namespace with a direct `spawn_agent` child. The catalog can be in top-level `tools`, or in the
 first input item's developer `additional_tools` when `tools` is absent (Responses Lite).
 An explicit top-level catalog takes precedence; user-role and later historical catalogs do not
@@ -202,19 +202,19 @@ activate the option. It removes
 `parameters.properties.message.encrypted: true`, when present, only from `spawn_agent`,
 `send_message`, and `followup_task`. ChatGPT reserves both the `collaboration` namespace and those
 three tool names, so the request uses fixed private aliases for all four identities. Before making
-that change, opencodex checks top-level and `additional_tools` catalogs, nested namespaces,
+that change, OpenRelay checks top-level and `additional_tools` catalogs, nested namespaces,
 `tool_search_output` declarations, `tool_choice`, and prior call items for the private namespace and
-fixed aliases. Any conflict leaves the entire request unchanged. OpenCodex restores only the
+fixed aliases. Any conflict leaves the entire request unchanged. OpenRelay restores only the
 request-scoped aliases in JSON, SSE, and WebSocket responses before Codex receives the tool call.
 The `encrypted_function_args: []` field is preserved so compatible Codex clients recognize the
 message as plaintext.
 
 This path adds no recovery request and therefore does not spend the extra ChatGPT quota used by a
 cache miss in `agentTaskRecovery`. It cannot change tasks that are already encrypted. If the request
-already declares the private alias or a conflicting reference, opencodex leaves that request
+already declares the private alias or a conflicting reference, OpenRelay leaves that request
 unchanged; separately enabled recovery can still handle a routed task that is later encrypted. If
 ChatGPT rejects or ignores the modified schema, or the Codex client does not recognize the plaintext
-response fields, the call can fail. OpenCodex does not retry the parent request with the original
+response fields, the call can fail. OpenRelay does not retry the parent request with the original
 schema because doing so could duplicate quota use or tool calls.
 
 Restoration uses a 10,000-identity traversal budget for each response payload. If a payload exhausts
@@ -235,7 +235,7 @@ warning while it is enabled.
 }
 ```
 
-The equivalent CLI command is `ocx config set plaintextV2AgentMessages true`. Restart the proxy
+The equivalent CLI command is `orl config set plaintextV2AgentMessages true`. Restart the proxy
 after changing the setting.
 
 
@@ -247,9 +247,9 @@ and a live thread switched from a native ChatGPT model to a routed one, whose hi
 backend-minted encrypted agent message on every later turn
 ([#4089](https://github.com/lidge-jun/opencodex/issues/4089)). It is disabled by default. When
 explicitly enabled and the final routed task contains an otherwise unreadable Fernet payload,
-opencodex uses a raw Responses passthrough request to the fixed
+OpenRelay uses a raw Responses passthrough request to the fixed
 `https://chatgpt.com/backend-api/codex/responses` endpoint with forward-mode authentication.
-ChatGPT returns the plaintext assignment through a forced function call; opencodex then converts
+ChatGPT returns the plaintext assignment through a forced function call; OpenRelay then converts
 only that task item to a standard user message before routed-provider dispatch. Direct routed
 recovery, cached history replay, and the unreadable-task detector recognise all four codex-rs
 agent-message types: `NEW_TASK`, `MESSAGE`, `FOLLOWUP_TASK`, and `FINAL_ANSWER`. Combo recovery
@@ -278,7 +278,7 @@ Admission and retention are deliberately narrow:
   the request body, logs, cache keys, or provider request; the in-memory cache scope uses only a
   process-random keyed digest of the caller credential and account;
 - the recovery request forwards only `authorization`, the matching `chatgpt-account-id`,
-  `originator`, and optional `openai-beta` and `user-agent` metadata; opencodex sets `content-type`
+  `originator`, and optional `openai-beta` and `user-agent` metadata; OpenRelay sets `content-type`
   and `accept` itself, and no other caller headers cross this boundary;
 - recovered plaintext is never logged or persisted; the process-local cache is credential-, parent-
   thread-, and ciphertext-scoped, expires after 15 minutes, and is bounded by both configured entry
@@ -291,7 +291,7 @@ Recovery accepts one consecutive run of up to 32 complete Fernet-shaped encrypte
 at most 2 MiB of combined ciphertext. Parts retain their order and boundaries in one authenticated
 request. Cache identity includes the sequence; the original input is revalidated before assignment
 replacement. HTTP failures retain the existing bounded diagnostic reason. They do not trigger an
-internal retry unless `retries` is set: with a value from 1 to 2, opencodex re-sends the same
+internal retry unless `retries` is set: with a value from 1 to 2, OpenRelay re-sends the same
 admitted request only on a transient upstream status (500/502/503/504/52x) or a transport
 failure, after a short jittered backoff, and still inside the same credential, deadline, and
 shared flight. Terminal statuses and invalid recovery output never retry.
@@ -350,7 +350,7 @@ if leaf tools no longer expose collaboration. V1 main turns, `multiAgentMode: "v
 review, and memory-consolidation turns bypass caps.
 
 Caps only lower effort. They snap to the highest advertised rung at or below the cap. If a model has
-no effort control or no supported rung fits, opencodex removes the effort and lets the provider default
+no effort control or no supported rung fits, OpenRelay removes the effort and lets the provider default
 apply. `max` and `ultra` are accepted, while the dashboard offers `low` through `xhigh`.
 
 Configured caps also apply to eligible native Chat Completions turns that carry no model effort pin. Provider wire mapping runs when a pin is applied or when a cap changes the value; a native caller value keeps its original wire spelling when neither happens.

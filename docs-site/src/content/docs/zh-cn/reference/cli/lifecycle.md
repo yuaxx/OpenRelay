@@ -3,44 +3,44 @@ title: CLI 生命周期
 description: 安装、启动、停止、服务、诊断、同步和更新命令。
 ---
 
-这些命令用于安装、运行、检查、修复并更新本地 opencodex 代理及其 Codex 集成。
+这些命令用于安装、运行、检查、修复并更新本地 OpenRelay 代理及其 Codex 集成。
 
 ## 初始化
 
-### `ocx init` · `ocx setup`
+### `orl init` · `orl setup`
 
 交互式初始化向导（`setup` 是 `init` 的别名）。会提示选择提供方（预设或自定义）、API key（字面量或 `${ENV}`）、默认模型和代理端口；将内容保存到 `~/.opencodex/config.json`；可选地把代理注入 `$CODEX_HOME/config.toml`（默认 `~/.codex/config.toml`）；并可选安装 Codex 自启动 shim。
 
 ## 代理生命周期
 
-### `ocx start [--port <port>] [--socks5 [host:port] | --socks5-off]`
+### `orl start [--port <port>] [--socks5 [host:port] | --socks5-off]`
 
-启动代理服务器（首选端口 `10100`）。它会写入 PID/运行时端口状态，并拒绝启动第二个存活实例。当首选端口已被占用时，`start` 会探测占用者，并且无论结果如何都会停止：如果那里响应的是 opencodex，它会直接拒绝启动；否则会报告无法识别的占用者。它绝不会自行把监听地址移到其他端口，因为那会让第一个代理继续运行，并将 Codex 重新指向第二个代理。即使显式指定不同的 `--port`，共用同一个 `OPENCODEX_HOME` 时也会拒绝启动，因为仅观察模式和启用上限的模式都会写入同一个支出日志。独立的同级实例必须使用单独的 `OPENCODEX_HOME`；`port: 0` 只让操作系统分配端口，并不会隔离状态。启动时，它会把每个提供方的模型同步到 Codex 的目录中。关闭时，它会恢复原生 Codex，除非它是作为受管服务启动的（`OCX_SERVICE=1`）。在已运行的代理旁启动的同级实例两者都不做，即使通过 `ocx stop` 或信号停止也是如此：它只在自己的端口上处理直接请求，Codex、Grok 和 Claude 仍指向原本已在运行的代理。 从另一个 `OPENCODEX_HOME` 启动时，它会根据默认主目录的运行时记录及受管理的 Grok、Codex 本地回环地址查找存活的所有者。没有存活所有者的单独自定义主目录仍会正常同步；显式执行的 `ocx sync` 和 `ocx grok apply` 也保持可用。
+启动代理服务器（首选端口 `10100`）。它会写入 PID/运行时端口状态，并拒绝启动第二个存活实例。当首选端口已被占用时，`start` 会探测占用者，并且无论结果如何都会停止：如果那里响应的是 OpenRelay，它会直接拒绝启动；否则会报告无法识别的占用者。它绝不会自行把监听地址移到其他端口，因为那会让第一个代理继续运行，并将 Codex 重新指向第二个代理。即使显式指定不同的 `--port`，共用同一个 `OPENCODEX_HOME` 时也会拒绝启动，因为仅观察模式和启用上限的模式都会写入同一个支出日志。独立的同级实例必须使用单独的 `OPENCODEX_HOME`；`port: 0` 只让操作系统分配端口，并不会隔离状态。启动时，它会把每个提供方的模型同步到 Codex 的目录中。关闭时，它会恢复原生 Codex，除非它是作为受管服务启动的（`OCX_SERVICE=1`）。在已运行的代理旁启动的同级实例两者都不做，即使通过 `orl stop` 或信号停止也是如此：它只在自己的端口上处理直接请求，Codex、Grok 和 Claude 仍指向原本已在运行的代理。 从另一个 `OPENCODEX_HOME` 启动时，它会根据默认主目录的运行时记录及受管理的 Grok、Codex 本地回环地址查找存活的所有者。没有存活所有者的单独自定义主目录仍会正常同步；显式执行的 `orl sync` 和 `orl grok apply` 也保持可用。
 
-`--socks5`（默认 `127.0.0.1:10808`）会将 SOCKS5 URL 保存到 `config.proxy`，并通过真正的 SOCKS5 隧道转发出站 HTTP(S) 请求。`--socks5-off` 只会清除已保存的 SOCKS5 代理，不会删除 HTTP 代理。该值保存在配置中，因此会在 `ocx update` 后保留。URL 可以包含用户名和密码，但启动日志会将其隐藏。
+`--socks5`（默认 `127.0.0.1:10808`）会将 SOCKS5 URL 保存到 `config.proxy`，并通过真正的 SOCKS5 隧道转发出站 HTTP(S) 请求。`--socks5-off` 只会清除已保存的 SOCKS5 代理，不会删除 HTTP 代理。该值保存在配置中，因此会在 `orl update` 后保留。URL 可以包含用户名和密码，但启动日志会将其隐藏。
 
 ```bash
-ocx start
-ocx start --port 8080
-ocx start --port 10100 --socks5
-ocx start --socks5-off
+orl start
+orl start --port 8080
+orl start --port 10100 --socks5
+orl start --socks5-off
 ```
 
-### `ocx stop`
+### `orl stop`
 
-停止正在运行的代理（按 PID），移除 PID 文件，并恢复原生 Codex。如果安装了受管后台服务，`ocx stop` 还会先停止该服务，这样它就无法重新拉起代理。Web 仪表盘的 **Stop** 按钮在多数后端执行同样的操作（`POST /api/stop`），但 Windows 任务计划程序除外：任务结束后包装器仍可能重新拉起代理，只有运行在代理之外的 stop 才能在恢复客户端配置前确认这个重启窗口，因此仪表盘会以 `respawnable_service` 拒绝、不做任何更改，并提示改用 `ocx stop`。
+停止正在运行的代理（按 PID），移除 PID 文件，并恢复原生 Codex。如果安装了受管后台服务，`orl stop` 还会先停止该服务，这样它就无法重新拉起代理。Web 仪表盘的 **Stop** 按钮在多数后端执行同样的操作（`POST /api/stop`），但 Windows 任务计划程序除外：任务结束后包装器仍可能重新拉起代理，只有运行在代理之外的 stop 才能在恢复客户端配置前确认这个重启窗口，因此仪表盘会以 `respawnable_service` 拒绝、不做任何更改，并提示改用 `orl stop`。
 
-### `ocx restart`
+### `orl restart`
 
 代理正在运行时，请求经过验证的准确 PID 和端口执行原位重启，等待正常排空，并确认同一端口上出现不同的运行时 PID。整个过程保留托管路由和服务监督；若请求结果不确定，也不会将其重放为单独的 stop/start。只有没有代理运行时，命令才回退到常规的 `ensure` 启动。
 
-如果无法将正在运行的监听器验证为对应的运行时 PID（包括升级前的代理），重启会安全失败，不会回退到 `ensure` 或 stop/start。确认所有权后，请依次运行一次 `ocx stop` 和 `ocx start`。
+如果无法将正在运行的监听器验证为对应的运行时 PID（包括升级前的代理），重启会安全失败，不会回退到 `ensure` 或 stop/start。确认所有权后，请依次运行一次 `orl stop` 和 `orl start`。
 
-### `ocx ensure`
+### `orl ensure`
 
 以幂等方式确保后台代理正在运行，然后同步其当前模型目录。如果 `codexAutoStart` 为 `false`，它会打印自启动已禁用，并且不执行任何操作。
 
-### `ocx restore [back]` · `ocx eject [back]`
+### `orl restore [back]` · `orl eject [back]`
 
 在**不停止代理**的情况下恢复原生 Codex——移除注入的配置行和路由后的目录条目，让普通 `codex` 重新以原生方式工作。`eject` 是 `restore` 的别名。
 
@@ -50,35 +50,35 @@ ocx start --socks5-off
 在任一命令后附加 `back`，即可在不改变代理生命周期的前提下，把普通 `codex` 重新指向一个已经在运行的代理：
 
 ```bash
-ocx restore back
-ocx eject back
+orl restore back
+orl eject back
 ```
 
-### `ocx recover-history --legacy-openai --yes`
+### `orl recover-history --legacy-openai --yes`
 
 为更早期的开发构建提供显式恢复，这些构建在可逆备份支持存在之前就重映射了 Codex App 历史记录。如果其历史数据库已被锁定，请先关闭 Codex。
 
 这是范围很广且具有破坏性的重标记：所有包含用户消息且当前标记为 `opencodex` 的线程都会改标为 `openai`，`exec` 会规范化为 `cli`，并设置事件标记。正常的专用提供方历史记录也在范围内。请先备份状态，并且仅在确实需要这一完整范围时执行。
 
-### `ocx recover-history --ocx-compaction <thread-id> --yes`
+### `orl recover-history --ocx-compaction <thread-id> --yes`
 
 在通过原生 Codex 恢复某个曾由路由提供方压缩的任务前，修复该任务的历史记录。此命令按 UUID 精确选择一个任务，先保存私有的逐字节备份，然后仅将 OpenCodeX 自有的 `ocx1:` 压缩状态转换为原生 Codex 可重放的普通摘要。原生加密内容和其他任务保持不变。运行前请关闭所选任务；如果 rollout 在处理期间发生变化，恢复会停止且不会替换原文件。
 
-### `ocx uninstall` · `ocx remove`
+### `orl uninstall` · `orl remove`
 
-停止服务和代理，移除服务和 Codex shim，恢复原生 Codex，然后仅在所有恢复步骤都成功时才删除 opencodex 本地配置。`remove` 是 `uninstall` 的别名。配置清理需要由全新安装创建的所有权元数据；旧版或共享目录会保留原样。
+停止服务和代理，移除服务和 Codex shim，恢复原生 Codex，然后仅在所有恢复步骤都成功时才删除 OpenRelay 本地配置。`remove` 是 `uninstall` 的别名。配置清理需要由全新安装创建的所有权元数据；旧版或共享目录会保留原样。
 
 ## 状态与健康
 
-### `ocx status [--json]`
+### `orl status [--json]`
 
 输出只读诊断摘要：代理 PID、`/healthz` 可达性、仪表盘 URL、配置路径、默认提供方、Codex 自启动设置、服务状态、shim 状态，以及已脱敏的实际 Codex home。只有明确且高置信度的 Windows Orca 运行时 home 签名才会添加可执行的 App-home 不匹配警告；它绝不会自动更改 `CODEX_HOME`。
 
 人类可读输出还会在 OAuth 登录摘要之后附加一个 **OAuth 健康** 区块：当所有已知账户都健康时显示 `OAuth health: ok`；否则显示 `OAuth health: warning`，并为每个不健康账户提供一行脱敏信息（提供方、打码后的账户 ID、状态，如需要重新认证、速率或配额受限、刷新冲突等），外加可选的 `Action:` 提示。账户 ID 会被脱敏；tokens 和邮箱绝不会打印。`--json` 协议目前不包含这个健康区块。
 
 ```bash
-ocx status
-ocx status --json
+orl status
+orl status --json
 ```
 
 简化示例结构：
@@ -128,11 +128,11 @@ ocx status --json
 
 实时读取会等待有上限的服务探测完成：诊断缓存为空或过期时，macOS/Linux 最多等待 6.5 秒，Windows 最多等待 16.5 秒。已有缓存的读取会及时返回。超时仍会回退到本地诊断；仅凭 `/healthz` 健康不能证明重启保护有效。
 
-### `ocx health [--json]`
+### `orl health [--json]`
 
 对正在运行的代理做身份校验。人类可读输出报告 PID/端口；`--json` 输出 `{ok, pid, port}`。只有在健康时该命令才以 0 退出，否则以 1 退出，因此适合用作服务探针。
 
-### `ocx ready [--json] [--wait [--timeout <seconds>]]`
+### `orl ready [--json] [--wait [--timeout <seconds>]]`
 
 通过无需认证的 `GET /readyz` 端点检查同步后的就绪状态。就绪时返回 `200`；状态为 `pending` 或
 终态 `failed` 时返回 `503`，并带有 `Retry-After: 1`。HTTP 仅返回经脱敏的身份字段
@@ -142,7 +142,7 @@ ocx status --json
 输出 `{ready, status, pid, port}`，其中 `status` 为 `ready`、`pending`、`failed` 或
 `unreachable`。退出码：就绪为 0；未就绪、pending、failed、超时或无法连接为 1；参数无效为 64。
 
-### `ocx doctor`
+### `orl doctor`
 
 运行只读的环境与连通性诊断：状态路径和文件系统类型、WSL 双重安装、代理环境/配置、ChatGPT 可达性、Codex 插件和项目配置警告，以及待处理的历史迁移。Codex app-home 定位部分也会检测狭义的 Windows Orca 运行时 home 不匹配，并在适用时解释服务迁移。此诊断展示的路径会对操作系统用户名进行脱敏。Doctor 会输出修复提示，但不会自动应用。
 
@@ -150,11 +150,11 @@ ocx status --json
 
 ## 目录同步
 
-### `ocx sync [--restart-codex] [--restart-app-server-only]`
+### `orl sync [--restart-codex] [--restart-app-server-only]`
 
 从每个已配置的提供方获取实时模型列表，并将合并后的目录重新注入 Codex。在添加提供方后运行，或用于刷新可用模型。
 
-如果仍有长期运行的 Codex `app-server` 进程，`ocx sync` 会警告它们可能继续提供旧的内存模型列表，即使 `opencodex-catalog.json` / `models_cache.json` 已更新。传入 `--restart-codex` 会重启匹配的 `codex … app-server` 和 `codex-code-mode-host` 进程，并在 macOS、Linux 和 Windows 上完全退出再重新启动 Codex 桌面应用，让模型选择器重新读取目录。进行中的对话会结束。故意避免使用宽泛的 `pkill -f codex` 匹配。
+如果仍有长期运行的 Codex `app-server` 进程，`orl sync` 会警告它们可能继续提供旧的内存模型列表，即使 `opencodex-catalog.json` / `models_cache.json` 已更新。传入 `--restart-codex` 会重启匹配的 `codex … app-server` 和 `codex-code-mode-host` 进程，并在 macOS、Linux 和 Windows 上完全退出再重新启动 Codex 桌面应用，让模型选择器重新读取目录。进行中的对话会结束。故意避免使用宽泛的 `pkill -f codex` 匹配。
 
 `--restart-desktop-app` 是 `--restart-codex` 的已弃用别名。它仍然可用，会打印弃用提示，并且不再仅限 Windows。
 
@@ -162,33 +162,33 @@ ocx status --json
 
 当命令在 Codex 应用内部运行时，重启会交给分离的 helper，当前会话会随应用一起结束。
 
-### `ocx sync-cache [--restart-codex] [--restart-app-server-only]`
+### `orl sync-cache [--restart-codex] [--restart-app-server-only]`
 
-使 Codex 的本地模型选择器缓存失效，让它根据当前激活的 opencodex 目录重新生成。与 `ocx sync` 相同的陈旧 `app-server` 警告和可选重启标志同样适用。
+使 Codex 的本地模型选择器缓存失效，让它根据当前激活的 OpenRelay 目录重新生成。与 `orl sync` 相同的陈旧 `app-server` 警告和可选重启标志同样适用。
 
-### `ocx catalog pull <https-url> [--auth-env <NAME>] [--json] [--restart-codex] [--restart-app-server-only]`
+### `orl catalog pull <https-url> [--auth-env <NAME>] [--json] [--restart-codex] [--restart-app-server-only]`
 
-安装由另一个 OpenCodex 实例的 `/v1/catalog` 端点提供的完整目录，然后同步 `models_cache.json`。URL 必须是 HTTPS；仅回环地址允许 HTTP。URL 内嵌凭据、查询、片段、重定向、超出大小的响应以及无效目录，都会在任何本地写入之前被拒绝。认证是可选的，并且只通过环境变量名（`--auth-env`）读取，不接受 argv 传入。
+安装由另一个 OpenRelay 实例的 `/v1/catalog` 端点提供的完整目录，然后同步 `models_cache.json`。URL 必须是 HTTPS；仅回环地址允许 HTTP。URL 内嵌凭据、查询、片段、重定向、超出大小的响应以及无效目录，都会在任何本地写入之前被拒绝。认证是可选的，并且只通过环境变量名（`--auth-env`）读取，不接受 argv 传入。
 
 如果 `HTTP_PROXY` 或 `http_proxy` 生效，且 `NO_PROXY` 或 `no_proxy` 中没有匹配的绕过规则，回环 HTTP 请求会在添加认证标头或发送请求之前被拒绝。`ALL_PROXY`/`all_proxy` 以及仅设置 `HTTPS_PROXY`/`https_proxy` 的情况不会触发此 HTTP 限制；仍允许通过 HTTPS 获取目录。拒绝消息不会包含代理地址或认证令牌。 非空的 `http_proxy` 和 `no_proxy` 分别优先于 `HTTP_PROXY` 和 `NO_PROXY`。要设置与 Bun 兼容的代理绕过规则，请使用主机名、匹配的 `host:port`、`[::1]` 等带方括号的 IPv6 地址或 `*`，不要使用 URL、路径或 `*.` 前缀。
 
-目录和缓存在共享的 Codex 目录锁下写入；失败时保留 last-known-good 文件。字节完全相同时是保留 mtime 的空操作。`--restart-codex`、`--restart-app-server-only` 以及已弃用别名 `--restart-desktop-app` 仅在发生真实写入之后生效，含义与 `ocx sync` / `ocx sync-cache` 相同。`ETag` 条件请求不属于此命令。完整的 `--json` 信封与退出码请参见[英文参考](/reference/cli/lifecycle/)。
+目录和缓存在共享的 Codex 目录锁下写入；失败时保留 last-known-good 文件。字节完全相同时是保留 mtime 的空操作。`--restart-codex`、`--restart-app-server-only` 以及已弃用别名 `--restart-desktop-app` 仅在发生真实写入之后生效，含义与 `orl sync` / `orl sync-cache` 相同。`ETag` 条件请求不属于此命令。完整的 `--json` 信封与退出码请参见[英文参考](/reference/cli/lifecycle/)。
 
 ## 后台服务
 
-### `ocx service [install|repair|restart|start|stop|status|uninstall|remove]`
+### `orl service [install|repair|restart|start|stop|status|uninstall|remove]`
 
-将 opencodex 作为登录管理的后台服务运行（macOS **launchd**、Linux **systemd user unit**、Windows **Task Scheduler**），在登录时自动启动，在崩溃时自动重启。服务运行会设置 `OCX_SERVICE=1`，因此重启时不会反复改动 Codex 配置。
+将 OpenRelay 作为登录管理的后台服务运行（macOS **launchd**、Linux **systemd user unit**、Windows **Task Scheduler**），在登录时自动启动，在崩溃时自动重启。服务运行会设置 `OCX_SERVICE=1`，因此重启时不会反复改动 Codex 配置。
 
 Windows 任务计划程序安装使用普通进程优先级（`Priority=4`）。旧的后台优先级（`7`，省略时调度器也默认使用 `7`）
-可能在 CPU 竞争时延迟健康检查响应，导致进程仍存活时托盘显示 Offline。升级后运行 `ocx service repair`，
+可能在 CPU 竞争时延迟健康检查响应，导致进程仍存活时托盘显示 Offline。升级后运行 `orl service repair`，
 即可迁移该注册优先级并重启服务；过程中可能需要批准 UAC 提示。已设为普通或高优先级时，不会仅因优先级而重新注册。
 
 在 Linux 上，systemd unit 调用安装时在 `PATH` 中找到的第一个常规可执行 `ocx` 文件，而不是已安装包目录内的 Bun 与 CLI 路径。**mise**、**asdf** 等版本管理器会安装到带版本号的目录并在升级时删除旧目录；其稳定的 shim 会让 unit 持续解析。没有 `ocx` 启动器的源码检出保留直接的 Bun + CLI 形式。Bun 启动前选定的可信 `OPENCODEX_BUN_PATH` 会透过 shim 保留；包内捆绑的 Bun 路径在升级后会被重新发现。
 
-在 macOS 上，launchd 则改用安装或修复时选定的包内 Bun 与 CLI 路径。这可防止可变的 PATH shim 在后续重启时获得服务 API 令牌和已配置的代理环境。升级版本管理器安装后，请在重启服务前运行 `ocx service repair` 刷新这些路径。
+在 macOS 上，launchd 则改用安装或修复时选定的包内 Bun 与 CLI 路径。这可防止可变的 PATH shim 在后续重启时获得服务 API 令牌和已配置的代理环境。升级版本管理器安装后，请在重启服务前运行 `orl service repair` 刷新这些路径。
 
-在此变更之前安装的定义仍带有旧的带版本路径，无法自行迁移——一旦旧可执行文件被删除，就没有 opencodex 代码运行来修复它。升级后请运行一次 `ocx service repair`。之后 Linux 服务启动会跟随启动器；macOS 的 repair 会把新的包路径写入 launchd 定义。外部升级不会替换已在运行的代理：当已安装的 CLI 比运行中的代理更新时，运行 `ocx service restart` 让新构建提供服务。在 macOS 上，此处的 `repair` 并不够：定义没有变化，而不改变任何内容的 repair 不会重新加载任何内容。反之若代理更新，请按 [`ocx status`](#ocx-status---json) 中的说明检查 CLI 安装与 `PATH`。
+在此变更之前安装的定义仍带有旧的带版本路径，无法自行迁移——一旦旧可执行文件被删除，就没有 OpenRelay 代码运行来修复它。升级后请运行一次 `orl service repair`。之后 Linux 服务启动会跟随启动器；macOS 的 repair 会把新的包路径写入 launchd 定义。外部升级不会替换已在运行的代理：当已安装的 CLI 比运行中的代理更新时，运行 `orl service restart` 让新构建提供服务。在 macOS 上，此处的 `repair` 并不够：定义没有变化，而不改变任何内容的 repair 不会重新加载任何内容。反之若代理更新，请按 [`orl status`](#ocx-status---json) 中的说明检查 CLI 安装与 `PATH`。
 
 | 子命令 | 操作 |
 | --- | --- |
@@ -203,25 +203,25 @@ Windows 任务计划程序安装使用普通进程优先级（`Priority=4`）。
 | `remove` | `uninstall` 的别名。 |
 
 ```bash
-ocx service
-ocx service install
-ocx service repair
-ocx service restart
-ocx service status
-ocx service uninstall
+orl service
+orl service install
+orl service repair
+orl service restart
+orl service status
+orl service uninstall
 ```
 
-在 Windows 上，bare `ocx service` 只有在 Task Scheduler 和 WinSW 两者的缺失都得到证实后才会走安装路径。如果任一状态查询结果不确定，它会拒绝任何注册并提示运行 `ocx service status`；只有在确认缺失之后才使用显式的 `ocx service install`。
+在 Windows 上，bare `orl service` 只有在 Task Scheduler 和 WinSW 两者的缺失都得到证实后才会走安装路径。如果任一状态查询结果不确定，它会拒绝任何注册并提示运行 `orl service status`；只有在确认缺失之后才使用显式的 `orl service install`。
 
-在 Windows 上，`ocx service status` 会单独报告 Task Scheduler 注册状态和已身份验证的 OpenCodex 代理可达性。它不会打印本地化的 `schtasks` 表格，因此在不同 Windows 代码页下摘要仍然可读。
+在 Windows 上，`orl service status` 会单独报告 Task Scheduler 注册状态和已身份验证的 OpenRelay 代理可达性。它不会打印本地化的 `schtasks` 表格，因此在不同 Windows 代码页下摘要仍然可读。
 
-在 Windows 上，创建 Task Scheduler 条目需要提升权限。识别到本地化的访问被拒绝文本时，会沿用现有的指导路径。如果该文本不可读，则回退要求命令形态为 `/create /tn opencodex-proxy /xml <non-empty-path> /f`，状态为 1，并且令牌明确为非提升权限；这时仪表盘的 Startup Safety 操作可以自动请求 UAC。如果该回退无法判断令牌状态，它会保留原始调度器错误。外部任务和操作绝不会发出自动提升标记。请批准仪表盘的 UAC 提示，或在提升权限的 PowerShell 窗口中重新运行 `ocx service install`。
+在 Windows 上，创建 Task Scheduler 条目需要提升权限。识别到本地化的访问被拒绝文本时，会沿用现有的指导路径。如果该文本不可读，则回退要求命令形态为 `/create /tn opencodex-proxy /xml <non-empty-path> /f`，状态为 1，并且令牌明确为非提升权限；这时仪表盘的 Startup Safety 操作可以自动请求 UAC。如果该回退无法判断令牌状态，它会保留原始调度器错误。外部任务和操作绝不会发出自动提升标记。请批准仪表盘的 UAC 提示，或在提升权限的 PowerShell 窗口中重新运行 `orl service install`。
 
-如果启动时报告 `another process owns the runtime mutation lease`，或者 `ocx service status` 显示 `Runtime mutation lease busy`，说明即使代理没有在运行，这个租约也在阻止启动或服务变更。消息中包含锁路径、记录的 PID、该 PID 当前是否存活、能获取时的可执行文件名，以及租约已持有的时长。进程身份未经验证：PID 可能已被复用，因此存活状态和可执行文件名描述的是当前占用该 PID 的进程。请等待操作结束后重试；不要仅凭这个 PID 删除锁或终止进程。当租约时长超过 30 秒且记录的 PID 已不再存活时，之后的变更操作可以回收这个过期租约；`ocx service status` 只查看它，不会回收。
+如果启动时报告 `another process owns the runtime mutation lease`，或者 `orl service status` 显示 `Runtime mutation lease busy`，说明即使代理没有在运行，这个租约也在阻止启动或服务变更。消息中包含锁路径、记录的 PID、该 PID 当前是否存活、能获取时的可执行文件名，以及租约已持有的时长。进程身份未经验证：PID 可能已被复用，因此存活状态和可执行文件名描述的是当前占用该 PID 的进程。请等待操作结束后重试；不要仅凭这个 PID 删除锁或终止进程。当租约时长超过 30 秒且记录的 PID 已不再存活时，之后的变更操作可以回收这个过期租约；`orl service status` 只查看它，不会回收。
 
-### `ocx codex-shim <install|status|uninstall|remove>`
+### `orl codex-shim <install|status|uninstall|remove>`
 
-在 macOS 和 Linux 上，`ocx codex-shim install` 会在解析后的 OpenCodex 主目录中安装私有 wrapper `<OPENCODEX_HOME>/bin/codex` 和可由 shell 加载的 `<OPENCODEX_HOME>/codex-shell-env.sh`。原生启动器保留在 brew、npm 或 fnm 安装的位置，包管理器升级和版本回滚无需重新包装。Windows 仍按原方式就地包装脚本启动器，真实的 `codex.exe` 保持不变。如果 Windows 安装只提供 `codex.exe`，请使用 `ocx service install`。
+在 macOS 和 Linux 上，`orl codex-shim install` 会在解析后的 OpenRelay 主目录中安装私有 wrapper `<OPENCODEX_HOME>/bin/codex` 和可由 shell 加载的 `<OPENCODEX_HOME>/codex-shell-env.sh`。原生启动器保留在 brew、npm 或 fnm 安装的位置，包管理器升级和版本回滚无需重新包装。Windows 仍按原方式就地包装脚本启动器，真实的 `codex.exe` 保持不变。如果 Windows 安装只提供 `codex.exe`，请使用 `orl service install`。
 
 完成 brew/fnm 等 PATH 设置后，运行安装时输出的激活命令。默认主目录对应：
 
@@ -229,15 +229,15 @@ ocx service uninstall
 . "$HOME/.opencodex/codex-shell-env.sh"
 ```
 
-自定义主目录请使用输出的带引号路径。重复加载会去掉私有 bin 的重复项，并将其放到 PATH 最前面。要在之后的 shell 中激活，请自行把这一行加到 shell 启动文件的 PATH 设置之后；OpenCodex 从不编辑启动文件，安装命令也无法改变父 shell 的 PATH。只要 wrapper 可运行，即使当前 shell 尚未激活，安装仍算成功；安装被拒绝或 wrapper 无法运行则失败。`ocx status`、`ocx codex-shim status`、`ocx doctor` 和 `ocx connect` 会将未被 PATH 选中的 wrapper 报告为 **not active**，并给出激活命令。connect 的警告不改变退出状态。别名、函数以及桌面或服务启动环境需要单独设置。
+自定义主目录请使用输出的带引号路径。重复加载会去掉私有 bin 的重复项，并将其放到 PATH 最前面。要在之后的 shell 中激活，请自行把这一行加到 shell 启动文件的 PATH 设置之后；OpenRelay 从不编辑启动文件，安装命令也无法改变父 shell 的 PATH。只要 wrapper 可运行，即使当前 shell 尚未激活，安装仍算成功；安装被拒绝或 wrapper 无法运行则失败。`orl status`、`orl codex-shim status`、`orl doctor` 和 `orl connect` 会将未被 PATH 选中的 wrapper 报告为 **not active**，并给出激活命令。connect 的警告不改变退出状态。别名、函数以及桌面或服务启动环境需要单独设置。
 
-提交安装或修复前，OpenCodex 会在跳过服务启动的情况下，用 `--version` 运行已保存的启动器。如果启动器把 `codex` 再次解析到 shim、以非零状态退出、运行超过五秒、留下仍在运行的子进程，或无法被安全验证和清理，OpenCodex 会拒绝并回滚更改。因此 `codex-shim install` 并不是无条件安装。若被拒绝，请重新安装 Codex，使 PATH 条目指向具体的可执行文件或启动器，然后重试；如果动态命令管理器的启动器无法满足这些检查，请改用 `ocx service install`。
+提交安装或修复前，OpenRelay 会在跳过服务启动的情况下，用 `--version` 运行已保存的启动器。如果启动器把 `codex` 再次解析到 shim、以非零状态退出、运行超过五秒、留下仍在运行的子进程，或无法被安全验证和清理，OpenRelay 会拒绝并回滚更改。因此 `codex-shim install` 并不是无条件安装。若被拒绝，请重新安装 Codex，使 PATH 条目指向具体的可执行文件或启动器，然后重试；如果动态命令管理器的启动器无法满足这些检查，请改用 `orl service install`。
 
-旧的 Unix 就地 shim 仅通过显式运行 `ocx codex-shim install` 迁移。迁移会恢复记录的原生启动器，但不会覆盖已经存在的较新启动器，然后安装私有 wrapper。如果原生恢复后私有安装失败，原生启动器会保持已恢复状态，操作可重试。记录的启动器缺失或无法运行时，请用包管理器修复；OpenCodex 不会猜测其他安装位置，也不会重新包装包管理器路径。
+旧的 Unix 就地 shim 仅通过显式运行 `orl codex-shim install` 迁移。迁移会恢复记录的原生启动器，但不会覆盖已经存在的较新启动器，然后安装私有 wrapper。如果原生恢复后私有安装失败，原生启动器会保持已恢复状态，操作可重试。记录的启动器缺失或无法运行时，请用包管理器修复；OpenRelay 不会猜测其他安装位置，也不会重新包装包管理器路径。
 
-仅安装启动器并不能证明 Codex 请求会经过 OpenCodex。安装可运行的 wrapper 后，命令会检查当前 Codex 路由；当路由由外部配置、用户自有网关管理或无法验证时，会显示警告而不是绿色成功。若出站代理变量只存在于当前进程，而 `config.proxy` 未设置或无法解析，也会给出警告，因为 Codex 启动器和后台服务未必继承该环境。这些检查只读且绝不会打印代理值；在依赖自动启动前，请先处理提示的交接配置并运行 `ocx doctor`。
+仅安装启动器并不能证明 Codex 请求会经过 OpenRelay。安装可运行的 wrapper 后，命令会检查当前 Codex 路由；当路由由外部配置、用户自有网关管理或无法验证时，会显示警告而不是绿色成功。若出站代理变量只存在于当前进程，而 `config.proxy` 未设置或无法解析，也会给出警告，因为 Codex 启动器和后台服务未必继承该环境。这些检查只读且绝不会打印代理值；在依赖自动启动前，请先处理提示的交接配置并运行 `orl doctor`。
 
-Unix 自动修复只刷新私有 wrapper，绝不重写包管理器启动器，也不迁移旧的就地 shim。Windows 上，完成的外部更新覆盖 shim 后，下一个普通 `ocx` 命令会备份稳定的新启动器并恢复 shim。仍在变化的启动器保持不动，稍后重试。`ocx status`、`ocx doctor`、`ocx codex-shim status`、`ocx system codex-cli-update check` 及其保留命名空间中的无效调用都不触发这项修复。修复失败只发出警告，不改变请求命令的退出状态；手动修复：`ocx codex-shim install`。将 `codexShimAutoRestore` 设为 `false`，或为进程设置 `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0`，即可关闭自动修复。
+Unix 自动修复只刷新私有 wrapper，绝不重写包管理器启动器，也不迁移旧的就地 shim。Windows 上，完成的外部更新覆盖 shim 后，下一个普通 `ocx` 命令会备份稳定的新启动器并恢复 shim。仍在变化的启动器保持不动，稍后重试。`orl status`、`orl doctor`、`orl codex-shim status`、`orl system codex-cli-update check` 及其保留命名空间中的无效调用都不触发这项修复。修复失败只发出警告，不改变请求命令的退出状态；手动修复：`orl codex-shim install`。将 `codexShimAutoRestore` 设为 `false`，或为进程设置 `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0`，即可关闭自动修复。
 
 | 子命令 | 操作 |
 | --- | --- |
@@ -247,66 +247,66 @@ Unix 自动修复只刷新私有 wrapper，绝不重写包管理器启动器，�
 | `status` | 报告 shim 状态及私有 wrapper 是否在 PATH 中激活。 |
 
 ```bash
-ocx codex-shim install
-ocx codex-shim status
-ocx codex-shim uninstall
+orl codex-shim install
+orl codex-shim status
+orl codex-shim uninstall
 ```
 
-Unix 卸载后，请从 shell 启动文件中删除加载行，并重启 shell 或从 PATH 中移除私有 bin。卸载仅删除归 OpenCodex 所有的 wrapper、shell 环境文件和状态，包管理器启动器保持不变。旧的 Unix 就地 shim 会利用已记录的恢复信息解除包装。
+Unix 卸载后，请从 shell 启动文件中删除加载行，并重启 shell 或从 PATH 中移除私有 bin。卸载仅删除归 OpenRelay 所有的 wrapper、shell 环境文件和状态，包管理器启动器保持不变。旧的 Unix 就地 shim 会利用已记录的恢复信息解除包装。
 
 :::note[Windows 令牌环境]
 新生成的 Windows CMD 和 PowerShell shim 会在执行后恢复调用方原有的 `OPENCODEX_API_AUTH_TOKEN` 状态。Codex 及其子进程仍可能继承令牌。
 
-更新 OpenCodex 后，如需让现有 Windows shim 采用此行为，请先运行 `ocx codex-shim uninstall`，再运行 `ocx codex-shim install` 重新安装。常规更新不会重写正常的 Windows shim。
+更新 OpenRelay 后，如需让现有 Windows shim 采用此行为，请先运行 `orl codex-shim uninstall`，再运行 `orl codex-shim install` 重新安装。常规更新不会重写正常的 Windows shim。
 :::
 
 :::tip[Service vs Shim]
-将 `ocx service` 用于始终在线的后台代理（推荐）。将 `ocx codex-shim` 用于无需守护进程的轻量按需启动——代理只会在启动 `codex` 时运行。
+将 `orl service` 用于始终在线的后台代理（推荐）。将 `orl codex-shim` 用于无需守护进程的轻量按需启动——代理只会在启动 `codex` 时运行。
 :::
 
 #### 向 Codex 注入令牌
 
 绑定到非回环地址时，注入的提供程序包含 `env_key = "OPENCODEX_API_AUTH_TOKEN"`。这一行告诉 Codex 应读取哪个变量，但不会创建该变量。如果变量不存在，Codex 会拒绝发起请求（`Missing environment variable: OPENCODEX_API_AUTH_TOKEN`），请求也不会到达代理。变量值保存在 `$OPENCODEX_HOME/service-api-token` 中；启动进程必须将其传入 Codex 的环境。
 
-请使用通过 `ocx codex-shim install` 安装且受维护的 shim。如果启动上下文选择此 shim，它会读取 OpenCodex 创建的令牌文件，并将变量传给 Codex。从桌面、cron 或服务启动时，必须使用能够选中该 shim 的 PATH 或启动器路径；安装过程不会自动配置这些环境。Codex 自身的子进程也可能继承令牌。
+请使用通过 `orl codex-shim install` 安装且受维护的 shim。如果启动上下文选择此 shim，它会读取 OpenRelay 创建的令牌文件，并将变量传给 Codex。从桌面、cron 或服务启动时，必须使用能够选中该 shim 的 PATH 或启动器路径；安装过程不会自动配置这些环境。Codex 自身的子进程也可能继承令牌。
 
 不要在 shell 启动文件中导出此 Bearer 令牌，也不要将其复制到 `config.toml`。`service-api-token` 文件包含的是原始令牌，而不是 `NAME=value` 形式的赋值，因此不能直接用作 systemd 的 `EnvironmentFile=`。
 
 `opencodex-proxy.service` 中的 `EnvironmentFile=` 或 `OCX_API_TOKEN_FILE` 仅配置代理进程，绝不会传入独立启动的 `codex exec`。
 
-Unix 包管理器升级保留私有 wrapper；未激活时，请加载输出的激活文件。Windows 或旧的就地 shim 在启动器被更新替换后会丢失 shim；Windows 上下一次执行普通的 `ocx` 命令时会将其恢复（见上文），但在此之前运行的 `codex exec` 会失败。`ocx doctor` 会在 "Codex env_key launch readiness" 项下报告这一状态及未激活的 wrapper（env_key 已配置、变量未设置、shim 缺失或不正常、令牌文件存在），并给出修复或激活指引，且绝不会输出令牌。读取令牌文件不属于注入的 `env_key` 的约定；启动进程必须提供该变量。
+Unix 包管理器升级保留私有 wrapper；未激活时，请加载输出的激活文件。Windows 或旧的就地 shim 在启动器被更新替换后会丢失 shim；Windows 上下一次执行普通的 `ocx` 命令时会将其恢复（见上文），但在此之前运行的 `codex exec` 会失败。`orl doctor` 会在 "Codex env_key launch readiness" 项下报告这一状态及未激活的 wrapper（env_key 已配置、变量未设置、shim 缺失或不正常、令牌文件存在），并给出修复或激活指引，且绝不会输出令牌。读取令牌文件不属于注入的 `env_key` 的约定；启动进程必须提供该变量。
 
-### `ocx tray <install|start|stop|status|uninstall|remove> [--json] [--no-start]`
+### `orl tray <install|start|stop|status|uninstall|remove> [--json] [--no-start]`
 
 安装并控制 Windows 状态托盘图标。它会在 Windows 登录时启动，并提供一键代理控制。`start` 和 `stop` 只控制图标本身；要控制代理，请使用其菜单。`--no-start` 适用于 `install`，会安装托盘但不会立即启动。
-已弃用：OpenCodex 桌面应用在 Windows、macOS 和 Linux 上提供托盘；没有桌面应用的安装仍可使用 `ocx tray`。
+已弃用：OpenRelay 桌面应用在 Windows、macOS 和 Linux 上提供托盘；没有桌面应用的安装仍可使用 `orl tray`。
 当发现有更新的包版本时，托盘会在在线、警告或离线图标上显示蓝点，并显示 **Update available**。托盘大约每分钟检查一次本地缓存的徽标；结果过期或不可用时会移除蓝点。该菜单项会打开仪表板，你可以在那里启动包更新。它不会自动安装。
 
 ## 仪表盘
 
-### `ocx gui`
+### `orl gui`
 
 在 `http://localhost:<port>` 打开 [web dashboard](/guides/web-dashboard/)，如果代理未运行则会自动启动。在启用了管理 ingress 的 hub 上，打开的是 `http://127.0.0.1:<管理端口>`。
 
 ## 更新
 
-`ocx update` 更新的是 OpenCodex 本身，而不是 Codex CLI。请使用 [system 检查命令](/zh-cn/reference/cli/agents/)中的 `ocx system codex-cli-update check`，对已配置的 Codex CLI 候选项进行有界、只读的 provenance 检查。该命令不会查询 package registry，也不会安装更新。
+`orl update` 更新的是 OpenRelay 本身，而不是 Codex CLI。请使用 [system 检查命令](/zh-cn/reference/cli/agents/)中的 `orl system codex-cli-update check`，对已配置的 Codex CLI 候选项进行有界、只读的 provenance 检查。该命令不会查询 package registry，也不会安装更新。
 
-### `ocx update [--tag latest|preview]`
+### `orl update [--tag latest|preview]`
 
-当 OpenCodex 由 mise 安装时，此命令会在停止代理或修改软件包文件之前以失败状态退出，并使用经过验证的本地 mise 别名显示 `mise upgrade <tool>`。更新检查仍然可用，并会报告该安装由外部管理。无法读取或不一致的 mise 所有权元数据也会阻止修改，且不会猜测工具名称；`--tag preview` 绝不会更改 mise 中配置的选择。
+当 OpenRelay 由 mise 安装时，此命令会在停止代理或修改软件包文件之前以失败状态退出，并使用经过验证的本地 mise 别名显示 `mise upgrade <tool>`。更新检查仍然可用，并会报告该安装由外部管理。无法读取或不一致的 mise 所有权元数据也会阻止修改，且不会猜测工具名称；`--tag preview` 绝不会更改 mise 中配置的选择。
 
-在 Linux 上，如果后台服务记录的启动器是 mise 的包启动器（`<tool>/latest/node_modules/.bin/ocx`，而不是 mise shim），服务会自动跟随 `mise upgrade`：新版本稳定后约十秒内，它会排空进行中的请求并在新版本上重启；如果 mise 之后清理了它正在运行的版本，也会以同样方式恢复。在 macOS 上、通过 mise shim 安装的服务以及前台代理，请在升级后自行重启（macOS 上先运行 `ocx service repair`）。
+在 Linux 上，如果后台服务记录的启动器是 mise 的包启动器（`<tool>/latest/node_modules/.bin/ocx`，而不是 mise shim），服务会自动跟随 `mise upgrade`：新版本稳定后约十秒内，它会排空进行中的请求并在新版本上重启；如果 mise 之后清理了它正在运行的版本，也会以同样方式恢复。在 macOS 上、通过 mise shim 安装的服务以及前台代理，请在升级后自行重启（macOS 上先运行 `orl service repair`）。
 
-从 npm 自更新 opencodex。稳定版安装使用 `@latest`；预览版安装保持在 `@preview`，除非你传入 `--tag latest|preview`。它会检测源码检出，并提示你改为运行 `git pull && bun install`；如果你已经是该标签的最新版本，则不会执行任何操作。对于 npm 安装，它会在停止任何进程之前，对 Unix 缓存的所有权和访问权限执行有界检查。嵌套符号链接会通过 `lstat` 检查但不会跟随；Windows 会明确跳过这项仅适用于 Unix 的检查。检查失败时，更新会在托盘和代理仍运行的情况下中止。随后才会在替换文件之前停止正在运行的代理；已安装的服务会自动重建并启动，而前台安装则会打印 `ocx start` 作为下一步。持久化前，仪表板更新记录会隐去用户配置文件/缓存路径以及 UID/GID 值。
+从 npm 自更新 OpenRelay。稳定版安装使用 `@latest`；预览版安装保持在 `@preview`，除非你传入 `--tag latest|preview`。它会检测源码检出，并提示你改为运行 `git pull && bun install`；如果你已经是该标签的最新版本，则不会执行任何操作。对于 npm 安装，它会在停止任何进程之前，对 Unix 缓存的所有权和访问权限执行有界检查。嵌套符号链接会通过 `lstat` 检查但不会跟随；Windows 会明确跳过这项仅适用于 Unix 的检查。检查失败时，更新会在托盘和代理仍运行的情况下中止。随后才会在替换文件之前停止正在运行的代理；已安装的服务会自动重建并启动，而前台安装则会打印 `orl start` 作为下一步。持久化前，仪表板更新记录会隐去用户配置文件/缓存路径以及 UID/GID 值。
 
 ```bash
-ocx update
-ocx update --tag preview
+orl update
+orl update --tag preview
 ```
 
 当 [Release workflow](https://github.com/lidge-jun/opencodex/actions/workflows/release.yml) 将新版本发布到 npm 时，这些新版本就会变得可用。
 
 ## Remote Hub 客户端生命周期
 
-使用 `ocx connect <url> --pairing-code-stdin`、`ocx connect status`、`ocx sync` 和 `ocx connect rotate --pairing-code-stdin`。`ocx disconnect` 可离线恢复本地状态，但不会吊销 hub 密钥。仍连接时，`ocx connect revoke --admin-token-stdin` 会吊销已保存的 `apiKeyId`；断开后请使用 hub 的 **连接 → API 密钥**。密钥只能通过 stdin 传递，不能放入 argv。
+使用 `orl connect <url> --pairing-code-stdin`、`orl connect status`、`orl sync` 和 `orl connect rotate --pairing-code-stdin`。`orl disconnect` 可离线恢复本地状态，但不会吊销 hub 密钥。仍连接时，`orl connect revoke --admin-token-stdin` 会吊销已保存的 `apiKeyId`；断开后请使用 hub 的 **连接 → API 密钥**。密钥只能通过 stdin 传递，不能放入 argv。

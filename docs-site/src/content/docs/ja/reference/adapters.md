@@ -3,7 +3,7 @@ title: アダプター
 description: プロバイダーアダプターの対象、リクエスト構成方式、固有の動作。
 ---
 
-**アダプター**は opencodex の内部リクエスト/レスポンスモデルとプロバイダーの wire 形式の間を変換します。すべてのアダプターは `ProviderAdapter` インターフェース（`src/adapters/base.ts`）を実装します。
+**アダプター**は OpenRelay の内部リクエスト/レスポンスモデルとプロバイダーの wire 形式の間を変換します。すべてのアダプターは `ProviderAdapter` インターフェース（`src/adapters/base.ts`）を実装します。
 
 ```ts
 interface ProviderAdapter {
@@ -75,7 +75,7 @@ interface ProviderAdapter {
   ありません。
 - **構造化出力は正規の Ollama Cloud では拒否されます。** Ollama は Cloud で構造化出力が未対応
   であると現在ドキュメントしており、Cloud は `format` フィールドを強制しません。そのため
-  OpenCodex は、schema 指定の要求に対して自由文を返すのではなく、要求を閉じて失敗させます。
+  OpenRelay は、schema 指定の要求に対して自由文を返すのではなく、要求を閉じて失敗させます。
   ローカル / カスタムの `ollama-native` エンドポイントは Ollama ネイティブの `format` マッピング
   （`json_object` → `"json"`、`json_schema` → schema オブジェクトそのもの）を保持します。
 
@@ -186,7 +186,7 @@ model discovery の両方に適用されます。
 - 通常の fetch/parse ではなく `runTurn` を使います。リクエストとサーバーイベントは `devin/cloud-direct/wire.ts` の手動 protobuf フレーミングで扱います。
 - `GetCascadeModelConfigs` でアカウントごとにモデルを取得し、プランに含まれないモデルはリクエスト時ではなく一覧の段階で外れます。
 - Cognition はツール説明の長さ制限と完全一致のブロックリストを課します。アダプターが既知の語句を書き換え、長すぎる説明を切り詰めます。
-- キーは更新されません。失効したら `ocx login devin` をやり直してください。
+- キーは更新されません。失効したら `orl login devin` をやり直してください。
 - CLI インポート経路でもローカルなのは資格情報だけで、ターン自体はどちらの経路でも Cognition へ送られます。以前のビルドには `devin-cli` id で、ローカルの `devin acp` 子プロセスに対して Agent Client Protocol セッションとしてターンを実行する第2のアダプターがありましたが、削除されました。そのアダプターをまだ指す保存済み設定は起動時に `devin` へ書き換えられ、`"devin-acp"` のようなカスタム名の行も同様です。
 
 ## `azure-openai`（別名: `azure`）

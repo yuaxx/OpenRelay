@@ -10,7 +10,7 @@ import { isFreeProvider } from "../../provider-workspace/catalog";
 import { isLocalProvider } from "../../provider-workspace/kind";
 import { providerAuthSurface } from "../../provider-workspace/auth";
 import { ProviderIcon } from "./ProviderRail";
-import { Switch } from "../../ui";
+import { Tabs, Tab as UiTab, Toggle } from "../ui/controls";
 import { IconChevron, IconTrash } from "../../icons";
 import ProviderOverview from "./ProviderOverview";
 import type { CatalogPreset } from "../provider-catalog/provider-presets";
@@ -247,7 +247,7 @@ export default function ProviderDetails({
           {onSetDisabled && (
             <div className="pws-detail-toggle">
               <span className="pws-detail-toggle-label">{t("pws.enabledLabel")}</span>
-              <Switch
+              <Toggle
                 on={!isDisabled}
                 onClick={() => onSetDisabled(item.name, !isDisabled)}
                 disabled={isDefault}
@@ -257,24 +257,22 @@ export default function ProviderDetails({
           )}
         </div>
       </div>
-      <div className="pws-detail-tabs" role="tablist">
+      <Tabs className="pws-detail-tabs" aria-label={formatProviderDisplayName(item.name, t)}>
         {tabs.map((candidate, index) => (
-          <button
+          <UiTab
             key={candidate.id}
             type="button"
-            role="tab"
             id={`pws-tab-${candidate.id}`}
             aria-controls={`pws-panel-${candidate.id}`}
-            aria-selected={tab === candidate.id}
+            active={tab === candidate.id}
             tabIndex={tab === candidate.id ? 0 : -1}
-            className={`pws-detail-tab${tab === candidate.id ? " pws-detail-tab--active" : ""}`}
             onClick={() => switchTab(candidate.id)}
             onKeyDown={event => onTabKeyDown(event, index)}
           >
             {candidate.label}
-          </button>
+          </UiTab>
         ))}
-      </div>
+      </Tabs>
       <div
         className="pws-detail-panel"
         role="tabpanel"

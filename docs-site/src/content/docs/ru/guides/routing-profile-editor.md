@@ -3,7 +3,7 @@ title: Редактор профилей маршрутизации
 description: Создавайте, изменяйте, проверяйте, пробно оценивайте и удаляйте профили правил маршрутизации в дашборде OpenCodex.
 ---
 
-Вкладка **Models → Routing** в дашборде OpenCodex позволяет управлять `config.routingProfiles` без ручного редактирования `config.json`.
+Вкладка **Models → Routing** в дашборде OpenRelay позволяет управлять `config.routingProfiles` без ручного редактирования `config.json`.
 
 ## Создание профиля
 

@@ -27,9 +27,9 @@ import {
 } from "./runtime-api";
 
 const USAGE = `Usage:
-  ocx api protocols [--provider <name>] [--json]
-  ocx api explain --model <id> --inbound <responses|chat|messages> [--feature <key>[,<key>]]... [--json]
-  ocx api policy [--messages <on|off>] [--unrepresentable <legacy|reject>]
+  orl api protocols [--provider <name>] [--json]
+  orl api explain --model <id> --inbound <responses|chat|messages> [--feature <key>[,<key>]]... [--json]
+  orl api policy [--messages <on|off>] [--unrepresentable <legacy|reject>]
       [--rollout <switch>=<on|off>]... [--json]`;
 
 type Rec = Record<string, unknown>;
@@ -138,7 +138,7 @@ async function explain(argv: string[], deps: RuntimeApiDeps): Promise<void> {
   if (!model) throw new CliUsageError("--model is required", USAGE);
   if (!isProtocol(inbound)) throw new CliUsageError("--inbound must be responses, chat or messages", USAGE);
   const unknown = features.filter(feature => !isProtocolFeature(feature));
-  if (unknown.length > 0) throw new CliUsageError("--feature names a feature this CLI does not know; `ocx api protocols --json` lists them", USAGE);
+  if (unknown.length > 0) throw new CliUsageError("--feature names a feature this CLI does not know; `orl api protocols --json` lists them", USAGE);
   const body = { model, inbound, ...(features.length > 0 ? { features: [...new Set(features)] } : {}) };
   const result = await runtimeRequest("/api/protocols/plan", {
     method: "POST",

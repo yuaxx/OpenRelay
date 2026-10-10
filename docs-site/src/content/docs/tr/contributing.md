@@ -1,6 +1,6 @@
 ---
 title: Katkıda Bulunma
-description: opencodex geliştirme — kurulum, düzen, kurallar ve yeni bir sağlayıcı veya adaptör ekleme.
+description: OpenRelay geliştirme — kurulum, düzen, kurallar ve yeni bir sağlayıcı veya adaptör ekleme.
 ---
 
 ## Kurulum
@@ -88,7 +88,7 @@ GitHub Actions iş akışları kasıtlı olarak yalın tutulur:
   paket, betik, TypeScript veya iş akışı dosyalarını etkileyen çekme
   isteklerinde ve `main` gönderimlerinde çalışır. Bun matrisi; Linux, Windows ve
   macOS üzerinde kurulum, tip denetimi, testler, gizlilik taraması, sürüm
-  yardımcısı duman testi, GUI derlemesi ve `ocx help` adımlarını kapsar. İkinci
+  yardımcısı duman testi, GUI derlemesi ve `orl help` adımlarını kapsar. İkinci
   bir üç işletim sistemli hat, paketin yerleşik çalışma zamanını kullanarak ayrı
   bir Bun kurulu olmadan npm global kurulumunun çalıştığını kanıtlar.
 - **Sürüm** (`.github/workflows/release.yml`) manuel olarak yürütülür. İkinci
@@ -216,7 +216,7 @@ Tüm sağlayıcı seçicileri ve tohumları kurallı kayıt defterinden
 },
 ```
 
-`src/providers/derive.ts` bu girdiyi `ocx init`, `ocx provider`, kontrol paneli
+`src/providers/derive.ts` bu girdiyi `orl init`, `orl provider`, kontrol paneli
 önayarları, API anahtarı girişi ve OAuth yapılandırma tohumlarına besler.
 `enrichProviderFromCatalog()`, model meta verilerini ve yetenek
 sınıflandırmalarını kaydedilen sağlayıcı yapılandırmasına kopyalar. OAuth
@@ -225,7 +225,7 @@ defteri meta verileri bir OAuth akışı değildir.
 
 ### Kurallı bir önayar için gereken kanıtlar
 
-Bir kayıt defteri girdisi sürdürülen bir taahhüttür: opencodex, kullanıcının API
+Bir kayıt defteri girdisi sürdürülen bir taahhüttür: OpenRelay, kullanıcının API
 anahtarının gönderildiği hedefi sağlar. Bu nedenle bir önayar, çalışan bir kod
 yolu değil, birincil kaynak kanıtı gerektirir. Bir sağlayıcı ekleyen veya
 yükselten çekme istekleri açıklamada aşağıdakilerin tümünü sağlamalıdır:
@@ -259,7 +259,7 @@ Kanıt eksik olduğunda dürüst yer, kurallı kayıt defteri yerine
 `src/providers/free-directory.ts` içindeki bir referans satırıdır. Dizin
 satırları açık bir `verification` derecesi (`official`, `primary`, `unverified`)
 taşır ve etkisizdir: Kullanıcılar özel OpenAI uyumlu akış üzerinden hizmete yine
-de ulaşabilirken, opencodex arkasında duramayacağı bir önayarın tanıtımını
+de ulaşabilirken, OpenRelay arkasında duramayacağı bir önayarın tanıtımını
 yapmaktan kaçınır. Yukarıdaki kanıtlar oluştuktan sonra satırı kayıt defterine
 yükseltin.
 

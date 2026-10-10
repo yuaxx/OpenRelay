@@ -14,23 +14,23 @@ import {
 } from "./runtime-api";
 
 const USAGE = `Usage:
-  ocx system [status] [--json]
-  ocx system health [--json]
-  ocx system settings [--auto-start <on|off>] [--stream-mode <auto|legacy-tee|eager-relay>]
+  orl system [status] [--json]
+  orl system health [--json]
+  orl system settings [--auto-start <on|off>] [--stream-mode <auto|legacy-tee|eager-relay>]
       [--desktop-authless <on|off>] [--client-compaction <on|off>]
       [--show-codex-credits <on|off>] [--account-picker <on|off>] [--main-account-hard-lock <on|off>]
       [--ultra-fast-tier <on|off>] [--fast-rows <on|off>] [--json]
-  ocx system startup <health|install-service|install-shim> [--json]
-  ocx system diagnostics [--json]
-  ocx system sync [--json]
-  ocx system codex-app-server [--json]
-  ocx system codex-restart --yes [--json]
-  ocx system codex-cli-update check [--json]
-  ocx system codex-cli-update attest [--json]
-  ocx system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
-  ocx system update check [--channel <latest|preview>] [--json]
-  ocx system update run [--channel <latest|preview>] [--restart <on|off>] --yes [--json]
-  ocx system update status <job-id> [--json]
+  orl system startup <health|install-service|install-shim> [--json]
+  orl system diagnostics [--json]
+  orl system sync [--json]
+  orl system codex-app-server [--json]
+  orl system codex-restart --yes [--json]
+  orl system codex-cli-update check [--json]
+  orl system codex-cli-update attest [--json]
+  orl system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
+  orl system update check [--channel <latest|preview>] [--json]
+  orl system update run [--channel <latest|preview>] [--restart <on|off>] --yes [--json]
+  orl system update status <job-id> [--json]
 
 --client-compaction favors native replay portability for future compactions while
 keeping OpenCodeX routing active; the configured provider may process summaries
@@ -155,10 +155,10 @@ function settingsUpdateLines(
     const retry = apply.reason === "external_provider"
       ? ""
       : apply.reason === "ownership_undetermined"
-      ? " Resolve the reported config.toml read error, then inspect 'ocx system settings --json'."
+      ? " Resolve the reported config.toml read error, then inspect 'orl system settings --json'."
       : apply.reason === "integration_disabled"
       ? " Enable Codex integration before applying the stored settings."
-      : " Run 'ocx sync' to apply the stored settings.";
+      : " Run 'orl sync' to apply the stored settings.";
     lines.push(`Codex config: ~/.codex/config.toml was not rewritten because ${desktopSwitchApplyReason(apply.reason)}.${detail}${retry}`);
   }
   lines.push(`Auth source: ${authSource.summary}`);
@@ -236,8 +236,8 @@ async function update(argv: string[], deps: RuntimeApiDeps): Promise<void> {
   const jobStatus = ["running", "restarting", "succeeded", "failed"].find(state => state === job?.status);
   const lines = jobId ? [
     `Update job ${jobId}: ${jobStatus ?? "status unconfirmed"} (${channel}).`,
-    `Check progress: ocx system update status ${jobId}`,
-  ] : ["Update request returned no usable job ID. Check: ocx system update check."];
+    `Check progress: orl system update status ${jobId}`,
+  ] : ["Update request returned no usable job ID. Check: orl system update check."];
   printData(result, wantsJson, lines);
 }
 

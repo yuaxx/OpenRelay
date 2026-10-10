@@ -187,7 +187,7 @@ export function buildCatalogEntriesFromObservedState({
       if (!slugAliasCollisionWarnings.has(model.alias)) {
         slugAliasCollisionWarnings.add(model.alias);
         console.warn(
-          `[opencodex] native combo alias collision on "${model.alias}": keeping the first configured combo and omitting later duplicates from the catalog.`,
+          `[openrelay] native combo alias collision on "${model.alias}": keeping the first configured combo and omitting later duplicates from the catalog.`,
         );
       }
       continue;
@@ -875,7 +875,7 @@ export function mergeCatalogEntriesFromObservedState({
     return gatheredProviderNames.has(provider) && degradedProviderNames.has(provider);
   }).length;
   if (degradedPreservedCount > 0 && policy.warningPolicy === "emit") {
-    console.warn(`[opencodex] catalog sync: provider discovery degraded; preserving ${degradedPreservedCount} existing routed entr${degradedPreservedCount === 1 ? "y" : "ies"} on disk.`);
+    console.warn(`[openrelay] catalog sync: provider discovery degraded; preserving ${degradedPreservedCount} existing routed entr${degradedPreservedCount === 1 ? "y" : "ies"} on disk.`);
   }
 
   const managedEntries = [...finalRoutedEntries, ...alignedAccountBoundEntries];

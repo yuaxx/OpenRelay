@@ -31,7 +31,7 @@ export function withPnpmCommandCwd(args, run) {
       }
       rmdirSync(cwd);
     } catch {
-      console.warn("[opencodex] Temporary pnpm workspace cleanup was incomplete; retained for inspection.");
+      console.warn("[openrelay] Temporary pnpm workspace cleanup was incomplete; retained for inspection.");
     }
   }
 }

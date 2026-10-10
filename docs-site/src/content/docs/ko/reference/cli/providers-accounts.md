@@ -7,7 +7,7 @@ description: 제공자 설정, 자격 증명, 할당량, 모델 카탈로그 명
 
 ## 제공자
 
-### `ocx provider <subcommand>`
+### `orl provider <subcommand>`
 
 비대화형 제공자 관리입니다. 레지스트리 항목은 이름으로 시드되며, 사용자 지정 이름을 쓰려면 `--adapter`와 `--base-url`을 둘 다 지정해야 합니다.
 
@@ -28,14 +28,14 @@ description: 제공자 설정, 자격 증명, 할당량, 모델 카탈로그 명
 기본 `add`, `remove`, `set-default`는 로컬 설정을 바꿉니다. 실행 중인 프록시를 바꾸려면 `--live`를 지정하세요. 실시간 삭제에는 `--yes`도 필요합니다. `--sync --json`도 저장 후 동기화를 실제로 시도하며, 실패하면 저장은 유지한 채 0이 아닌 코드와 `needsSync: true`를 반환합니다. `--live`와 `--sync`는 함께 쓸 수 없습니다. pacing·snapshot/apply 절차는 [영문 명령 안내](/reference/cli/providers-accounts/#snapshot-edit-and-apply-with-a-baseline)를 참고하세요.
 
 ```bash
-ocx provider list --json
-ocx provider list --jsonl
-ocx provider test ark
-ocx provider add anthropic --api-key sk-ant-... --set-default --sync
-ocx provider add local-dev --adapter openai-chat --base-url http://localhost:11434/v1
-ocx provider show anthropic --json
-ocx models --provider anthropic --json
-ocx models live --provider ark --json
+orl provider list --json
+orl provider list --jsonl
+orl provider test ark
+orl provider add anthropic --api-key sk-ant-... --set-default --sync
+orl provider add local-dev --adapter openai-chat --base-url http://localhost:11434/v1
+orl provider show anthropic --json
+orl models --provider anthropic --json
+orl models live --provider ark --json
 ```
 
 `--jsonl`은 설정된 제공자만 JSON 객체 하나당 한 줄로 출력합니다. 각 객체의 필드는 `--json`의 `configured` 배열 항목과 같으며, `registryCount` 요약은 포함하지 않습니다. 스크립트에서 각 줄의 객체를 순서대로 처리할 수 있습니다. `--json`과 `--jsonl`은 함께 사용할 수 없습니다.
@@ -59,18 +59,18 @@ ocx models live --provider ark --json
 
 ## 인증
 
-### `ocx login <provider>`
+### `orl login <provider>`
 
 제공자에 등록된 로그인 흐름을 시작합니다. OAuth 제공자는 브라우저를 열고 자동 갱신되는 자격 증명을 `~/.opencodex/` 아래에 저장합니다. API 키 로그인 제공자는 키 대시보드를 열고, 키 입력을 요청한 뒤, 가능한 경우 검증하고, 그 결과 나온 제공자 설정을 저장합니다. 이름이 없거나 알 수 없으면 현재 허용되는 OAuth 및 API 키 제공자 id를 출력합니다.
 
-`ocx status` / `ocx doctor`가 재인증 필요 또는 터미널 새로고침 실패를 보고한 뒤에는 같은 명령으로 **재인증**하면 됩니다(대시보드의 Reauthenticate를 써도 됩니다). Codex 풀 계정은 위 OAuth·API 키 제공자 중 하나가 아니지만 `ocx login codex`로 닿습니다. 이 명령은 계정 풀 로그인으로 연결되므로 `ocx login codex --reauth`는 `ocx account reauth codex`와 같습니다. 대시보드의 Codex 계정 풀(Reauthenticate)로도 됩니다. 이 경로는 프록시 안에서 돌기 때문에 프록시가 실행 중이어야 합니다.
+`orl status` / `orl doctor`가 재인증 필요 또는 터미널 새로고침 실패를 보고한 뒤에는 같은 명령으로 **재인증**하면 됩니다(대시보드의 Reauthenticate를 써도 됩니다). Codex 풀 계정은 위 OAuth·API 키 제공자 중 하나가 아니지만 `orl login codex`로 닿습니다. 이 명령은 계정 풀 로그인으로 연결되므로 `orl login codex --reauth`는 `orl account reauth codex`와 같습니다. 대시보드의 Codex 계정 풀(Reauthenticate)로도 됩니다. 이 경로는 프록시 안에서 돌기 때문에 프록시가 실행 중이어야 합니다.
 
 ```bash
-ocx login xai
-ocx login anthropic
+orl login xai
+orl login anthropic
 ```
 
-### `ocx logout <provider>`
+### `orl logout <provider>`
 
 제공자에 저장된 OAuth 자격 증명을 제거합니다.
 
@@ -100,11 +100,11 @@ Reserve입니다. 차단 중에는 그 메인 계정의 Reserve를 활성화할 
 받으며 `mainAccountHardLock.thresholds`에 실제 적용값을 반환합니다.
 
 같은 리셋 구간에서 최신 사용량이 1%포인트 이상 늘었는데 이 프록시를 통한 메인 계정 활동이
-최근에 없었다면 대시보드와 `ocx status`에 **opencodex 밖에서 사용량이 늘었을 수 있음**을 표시합니다.
+최근에 없었다면 대시보드와 `orl status`에 **OpenRelay 밖에서 사용량이 늘었을 수 있음**을 표시합니다.
 오래 실행한 턴도 같은 현상을 만들 수 있어 외부 사용의 확정 증거는 아닙니다. 외부 사용 때문에
 차단해도 한도를 소진할 수 있습니다. 알림은 프로세스 메모리에만 유지되며 계정이나 리셋 구간이
 바뀌면 지워지고, 6시간 경과 또는 관측한 리셋 시각 중 이른 시점에 만료됩니다.
-`ocx status --json`은 실행 중인 관리 API에서 읽은 상태, 적용 기준, 차단 창 종류와 선택적
+`orl status --json`은 실행 중인 관리 API에서 읽은 상태, 적용 기준, 차단 창 종류와 선택적
 `externalUsage` 알림을 `mainAccountHardLock`에 담습니다.
 
 값이 빠진 응답을 0%로 보지 않으며, 이미 확인한 차단 수치를 누락된 응답만으로 지우지도 않습니다.
@@ -131,7 +131,7 @@ Pool 모드에서 사용량 조회의 `--refresh`는 캐시 유효기간을 무�
 Direct 모드의 공급자 사용량 보고서에서도 공유 상태에 반영되지 않은 응답과 이전 캐시 보고서를 표시하지 않습니다.
 계정 정보가 충돌하거나 이전 토큰의 401/403 응답이 늦게 도착한 경우에는 현재 캐시를 유지하고 재인증 상태를 변경하지 않습니다.
 
-저장되는 옵션은 OpenCodex의 `config.json`에 있는 `"codexMainAccountHardLock"`입니다. 값이 없거나
+저장되는 옵션은 OpenRelay의 `config.json`에 있는 `"codexMainAccountHardLock"`입니다. 값이 없거나
 `true`이면 켜짐이고, `false`일 때만 꺼집니다. 스위치를 끄면 이 `false`가 저장됩니다. 기본값이
 바뀐 지점입니다. 예전에는 옵트인이었고 스위치를 끌 때 키를 지웠기 때문에, 꺼 두었던 설치도
 지금은 켜진 상태로 읽힙니다. 예전 동작을 유지하려면 스위치를 한 번 꺼서 옵트아웃을 기록하세요.
@@ -158,15 +158,15 @@ Reserve가 활성화되지 않을 수 있습니다. 스위치를 끄면 원래 �
 
 기본 OpenAI 공급자를 ChatGPT 전달 모드로 켜 두고, 계정별 모델 선택기를 켠 뒤 저장된 메인
 계정의 공개 선택자 이름을 지정합니다. 로컬 루프백 로그인 생략 모드가 실제로 적용된 상태에서
-`ocx sync`를 실행하면 `<메인-선택자>/gpt-reserve`가 다른 공급자 모델과 함께 추가됩니다.
+`orl sync`를 실행하면 `<메인-선택자>/gpt-reserve`가 다른 공급자 모델과 함께 추가됩니다.
 접두사 없는 `gpt-reserve`, 추가 계정 선택자, API 키용 모델 목록에는 추가하지 않습니다.
 원격 클라이언트나 별도 접근 헤더가 필요한 리스너에서는 이 모드를 적용하지 않습니다.
 공개 리스너와 로컬 리스너를 함께 켜도 Reserve 호환 모드는 로컬 리스너로 받은 요청에만
 적용됩니다. 같은 컴퓨터에서 보냈더라도 공개 리스너로 인증한 요청은 원래 경로를 유지하며,
 요청 헤더로 로컬 정책을 고를 수는 없습니다.
 
-`ocx system settings --desktop-authless on`으로 Desktop 로그인 생략 모드를 켜고,
-`ocx sync`를 실행한 다음 Codex Desktop을 완전히 종료했다가 다시 여세요.
+`orl system settings --desktop-authless on`으로 Desktop 로그인 생략 모드를 켜고,
+`orl sync`를 실행한 다음 Codex Desktop을 완전히 종료했다가 다시 여세요.
 다시 쓴 설정과 모델 목록을 읽으려면 이 순서가 필요합니다. 자세한 절차는
 [Desktop 로그인 생략 모드 가이드](/guides/codex-integration/#authless-codex-desktop-opt-in)를 따르세요.
 
@@ -186,12 +186,12 @@ Luna 메타데이터임을 표시해 사용합니다. 목록에 보인다는 사
 않습니다. Desktop 소스와 테스트용 응답 경로를 확인했으며, 실제 Reserve 활성 계정으로는 이
 호환 경로를 검증하지 않았습니다.
 
-### `ocx account <subcommand>`
+### `orl account <subcommand>`
 
 실행 중인 프록시를 통해 제공자 계정과 API 키 풀을 나열하고 전환합니다. 제공되는 도움말 표면은 다음과 같습니다:
 
 ```text
-Usage: ocx account <list|history|current|use|clear|refresh|auto-switch|alias|priority|pause|resume|pause-exhausted|strategy|sticky|remove|clear-cooldown|add-key|import|import-orca|login|reauth|code|cancel|reset-credits|grok-reset-coupons|main> ...
+Usage: orl account <list|history|current|use|clear|refresh|auto-switch|alias|priority|pause|resume|pause-exhausted|strategy|sticky|remove|clear-cooldown|add-key|import|import-orca|login|reauth|code|cancel|reset-credits|grok-reset-coupons|main> ...
 
 list [provider]     Codex account pool, OAuth accounts and API keys (identifiers shown masked as the API returns them).
 history openai <pool-account-id> [--limit <1-200>]  Recent routing decisions for one Codex pool account.
@@ -239,15 +239,15 @@ Codex pool selection applies to the next request after clearing existing affinit
 }
 ```
 
-### `ocx account list [provider] [--json] [--all] [--quota [--refresh]]`
+### `orl account list [provider] [--json] [--all] [--quota [--refresh]]`
 
-제공자를 지정하지 않으면 Codex 풀, OAuth 계정, 설정된 API 키 풀을 나열합니다. `--all`이 없으면 비어 있는 제공자는 건너뜁니다. 제공자를 지정하면 해당 자격 증명 계열만 나열합니다. 사람이 보는 출력은 `PROVIDER TYPE ID PLAN/LABEL PRIORITY STATUS` 형식을 사용하며, 수동으로 선택한 Codex 행에는 `selected`가 표시됩니다. 사용 가능한 Kiro 계정이 두 개 이상 저장되어 있으면 기본적으로 429 응답 시 다른 계정으로 자동 전환하며, 알려진 잔여 할당량이 가장 많은 계정을 우선합니다. 이 전환은 계정 존재만으로 활성화되며 끌 수 없습니다. `oauthAccountFailover.enabled: false`는 429 복구가 아니라 요청을 보내기 전 계정을 고르는 동작만 거부합니다. `ocx account login kiro`는 계정을 한 번에 하나씩 풀에 추가합니다. 빈 결과도 성공입니다. `--json`은 다음을 반환합니다:
+제공자를 지정하지 않으면 Codex 풀, OAuth 계정, 설정된 API 키 풀을 나열합니다. `--all`이 없으면 비어 있는 제공자는 건너뜁니다. 제공자를 지정하면 해당 자격 증명 계열만 나열합니다. 사람이 보는 출력은 `PROVIDER TYPE ID PLAN/LABEL PRIORITY STATUS` 형식을 사용하며, 수동으로 선택한 Codex 행에는 `selected`가 표시됩니다. 사용 가능한 Kiro 계정이 두 개 이상 저장되어 있으면 기본적으로 429 응답 시 다른 계정으로 자동 전환하며, 알려진 잔여 할당량이 가장 많은 계정을 우선합니다. 이 전환은 계정 존재만으로 활성화되며 끌 수 없습니다. `oauthAccountFailover.enabled: false`는 429 복구가 아니라 요청을 보내기 전 계정을 고르는 동작만 거부합니다. `orl account login kiro`는 계정을 한 번에 하나씩 풀에 추가합니다. 빈 결과도 성공입니다. `--json`은 다음을 반환합니다:
 
 ```text
 { accounts: AccountRow[], notes: string[] }
 ```
 
-### `ocx account current <provider> [--json]`
+### `orl account current <provider> [--json]`
 
 활성 계정이나 키를 보여줍니다. 수동 고정이 없는 Codex 풀은 우선순위를 고려한 자동 선택을 보고합니다. 가장 우선순위가 높은 적격 tier를 고르고, 그 tier 안에서 할당량 라우팅 기준으로 가장 적게 사용한 항목을 선택합니다. 활성 자격 증명이 없는 다른 계열은 그 상태를 보고하고도 종료 코드 0으로 끝납니다. `--json`은 다음을 반환합니다:
 
@@ -255,12 +255,12 @@ Codex pool selection applies to the next request after clearing existing affinit
 { provider, type, activeId: string | null, autoSwitchThreshold?: number, account: AccountRow | null }
 ```
 
-### `ocx account use <provider> <account-or-key-id|alias|main|auto> [--json]`
+### `orl account use <provider> <account-or-key-id|alias|main|auto> [--json]`
 
-`auto`는 수동 선택을 지워 풀이 다시 자체 전략으로 작업을 배치하게 합니다 — 단 id가 `auto`인 Codex 계정이 있으면 정확한 id 일치가 우선되며 `ocx account clear <provider>`는 항상 자동 선택을 복원합니다. Codex 계정은 id 대신 `ocx account alias`로 지정한 별칭으로도 가리킬 수 있으며, `priority`, `pause`, `resume`, `clear-cooldown`, `remove`, `alias`에서도 마찬가지입니다. Codex 계정에서 `auto`, `main`, `__main__`은 대소문자 구분 없이 예약어이므로 별칭으로 지정할 수 없습니다. OAuth 계정과 API 키의 표시 이름에는 기존 규칙이 그대로 적용됩니다.
+`auto`는 수동 선택을 지워 풀이 다시 자체 전략으로 작업을 배치하게 합니다 — 단 id가 `auto`인 Codex 계정이 있으면 정확한 id 일치가 우선되며 `orl account clear <provider>`는 항상 자동 선택을 복원합니다. Codex 계정은 id 대신 `orl account alias`로 지정한 별칭으로도 가리킬 수 있으며, `priority`, `pause`, `resume`, `clear-cooldown`, `remove`, `alias`에서도 마찬가지입니다. Codex 계정에서 `auto`, `main`, `__main__`은 대소문자 구분 없이 예약어이므로 별칭으로 지정할 수 없습니다. OAuth 계정과 API 키의 표시 이름에는 기존 규칙이 그대로 적용됩니다.
 
 기존 Codex 계정, OAuth 계정 또는 API key를 선택합니다. `openai`에서 `main`은 Codex App 로그인을
-선택합니다. Codex Pool 선택은 프로세스 로컬 affinity를 지우고 기존에 보이던 작업을 포함한 다음 요청부터 적용됩니다. 프록시 재시작이나 affinity eviction 뒤에도 작업이 바인딩 없는 상태가 될 수 있지만, 진행 중인 요청은 이미 확보한 계정을 유지합니다. 이 선택은 Pool 라우팅만 제어하며 Direct mode는 호출자 소유/native main credential을 계속 사용합니다. 사용량 기반 선제 전환, 401/403 재인증, 429/retry-after cooldown, 제외, 출력 전 429/402 실패 복구는 나중에 다른 적격 Pool 계정을 선택할 수 있습니다. 이러한 복구 경로는 사용량 기반 전환이 꺼져 있어도 동작합니다. 계정이 바뀌어도 OpenCodex는 대화 문맥을 재생하지만 프로바이더 측 prompt cache는 다시 예열해야 할 수 있습니다.
+선택합니다. Codex Pool 선택은 프로세스 로컬 affinity를 지우고 기존에 보이던 작업을 포함한 다음 요청부터 적용됩니다. 프록시 재시작이나 affinity eviction 뒤에도 작업이 바인딩 없는 상태가 될 수 있지만, 진행 중인 요청은 이미 확보한 계정을 유지합니다. 이 선택은 Pool 라우팅만 제어하며 Direct mode는 호출자 소유/native main credential을 계속 사용합니다. 사용량 기반 선제 전환, 401/403 재인증, 429/retry-after cooldown, 제외, 출력 전 429/402 실패 복구는 나중에 다른 적격 Pool 계정을 선택할 수 있습니다. 이러한 복구 경로는 사용량 기반 전환이 꺼져 있어도 동작합니다. 계정이 바뀌어도 OpenRelay는 대화 문맥을 재생하지만 프로바이더 측 prompt cache는 다시 예열해야 할 수 있습니다.
 알 수 없는 프로바이더나 id는 종료 코드 1입니다. `--json`은 다음을 반환합니다.
 **401/403**이 발생하면 해당 계정의 프로세스 로컬 affinity를 해제하고 재인증을 요구합니다.
 **429**에서는 `Retry-After`를 준수해 계정 cooldown을 시작하고 affinity를 해제한 뒤,
@@ -271,63 +271,63 @@ Codex pool selection applies to the next request after clearing existing affinit
 { ok: true, provider, type, activeId }
 ```
 
-### `ocx account pause|resume anthropic <id|alias> [--json]`
+### `orl account pause|resume anthropic <id|alias> [--json]`
 
 Anthropic의 자동 대체 계정 선택은 기존 계정 순서를 유지하며, 일시 정지되었거나 재인증이 필요한 계정과 60초 이내에 만료되는 Claude Code 가져오기를 건너뜁니다. 출처가 기록되지 않은 레거시 계정도 선택할 수 있지만, 자체 저장 자격 증명과 일반적인 저장 토큰 갱신만 사용하며 CLI 디스크 자격 증명을 가져오지 않습니다. 60초 넘게 남은 유효한 Claude Code 계정은 선택할 수 있습니다. 이후 자동 가져오기는 비어 있지 않은 access 또는 refresh 토큰이 일치하면 허용됩니다. 두 토큰이 모두 바뀌면 저장된 bearer와 새 bearer에서 인증된 계정 UUID가 같아야 합니다. 로그인·갱신·프로필 조회에서 얻은 증명은 비공개로 저장하며, 계정 라벨·이메일·조직·파일 경로로 대체하지 않습니다.
 
 기존 bearer가 만료되었고 해당 토큰에 묶인 계정 증명이 없으면 자동 복구가 불가능할 수 있습니다. 프로필을 조회할 수 없거나 교체된 토큰의 계정을 확인하지 못하면 저장된 계정을 유지하고, 이미 소비되었을 수 있는 refresh 토큰을 다시 사용하지 않습니다. 현재 Claude Code 자격 증명을 가져오려면 명시적으로 로그인하세요. 가져오기는 관련 없는 신원 미확인 슬롯을 보존하므로 별도 계정이 생길 수 있습니다. 사용할 계정을 선택하고 확인한 뒤 오래된 슬롯을 삭제하세요. 프로필 조회에 실패한 새 가져오기도 신원 미확인 상태로 남으며 같은 자동 복구 제한이 적용됩니다.
 
 허용된 대체 계정이 없으면 사용 가능한 활성 계정이 선택될 때까지 할당량 조회와 실시간 모델 검색이 대기합니다.
-`ocx account use anthropic <account-id-or-alias>`로 일시 정지되지 않은 기존 레거시 계정을 명시적으로 선택할 수 있습니다.
+`orl account use anthropic <account-id-or-alias>`로 일시 정지되지 않은 기존 레거시 계정을 명시적으로 선택할 수 있습니다.
 원래 자격 증명의 출처가 기록되지 않았더라도 해당 계정의 유효한 자격 증명과 일반적인 저장 토큰 갱신을 계속 사용할 수 있습니다.
 
 CLI 명령은 Anthropic OAuth 계정을 id 또는 유일한 alias로 일시 정지하거나 재개합니다. alias는 정확히 일치하는 값을 먼저 찾고, 없으면 대소문자를 구분하지 않고 찾습니다. 대시보드와 같은 `PUT /api/oauth/accounts/pause`에 `{ provider: "anthropic", accountId, paused }`를 보냅니다. 계정에 저장되는 `paused` 상태는 `GET /api/oauth/accounts`에도 표시됩니다. 사전 계정 전환 풀이 꺼져 있어도 정지된 계정은 선택, 세션 바인딩, 429 대체 후보에서 제외됩니다. 모든 계정이 정지되면 하나를 재개할 때까지 요청은 403을 반환합니다. 이미 전송한 요청은 유지하며 자격 증명과 건강 상태를 지우지 않습니다. 재시작·재로그인 후에도 정지는 유지되고, 계정을 삭제하면 함께 제거됩니다. 계정별 전환 임계값은 이 기능에 포함되지 않습니다.
 
-### `ocx account clear <provider> [--json]`
+### `orl account clear <provider> [--json]`
 
 계정 id를 해석하지 않고 Codex 계정의 수동 선택을 지우므로 `auto`라는 id의 계정이 있어도 동작합니다. Codex 풀 전용이며 다른 공급자 유형에는 복원할 자동 선택이 없습니다.
 
-### `ocx account clear-cooldown <openai|anthropic> <id|alias|main> [--json]`
+### `orl account clear-cooldown <openai|anthropic> <id|alias|main> [--json]`
 
 저장된 자격 증명은 바꾸지 않고 프로세스 로컬 실패 cooldown을 해제합니다. Codex Pool 계정에는
 `openai`, Anthropic OAuth 계정에는 `anthropic`을 사용하며 다른 provider는 거부됩니다. 두 경로
 모두 계정 id 또는 고유 alias를 받지만 `main`은 Codex Pool에서만 사용할 수 있습니다.
 
 ```bash
-ocx account clear-cooldown anthropic <id-or-alias>
+orl account clear-cooldown anthropic <id-or-alias>
 ```
 
 활성 cooldown이 없어도 명령은 성공하고 JSON에는 `cleared: false`가 표시됩니다. Anthropic
 cooldown을 해제하면 계정 generation도 전진하므로 이전 quota probe가 해제된 상태를 되살리거나
 오래된 quota 기반 eligibility를 게시할 수 없습니다.
 
-API 키 풀의 키별 할당량은 `ocx account list <provider> --quota [--refresh] --json`으로 조회합니다. `--quota`를 생략하면 할당량 확인을 요청하지 않습니다. 명시한 경우 공급자에 요청을 보낼 수 있으므로 반복 조회에 주의하세요. `quotaMode`, `quotaUnavailable`, 실제 `quota`를 함께 확인해야 하며, 측정하지 못한 값을 0으로 해석하면 안 됩니다. 공급자 전체 보고서를 읽는 아래 `account refresh`와는 별도 조회입니다.
+API 키 풀의 키별 할당량은 `orl account list <provider> --quota [--refresh] --json`으로 조회합니다. `--quota`를 생략하면 할당량 확인을 요청하지 않습니다. 명시한 경우 공급자에 요청을 보낼 수 있으므로 반복 조회에 주의하세요. `quotaMode`, `quotaUnavailable`, 실제 `quota`를 함께 확인해야 하며, 측정하지 못한 값을 0으로 해석하면 안 됩니다. 공급자 전체 보고서를 읽는 아래 `account refresh`와는 별도 조회입니다.
 
-### `ocx account refresh <provider> [--json]`
+### `orl account refresh <provider> [--json]`
 
-Codex 풀에는 `ocx account refresh openai [--json]`를 사용합니다. 계정 할당량을 강제로 새로 고치고 사용 가능 주간/월간 비율과 재설정 시간을 출력합니다. 할당량 데이터가 없으면 0%가 아니라 알 수 없음으로 보고합니다. JSON 봉투는 `{ accounts: AccountRow[] }`이며, Codex 행마다 `quota`가 붙습니다.
+Codex 풀에는 `orl account refresh openai [--json]`를 사용합니다. 계정 할당량을 강제로 새로 고치고 사용 가능 주간/월간 비율과 재설정 시간을 출력합니다. 할당량 데이터가 없으면 0%가 아니라 알 수 없음으로 보고합니다. JSON 봉투는 `{ accounts: AccountRow[] }`이며, Codex 행마다 `quota`가 붙습니다.
 
 OAuth 및 API 키 제공자에는 제공자의 할당량 보고 엔드포인트를 강제로 새로 고칩니다. 토큰 재로그인이나 단순한 계정 목록 재읽기가 아닙니다. `--json`은 `{ provider, report: ProviderQuotaReport | null }`를 반환합니다. 지원되는 할당량 보고가 없는 제공자는 `no quota report available for <provider>`를 출력하고 종료 코드 0으로 끝납니다. 알 수 없는 제공자와 관리 API 실패는 종료 코드 1로 끝납니다. 상위 할당량 확인이 실패하거나 시간 초과되면 대시보드의 할당량 막대와 맞추어 null 또는 오래된 보고로만 떨어집니다(종료 코드 0).
 
-### `ocx account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]`
+### `orl account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]`
 
 `openai` Codex 풀의 임계값을 제어하거나 일반 OAuth 풀의 임계값을 저장합니다. `on`은 80%, `off`는 0%, `threshold <n>`은 0–100을 저장합니다. 일반 풀의 임계값은 `pool.kernel`이 켜져 있고 `strategy: "fill-first"`일 때만 선택에 반영됩니다. 플래그가 꺼져 있으면 저장해도 임계값 기반 전환이 켜지지 않습니다. 어느 쪽이든 제공자 활성화 설정은 바뀌지 않고, 429 오류에 따른 회전도 비활성화되지 않습니다. 일반 풀의 조회와 변경 결과는 서버가 확인한 값을 사용합니다. 일반 풀의 `poolEnabled`는 저장된 제공자별 설정이며 `null`은 미지정입니다. 전역 설정을 상속한 실제 상태를 뜻하지 않습니다. `inert: true`는 임계값이 저장만 되고 적용되지 않는 상태, `inert: false`는 풀이 실제로 적용하고 있는 상태를 뜻합니다. `inert`가 아예 없으면 기능 지원을 알 수 없는 경우이며, 이때도 `enabled: true`로 표시하지 않습니다. API 키 제공자 및 잘못된 값은 거부합니다.
 
-### `ocx account auto-switch anthropic … --account <id>`
+### `orl account auto-switch anthropic … --account <id>`
 
-Anthropic OAuth는 `ocx account auto-switch anthropic threshold 90 --account <id>`로 계정별 정수 0–100을 저장합니다. `off --account <id>`는 0, `on --account <id>`는 80, `inherit --account <id>`는 상속 복원, `status --account <id>`는 조회입니다. `--json`도 지원합니다. 계정 카드에서 같은 사용자 지정 임계값을 편집합니다. 미설정/null은 풀 기본값 `anthropicAccountPool.autoSwitchThreshold`(기본 80)를 상속하고, 0은 해당 계정의 사용량 기반 전환만 끕니다. 재시작·재로그인 후에도 유지되고 계정 삭제 시 제거됩니다. 수동 선택, 세션 affinity, 사용량 미확인·전체 소진 시 fallback, 모델 경로 제한은 유지됩니다. 풀이 꺼져 있으면 임계값은 적용되지 않으며 pause와 429 복구는 계속 동작합니다.
+Anthropic OAuth는 `orl account auto-switch anthropic threshold 90 --account <id>`로 계정별 정수 0–100을 저장합니다. `off --account <id>`는 0, `on --account <id>`는 80, `inherit --account <id>`는 상속 복원, `status --account <id>`는 조회입니다. `--json`도 지원합니다. 계정 카드에서 같은 사용자 지정 임계값을 편집합니다. 미설정/null은 풀 기본값 `anthropicAccountPool.autoSwitchThreshold`(기본 80)를 상속하고, 0은 해당 계정의 사용량 기반 전환만 끕니다. 재시작·재로그인 후에도 유지되고 계정 삭제 시 제거됩니다. 수동 선택, 세션 affinity, 사용량 미확인·전체 소진 시 fallback, 모델 경로 제한은 유지됩니다. 풀이 꺼져 있으면 임계값은 적용되지 않으며 pause와 429 복구는 계속 동작합니다.
 
 ```text
 openai: { provider, autoSwitchThreshold: number, enabled: boolean }
 generic OAuth: { provider, autoSwitchThreshold: number | null, enabled: boolean, poolEnabled: boolean | null, inert: boolean | null }
 ```
 
-### `ocx account priority <provider> <account-id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]`
+### `orl account priority <provider> <account-id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]`
 
 Codex pool 계정 하나의 선택 순서를 읽거나 설정합니다. **값이 클수록 먼저** 쓰이고 기본값은 `0`,
 범위는 `-100`부터 `100`까지입니다. 순서를 갖는 것은 `openai` Codex pool뿐이므로 다른 프로바이더는
 종료 코드 1입니다. `main`은 Codex Desktop 로그인을 가리키며 다른 pool 계정과 똑같이 정렬됩니다.
-`ocx account priority openai main last`로 예비 계정으로 남겨 둘 수 있습니다.
+`orl account priority openai main last`로 예비 계정으로 남겨 둘 수 있습니다.
 
 프리셋 단어는 작은 정수의 다른 이름입니다. `first`는 `+2`, `earlier`는 `+1`, `normal`은 `0`,
 `later`는 `-1`, `last`는 `-2`입니다. `reset`은 기본값으로 되돌리고 저장된 항목을 지웁니다. **값을
@@ -344,11 +344,11 @@ Codex pool 계정 하나의 선택 순서를 읽거나 설정합니다. **값이
 ```
 
 
-### `ocx account login|reauth|code|cancel ...`
+### `orl account login|reauth|code|cancel ...`
 
-헤드리스 셸에서 브라우저나 수동 코드로 계정을 인증합니다. 제공자별 문법은 `ocx account --help`에서 확인하세요. Codex 로그인이 저장돼도 검증이나 모델 카탈로그 갱신이 남아 있으면 일반 출력과 `--json` 모두 종료 코드 1을 반환합니다. 저장된 로그인은 유지되므로 보류 상태만 보고 인증을 다시 시작하지 마세요. 일반 출력은 카탈로그 갱신이 보류됐을 때 stderr에 `ocx sync` 안내를 표시합니다. `--json`은 안내 문구 없이 상태와 보류 플래그를 stdout에 출력합니다.
+헤드리스 셸에서 브라우저나 수동 코드로 계정을 인증합니다. 제공자별 문법은 `orl account --help`에서 확인하세요. Codex 로그인이 저장돼도 검증이나 모델 카탈로그 갱신이 남아 있으면 일반 출력과 `--json` 모두 종료 코드 1을 반환합니다. 저장된 로그인은 유지되므로 보류 상태만 보고 인증을 다시 시작하지 마세요. 일반 출력은 카탈로그 갱신이 보류됐을 때 stderr에 `orl sync` 안내를 표시합니다. `--json`은 안내 문구 없이 상태와 보류 플래그를 stdout에 출력합니다.
 
-### `ocx account remove <provider> <id|alias|main> --yes [--json]`
+### `orl account remove <provider> <id|alias|main> --yes [--json]`
 
 이 보호된 비대화형 삭제는 `--yes`를 요구합니다. 삭제하기 전에 id가 존재하는지 확인하며, 없는 id는 DELETE를 보내지 않고 종료 코드 1로 끝납니다. Codex App의 main 로그인은 제거할 수 없으므로 `remove openai main --yes`는 거부됩니다. 삭제 후에는 해당 계열을 다시 읽습니다. 고정된 Codex 계정을 제거하면 고정이 풀리고 자동 선택으로 돌아갑니다. OAuth는 남아 있는 첫 번째 계정으로 승격하거나 없다고 보고합니다. API 키 풀은 남아 있는 첫 번째 키로 승격하거나 없다고 보고합니다. `--json`의 성공 및 실패 형식은 다음과 같습니다:
 
@@ -358,60 +358,60 @@ Codex pool 계정 하나의 선택 순서를 읽거나 설정합니다. **값이
 ```
 
 `catalogRefreshPending`는 Codex 삭제에만 포함됩니다. `true`여도 삭제는 이미 저장되었으며 human output은
-stderr에 `ocx sync` 안내를 표시하고 종료 코드 0을 유지합니다. OAuth account와 API key 삭제 형식은 바뀌지 않습니다.
+stderr에 `orl sync` 안내를 표시하고 종료 코드 0을 유지합니다. OAuth account와 API key 삭제 형식은 바뀌지 않습니다.
 
-### `ocx account add-key <provider> [--label <label>] [--json]`
+### `orl account add-key <provider> [--label <label>] [--json]`
 
 API 키 제공자에 키를 추가하고 활성화합니다. 키는 비TTY 파이프/리디렉션 stdin에서만 읽습니다. 대화형 TTY 입력, 빈 입력, OAuth/Codex 제공자, API 실패는 종료 코드 1로 끝납니다. 라벨 안에 들어 있더라도 키는 절대 출력되지 않습니다. 비밀 관리자나 here-string을 쓰는 편이 좋습니다:
 
 ```bash
-ocx account add-key openrouter --label personal <<< "$OPENROUTER_API_KEY"
-security find-generic-password -w openrouter | ocx account add-key openrouter --json
+orl account add-key openrouter --label personal <<< "$OPENROUTER_API_KEY"
+security find-generic-password -w openrouter | orl account add-key openrouter --json
 ```
 
 `--json`은 `{ ok: true, id: string | null, label?: string }`를 반환하며 키를 절대 포함하지 않습니다.
 
-### `ocx account reset-credits <id|main> [--consume --yes]`
+### `orl account reset-credits <id|main> [--consume --yes]`
 
 계정의 Codex reset credits를 확인합니다. credit을 소비하는 동작은 파괴적이므로 `--consume`와 `--yes`를 둘 다 요구합니다.
 
-### `ocx account grok-reset-coupons [<account-id>] [--consume --yes [--token-id <id>] [--operation-id <uuid>]] [--json]`
+### `orl account grok-reset-coupons [<account-id>] [--consume --yes [--token-id <id>] [--operation-id <uuid>]] [--json]`
 
 xAI / Grok 계정의 남은 reset coupon을 확인하거나 하나를 교환합니다.
 
 `--consume` 없이 실행하면 사용 가능한 쿠폰 토큰과 유효 기간을 반환합니다:
 
 ```bash
-ocx account grok-reset-coupons
-ocx account grok-reset-coupons acc_xai_01 --json
+orl account grok-reset-coupons
+orl account grok-reset-coupons acc_xai_01 --json
 ```
 
 reset coupon을 교환하면 billing 상태가 변경되고 쿠폰 토큰 하나를 영구적으로 소진합니다. `--consume`에는 `--yes`가 엄격하게 요구됩니다:
 
 ```bash
-ocx account grok-reset-coupons --consume --yes
-ocx account grok-reset-coupons --consume --yes --token-id <token-id>
+orl account grok-reset-coupons --consume --yes
+orl account grok-reset-coupons --consume --yes --token-id <token-id>
 ```
 
 `--operation-id <uuid>`(유효한 UUIDv4여야 함)를 전달하면 멱등한 정산이 보장됩니다. 네트워크가 끊기거나 명령이 재시도되더라도 동일한 operation id는 쿠폰을 다시 소진하는 대신 저장된 결과를 재생합니다.
 
-### `ocx account main <subcommand>`
+### `orl account main <subcommand>`
 
-OpenCodex 계정 풀 라우팅을 변경하지 않고 이름이 지정된 네이티브 Codex 기본 로그인 프로필을 관리합니다.
+OpenRelay 계정 풀 라우팅을 변경하지 않고 이름이 지정된 네이티브 Codex 기본 로그인 프로필을 관리합니다.
 
 ```text
-ocx account main doctor [--json]
-ocx account main list [--json]
-ocx account main register <label> [--json]
-ocx account main add <label>
-ocx account main reauth --device [--no-wait] [--json]
-ocx account main reauth status --flow <id> [--json]
-ocx account main reauth cancel --flow <id> [--json]
-ocx account main switch <profile-id-or-label> --yes [--json]
-ocx account main recover [--rollback --yes] [--json]
+orl account main doctor [--json]
+orl account main list [--json]
+orl account main register <label> [--json]
+orl account main add <label>
+orl account main reauth --device [--no-wait] [--json]
+orl account main reauth status --flow <id> [--json]
+orl account main reauth cancel --flow <id> [--json]
+orl account main switch <profile-id-or-label> --yes [--json]
+orl account main recover [--rollback --yes] [--json]
 ```
 
-`ocx account main reauth --device --no-wait --json`은 성공 시 stdout에 JSON 객체 하나만 출력하며, 사람이 읽는 `follow up:` 안내 줄은 출력하지 않습니다. 반환된 `flowId`를 `ocx account main reauth status --flow <id> --json`에 지정하면 진행 상태를 확인할 수 있습니다.
+`orl account main reauth --device --no-wait --json`은 성공 시 stdout에 JSON 객체 하나만 출력하며, 사람이 읽는 `follow up:` 안내 줄은 출력하지 않습니다. 반환된 `flowId`를 `orl account main reauth status --flow <id> --json`에 지정하면 진행 상태를 확인할 수 있습니다.
 
 각 변경 명령은 실행 중인 프록시가 반환한 정규화된 유효 `CODEX_HOME`을 표시합니다. 이 경로는
 호출자의 `CODEX_HOME`과 다를 수 있으며, JSON을 지원하는 명령은 같은 값을
@@ -419,19 +419,19 @@ ocx account main recover [--rollback --yes] [--json]
 
 버전 1은 파일 기반 Codex 인증을 지원하고 저장된 프로필을 AES-256-GCM으로 암호화하며 암호화 키를 운영 체제 자격 증명 저장소에 보관합니다. `add`는 생성된 자격 증명을 가져오기 전에 공식 Codex 로그인을 스테이징합니다. 프로필을 전환하기 전에 Codex를 종료하십시오. 전환에 성공하면 로컬 작업과 기록은 보존되지만 계속하기 전에 Codex를 다시 시작해야 합니다. `doctor`로 프로필 상태를 확인하고 `recover`로 중단된 전환을 완료하거나 롤백할 수 있습니다. `switch`에는 프로필 ID 또는 라벨을 지정할 수 있습니다.
 
-v1 복구 매트릭스는 트랜잭션 파일이 rename으로 게시된 뒤 OpenCodex 프로세스가 종료되는 경우를 다룹니다. 운영 체제 또는 커널 충돌이나 갑작스러운 전원 손실에 대한 내구성은 보장하지 않습니다. `atomicWriteFileAsync()`는 파일이나 부모 디렉터리에 `fsync`를 수행하지 않습니다.
+v1 복구 매트릭스는 트랜잭션 파일이 rename으로 게시된 뒤 OpenRelay 프로세스가 종료되는 경우를 다룹니다. 운영 체제 또는 커널 충돌이나 갑작스러운 전원 손실에 대한 내구성은 보장하지 않습니다. `atomicWriteFileAsync()`는 파일이나 부모 디렉터리에 `fsync`를 수행하지 않습니다.
 
-암호화된 볼트, 전환 저널, 복구 마커 및 저널 격리 파일은 정규 `<real CODEX_HOME>/.opencodex-native-main-profiles` 디렉터리에 저장됩니다. 따라서 해당 Codex 홈을 공유하는 모든 OpenCodex 인스턴스는 동일한 단일 소유자와 단일 복구 상태를 관찰합니다. 평문 로그인 스테이징은 각 `<OPENCODEX_HOME>/native-main-profile-staging` 디렉터리 아래에 서로 분리된 채 유지됩니다.
+암호화된 볼트, 전환 저널, 복구 마커 및 저널 격리 파일은 정규 `<real CODEX_HOME>/.opencodex-native-main-profiles` 디렉터리에 저장됩니다. 따라서 해당 Codex 홈을 공유하는 모든 OpenRelay 인스턴스는 동일한 단일 소유자와 단일 복구 상태를 관찰합니다. 평문 로그인 스테이징은 각 `<OPENCODEX_HOME>/native-main-profile-staging` 디렉터리 아래에 서로 분리된 채 유지됩니다.
 
-native-main 트래픽이나 저널 복구를 허용하기 전에 수명 주기 소유자가 자격 증명에 대한 배타적 점유권을 획득하고, 이름이 정확히 `auth.json.ocx.<pid>.<sequence>.tmp`인 충돌 잔여 파일만 제거합니다. 각 후보는 변경되지 않은 정규 `CODEX_HOME` 아래에서 하드 링크 수가 1인 일반 파일로 유지되어야 하며, 내용을 잘라내고 flush한 다음 unlink합니다. 링크나 재분석 지점(reparse point)으로의 바꿔치기, 파일 식별 정보 변경 또는 그 밖의 모호성이 있으면 native-main 트래픽은 계속 차단되며, 이름이 비슷할 뿐 정확히 일치하지 않는 파일은 자동으로 제거하지 않습니다. 이는 정상적으로 협력하는 OpenCodex 프로세스의 충돌을 방어하지만, 이미 같은 운영 체제 사용자로 실행 중인 악의적 프로세스까지 방어하지는 않습니다. 해당 사용자와 `CODEX_HOME`이 있는 파일 시스템은 계속 신뢰 대상으로 간주되며, 내용을 잘라내더라도 copy-on-write 저장소, 스냅샷 또는 SSD 잔류 데이터에서 물리적으로 지워진다고 보장할 수 없습니다.
+native-main 트래픽이나 저널 복구를 허용하기 전에 수명 주기 소유자가 자격 증명에 대한 배타적 점유권을 획득하고, 이름이 정확히 `auth.json.ocx.<pid>.<sequence>.tmp`인 충돌 잔여 파일만 제거합니다. 각 후보는 변경되지 않은 정규 `CODEX_HOME` 아래에서 하드 링크 수가 1인 일반 파일로 유지되어야 하며, 내용을 잘라내고 flush한 다음 unlink합니다. 링크나 재분석 지점(reparse point)으로의 바꿔치기, 파일 식별 정보 변경 또는 그 밖의 모호성이 있으면 native-main 트래픽은 계속 차단되며, 이름이 비슷할 뿐 정확히 일치하지 않는 파일은 자동으로 제거하지 않습니다. 이는 정상적으로 협력하는 OpenRelay 프로세스의 충돌을 방어하지만, 이미 같은 운영 체제 사용자로 실행 중인 악의적 프로세스까지 방어하지는 않습니다. 해당 사용자와 `CODEX_HOME`이 있는 파일 시스템은 계속 신뢰 대상으로 간주되며, 내용을 잘라내더라도 copy-on-write 저장소, 스냅샷 또는 SSD 잔류 데이터에서 물리적으로 지워진다고 보장할 수 없습니다.
 
-프리뷰 빌드는 `<OPENCODEX_HOME>/native-main-profiles`를 사용했습니다. 이 레이아웃은 절대로 자동으로 가져오지 않습니다. `doctor`가 레거시 프로필 상태를 보고하면 동일한 `CODEX_HOME`을 공유하는 모든 OpenCodex 프록시를 중지하십시오. 그런 다음 해당하는 `*.vault.json`, `*.journal.json`, 복구 마커 및 참조된 journal-quarantine 파일을 백업하고, 소유자 전용 권한을 유지한 채 모두 함께 정규 디렉터리로 옮기십시오. 또는 이전 프리뷰 파일 세트를 제거하고 `ocx account main register`를 다시 실행하십시오. 동일한 `CODEX_HOME`을 공유하는 프록시가 하나라도 실행 중인 동안에는 여러 이전 루트 중 하나를 선택하거나 두 레이아웃을 동시에 사용하지 마십시오. Windows에서는 이전의 대소문자를 구분하지 않는 홈 식별자를 키로 사용한 프리뷰 상태를 옮기지 말고 재설정해야 합니다. 암호화된 AAD와 운영 체제 키링 식별자는 의도적으로 재사용하지 않기 때문입니다.
+프리뷰 빌드는 `<OPENCODEX_HOME>/native-main-profiles`를 사용했습니다. 이 레이아웃은 절대로 자동으로 가져오지 않습니다. `doctor`가 레거시 프로필 상태를 보고하면 동일한 `CODEX_HOME`을 공유하는 모든 OpenRelay 프록시를 중지하십시오. 그런 다음 해당하는 `*.vault.json`, `*.journal.json`, 복구 마커 및 참조된 journal-quarantine 파일을 백업하고, 소유자 전용 권한을 유지한 채 모두 함께 정규 디렉터리로 옮기십시오. 또는 이전 프리뷰 파일 세트를 제거하고 `orl account main register`를 다시 실행하십시오. 동일한 `CODEX_HOME`을 공유하는 프록시가 하나라도 실행 중인 동안에는 여러 이전 루트 중 하나를 선택하거나 두 레이아웃을 동시에 사용하지 마십시오. Windows에서는 이전의 대소문자를 구분하지 않는 홈 식별자를 키로 사용한 프리뷰 상태를 옮기지 말고 재설정해야 합니다. 암호화된 AAD와 운영 체제 키링 식별자는 의도적으로 재사용하지 않기 때문입니다.
 
 ## 모델
 
-### `ocx models [subcommand]` · `ocx model <subcommand>`
+### `orl models [subcommand]` · `orl model <subcommand>`
 
-`ocx model`은 `ocx models`의 별칭입니다. 하위 명령이 없으면 설정된 제공자에 사전 등록된 모델을 나열합니다. `--provider`는 설정된 제공자 하나를 필터링하고 `--json`은 모델 메타데이터를 반환합니다. `live`는 실행 중인 카탈로그를 읽습니다. `add`, `edit`, `remove`, `list-custom`은 수동 카탈로그 항목을 관리합니다. `enable`, `disable`, `provider`는 가시성을 제어합니다. `selected`는 제공자 허용 목록을 제어합니다. `context`는 제공자 컨텍스트 한도를 제어합니다. `shadow`는 백그라운드 shadow-call 가로채기를 관리합니다.
+`orl model`은 `orl models`의 별칭입니다. 하위 명령이 없으면 설정된 제공자에 사전 등록된 모델을 나열합니다. `--provider`는 설정된 제공자 하나를 필터링하고 `--json`은 모델 메타데이터를 반환합니다. `live`는 실행 중인 카탈로그를 읽습니다. `add`, `edit`, `remove`, `list-custom`은 수동 카탈로그 항목을 관리합니다. `enable`, `disable`, `provider`는 가시성을 제어합니다. `selected`는 제공자 허용 목록을 제어합니다. `context`는 제공자 컨텍스트 한도를 제어합니다. `shadow`는 백그라운드 shadow-call 가로채기를 관리합니다.
 
 `add`·`remove`는 기본적으로 로컬 저장이며 `--live`를 주면 실행 중인 프록시를 바꿉니다. 로컬 `--json` 저장은 프록시가 없으면 `sync.status: "not-attempted"`, `needsSync: true`, 종료 코드 0을 반환합니다. 실제 동기화 시도가 실패하면 저장은 유지하고 0이 아닌 코드로 끝납니다. `list-custom`은 로컬 목록입니다. 발견된 모델의 표시 이름은 raw upstream ID를 받는 `display-name`으로 바꾸고, picker 순서는 public ID를 받는 `order`로 바꿉니다. [영문 절차](/reference/cli/providers-accounts/#display-names-and-picker-identities)에서 전체 목록·featured 접두부·native 순서 초기화 제약을 확인하세요.
 
@@ -451,15 +451,15 @@ native-main 트래픽이나 저널 복구를 허용하기 전에 수명 주기 �
 | `shadow <status\|set> [model\|-]` | `--enabled <on\|off>`, `--json` | Codex의 백그라운드 헬퍼 호출에 사용할 대체 모델을 읽거나 설정합니다. `-`는 모델을 지웁니다. `status`는 프록시가 가로채는 헬퍼 슬러그인 `sourceModels`도 보고합니다(기본값: `gpt-6-luna`, `gpt-5.6-luna`; 0.144.x 이하 클라이언트가 사용한 `gpt-5.4-mini`는 명시적인 `sourceModels` 재정의로 복원할 수 있습니다). |
 
 ```bash
-ocx models live --json                                  # what Codex can actually see right now
-ocx models disable anthropic/claude-haiku-4             # hide one routed model
-ocx models enable gpt-5.6-sol                           # no slash, so it is treated as native
-ocx models provider zenmux off                          # hide a noisy provider wholesale
-ocx models selected anthropic --set claude-opus-5,claude-fable-5
-ocx models selected anthropic --clear                   # drop the allowlist again
-ocx models add deepseek deepseek-v4 --display-name 'DeepSeek V4' --context-window 128000 --modalities text,image
-ocx models list-custom --json                           # read the custom-id for edit/remove
-ocx models remove deepseek/deepseek-v4 --yes
+orl models live --json                                  # what Codex can actually see right now
+orl models disable anthropic/claude-haiku-4             # hide one routed model
+orl models enable gpt-5.6-sol                           # no slash, so it is treated as native
+orl models provider zenmux off                          # hide a noisy provider wholesale
+orl models selected anthropic --set claude-opus-5,claude-fable-5
+orl models selected anthropic --clear                   # drop the allowlist again
+orl models add deepseek deepseek-v4 --display-name 'DeepSeek V4' --context-window 128000 --modalities text,image
+orl models list-custom --json                           # read the custom-id for edit/remove
+orl models remove deepseek/deepseek-v4 --yes
 ```
 
 슬래시가 있는 모델 선택기는 라우팅됩니다(`anthropic/claude-opus-5`). 슬래시가 없는 id는 native OpenAI 모델로 취급되므로, 라우팅된 것처럼 보일 수 있는 id에 대해 그 읽기를 강제하려면 `--native`가 필요합니다.
@@ -468,7 +468,7 @@ ocx models remove deepseek/deepseek-v4 --yes
 
 ### 저장된 쿼터 기록
 
-`ocx account history openai <pool-account-id> [--limit 1-200] [--json]`은 제공자에게 요청하지 않고 저장된 관측을 읽습니다. 관측 시각, WHAM·응답 헤더 출처, 한도 종류와 사용률을 구분해 표시합니다. 계정마다 최대 200개를 30일간 보관하며 전체 저장량에도 제한이 있습니다.
+`orl account history openai <pool-account-id> [--limit 1-200] [--json]`은 제공자에게 요청하지 않고 저장된 관측을 읽습니다. 관측 시각, WHAM·응답 헤더 출처, 한도 종류와 사용률을 구분해 표시합니다. 계정마다 최대 200개를 30일간 보관하며 전체 저장량에도 제한이 있습니다.
 
 일반 토큰 갱신은 기록을 유지합니다. 재로그인·삭제·계정 교체는 이전 기록과 분리합니다. 네이티브 메인 계정과 로그인 저장 전 조회는 포함하지 않습니다. 기록이 없다는 것은 관측 부족이며 사용량 0을 뜻하지 않습니다. 이 명령은 쿼터를 소비하지 않습니다. 관측을 바탕으로 한 용량 추정에는 아래 한계가 적용됩니다.
 

@@ -134,7 +134,7 @@ export function formatUsageReport(data: UsageReportInput, options?: { modelView?
     lines.push(data.usageIncomplete === true
       ? `No matching readable usage records for ${terminalText(what)} in this range; skipped records may contain matches.`
       : `No usage recorded for ${terminalText(what)} in this range.`);
-    lines.push("Check the spelling against `ocx usage --json`, or widen --range.");
+    lines.push("Check the spelling against `orl usage --json`, or widen --range.");
     return lines.map(terminalText);
   }
 

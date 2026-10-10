@@ -334,7 +334,7 @@ export function selectStatusStartupHealth(
 export function runtimeSupervisorLine(startup: StartupHealth): string | null {
   const supervisor = startup.desktop?.supervisor;
   return supervisor
-    ? `Runtime supervisor: OpenCodex Desktop (pid ${supervisor.supervisorPid}, ${supervisor.app}); durable owner: ${startup.desktop?.owned ? "desktop" : "none"}`
+    ? `Runtime supervisor: OpenRelay Desktop (pid ${supervisor.supervisorPid}, ${supervisor.app}); durable owner: ${startup.desktop?.owned ? "desktop" : "none"}`
     : null;
 }
 
@@ -348,7 +348,7 @@ export function statusServiceSummary(
   startupSource?: CliStatusJson["startupSource"],
 ): string {
   if (live && liveStartup) {
-    const supervisor = liveStartup.desktop?.supervisor ? "OpenCodex Desktop supervises the running proxy; " : "";
+    const supervisor = liveStartup.desktop?.supervisor ? "OpenRelay Desktop supervises the running proxy; " : "";
     if (liveStartup.protection === "service" && liveStartup.serviceViable) {
       return `${supervisor}running under the live managed service (logs: ${serviceLogPath()})`;
     }
@@ -362,7 +362,7 @@ export function statusServiceSummary(
     return `${supervisor}${label} startup reports service ${state}${action} (logs: ${serviceLogPath()})`;
   }
   return service.installed && !live
-    ? `${service.summary} — registered but NOT serving; see ${serviceLogPath()} and re-run 'ocx service repair'`
+    ? `${service.summary} — registered but NOT serving; see ${serviceLogPath()} and re-run 'orl service repair'`
     : service.summary;
 }
 
@@ -429,7 +429,7 @@ export function hubStatusLines(hub: HubStatus): string[] {
     // hub looks like from `ocx status`, and nothing else in the report says so (#4236).
     tokenLines.push(
       "    that file holds the MANAGEMENT token, so the hub fences its management API closed at boot —",
-      "    delete it and run 'ocx service repair' to generate a data-plane token",
+      "    delete it and run 'orl service repair' to generate a data-plane token",
     );
   }
   if (hub.dataTokenEnvInShell) {
@@ -442,7 +442,7 @@ export function hubStatusLines(hub: HubStatus): string[] {
     `  Management ingress: ${hub.managementIngress.enabled ? `http://127.0.0.1:${hub.managementIngress.port}` : "disabled"}`,
     `  Management origin: ${hub.managementPublicOrigin ?? "unset — remote pairing and the remote dashboard need hub.managementPublicOrigin"}`,
     ...tokenLines,
-    "  Invite a machine: ocx hub invite",
+    "  Invite a machine: orl hub invite",
   ];
 }
 
@@ -634,7 +634,7 @@ export function unusedProxyWarningLines(input: {
   if (!input.proxyUp || input.routingKind !== "native") return [];
   return [
     "⚠️  Codex routing is native — the running proxy is unused.",
-    "   Codex requests go to OpenAI, not this proxy. Re-point with: ocx start",
+    "   Codex requests go to OpenAI, not this proxy. Re-point with: orl start",
   ];
 }
 
@@ -661,7 +661,7 @@ export function deadProxyRoutingAdviceLines(input: {
   if (input.proxyUp || input.routingKind !== "opencodex-local") return [];
   return [
     "Codex is still pointed at this proxy, so sign-in and model requests both fail while it is down.",
-    "To hand Codex back to its own account and endpoints without starting anything: ocx restore",
+    "To hand Codex back to its own account and endpoints without starting anything: orl restore",
   ];
 }
 
@@ -706,7 +706,7 @@ export function codexRoutingDriftWarning(input: {
   if (drift.kind !== "foreign") return null;
   const ports = [...new Set(drift.targets.map(target => target.port))].join(", ");
   return `Codex routing points at port ${ports}, but the proxy is on ${livePort}; if nothing serves that port, `
-    + "new Codex threads fail with \"Connection refused\". Run 'ocx sync' to re-point it now; a running "
+    + "new Codex threads fail with \"Connection refused\". Run 'orl sync' to re-point it now; a running "
     + "owner proxy may also do that on its own once the port stays dead.";
 }
 
@@ -723,7 +723,7 @@ export function missingCodexCatalogLines(missingCatalogPath: string | null): str
   return [
     "⚠️  Codex is pointed at a model catalog that is no longer on disk, so Codex cannot load its config:",
     `   ${missingCatalogPath}`,
-    "   Regenerate it with 'ocx start', or remove opencodex from Codex with 'ocx restore'.",
+    "   Regenerate it with 'orl start', or remove opencodex from Codex with 'orl restore'.",
   ];
 }
 
@@ -825,7 +825,7 @@ export async function collectStatus(options: { mainAccountPolicy?: boolean } = {
     && resolvedRuntime.replacedConfigured.from.command !== resolvedRuntime.runtime.command
   ) {
     warningParts.push(
-      `Preferred Codex runtime is unavailable; using ${displayCodexRuntimePath(resolvedRuntime.runtime.command)} instead. Run ocx doctor for diagnosis and recovery.`,
+      `Preferred Codex runtime is unavailable; using ${displayCodexRuntimePath(resolvedRuntime.runtime.command)} instead. Run orl doctor for diagnosis and recovery.`,
     );
   } else if (
     resolvedRuntime.runtime.source === "fallback"
@@ -835,16 +835,16 @@ export async function collectStatus(options: { mainAccountPolicy?: boolean } = {
     const detail = resolvedRuntime.failures[0]?.reason;
     warningParts.push(
       detail
-        ? `No validated Codex runtime found (${detail}); falling back to \`codex\`. Run ocx doctor for diagnosis and recovery.`
-        : "No validated Codex runtime found; falling back to `codex`. Run ocx doctor for diagnosis and recovery.",
+        ? `No validated Codex runtime found (${detail}); falling back to \`codex\`. Run orl doctor for diagnosis and recovery.`
+        : "No validated Codex runtime found; falling back to `codex`. Run orl doctor for diagnosis and recovery.",
     );
   }
   if (resolvedRuntime.newerAvailable) {
-    warningParts.push("OpenCodex is using an older Codex binary. Run ocx doctor for diagnosis and recovery.");
+    warningParts.push("OpenRelay is using an older Codex binary. Run orl doctor for diagnosis and recovery.");
   }
   if (clampActive) {
     warningParts.push(
-      `Catalog clamp removed: ${liveRemovedEfforts(lastClamp).join(", ")}. Run ocx doctor for diagnosis and recovery.`,
+      `Catalog clamp removed: ${liveRemovedEfforts(lastClamp).join(", ")}. Run orl doctor for diagnosis and recovery.`,
     );
   }
   // A Grok fence naming a port we are not listening on is invisible everywhere else:
@@ -866,7 +866,7 @@ export async function collectStatus(options: { mainAccountPolicy?: boolean } = {
   if (grokDrift) {
     warningParts.push(
       `Grok Build config points at port ${grokDrift.fencePort}, but the proxy is on `
-      + `${grokDrift.livePort}; grok turns will retry against a closed port. Run 'ocx ensure' to repoint it.`,
+      + `${grokDrift.livePort}; grok turns will retry against a closed port. Run 'orl ensure' to repoint it.`,
     );
   }
   const codexDrift = (() => {

@@ -1,20 +1,20 @@
 ---
 title: Grok Build
-description: Utilisez n’importe quel modèle routé par opencodex depuis la CLI Grok Build de xAI — les modèles sont automatiquement enregistrés dans ~/.grok/config.toml pendant l’exécution du proxy.
+description: Utilisez n’importe quel modèle routé par OpenRelay depuis la CLI Grok Build de xAI — les modèles sont automatiquement enregistrés dans ~/.grok/config.toml pendant l’exécution du proxy.
 ---
 
-opencodex expose un point de terminaison compatible OpenAI `POST /v1/chat/completions` (ainsi que `/v1/responses`) sur son
+OpenRelay expose un point de terminaison compatible OpenAI `POST /v1/chat/completions` (ainsi que `/v1/responses`) sur son
 port local, tandis que Grok Build prend en charge les modèles personnalisés hébergés sur des serveurs compatibles OpenAI. Avec
-cette intégration, opencodex enregistre automatiquement l’intégralité de son catalogue visible dans Grok Build :
+cette intégration, OpenRelay enregistre automatiquement l’intégralité de son catalogue visible dans Grok Build :
 aucune modification manuelle de la configuration n’est nécessaire.
 
 ## Enregistrement automatique
 
-Lorsque `~/.grok` existe, `ocx start` (et `ocx ensure` / `ocx restart`) écrit un bloc géré
+Lorsque `~/.grok` existe, `orl start` (et `orl ensure` / `orl restart`) écrit un bloc géré
 en `~/.grok/config.toml` :
 
 ```toml
-# >>> opencodex managed block — do not edit (removed by `ocx stop`) >>>
+# >>> opencodex managed block — do not edit (removed by `orl stop`) >>>
 [model_providers.opencodex]
 base_url = "http://127.0.0.1:10100/v1"
 api_backend = "responses"
@@ -42,14 +42,14 @@ default = true
 - **Additif :** votre propre configuration, en dehors des délimiteurs, n’est jamais modifiée. Avant la première
   injection dans un fichier existant, une sauvegarde unique est créée dans
   `~/.grok/config.toml.bak-opencodex`.
-- **Idempotent :** chaque exécution de `ocx start` (ainsi que de `ocx ensure` lorsque le démarrage automatique est activé) remplace
+- **Idempotent :** chaque exécution de `orl start` (ainsi que de `orl ensure` lorsque le démarrage automatique est activé) remplace
   le bloc délimité par le catalogue actuel.
-- **Supprimé à l’arrêt :** `ocx stop`, `ocx eject`, `ocx uninstall` et l’arrêt normal
+- **Supprimé à l’arrêt :** `orl stop`, `orl eject`, `orl uninstall` et l’arrêt normal
   du démon hors service suppriment le bloc délimité et restaurent votre fichier
-  octet pour octet. Sous un gestionnaire de service, le démontage passe par `ocx stop`/`ocx
+  octet pour octet. Sous un gestionnaire de service, le démontage passe par `orl stop`/`ocx
   uninstall` (les processus en mode service conservent intentionnellement le bloc lors des relancements).
 - **Les alias en conflit** déjà définis dans vos propres tables `[model.*]` sont respectés
-  (opencodex ajoute un suffixe à ses propres entrées) ; un bloc délimité endommagé (marqueur de début sans marqueur de fin)
+  (OpenRelay ajoute un suffixe à ses propres entrées) ; un bloc délimité endommagé (marqueur de début sans marqueur de fin)
   refuse tout changement automatique et demande une réparation manuelle.
 
 Choisissez ensuite un modèle dans Grok Build :
@@ -68,7 +68,7 @@ les entrées doivent contenir `supports_reasoning_effort` ainsi que les choix du
 `reasoning_efforts`. Une projection compatible avec Grok de cette échelle est également écrite dans chaque table
 `[model.*]` gérée, avec `supports_reasoning_effort`, la valeur par défaut `reasoning_effort` et les lignes
 `[[model.<alias>.reasoning_efforts]]`, afin que le menu soit présent lorsque Grok lit le modèle depuis
-`config.toml`. Pour les entrées de modèles routés, opencodex reflète les niveaux configurés pour le fournisseur
+`config.toml`. Pour les entrées de modèles routés, OpenRelay reflète les niveaux configurés pour le fournisseur
 (`reasoningEfforts` / `modelReasoningEfforts`, et la valeur par défaut de
 `modelDefaultReasoningEfforts`). Ces métadonnées décrivent l’échelle des modèles routés configurée dans le proxy ;
 elles ne prétendent pas que le fournisseur prend nativement en charge ces niveaux.
@@ -80,7 +80,7 @@ en amont fixes, et non les métadonnées configurées pour les modèles routés.
 `none` et `minimal`, sont conservés lorsqu’ils sont annoncés. Les niveaux non pris en charge ou en double,
 notamment `ultra`, propre à Codex, sont omis du fichier afin que chaque option générée reste sélectionnable.
 
-Grok Build communique avec opencodex au moyen de l’API Responses. Lorsque la route annonce une
+Grok Build communique avec OpenRelay au moyen de l’API Responses. Lorsque la route annonce une
 échelle de raisonnement, le relais Responses transmet `reasoning.summary` tel que configuré, si bien
 que les traces de raisonnement parviennent à Grok nativement sous forme d’éléments de raisonnement
 Responses. Réglez `reasoning.summary: "none"` si un client souhaite que le modèle réfléchisse sans
@@ -90,16 +90,16 @@ route.
 ## Note d'authentification
 
 Grok Build exige une clé API non vide pour les modèles personnalisés, même sur l’interface de bouclage. Les entrées
-injectées contiennent une valeur fictive (`opencodex-loopback`) ; opencodex ignore les clés d’admission pour les
+injectées contiennent une valeur fictive (`opencodex-loopback`) ; OpenRelay ignore les clés d’admission pour les
 connexions de bouclage, de sorte qu’aucun véritable secret n’est utilisé.
 
-**L’enregistrement automatique est réservé au bouclage.** Lorsque opencodex écoute sur une adresse qui n’est pas
+**L’enregistrement automatique est réservé au bouclage.** Lorsque OpenRelay écoute sur une adresse qui n’est pas
 de bouclage — y compris les caractères génériques `0.0.0.0` et `::`, qui exposent toutes les interfaces — les
 requêtes doivent présenter votre véritable jeton d’admission, qu’un bloc géré ne peut pas transporter en toute
 sécurité. Inscrire ce jeton en clair stockerait votre secret dans `~/.grok/config.toml` et écraserait toute valeur
-que vous y auriez définie lors du prochain `ocx start`/`ensure`/`restart`. Dans ce cas, opencodex n’écrit donc rien
+que vous y auriez définie lors du prochain `orl start`/`ensure`/`restart`. Dans ce cas, OpenRelay n’écrit donc rien
 (et supprime tout bloc laissé par une ancienne liaison de bouclage) ; vous configurez vous-même les modèles en
-dehors des marqueurs gérés, où aucune opération opencodex ne peut les écraser. Consultez la
+dehors des marqueurs gérés, où aucune opération OpenRelay ne peut les écraser. Consultez la
 [recette manuelle](#recette-manuelle-sans-enregistrement-automatique) pour obtenir la table exacte, puis définissez
 `base_url` (une adresse réellement accessible depuis l’endroit où vous exécutez `grok`) et `api_key` (votre
 `OPENCODEX_API_AUTH_TOKEN`).
@@ -110,12 +110,12 @@ résolu n’interrompt pas la requête : Grok utilise alors votre jeton de sessi
 HTTP en clair qui n’appartient pas à xAI.
 
 La valeur `api_key` injectée sur l’entrée du fournisseur se trouve en tête de la chaîne d’identifiants de Grok. Les requêtes
-adressées à opencodex ne nécessitent donc aucune connexion Grok supplémentaire. Conservez votre configuration
+adressées à OpenRelay ne nécessitent donc aucune connexion Grok supplémentaire. Conservez votre configuration
 habituelle `grok login` / `XAI_API_KEY` pour les modèles Grok natifs et les fonctions qui contactent directement xAI.
 
 ## Recette manuelle (sans enregistrement automatique)
 
-Si vous gérez `~/.grok/config.toml` vous-même — ou si opencodex est sur une liaison sans bouclage — ajoutez un bloc
+Si vous gérez `~/.grok/config.toml` vous-même — ou si OpenRelay est sur une liaison sans bouclage — ajoutez un bloc
 `[model_providers.opencodex]` et des tables par modèle qui le référencent via `model_provider`, en dehors des
 marqueurs `# >>> opencodex managed block` :
 
@@ -150,20 +150,20 @@ Placez entre guillemets tout alias contenant un point : `[model.grok-4.5]` sans 
 
 ## Limitations connues
 
-- **Installé par le service `ocx restart` :** le proxy en cours d'exécution possède l'autorisation de redémarrage et la vidange
+- **Installé par le service `orl restart` :** le proxy en cours d'exécution possède l'autorisation de redémarrage et la vidange
   coordination, tandis que le gestionnaire de service installé lance le remplacement après l'ancien processus
   sorties. La supervision du service reste installée. Lors de l'enregistrement automatique en boucle, le bloc géré
   reste également en place tout au long du transfert ; les déploiements sans bouclage utilisent une gestion manuelle Grok
   configuration à la place. La commande ne réussit qu'après qu'un processus différent, avec vérification d'identité, ait été effectué.
   sain sur le même port.
-- **Moment de lecture de la configuration :** démarrez d’abord opencodex, puis lancez `grok` pour obtenir les résultats les plus
+- **Moment de lecture de la configuration :** démarrez d’abord OpenRelay, puis lancez `grok` pour obtenir les résultats les plus
   prévisibles. Grok Build surveille `~/.grok/config.toml` et recharge la configuration lorsque la table
   `[model]` change réellement (temporisation d’environ une seconde, avec comparaison du contenu) ;
   un bloc actualisé atteint une session ouverte sans redémarrage. Pour confirmer ce que Grok a analysé,
   exécutez `grok inspect` : il répertorie les sources de configuration chargées et signale les champs
   rejetés. Il n'affiche pas la liste des modèles résolus. La version actuelle de Grok Build signale et
   ignore les champs de modèle invalides tout en conservant le reste de l'entrée. Une erreur de syntaxe
-  TOML empêche toujours le chargement du fichier. opencodex écrit de manière atomique, de sorte que
+  TOML empêche toujours le chargement du fichier. OpenRelay écrit de manière atomique, de sorte que
   Grok observe un document complet à chaque rechargement.
 - **Mises à jour du catalogue :** le bloc délimité reflète le catalogue au moment de l’injection. Après
-  l’ajout de fournisseurs ou de modèles, exécutez `ocx ensure` (ou redémarrez le proxy) pour l’actualiser.
+  l’ajout de fournisseurs ou de modèles, exécutez `orl ensure` (ou redémarrez le proxy) pour l’actualiser.

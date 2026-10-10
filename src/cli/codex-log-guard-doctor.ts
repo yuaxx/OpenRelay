@@ -29,7 +29,7 @@ function protectionLines(report: DoctorReport): string[] {
     case "drifted":
       return [
         `  WARN   protection drifted (desired ${protection.desiredMode}; observed ${protection.observedMode})`,
-        "         Action: ocx storage codex-logs repair",
+        "         Action: orl storage codex-logs repair",
       ];
     case "unsupported":
       return ["  --     protection unavailable for this schema"];

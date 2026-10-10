@@ -3,7 +3,7 @@ title: 轉接器
 description: provider adapter 的目標、請求建置方式與各自特性。
 ---
 
-**adapter** 負責在 opencodex 的內部請求/回應模型與某個 provider 的 wire 格式之間轉換。每個
+**adapter** 負責在 OpenRelay 的內部請求/回應模型與某個 provider 的 wire 格式之間轉換。每個
 adapter 都實作 `ProviderAdapter` 介面（`src/adapters/base.ts`）：
 
 ```ts
@@ -70,7 +70,7 @@ interface ProviderAdapter {
   **`required` 或精確名稱選擇會 fail closed**，因為 Ollama 的 `/api/chat` 沒有可用來強制它的
   `tool_choice` 欄位。
 - **正典 Ollama Cloud 上拒絕結構化輸出。** Ollama 目前在文件中說明其 Cloud 不支援結構化輸出，
-  且 Cloud 不會強制 `format` 欄位，因此 OpenCodex 會讓該請求顯式失敗，而不是在 schema 指定的
+  且 Cloud 不會強制 `format` 欄位，因此 OpenRelay 會讓該請求顯式失敗，而不是在 schema 指定的
   請求上回傳不受約束的散文。本機 / 自訂 `ollama-native` 端點保留 Ollama 原生的 `format` 映射
   （`json_object` → `"json"`，`json_schema` → schema 物件本身）。
 
@@ -137,7 +137,7 @@ Kiro 的 assistant 文字本身沒有可靠的回合結束標記，但終止的 
 錯誤，內容過濾或 guardrail 停止表現為 filtered incomplete。沒有真實工具呼叫卻出現的 `TOOL_USE` 被視為
 矛盾而非進展。
 
-只有完全沒有 stop reason 時，opencodex 才新增私有的 `codex_kiro_final_answer` 工具並做一次續寫。
+只有完全沒有 stop reason 時，OpenRelay 才新增私有的 `codex_kiro_final_answer` 工具並做一次續寫。
 重複抑制嚴格限定為空白歸一化後的完全一致：改寫過的狀態更新可能改變本回合的結果（從"仍在進行"變成"已完成"），
 丟掉那句話比顯示一次表面重複更糟糕。
 
@@ -177,7 +177,7 @@ GPT-5.6 系列使用 `additionalModelRequestFields.reasoning.effort`，`claude-o
 - 使用 `runTurn` 而非一般的 fetch/parse 路徑。請求與伺服器事件由 `devin/cloud-direct/wire.ts` 手寫的 protobuf 分幀處理。
 - 以 `GetCascadeModelConfigs` 依帳號取得模型；方案未涵蓋的模型在清單階段就被濾除。
 - Cognition 對工具說明設有長度上限與完全比對的封鎖清單。轉接器會改寫已知語句並截斷過長說明。
-- 金鑰不會更新。失效後請重新執行 `ocx login devin`。
+- 金鑰不會更新。失效後請重新執行 `orl login devin`。
 - 即使走 CLI 匯入路徑，本機的也只有憑證，請求本身無論哪條路徑都發往 Cognition。早期版本曾在 `devin-cli` id 下提供第二個轉接器，把請求作為對本機 `devin acp` 子行程的 Agent Client Protocol 工作階段來執行，現已移除。仍引用該轉接器的已儲存設定會在啟動時重寫為 `devin`，包括 `"devin-acp"` 這類自訂名稱的列。
 
 ## `azure-openai`（別名：`azure`）

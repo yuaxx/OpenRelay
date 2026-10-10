@@ -1,10 +1,10 @@
 ---
 title: opencode
-description: Utilisez n’importe quel modèle routé depuis opencode — opencodex injecte un bloc de fournisseur à l’exécution sans modifier votre propre configuration opencode.
+description: Utilisez n’importe quel modèle routé depuis opencode — OpenRelay injecte un bloc de fournisseur à l’exécution sans modifier votre propre configuration opencode.
 ---
 
 opencode lit ses fournisseurs dans des couches de configuration JSON fusionnées plutôt que dans des variables
-d’environnement ; il n’existe donc aucun emplacement de type `ANTHROPIC_BASE_URL` dans lequel injecter une valeur. `ocx opencode`
+d’environnement ; il n’existe donc aucun emplacement de type `ANTHROPIC_BASE_URL` dans lequel injecter une valeur. `orl opencode`
 comble cette lacune : il s’assure que le proxy fonctionne, crée un bloc fournisseur à partir du
 catalogue visible, puis l’injecte au moyen de la couche d’exécution en ligne d’OpenCode
 (`OPENCODE_CONFIG_CONTENT`).
@@ -12,12 +12,12 @@ catalogue visible, puis l’injecte au moyen de la couche d’exécution en lign
 ## Démarrage rapide
 
 ```bash
-ocx opencode
+orl opencode
 ```
 
 Cette commande s’assure que le proxy fonctionne et lance opencode en injectant les blocs
 `provider.opencodex` et `providers.opencodex` générés pour ce processus. Les arguments supplémentaires sont transmis tels quels :
-`ocx opencode run "hello"`.
+`orl opencode run "hello"`.
 
 Les modèles acheminés apparaissent dans le sélecteur sous le fournisseur `opencodex` :
 
@@ -34,28 +34,28 @@ lire la configuration globale ou celle du projet afin de détecter une redéfini
 fournisseurs, agents, raccourcis clavier, entrées MCP et références relatives `{file:…}` existants
 continuent d’être résolus depuis leurs fichiers d’origine.
 
-Pour ce lancement uniquement, opencodex ajoute les blocs `provider.opencodex` et `providers.opencodex` générés via
+Pour ce lancement uniquement, OpenRelay ajoute les blocs `provider.opencodex` et `providers.opencodex` générés via
 la couche d’exécution en ligne d’OpenCode. Cette couche est fusionnée après les configurations globale, personnalisée et de projet,
 et ne remplace que les clés en conflit pour le processus enfant.
 
-| Couche | Comportement avec `ocx opencode` |
+| Couche | Comportement avec `orl opencode` |
 | --- | --- |
 | Configuration globale/personnalisée/de projet | Conservée sur disque exactement telle que vous l’avez écrite |
 | Exécution en ligne (`OPENCODE_CONFIG_CONTENT`) | Reçoit les blocs `provider.opencodex` et `providers.opencodex` générés (fusionnés dans toute config en ligne héritée) |
 | Chemins relatifs `{file:…}` | Toujours résolus par rapport au fichier de configuration qui les a définis à l’origine |
 
 Si une configuration globale ou de projet définit également `provider.opencodex` ou `providers.opencodex`, le lanceur affiche une
-note d’information : la couche d’exécution de `ocx opencode` la remplace pour ce lancement.
+note d’information : la couche d’exécution de `orl opencode` la remplace pour ce lancement.
 
 ## Ajouter le bloc à votre propre configuration
 
-`ocx opencode` injecte le bloc fournisseur pour un seul lancement, ce qui signifie simplement `opencode` toujours
+`orl opencode` injecte le bloc fournisseur pour un seul lancement, ce qui signifie simplement `opencode` toujours
 ne sait rien du proxy. Lorsque vous souhaitez que les modèles acheminés soient disponibles à partir de `opencode` — ou
-depuis une extension d'éditeur qui ne passe jamais par le lanceur — `ocx export` imprime la même chose
+depuis une extension d'éditeur qui ne passe jamais par le lanceur — `orl export` imprime la même chose
 bloc fournisseur à fusionner dans votre propre configuration :
 
 ```bash
-ocx export --client opencode
+orl export --client opencode
 ```
 
 Le proxy doit être en cours d'exécution. La commande imprime la config, la destination canonique
@@ -65,17 +65,17 @@ déplacer le bloc dans votre configuration est votre acte explicite.
 
 :::caution[Fusionnez, ne remplacez jamais]
 Fusionnez les deux blocs — `provider.opencodex` et `providers.opencodex` — dans votre configuration existante. Remplacer tout le fichier par le
-celui exporté détruit vos autres fournisseurs, agents, raccourcis clavier et entrées MCP. `ocx export --out`
+celui exporté détruit vos autres fournisseurs, agents, raccourcis clavier et entrées MCP. `orl export --out`
 refuse d'écraser un fichier existant exactement pour cette raison, alors pointez `--out` sur un chemin de travail
 et copiez les blocs :
 
 ```bash
-ocx export --client opencode --out ~/opencodex-opencode.json
+orl export --client opencode --out ~/opencodex-opencode.json
 ```
 :::
 
 Contrairement au bloc d'exécution du lanceur, un bloc fusionné est un instantané statique : il ne suit pas votre
-catalogue. Réexécutez `ocx export` après avoir ajouté un fournisseur ou modifié la visibilité du modèle.
+catalogue. Réexécutez `orl export` après avoir ajouté un fournisseur ou modifié la visibilité du modèle.
 
 Une fois fusionné, exportez la clé d'admission avant de lancer l'opencode — sauf si le proxy est en bouclage,
 là où aucun n'est nécessaire :
@@ -117,7 +117,7 @@ une clé API configurée — ce qui est ce qu'exige une liaison sans bouclage.
 
 Une liaison de bouclage (`127.0.0.1`, la valeur par défaut) n'authentifie rien, donc la référence `{env:…}` est
 inerte et vous pouvez laisser la variable non définie. Cela n'a d'importance que lorsque `hostname` est défini au-delà du bouclage ;
-voir [Accès à distance](/fr/reference/configuration/server/#accès-à-distance). Cette clé d'admission est celle de opencodex
+voir [Accès à distance](/fr/reference/configuration/server/#accès-à-distance). Cette clé d'admission est celle de OpenRelay
 propre et n'est pas lié aux clés du fournisseur en amont configurées sous
 [Prestataires](/fr/guides/providers/).
 

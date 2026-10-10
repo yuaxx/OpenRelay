@@ -10,9 +10,9 @@ Non-mutating probes may still contact providers, consume quota or refresh caches
 
 Declared capabilities: 28.
 
-### `ocx link port`
+### `orl link port`
 
-Usage: `ocx link port [--json]`
+Usage: `orl link port [--json]`
 
 Allocate a free loopback port for a remote home link.
 
@@ -29,7 +29,7 @@ JSON mode: `envelope`.
 - Local temporary loopback socket allocation; no management API request.
 - Always emits a CLI-shaped {port} JSON object, even without --json.
 
-### ocx link issue
+### orl link issue
 
 Human-only handoff: ask the operator to perform this in their own terminal or dashboard; do not capture the secret-bearing result.
 
@@ -51,9 +51,9 @@ JSON mode: `payload`.
 
 - Human-only handoff: issues a credential and prints its plaintext once. Never capture it in an agent transcript. Requires loopback admin authority; tunnel port must be 1024-65535.
 
-### `ocx link status`
+### `orl link status`
 
-Usage: `ocx link status [--json]`
+Usage: `orl link status [--json]`
 
 Read link listener and tunnel status.
 
@@ -71,9 +71,9 @@ JSON mode: `payload`.
 
 - Reads live listener/tunnel metadata; when no proxy is found, falls back to the local link store. Always emits JSON.
 
-### `ocx link revoke`
+### `orl link revoke`
 
-Usage: `ocx link revoke --link-id <id> [--force --yes] [--json]`
+Usage: `orl link revoke --link-id <id> [--force --yes] [--json]`
 
 Revoke a link credential and remove its link record.
 
@@ -95,11 +95,11 @@ JSON mode: `envelope`.
 - Requires a valid link ID and loopback admin authority. Explicit force additionally requires --yes.
 - Ordinary revoke always emits {linkId} JSON; forced revoke has human output or a JSON cleanup receipt. Already-revoked link_not_found is idempotent success.
 - Ordinary revoke retains its no-body and idempotent behavior. Forced success reports remoteCleanup:skipped from invocation intent; already-missing link reports unverified. Neither proves the remote client disconnected.
-- If forced cleanup was needed, run ocx disconnect on the remote client. No new enrollment, SSH trust or credential action is implied.
+- If forced cleanup was needed, run orl disconnect on the remote client. No new enrollment, SSH trust or credential action is implied.
 
-### `ocx remote-workspace pair`
+### `orl remote-workspace pair`
 
-Usage: `ocx remote-workspace pair <hub-url> --pairing-code-stdin --root <absolute-path> [--root <absolute-path> ...] [--toolchain-root <absolute-directory> ...] [--executor-helper <absolute-file>] [--name <device-name>] [--json]`
+Usage: `orl remote-workspace pair <hub-url> --pairing-code-stdin --root <absolute-path> [--root <absolute-path> ...] [--toolchain-root <absolute-directory> ...] [--executor-helper <absolute-file>] [--name <device-name>] [--json]`
 
 Enroll this executor with one Hub using a one-time code from stdin and locally approved roots.
 
@@ -121,9 +121,9 @@ JSON mode: `payload`.
 - Executor-local state/control; no Hub management API routes.
 - Pairing consumes a human-provided one-time code from stdin and persists enrollment; approved roots and platform confinement determine capabilities.
 
-### `ocx remote-workspace agent`
+### `orl remote-workspace agent`
 
-Usage: `ocx remote-workspace agent`
+Usage: `orl remote-workspace agent`
 
 Keep the paired executor connected to its Hub.
 
@@ -136,9 +136,9 @@ JSON mode: `none`.
 - Executor-local state/control; no Hub management API routes.
 - Maintains the enrolled executor connection to the Hub until interrupted.
 
-### `ocx remote-workspace status`
+### `orl remote-workspace status`
 
-Usage: `ocx remote-workspace status [--json]`
+Usage: `orl remote-workspace status [--json]`
 
 Read local executor enrollment and available capabilities without printing credentials.
 
@@ -155,11 +155,11 @@ JSON mode: `payload`.
 - Executor-local state/control; no Hub management API routes.
 - Reports local enrollment and platform/helper capabilities without credentials; not Hub device/runtime/session inventory.
 
-### ocx hub invite
+### orl hub invite
 
 Human-only handoff: ask the operator to perform this in their own terminal or dashboard; do not capture the secret-bearing result.
 
-Mint a single-use pairing code on a hub and print the exact `ocx connect` line for one more machine.
+Mint a single-use pairing code on a hub and print the exact `orl connect` line for one more machine.
 
 State-changing: yes.
 
@@ -179,9 +179,9 @@ JSON mode: `envelope`.
 - The bound browser origin is always printed; when it is not http://localhost:10100 the warning names the port the connecting machine must use.
 - Refuses when the advertised data origin would be loopback (a loopback or wildcard bind with no hub.dataPublicOrigin and no --data-url) rather than printing a line that dials the other machine itself.
 - Prints no data-plane token. Remote machines receive their own revocable per-client key from the exchange.
-- Mints through the attested local pairing-grant route, the same one ocx gui pair uses; no admin token is read.
+- Mints through the attested local pairing-grant route, the same one orl gui pair uses; no admin token is read.
 
-### `ocx connect rotate`
+### `orl connect rotate`
 
 Rotate the connected client's data key against the hub, with commit and abort.
 
@@ -204,9 +204,9 @@ JSON mode: `payload`.
 - Requires transient authority on stdin; the credential is never persisted or echoed.
 - A rotation left pending by a crash is resumed here — startup and status stop rather than guess which key generation is live.
 
-### `ocx api protocols`
+### `orl api protocols`
 
-Usage: `ocx api protocols [--provider <name>] [--json]`
+Usage: `orl api protocols [--provider <name>] [--json]`
 
 Read the protocol contract version, API surfaces, protocol settings and feature vocabulary.
 
@@ -223,9 +223,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx api explain`
+### `orl api explain`
 
-Usage: `ocx api explain --model <id> --inbound <responses|chat|messages> [--feature <key>[,<key>]]... [--json]`
+Usage: `orl api explain --model <id> --inbound <responses|chat|messages> [--feature <key>[,<key>]]... [--json]`
 
 Preview the request path a model would take from one inbound API, computed from config.
 
@@ -246,9 +246,9 @@ JSON mode: `payload`.
 
 - A read-only POST: nothing is sent upstream, no combo state advances and the input is not logged.
 
-### `ocx api policy`
+### `orl api policy`
 
-Usage: `ocx api policy [--messages <on|off>] [--unrepresentable <legacy|reject>] [--rollout <switch>=<on|off>]... [--json]`
+Usage: `orl api policy [--messages <on|off>] [--unrepresentable <legacy|reject>] [--rollout <switch>=<on|off>]... [--json]`
 
 Read the protocol policy, or change the Messages surface, unrepresentable policy and rollout switches.
 
@@ -271,9 +271,9 @@ JSON mode: `payload`.
 - A bare invocation reads and never writes.
 - A setting flag changes the operator's config; run it only when the operator asks for that change.
 
-### `ocx access key`
+### `orl access key`
 
-Usage: `ocx access key list [--json]`
+Usage: `orl access key list [--json]`
 
 Manage API access keys and inspect masked metadata.
 
@@ -299,9 +299,9 @@ JSON mode: `payload`.
 - Creation and rotation initiation return plaintext secrets once and are human-only handoffs. Ask the operator to perform them in their terminal or dashboard; never capture the returned credential.
 - Use the separately documented safe follow-up leaves. keys and top-level api-key are aliases.
 
-### `ocx access key list`
+### `orl access key list`
 
-Usage: `ocx access key list [--json]`
+Usage: `orl access key list [--json]`
 
 List masked access keys, usage, endpoints and pending rotations.
 
@@ -319,9 +319,9 @@ JSON mode: `payload`.
 
 - No plaintext secret is returned by the list route.
 
-### `ocx access key get`
+### `orl access key get`
 
-Usage: `ocx access key get <id-or-name> [--json]`
+Usage: `orl access key get <id-or-name> [--json]`
 
 Read one masked key and its access scope.
 
@@ -339,9 +339,9 @@ JSON mode: `payload`.
 
 - Case-insensitive ID takes precedence over name; ambiguous names are refused.
 
-### `ocx access key set`
+### `orl access key set`
 
-Usage: `ocx access key set <id-or-name> [--allow-provider <name>]... [--allow-model <id>]... [--clear] [--json]`
+Usage: `orl access key set <id-or-name> [--allow-provider <name>]... [--allow-model <id>]... [--clear] [--json]`
 
 Replace selected provider/model scope dimensions.
 
@@ -363,9 +363,9 @@ JSON mode: `payload`.
 
 - At least one scope option is required. Unspecified dimensions are preserved; this command does not rename keys.
 
-### `ocx access key rotate commit`
+### `orl access key rotate commit`
 
-Usage: `ocx access key rotate commit <id> <rotation-id> [--json]`
+Usage: `orl access key rotate commit <id> <rotation-id> [--json]`
 
 Commit a pending key rotation.
 
@@ -383,9 +383,9 @@ JSON mode: `payload`.
 
 - Use IDs from the human-authorized rotation. Commit only after the client accepts the replacement; the old credential is retired.
 
-### `ocx access key rotate abort`
+### `orl access key rotate abort`
 
-Usage: `ocx access key rotate abort <id> <rotation-id> [--json]`
+Usage: `orl access key rotate abort <id> <rotation-id> [--json]`
 
 Abort a pending key rotation.
 
@@ -403,9 +403,9 @@ JSON mode: `payload`.
 
 - Use IDs from the human-authorized rotation. Abort discards the pending replacement credential.
 
-### `ocx access key remove`
+### `orl access key remove`
 
-Usage: `ocx access key remove <id> --yes [--json]`
+Usage: `orl access key remove <id> --yes [--json]`
 
 Revoke one API access key.
 
@@ -424,9 +424,9 @@ JSON mode: `payload`.
 
 - Uses the exact ID, not name resolution; delete is an alias.
 
-### `ocx access endpoints`
+### `orl access endpoints`
 
-Usage: `ocx access endpoints [--json]`
+Usage: `orl access endpoints [--json]`
 
 Read endpoint URLs from the access-key metadata.
 
@@ -444,9 +444,9 @@ JSON mode: `envelope`.
 
 - Projects only baseUrl, endpoint and fields ending in Endpoint; use key list for the full metadata payload.
 
-### `ocx access models`
+### `orl access models`
 
-Usage: `ocx access models [--json]`
+Usage: `orl access models [--json]`
 
 Read the public external-model catalog.
 
@@ -462,9 +462,9 @@ JSON mode: `payload`.
 
 - Data-plane GET /v1/models via the runtime client; differs from management models live. The routes field indexes management API routes only.
 
-### `ocx access test`
+### `orl access test`
 
-Usage: `ocx access test <model> [--protocol <chat|responses|messages>] [--api-key-stdin] [--json]`
+Usage: `orl access test <model> [--protocol <chat|responses|messages>] [--api-key-stdin] [--json]`
 
 Send a small inference request through the selected protocol.
 
@@ -485,9 +485,9 @@ JSON mode: `envelope`.
 - Version1 selected-key JSON reports control/request observations and a safe text/completion/usage projection. Limited output stays limited; neither control nor response certifies billing identity, key scopes or atomic policy stability.
 - Keys use explicit bounded stdin and printableASCII input compatible with issued keys. Same-target identity checks, deadlines, redirect refusal, exact-key redaction and cancellation apply; no retries or fallback credential.
 
-### `ocx remote-workspace hub status`
+### `orl remote-workspace hub status`
 
-Usage: `ocx remote-workspace hub status [--json]`
+Usage: `orl remote-workspace hub status [--json]`
 
 Read Hub devices, runtime availability and sessions.
 
@@ -506,9 +506,9 @@ JSON mode: `payload`.
 - Existing remote-workspace status remains executor-local. These fixed reads use the selected management Hub; they do not create pairing grants, sessions or remote commands.
 - Available empty lists succeed. Disabled Hub observations return explicit available:false and exit1; malformed or refused responses are not presented as empty success. Runtime reads can perform availability probes.
 
-### `ocx remote-workspace hub runtimes`
+### `orl remote-workspace hub runtimes`
 
-Usage: `ocx remote-workspace hub runtimes [--json]`
+Usage: `orl remote-workspace hub runtimes [--json]`
 
 Read Codex, Claude and Pi availability on the Hub.
 
@@ -527,9 +527,9 @@ JSON mode: `payload`.
 - Existing remote-workspace status remains executor-local. These fixed reads use the selected management Hub; they do not create pairing grants, sessions or remote commands.
 - Available empty lists succeed. Disabled Hub observations return explicit available:false and exit1; malformed or refused responses are not presented as empty success. Runtime reads can perform availability probes.
 
-### `ocx remote-workspace hub sessions`
+### `orl remote-workspace hub sessions`
 
-Usage: `ocx remote-workspace hub sessions [--json]`
+Usage: `orl remote-workspace hub sessions [--json]`
 
 Read Hub sessions and their public recent events.
 
@@ -548,9 +548,9 @@ JSON mode: `payload`.
 - Existing remote-workspace status remains executor-local. These fixed reads use the selected management Hub; they do not create pairing grants, sessions or remote commands.
 - Available empty lists succeed. Disabled Hub observations return explicit available:false and exit1; malformed or refused responses are not presented as empty success. Runtime reads can perform availability probes.
 
-### `ocx access key rename`
+### `orl access key rename`
 
-Usage: `ocx access key rename <id-or-name> <name> [--json]`
+Usage: `orl access key rename <id-or-name> <name> [--json]`
 
 Rename an unambiguously selected API key while preserving its scopes.
 
@@ -570,9 +570,9 @@ JSON mode: `payload`.
 - Resolves a unique ID/name from the pinned management roster and sends only id/name. Duplicate-ID ambiguity is refused; no plaintext, scope clear, rotation or deletion is involved.
 - Name follows existing trimmed nonempty64-unit/control-character rules. Resolution is not revision CAS; API-key root alias shares the operation.
 
-### `ocx access audio transcribe`
+### `orl access audio transcribe`
 
-Usage: `ocx access audio transcribe <file> --model <gpt-4o-transcribe|gpt-4o-mini-transcribe|whisper-1> --api-key-stdin [--json]`
+Usage: `orl access audio transcribe <file> --model <gpt-4o-transcribe|gpt-4o-mini-transcribe|whisper-1> --api-key-stdin [--json]`
 
 Transcribe an explicitly chosen bounded audio file with a supplied data key.
 
@@ -592,9 +592,9 @@ JSON mode: `payload`.
 - File must be nonempty regular input≤25,000,000bytes; multipart≤32MiB, response≤2MiB, request130s. Only the requested text result is returned, with exact supplied-key redaction.
 - Audio uses its own explicit-key admission, including on an otherwise authless model listener. No generic model control, retries, secret argv/env or redirect following.
 
-### `ocx access audio live-check`
+### `orl access audio live-check`
 
-Usage: `ocx access audio live-check --model <id> --api-key-stdin [--json]`
+Usage: `orl access audio live-check --model <id> --api-key-stdin [--json]`
 
 Check actual live-session readiness, then close the connection.
 

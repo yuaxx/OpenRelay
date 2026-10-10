@@ -3,7 +3,7 @@ import type { Capability } from "./capability-types";
 export const LAB_CAPABILITIES: readonly Capability[] = [
   {
     command: ["lab", "status"],
-    usage: "ocx lab status [--json]",
+    usage: "orl lab status [--json]",
     summary: "Read local Lab projection status.",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -13,7 +13,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "verdicts"],
-    usage: "ocx lab verdicts [--subject <subject>] [--layer <layer>] [--suite <suite>] [--verdict <verdict>] [--from <ms>] [--to <ms>] [--limit <n>] [--cursor <cursor>] [--json]",
+    usage: "orl lab verdicts [--subject <subject>] [--layer <layer>] [--suite <suite>] [--verdict <verdict>] [--from <ms>] [--to <ms>] [--limit <n>] [--cursor <cursor>] [--json]",
     summary: "Read local Lab verdicts.",
     routes: [],
     flags: [{"name": "--subject", "value": "string", "summary": "Exact subject ID."}, {"name": "--layer", "value": "string", "summary": "Evidence layer."}, {"name": "--suite", "value": "string", "summary": "Suite ID."}, {"name": "--verdict", "value": "string", "summary": "Compatibility verdict."}, {"name": "--from", "value": "number", "summary": "Inclusive timestamp in milliseconds."}, {"name": "--to", "value": "number", "summary": "Timestamp upper bound in milliseconds."}, {"name": "--limit", "value": "number", "summary": "Positive page size."}, {"name": "--cursor", "value": "string", "summary": "Opaque page cursor."}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -23,7 +23,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "subjects"],
-    usage: "ocx lab subjects [--kind <kind>] [--limit <n>] [--cursor <cursor>] [--json]",
+    usage: "orl lab subjects [--kind <kind>] [--limit <n>] [--cursor <cursor>] [--json]",
     summary: "Read local Lab subjects.",
     routes: [],
     flags: [{"name": "--kind", "value": "string", "summary": "Subject kind."}, {"name": "--limit", "value": "number", "summary": "Positive page size."}, {"name": "--cursor", "value": "string", "summary": "Opaque page cursor."}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -33,7 +33,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "observations"],
-    usage: "ocx lab observations [--subject <subject>] [--layer <layer>] [--suite <suite>] [--scenario <scenario>] [--outcome <outcome>] [--execution-mode <execution-mode>] [--from <ms>] [--to <ms>] [--limit <n>] [--cursor <cursor>] [--json]",
+    usage: "orl lab observations [--subject <subject>] [--layer <layer>] [--suite <suite>] [--scenario <scenario>] [--outcome <outcome>] [--execution-mode <execution-mode>] [--from <ms>] [--to <ms>] [--limit <n>] [--cursor <cursor>] [--json]",
     summary: "Read local Lab observations.",
     routes: [],
     flags: [{"name": "--subject", "value": "string", "summary": "Exact subject ID."}, {"name": "--layer", "value": "string", "summary": "Evidence layer."}, {"name": "--suite", "value": "string", "summary": "Suite ID."}, {"name": "--scenario", "value": "string", "summary": "Scenario ID."}, {"name": "--outcome", "value": "string", "summary": "Observation outcome."}, {"name": "--execution-mode", "value": "string", "summary": "Execution mode."}, {"name": "--from", "value": "number", "summary": "Inclusive timestamp in milliseconds."}, {"name": "--to", "value": "number", "summary": "Timestamp upper bound in milliseconds."}, {"name": "--limit", "value": "number", "summary": "Positive page size."}, {"name": "--cursor", "value": "string", "summary": "Opaque page cursor."}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -43,7 +43,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "events"],
-    usage: "ocx lab events [--event-kind <event-kind>] [--subject <subject>] [--from <ms>] [--to <ms>] [--excluded <true|false>] [--limit <n>] [--cursor <cursor>] [--json]",
+    usage: "orl lab events [--event-kind <event-kind>] [--subject <subject>] [--from <ms>] [--to <ms>] [--excluded <true|false>] [--limit <n>] [--cursor <cursor>] [--json]",
     summary: "Read local Lab events.",
     routes: [],
     flags: [{"name": "--event-kind", "value": "string", "summary": "Event kind."}, {"name": "--subject", "value": "string", "summary": "Exact subject ID."}, {"name": "--from", "value": "number", "summary": "Inclusive timestamp in milliseconds."}, {"name": "--to", "value": "number", "summary": "Timestamp upper bound in milliseconds."}, {"name": "--excluded", "value": "string", "summary": "true or false; takes a value."}, {"name": "--limit", "value": "number", "summary": "Positive page size."}, {"name": "--cursor", "value": "string", "summary": "Opaque page cursor."}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -53,7 +53,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "artifacts"],
-    usage: "ocx lab artifacts [--status <status>] [--artifact-class <artifact-class>] [--limit <n>] [--cursor <cursor>] [--json]",
+    usage: "orl lab artifacts [--status <status>] [--artifact-class <artifact-class>] [--limit <n>] [--cursor <cursor>] [--json]",
     summary: "Read local Lab artifacts.",
     routes: [],
     flags: [{"name": "--status", "value": "string", "summary": "present, corrupt or purged_unavailable."}, {"name": "--artifact-class", "value": "string", "summary": "Artifact class."}, {"name": "--limit", "value": "number", "summary": "Positive page size."}, {"name": "--cursor", "value": "string", "summary": "Opaque page cursor."}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -63,7 +63,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "catalog"],
-    usage: "ocx lab catalog [--layer <layer>] [--suite <suite>] [--json]",
+    usage: "orl lab catalog [--layer <layer>] [--suite <suite>] [--json]",
     summary: "Read local Lab catalog.",
     routes: [],
     flags: [{"name": "--layer", "value": "string", "summary": "Evidence layer."}, {"name": "--suite", "value": "string", "summary": "Suite ID."}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -73,7 +73,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "subject"],
-    usage: "ocx lab subject <subjectId> [--json]",
+    usage: "orl lab subject <subjectId> [--json]",
     summary: "Inspect one local Lab subject.",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -83,7 +83,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "event"],
-    usage: "ocx lab event <eventId> [--json]",
+    usage: "orl lab event <eventId> [--json]",
     summary: "Inspect one local Lab event.",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -93,7 +93,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "artifact"],
-    usage: "ocx lab artifact <digest> [--json]",
+    usage: "orl lab artifact <digest> [--json]",
     summary: "Inspect one local Lab artifact.",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -103,7 +103,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "production-signals"],
-    usage: "ocx lab production-signals --subject <id> [--limit <n>] [--json]",
+    usage: "orl lab production-signals --subject <id> [--limit <n>] [--json]",
     summary: "Read passive production context for one exact Lab route subject.",
     routes: [],
     flags: [{"name": "--subject", "value": "string", "summary": "Exact Lab route subject ID.", "required": true}, {"name": "--limit", "value": "number", "summary": "Positive page size."}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -113,7 +113,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "public", "preview"],
-    usage: "ocx lab public preview --event <eventId> [--event <eventId> ...] [--json]",
+    usage: "orl lab public preview --event <eventId> [--event <eventId> ...] [--json]",
     summary: "Preview unsigned local public evidence.",
     routes: [],
     flags: [{"name": "--event", "value": "string", "summary": "Event ID; repeat for multiple records.", "required": true}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -123,7 +123,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "public", "export"],
-    usage: "ocx lab public export --event <eventId> [--event <eventId> ...] [--json]",
+    usage: "orl lab public export --event <eventId> [--event <eventId> ...] [--json]",
     summary: "Export signed local public evidence.",
     routes: [],
     flags: [{"name": "--event", "value": "string", "summary": "Event ID; repeat for multiple records.", "required": true}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -133,7 +133,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "public", "verify"],
-    usage: "ocx lab public verify --file <bundle.json> [--json]",
+    usage: "orl lab public verify --file <bundle.json> [--json]",
     summary: "Verify a public evidence file.",
     routes: [],
     flags: [{"name": "--file", "value": "string", "summary": "Public evidence bundle path.", "required": true}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -143,7 +143,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "public", "import"],
-    usage: "ocx lab public import --file <bundle.json> [--json]",
+    usage: "orl lab public import --file <bundle.json> [--json]",
     summary: "Import public evidence as untrusted community context.",
     routes: [],
     flags: [{"name": "--file", "value": "string", "summary": "Public evidence bundle path.", "required": true}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -153,7 +153,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "public", "community"],
-    usage: "ocx lab public community [--json]",
+    usage: "orl lab public community [--json]",
     summary: "List local untrusted community evidence context.",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -163,7 +163,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "automation", "status"],
-    usage: "ocx lab automation [status] [--json]",
+    usage: "orl lab automation [status] [--json]",
     summary: "Read local automation policy, queue and run state.",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -173,7 +173,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "automation", "enable"],
-    usage: "ocx lab automation enable [--protocol] [--live] [--json]",
+    usage: "orl lab automation enable [--protocol] [--live] [--json]",
     summary: "Enable local Lab automation layers.",
     routes: [],
     flags: [{"name": "--protocol", "value": "boolean", "summary": "Select protocol conformance."}, {"name": "--live", "value": "boolean", "summary": "Select live route compatibility; may spend upstream quota."}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -183,7 +183,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "automation", "disable"],
-    usage: "ocx lab automation disable [--json]",
+    usage: "orl lab automation disable [--json]",
     summary: "Disable local Lab automation.",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -193,7 +193,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "automation", "runs"],
-    usage: "ocx lab automation runs [--limit <n>] [--cursor <c>] [--json]",
+    usage: "orl lab automation runs [--limit <n>] [--cursor <c>] [--json]",
     summary: "List locally persisted automation runs.",
     routes: [],
     flags: [{"name": "--limit", "value": "number", "summary": "Positive page size."}, {"name": "--cursor", "value": "string", "summary": "Opaque page cursor."}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],
@@ -203,7 +203,7 @@ export const LAB_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["lab", "run"],
-    usage: "ocx lab run --layer <protocol_conformance|live_route_compatibility|task_effectiveness> --scenario <id> [--provider <name>] [--model <id>] [--json]",
+    usage: "orl lab run --layer <protocol_conformance|live_route_compatibility|task_effectiveness> --scenario <id> [--provider <name>] [--model <id>] [--json]",
     summary: "Plan and enqueue an explicit local Lab run.",
     routes: [],
     flags: [{"name": "--layer", "value": "string", "summary": "Evidence layer.", "required": true}, {"name": "--scenario", "value": "string", "summary": "Scenario ID.", "required": true}, {"name": "--provider", "value": "string", "summary": "Configured provider name."}, {"name": "--model", "value": "string", "summary": "Model ID."}, {"name": "--json", "value": "boolean", "summary": "Emit the local result as JSON."}],

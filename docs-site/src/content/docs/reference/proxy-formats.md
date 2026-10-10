@@ -3,7 +3,7 @@ title: Proxy API Formats
 description: Wire-level reference for the Responses, Chat Completions, Anthropic Messages, model catalog, WebSocket, realtime, and compaction surfaces.
 ---
 
-opencodex presents one local proxy in several client dialects. A Codex client can speak the
+OpenRelay presents one local proxy in several client dialects. A Codex client can speak the
 Responses API, an OpenAI-compatible app can speak Chat Completions, and Claude Code can speak
 Anthropic Messages without requiring every upstream provider to implement every format.
 
@@ -46,7 +46,7 @@ sentence such as `I can't help with that request.` instead of HTTP 200 plus
 `finish_reason: content_filter`. Codex treats a 403 as a transport failure, so the
 user turn is never recorded and the same request is retried.
 
-On a non-combo Responses request, OpenCodex rewrites that allowlisted 403 to an
+On a non-combo Responses request, OpenRelay rewrites that allowlisted 403 to an
 HTTP 200 Responses payload with `status: "incomplete"` and
 `incomplete_details.reason: "content_filter"`. The rewrite runs on the openai-chat
 adapter path and on openai-responses passthrough (grok-4.6 / grok-4.5 OAuth).
@@ -88,7 +88,7 @@ frames in order. This handshake policy is separate from the Responses WebSocket 
 ## File transcription
 
 Connections > API keys has separate **Dictation** and **Live Voice** blocks.
-Enter an OpenCodex data key, not a provider or management key. Dictation uploads
+Enter an OpenRelay data key, not a provider or management key. Dictation uploads
 the file you select and offers cancellation and transcript copying. Live Voice's
 **Check connection** opens a session without microphone access or audio frames,
 waits for the provider's session acknowledgment, and disconnects after one minute
@@ -98,7 +98,7 @@ health or entitlement. Use the explicit action to observe a result. Examples use
 key placeholders and never include the entered secret. An older server without
 audio metadata leaves these controls unavailable.
 
-`POST /v1/audio/transcriptions` accepts an OpenCodex data-plane key in
+`POST /v1/audio/transcriptions` accepts an OpenRelay data-plane key in
 `Authorization: Bearer`, `x-opencodex-api-key`, or `x-api-key`, including on a local
 listener. An explicitly supplied invalid key is rejected. Upload one audio file
 as multipart `file` and provide `model=gpt-4o-transcribe` for a connected ChatGPT
@@ -133,7 +133,7 @@ content is not written to request history.
 
 ## Streaming dictation
 
-`WS /v1/audio/transcriptions/stream` is an OpenCodex extension for a connected
+`WS /v1/audio/transcriptions/stream` is an OpenRelay extension for a connected
 ChatGPT account. It is separate from OpenAI's public Realtime transcription
 protocol. Authenticate with the same proxy-key headers as file transcription.
 Browser clients instead offer these two WebSocket subprotocols:
@@ -167,14 +167,14 @@ for final text and `session.updated` with `session.status="closed"`.
 
 ## `POST /v1/responses`
 
-This is the native opencodex data-plane shape. The request body must be a JSON object with a
+This is the native OpenRelay data-plane shape. The request body must be a JSON object with a
 non-empty `model`. `input` may be a string or an array of Responses items.
 
 ### Caller conversation header
 
 For HTTP `POST /v1/responses` and `POST /v1/messages`, a client can send a stable
 `x-session-id` for each conversation. When no `session_id`, `session-id`, or `thread-id`
-header is present, opencodex promotes the marker to `session_id`. Managed Grok identity
+header is present, OpenRelay promotes the marker to `session_id`. Managed Grok identity
 on Responses takes precedence too. Even an empty explicit header suppresses promotion.
 
 Use 1–128 ASCII letters, digits, `.`, `_`, `:`, or `-`, starting with a letter or digit.
@@ -203,7 +203,7 @@ unchanged, and no identity is invented for requests without a conversation marke
 For third-party clients, keep one caller-owned marker per conversation, including repeated
 `curl` requests. A shared `prompt_cache_key` or identical system/tools prefix is a cache cohort,
 not proof that two requests belong to one conversation. Requests without a conversation marker
-receive no invented stable session. OpenCodex also does not impersonate Codex by synthesizing
+receive no invented stable session. OpenRelay also does not impersonate Codex by synthesizing
 an `originator`; a caller-supplied originator retains its normal forwarding rules. Header
 continuity does not establish a cache hit: compare the upstream's reported cached input tokens
 for your own repeated-prefix requests. An omitted cache-write count is not evidence of no write.
@@ -251,7 +251,7 @@ With `stream: true`, the response is `text/event-stream`. The bridge emits Respo
 With `stream: false` or no `stream`, the same adapter events are collected into one Responses JSON
 object. Both forms preserve the selected model, output items, terminal status, and usage.
 The canonical ChatGPT Codex route still uses `stream: true` on its upstream-only request because that
-destination is SSE-only; OpenCodex boundedly validates and folds the terminal stream back into the
+destination is SSE-only; OpenRelay boundedly validates and folds the terminal stream back into the
 JSON shape the client requested. This transport coercion does not alter an explicit `store` value.
 The first terminal must be valid; a later terminal cannot replace an invalid first one. Output indices
 must be contiguous and covered by a completed item or the terminal output, so a text/tool delta left
@@ -323,13 +323,13 @@ would overflow. That overflow emits a terminal downstream `response.failed` even
 The upstream WebSocket checks `NO_PROXY`/`no_proxy` first. Otherwise it uses the first non-empty
 `HTTPS_PROXY`, `https_proxy`, `ALL_PROXY`, or `all_proxy` value; `HTTP_PROXY` alone does not proxy a
 WSS connection. HTTP and HTTPS proxy URLs are passed to Bun. If the selected value is invalid or
-uses an unsupported protocol, opencodex skips the WebSocket attempt and uses HTTP/SSE instead of
+uses an unsupported protocol, OpenRelay skips the WebSocket attempt and uses HTTP/SSE instead of
 dialing the upstream directly.
 
 These rules belong to the upstream WebSocket transport, independently of the selected provider
 adapter. HTTP fetch-based Responses requests, including SSE fallback, use the
 [configured outbound fetch](/reference/configuration/server/#server-fields). A server SOCKS5 proxy — set
-with `config.proxy` or inherited from a SOCKS5 `ALL_PROXY` — uses OpenCodex's built-in tunnel when
+with `config.proxy` or inherited from a SOCKS5 `ALL_PROXY` — uses OpenRelay's built-in tunnel when
 `NO_PROXY`/`no_proxy` does not exempt the target. Scheme-specific
 `HTTP_PROXY`/`HTTPS_PROXY` values retain Bun's native HTTP(S) handling, while a non-SOCKS
 `ALL_PROXY` is not a native HTTP fetch route. `config.proxy` fills missing
@@ -450,7 +450,7 @@ Responses items; translates function tools, tool choice, images, reasoning effor
 response formats; runs the normal Responses routing pipeline; then translates the result back.
 
 Image URLs and base64 data URLs use Chat `image_url` content parts. Translation preserves
-supported `detail` values (`auto`, `low`, `high`). On translated routes, OpenCodex also accepts
+supported `detail` values (`auto`, `low`, `high`). On translated routes, OpenRelay also accepts
 image-bearing tool-result arrays as a compatibility extension: Responses routes retain structured
 output, while the `openai-chat` adapter sends tool images in a following user message because Chat
 tool content is text-only. Other downstream adapters own provider-specific placement. Plain text
@@ -513,7 +513,7 @@ Anthropic passthrough retains its separate body-size contract.
 
 Base64 and URL image sources are translated in user messages and nested tool results. File-backed
 images (`source.type: "file"`) require native Anthropic passthrough; translated routes return a
-fixed HTTP 400 error asking for base64 or URL input. OpenCodex does not resolve another provider's
+fixed HTTP 400 error asking for base64 or URL input. OpenRelay does not resolve another provider's
 file storage or upload the referenced image on the caller's behalf.
 
 When replay history contains an image-bearing tool result without its adjacent call, the
@@ -597,7 +597,7 @@ Thinking replay and prompt-cache work remain separate in [#3719](https://github.
 
 ### External API keys
 
-External clients use an OpenCodex key in any supported audio credential header,
+External clients use an OpenRelay key in any supported audio credential header,
 or the browser subprotocol pair described above. Standalone
 `WS /v1/live?model=gpt-live-1-codex` uses the Frameless protocol; an omitted model
 defaults to that identifier and `gpt-live-1` is its proxy alias. This is not a
@@ -641,7 +641,7 @@ token/account pair; an arbitrary key prefix is not proof of native credentials.
 Credential-free trusted-local native calls retain their existing behavior.
 
 `POST /v1/live` accepts the ChatGPT/Codex App Frameless call-creation surface.
-`POST /v1/realtime/calls` accepts the OpenAI Realtime call-creation surface. opencodex selects an
+`POST /v1/realtime/calls` accepts the OpenAI Realtime call-creation surface. OpenRelay selects an
 eligible OpenAI-family route, normalizes the call-creation request for the upstream authentication
 mode, and relays the bounded response.
 
@@ -666,7 +666,7 @@ sent it, and none is invented.
 `Authorization` and the ChatGPT account id are proxy-owned on ChatGPT-backed routes (Pool replaces
 them with the stored account, Direct forwards the validated caller bearer) and an API-key provider
 gets its own bearer. Codex only sends the join to the proxy when `experimental_realtime_ws_base_url`
-points at it; `ocx start` injects that key next to `openai_base_url` (see
+points at it; `orl start` injects that key next to `openai_base_url` (see
 [Codex integration](/guides/codex-integration/)).
 
 ## `POST /v1/responses/compact`
@@ -679,7 +679,7 @@ conversation.
 | Canonical ChatGPT or official OpenAI route | Tries the native `/responses/compact` endpoint with the resolved account and model authentication; HTTP 404 falls back to a regular Responses compaction turn |
 | Other routed model | Runs an internal, non-streaming, no-tools compaction turn with a `compaction_trigger`; requires exactly one synthetic `compaction` item whose `encrypted_content` is an `ocx1:` envelope; decodes that summary into v1 replacement history |
 
-If the native compact endpoint returns HTTP 404, OpenCodex retries compaction through a regular
+If the native compact endpoint returns HTTP 404, OpenRelay retries compaction through a regular
 Responses turn with the same model selector and session headers. Canonical ChatGPT fallback
 turns use upstream SSE; the compact caller still receives JSON. A completed native opaque
 compaction item is preserved, while an `ocx1:` summary is decoded into replacement user history.
@@ -777,21 +777,21 @@ Anthropic-origin failures are rendered in Anthropic's error envelope, so the ori
 ## Encrypted-content hygiene
 
 The proxy treats genuine backend ciphertext as opaque. Structurally valid ciphertext is preserved
-byte for byte: opencodex does not decrypt it, translate its contents, or re-encrypt it for another
+byte for byte: OpenRelay does not decrypt it, translate its contents, or re-encrypt it for another
 provider.
 
 Some agent hooks have historically placed plaintext control text in an `encrypted_content` slot.
 For compatibility, the proxy separates that plaintext into text parts while retaining any
 structurally valid Fernet runs unchanged. If an `agent_message` loses all encrypted parts during
 that repair, it becomes a normal user message. If a current v2 task remains genuinely encrypted
-but the selected routed target cannot read native ChatGPT ciphertext, opencodex fails with
+but the selected routed target cannot read native ChatGPT ciphertext, OpenRelay fails with
 `unreadable_encrypted_agent_task` instead of sending unreadable bytes to that provider. See
 [Sub-agent Surface](/guides/sub-agent-surface/) for the client behavior around worker tasks.
 
 History is handled too, and differently, because losing a replayed message should not end a
 conversation. A replayed `agent_message` that mixes readable text with backend ciphertext cannot
 be lowered to a public message, so a routed Responses destination would otherwise receive the
-ciphertext along with an item type only the ChatGPT backend declares. Before dispatch, opencodex
+ciphertext along with an item type only the ChatGPT backend declares. Before dispatch, OpenRelay
 replaces that ciphertext with `[encrypted content omitted]` — the same marker it already
 substitutes after an upstream decrypt failure — which leaves the item lowerable and the readable
 text intact. The provider never sees the ciphertext or the private item, and the conversation
@@ -805,12 +805,12 @@ existing decrypt-failure recovery.
 ### Switching providers in an existing conversation
 
 A replayed reasoning item carries `encrypted_content` that only the provider and credential that
-produced it can read. When opencodex knows the conversation was last served by a different
+produced it can read. When OpenRelay knows the conversation was last served by a different
 provider, it removes that blob before sending and keeps the item's summary. If that provider also
 used a different endpoint or credential, the item's `rs_…` id is removed too, because it names an
 item the new destination cannot look up. When it cannot know,
 for example after a proxy restart, the new destination rejects the blob instead: OpenAI and Azure
-OpenAI answer `400 invalid_encrypted_content`. opencodex then resends the request once without the
+OpenAI answer `400 invalid_encrypted_content`. OpenRelay then resends the request once without the
 previous provider's reasoning state. The blob goes, and so does the reasoning item's `rs_…` id,
 because that id names an item the previous provider stored and the new destination would answer
 `Item with id 'rs_…' not found`.

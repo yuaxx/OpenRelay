@@ -1,6 +1,6 @@
 ---
 title: Sağlayıcılar
-description: opencodex'in bir LLM sağlayıcısıyla kimlik doğrulaması yapmasının ve konuşmasının her yolu — OAuth, API anahtarı, ChatGPT iletme ve yerel.
+description: OpenRelay'in bir LLM sağlayıcısıyla kimlik doğrulaması yapmasının ve konuşmasının her yolu — OAuth, API anahtarı, ChatGPT iletme ve yerel.
 ---
 
 Bir **sağlayıcı**, bir yukarı akış LLM uç noktası artı ona nasıl ulaşılacağıdır:
@@ -108,26 +108,26 @@ GPT-5.6 Sol/Terra/Luna slug'larını (`gpt-5.6-sol`, `gpt-5.6-terra`,
 ## 2. Hesap girişi (OAuth)
 
 Sağlayıcı önayarları hesap girişini kullanabilir — deneysel resmi olmayan bir cihaz
-akışı köprüsü aracılığıyla GitHub Copilot da buna dahildir. opencodex bunların kimlik
+akışı köprüsü aracılığıyla GitHub Copilot da buna dahildir. OpenRelay bunların kimlik
 bilgilerini `~/.opencodex/auth.json` içinde saklar ve otomatik olarak yeniler.
-Oturum açma CLI'sı `ocx login codex` komutunu da kabul eder; bu yukarıdaki sağlayıcılardan biri
-değildir: komut Codex hesap havuzu girişine yönlendirilir (`ocx account login codex` ile aynı akış).
+Oturum açma CLI'sı `orl login codex` komutunu da kabul eder; bu yukarıdaki sağlayıcılardan biri
+değildir: komut Codex hesap havuzu girişine yönlendirilir (`orl account login codex` ile aynı akış).
 Havuzun kendi hesap defteri vardır, bu nedenle bu yol çalışan bir proxy gerektirir. `chatgpt` ve
 `openai` aynı yolun takma adlarıdır.
 
 ```bash
-ocx login xai          # xAI Grok
-ocx login anthropic    # Anthropic Claude (Pro/Max)
-ocx login kimi         # Moonshot Kimi
-ocx login nous         # Nous Portal (cihaz yetkisi; ücretsiz + ücretli modeller)
-ocx login kiro         # kiro-cli kimlik bilgilerini içe aktarın (veya belirteç geri dönüşü)
-ocx login google-antigravity
-ocx login cursor       # bağımsız Cursor PKCE girişi
-ocx login command-code # Command Code tarayıcı OAuth (veya ~/.commandcode/auth.json içe aktarma)
-ocx login devin       # Cognition/Devin: önce Devin CLI kimliği içe aktarılır, yoksa Auth0 tarayıcı girişi
-ocx login github-copilot  # GitHub cihaz akışı → Copilot belirteci (Copilot Pro/Business)
-ocx login codex        # Codex hesap havuzu (takma adlar: chatgpt, openai; çalışan bir proxy gerekir)
-ocx logout <saglayici>
+orl login xai          # xAI Grok
+orl login anthropic    # Anthropic Claude (Pro/Max)
+orl login kimi         # Moonshot Kimi
+orl login nous         # Nous Portal (cihaz yetkisi; ücretsiz + ücretli modeller)
+orl login kiro         # kiro-cli kimlik bilgilerini içe aktarın (veya belirteç geri dönüşü)
+orl login google-antigravity
+orl login cursor       # bağımsız Cursor PKCE girişi
+orl login command-code # Command Code tarayıcı OAuth (veya ~/.commandcode/auth.json içe aktarma)
+orl login devin       # Cognition/Devin: önce Devin CLI kimliği içe aktarılır, yoksa Auth0 tarayıcı girişi
+orl login github-copilot  # GitHub cihaz akışı → Copilot belirteci (Copilot Pro/Business)
+orl login codex        # Codex hesap havuzu (takma adlar: chatgpt, openai; çalışan bir proxy gerekir)
+orl logout <saglayici>
 ```
 
 | Sağlayıcı | Adaptör | Temel URL | Notlar |
@@ -137,10 +137,10 @@ ocx logout <saglayici>
 | `kimi` | `openai-chat` | `https://api.kimi.com/coding/v1` | Kimi Code modelleri. `kimi-for-coding` artık K2.8 Preview modelini gösterir; 1 milyon token bağlam, `low`/`high`/`max` akıl yürütme ve metin ile görsel girdisi sunar. `k3-256k` için bağlam sınırı sabit 256K'dır. |
 | `kimi-responses` | `openai-responses` | `https://api.kimi.com/coding/v1` | `kimi` ile aynı OAuth oturumunu ve model listesini Responses üzerinden kullanır. Akıl yürütme içeriği sunucuda şifreli kalır; araç çağrıları ve sonuçları görünürdür. |
 | `nous` | `openai-chat` | `https://inference-api.nousresearch.com/v1` | Nous Research abonelik ağ geçidi (Hermes Agent'ın kullandığı aynı arka uç). `portal.nousresearch.com`'a karşı cihaz yetkilendirmesi girişi; erişim belirteci istek başına çıkarım JWT'sidir. Oturum açmış hesaptan canlı olarak keşfedilen karışık ücretli + `:free` model kataloğu (`tencent/hy3:free`, `stepfun/step-3.7-flash:free`, ...). Yenileme belirteçleri tek kullanımlıktır ve her yenilemede döndürülür. |
-| `kiro` | `kiro` | `https://runtime.us-east-1.kiro.dev` | İlk oturum açma, kurulu ve oturum açılmış `kiro-cli` oturumunu içe aktarır (Unix'te `curl -fsSL https://cli.kiro.dev/install` &#124; `bash` ile kurun; Windows PowerShell'de `irm 'https://cli.kiro.dev/install.ps1'` &#124; `iex` kullanın; ardından `kiro-cli login` çalıştırın). **Hesap ekle**, `kiro-cli` oturumunu kapatır, `kiro-cli` tarafından kullanılan hesabı değiştiren yeni bir tarayıcı girişi başlatır ve hesap kapsamlı profil meta verilerini saklar. Mevcut OpenCodex hesapları korunur ve iptal veya başarısızlık önceki `kiro-cli` oturumunu geri yükler. |
+| `kiro` | `kiro` | `https://runtime.us-east-1.kiro.dev` | İlk oturum açma, kurulu ve oturum açılmış `kiro-cli` oturumunu içe aktarır (Unix'te `curl -fsSL https://cli.kiro.dev/install` &#124; `bash` ile kurun; Windows PowerShell'de `irm 'https://cli.kiro.dev/install.ps1'` &#124; `iex` kullanın; ardından `kiro-cli login` çalıştırın). **Hesap ekle**, `kiro-cli` oturumunu kapatır, `kiro-cli` tarafından kullanılan hesabı değiştiren yeni bir tarayıcı girişi başlatır ve hesap kapsamlı profil meta verilerini saklar. Mevcut OpenRelay hesapları korunur ve iptal veya başarısızlık önceki `kiro-cli` oturumunu geri yükler. |
 | `google-antigravity` | `google` | `https://daily-cloudcode-pa.googleapis.com` | Cloud Code Assist hattı üzerinden Google OAuth. Canlı keşif CCA'nın kimlik doğrulamalı `v1internal:fetchAvailableModels` uç noktasını kullanır ve oturum açmış hesap için kullanılabilir olan ajan modellerini yayınlar; sürdürülen katalog geri dönüş olarak kalır. |
 | `cursor` | `cursor` | `https://api2.cursor.sh` | Deneysel PKCE girişi, canlı HTTP/2 aktarımı ve hesap filtreli model keşfi. |
-| `devin` | `devin` | `https://server.codeium.com` | Deneysel, resmi olmayan Cognition/Devin köprüsü. Giriş önce kurulu Devin CLI'nin zaten tuttuğu kimlik bilgisini içe aktarır (`devin auth login`, `devin-session-token`'ı kendi `credentials.toml` dosyasına yazar); yoksa tarayıcıda Auth0 oturumunu açar ve yapıştırılan belirteci `RegisterUser` ile uzun ömürlü bir API anahtarına dönüştürür. `ocx login devin-cli` kullanımdan kaldırılmış bir takma ad olarak çalışmaya devam eder. Modeller hesaba göre `GetCascadeModelConfigs` ile keşfedilir; akış yalnızca Connect-RPC üzerindeki `runTurn` yolunu kullanır. Panel ön ayarında varsayılan olarak yer almaz. |
+| `devin` | `devin` | `https://server.codeium.com` | Deneysel, resmi olmayan Cognition/Devin köprüsü. Giriş önce kurulu Devin CLI'nin zaten tuttuğu kimlik bilgisini içe aktarır (`devin auth login`, `devin-session-token`'ı kendi `credentials.toml` dosyasına yazar); yoksa tarayıcıda Auth0 oturumunu açar ve yapıştırılan belirteci `RegisterUser` ile uzun ömürlü bir API anahtarına dönüştürür. `orl login devin-cli` kullanımdan kaldırılmış bir takma ad olarak çalışmaya devam eder. Modeller hesaba göre `GetCascadeModelConfigs` ile keşfedilir; akış yalnızca Connect-RPC üzerindeki `runTurn` yolunu kullanır. Panel ön ayarında varsayılan olarak yer almaz. |
 | `github-copilot` | `openai-chat` | `https://api.githubcopilot.com` | Deneysel. GitHub cihaz akışı + `copilot_internal` değişimi (VS Code OAuth istemcisi). Aktif bir Copilot aboneliği gerektirir; resmi bir üçüncü taraf API değildir. |
 
 Google Antigravity hesap ve sağlayıcı kota sorguları, model listesine geri dönüş dahil sabit Google uç noktalarını kullanır. Bu hedefler için şeffaf Fake-IP DNS desteklenirken TLS doğrulaması, yönlendirme reddi ve özel adres kontrolleri korunur. Özel base URL yalnızca model isteklerini değiştirir; `NO_PROXY` doğrudan bağlantı politikasını korur.
@@ -148,10 +148,10 @@ Google Antigravity hesap ve sağlayıcı kota sorguları, model listesine geri d
 ### Google araç şeması kayıp tanılaması
 
 Google araç bildirimleri seçilen uç nokta sınıfına göre derlenir. Sağlayıcı hata ayıklaması
-`ocx debug provider on`, kontrol panelindeki Logs anahtarı veya `OCX_DEBUG=1` ile açıldığında,
+`orl debug provider on`, kontrol panelindeki Logs anahtarı veya `OCX_DEBUG=1` ile açıldığında,
 politika yokken veya `compatible` iken uyumluluk dönüşümü sırasında oluşan şema kaybı bir
 `[ocx:google:google-tool-schema-loss]` kaydı yayınlar
-(`ocx debug provider logs -f` ile takip edin). Kayıt yalnızca rapor sürümünü, uç nokta sınıfını,
+(`orl debug provider logs -f` ile takip edin). Kayıt yalnızca rapor sürümünü, uç nokta sınıfını,
 bir `lossy` göstergesini, sınırlı bir belirsiz karşılaştırma sayısını, sınırlı sayımlara sahip sabit kayıp kategorilerini ve kesilme işaretini
 taşır. Araç ve özellik adları, yollar, değerler ve şema metni hiçbir zaman dahil edilmez. Politika
 yoksa veya `compatible` ise dönüşüm reddedilmeden gözlemlenir. `reject-lossy` altında, ilk derleme
@@ -168,11 +168,11 @@ Uç bir Nous yenileme hatasından sonra yeniden kimlik doğrulamak için `ocx lo
 nous` çalıştırın.
 
 Kurallı Kimi Coding Plan önayarları için (`kimi` hesap girişi ve `kimi-code` API
-anahtarı), opencodex Chat Completions isteğine yalnızca arayan tarafından
+anahtarı), OpenRelay Chat Completions isteğine yalnızca arayan tarafından
 sağlanan kararlı bir `prompt_cache_key` iletir; asla bir tane oluşturmaz. Kimi,
 Code Plan önbellek isabet oranlarını artırmak için gerekli olarak kararlı bir
 oturum/görev anahtarı belgelerken, anahtarsız istekler anahtarsız kalır. Dahil
-edilmiş bir yukarı akış alanı reddederse opencodex bunu kaldırmaz ve yeniden
+edilmiş bir yukarı akış alanı reddederse OpenRelay bunu kaldırmaz ve yeniden
 denemez veya kayıtlı yapılandırmayı değiştirmez. Diğer sağlayıcılar varsayılan
 olarak reddedilir kalır.
 
@@ -200,7 +200,7 @@ ayrı bir defteri vardır. Belirteçler `~/.opencodex/auth.json` içinde kalır;
 
 ### Cockpit Tools Antigravity içe aktarma
 
-v1 için OpenCodex, yalnızca `google-antigravity` sağlayıcısı için bir **Cockpit
+v1 için OpenRelay, yalnızca `google-antigravity` sağlayıcısı için bir **Cockpit
 Tools Antigravity** JSON dışa aktarımını içe aktarır. Sağlayıcılar kontrol
 panelinde, bu sağlayıcının Hesaplar sekmesinden yerel JSON dosyasını seçin.
 Kontrol paneli dosya içeriğini veya kimlik bilgisi değerlerini göstermez;
@@ -211,8 +211,8 @@ CLI, dışa aktarmayı yalnızca bir dosyadan veya standart girdiden kabul eder 
 asla bir komut argümanına yapıştırmayın:
 
 ```bash
-ocx account import google-antigravity --format cockpit-tools --file <yol> [--json]
-cat accounts.json | ocx account import google-antigravity --format cockpit-tools --stdin [--json]
+orl account import google-antigravity --format cockpit-tools --file <yol> [--json]
+cat accounts.json | orl account import google-antigravity --format cockpit-tools --stdin [--json]
 ```
 
 Satır içi JSON ve fazladan konumsal argümanlar reddedilir. Dışa aktarılan
@@ -221,7 +221,7 @@ saklayın.
 
 ### OAuth güvenilirliği
 
-opencodex, eşzamanlı isteklerin kimlik bilgisi deposuyla yarışmaması için
+OpenRelay, eşzamanlı isteklerin kimlik bilgisi deposuyla yarışmaması için
 belirteç yenilemeyi ve Codex havuz yönlendirmesini koordine eder. Bu
 güvenilirlik ve tanılama çalışmasıdır — sağlayıcı yaptırımlarından, hız
 sınırlarından veya hesap işlemlerinden korumayı **garanti etmez**.
@@ -262,33 +262,33 @@ parçacıkları bir hız sınırı yanıtı boyunca sabitlenmez.
 originator, oturum/iş parçacığı kimlikleri ve ilgili Codex başlıkları — bkz.
 [Adaptörler](/tr/reference/adapters/)). Havuz modu yalnızca seçilen kimlik
 bilgisiyle eşleşecek şekilde yetkilendirmeyi ve `chatgpt-account-id`'yi yeniden
-yazar. opencodex, arayan kişi bunları göndermediğinde resmi istemci kimliği
+yazar. OpenRelay, arayan kişi bunları göndermediğinde resmi istemci kimliği
 (örneğin `originator`, oturum veya iş parçacığı başlıkları) **uydurmaz**.
 
 **Tanılama ve yeniden kimlik doğrulama.** İnsan tarafından okunabilir `ocx
 status`, bir OAuth sağlık bloğu yazdırır (maskelenmiş hesap kimlikleri, belirteç
-yok). `ocx doctor`, yazılabilir depo / tek uçuş denetimleri ve bir kurtarma
+yok). `orl doctor`, yazılabilir depo / tek uçuş denetimleri ve bir kurtarma
 Eylemi içeren UYARI satırlarıyla bir OAuth güvenilirlik bölümü ekler. Bir OAuth
 sağlayıcı hesabının yeniden kimlik doğrulaması gerektiğinde `ocx login
 <saglayici>` çalıştırın (veya kontrol panelinde Yeniden Kimlik Doğrula'yı
-kullanın). Codex havuz hesapları bir `ocx login` sağlayıcısı değildir — kontrol
+kullanın). Codex havuz hesapları bir `orl login` sağlayıcısı değildir — kontrol
 paneli Codex hesap havuzu aracılığıyla yeniden kimlik doğrulaması yapın. CLI
-referansında [`ocx status` / `ocx doctor`](/tr/reference/cli/) bölümüne bakın.
+referansında [`orl status` / `orl doctor`](/tr/reference/cli/) bölümüne bakın.
 
 ### Kiro kimlik bilgisi içe aktarma
 
 Kiro oturum açma Kiro CLI'yı bekler: Unix'te `curl -fsSL
 https://cli.kiro.dev/install | bash` ile kurun; Windows PowerShell'de `irm
 'https://cli.kiro.dev/install.ps1' | iex` kullanın; ardından `kiro-cli login`
-ile oturum açın. Bir `kiro-cli` oturumu olmadan `ocx login kiro`, yapıştırılmış
+ile oturum açın. Bir `kiro-cli` oturumu olmadan `orl login kiro`, yapıştırılmış
 bir erişim belirtecine veya `KIRO_ACCESS_TOKEN` ortam değişkenine geri döner.
 
-`ocx login kiro` içe aktarma yolu platform Kiro CLI depolarını arar ve SQLite
+`orl login kiro` içe aktarma yolu platform Kiro CLI depolarını arar ve SQLite
 veritabanlarını salt okunur olarak açar. İki ortam değişkeni kaynak ve belirteç
 satırı seçimini açık hale getirir:
 
 - `KIROCLI_DB_PATH` standart olmayan bir Kiro CLI SQLite veritabanını seçer. Yol
-  zaten mevcut olmalıdır; bu içe aktarma yolu sırasında opencodex veritabanı,
+  zaten mevcut olmalıdır; bu içe aktarma yolu sırasında OpenRelay veritabanı,
   WAL veya SHM dosyalarını oluşturmaz veya değiştirmez.
 - `KIROCLI_TOKEN_KEY`, bir veritabanı birden fazla belirsiz belirteç satırı
   içerdiğinde tam `auth_kv` belirteç anahtarını seçer. Eksik bir seçim tahmin
@@ -296,21 +296,21 @@ satırı seçimini açık hale getirir:
 
 Windows'ta içe aktarma `%LOCALAPPDATA%\Kiro-Cli\data.sqlite3` dosyasını arar.
 Zorunlu/hesap ekleme girişi yerel CLI ikili dosyasına da ihtiyaç duyar:
-opencodex önce `PATH`'i kullanır, ardından
+OpenRelay önce `PATH`'i kullanır, ardından
 `%LOCALAPPDATA%\Kiro-Cli\kiro-cli.exe` ve `C:\Program
 Files\Kiro-Cli\kiro-cli.exe`'ye geri döner.
 Bu klasörlerin hiçbirinde `kiro-cli.exe` yoksa, aynı iki `Kiro-Cli` klasöründeki `kiro.exe`
-kullanılır. opencodex, `PATH` üzerinde veya paylaşılan macOS/Linux bin dizinlerinde bulunan kısa
+kullanılır. OpenRelay, `PATH` üzerinde veya paylaşılan macOS/Linux bin dizinlerinde bulunan kısa
 `kiro` ya da `kiro.exe` dosyasını asla çalıştırmaz; CLI'yi orada `kiro-cli` adıyla kurun veya bağlayın.
 
-Başarılı bir içe aktarmadan sonra opencodex içe aktarılan kimlik bilgisini
+Başarılı bir içe aktarmadan sonra OpenRelay içe aktarılan kimlik bilgisini
 `~/.opencodex/auth.json` dosyasına kalıcı hale getirir. Bu değişkenleri ve
 seçilen veritabanını gizli tutun. Hata raporlarına veritabanı dosyalarını veya
 ham oturum açma tanılamalarını eklemeyin.
 
 **Hesap ekle** ayrı bir yazma iş akışıdır: geçerli oturumun anlık görüntüsünü
 alır, `kiro-cli` oturumunu kapatır ve yeni tarayıcı girişini içe aktarır. Oturum
-açma iptal edilirse veya başarısız olursa (OpenCodex kimlik bilgisini kalıcı
+açma iptal edilirse veya başarısız olursa (OpenRelay kimlik bilgisini kalıcı
 hale getirirken dahil), geri alma işlemi önceki oturum anlık görüntüsünü
 yayınlamadan önce Kiro CLI veritabanını değiştirir ve geçerli WAL, SHM ve günlük
 sidecar'larını kaldırır.
@@ -327,7 +327,7 @@ olmayan bir makineden oturum açmak bundan etkilenmez.
 
 ## 3. API anahtarı kataloğu
 
-opencodex 103 yerleşik önayar ile birlikte gelir: 84 anahtar tabanlı, 15
+OpenRelay 103 yerleşik önayar ile birlikte gelir: 84 anahtar tabanlı, 15
 OAuth, üç yerel ve bir varsayılan ChatGPT iletme önayarı. Kontrol panelinin
 **Sağlayıcı ekle** seçicisi bir anahtar sağlayıcısının kontrol panelini açar,
 anahtarı doğrular ve saklar; doğrulama sağlayıcıya özgüdür. Dikkate değer
@@ -338,12 +338,12 @@ tarafından işletilen [resmi abonelik
 kataloğu](https://docs.cline.bot/getting-started/clinepass) ve [Chat Completions
 uç noktası](https://docs.cline.bot/api/chat-completions) ile bir Cline API
 anahtarı kullanır. `cline-pass/cline-pass/kimi-k3` gibi yönlendirilen bir kimlik
-kasıtlıdır: ilk segment opencodex sağlayıcısını seçerken, `cline-pass/kimi-k3`
+kasıtlıdır: ilk segment OpenRelay sağlayıcısını seçerken, `cline-pass/kimi-k3`
 yukarı akışa gönderilen tam model slug'ıdır. ClinePass kotası, dönen 5 saatlik,
 haftalık ve aylık limitler genelinde hesap tarafından paylaşılır. 2026-08-13
 tarihli canlı bir araştırma, her statik ClinePass modelinin ağ geçidi girdi
 sınırında `low`, `medium`, `high`, `xhigh` ve `max` değerlerini kabul ettiğini
-doğrulamıştır. opencodex bu talep edilen katmanları korur; arka uca özgü
+doğrulamıştır. OpenRelay bu talep edilen katmanları korur; arka uca özgü
 normalleştirme ClinePass'ın sorumluluğunda kalır.
 
 **Cline**, 100'den fazla modelde (OpenRouter tarzı `anthropic/claude-sonnet-4-6`
@@ -407,7 +407,7 @@ yalnızca Cline IDE/CLI içinde mevcuttur; `minimax/minimax-m2.5` belgelenmiş A
 yeniler ve etkin Chat Completions modellerini (ve yalnızca Responses ile sunulup Responses'a yönlendirilen `openai/o3-pro` modelini) tutar. Sionic tarafından sunulan
 `deepseek/deepseek-v4.1-flash-ultrafast` ve `z-ai/glm-5.3-flash-ultrafast` ilk sırada listelenir.
 [OpenGateway panelinde](https://opengateway.ai/api-keys) bir anahtar oluşturun, ardından
-`ocx provider add opengateway` çalıştırın veya panelde **OpenGateway** seçin. Chat istekleri
+`orl provider add opengateway` çalıştırın veya panelde **OpenGateway** seçin. Chat istekleri
 yapılandırılmış Bearer anahtarını kullanır; genel model listesi anahtarı doğrulamaz.
 
 **OpenCode Zen** (`opencode-zen`) ve anahtarsız **OpenCode Free** önayarı
@@ -418,7 +418,7 @@ yayınlamaz). Zen, `Retry-After` / `X-RateLimit-*` başlıkları olmadan genel h
 sınırı 429 yanıtları döndürebilir. Bu, OpenCode'un tanıttığı anahtarsız masaüstü
 kotasından ayrıdır (`opencode-free` üzerinde 5 saatte yaklaşık 200 Big
 Pickle/ücretsiz model isteği). Zen böyle bir 429'da `Retry-After`'ı atladığında
-opencodex istemci hatasına sağlayıcı rehberliği ve sentetik bir `Retry-After`
+OpenRelay istemci hatasına sağlayıcı rehberliği ve sentetik bir `Retry-After`
 ekler; bir yukarı akış `Retry-After`'ı yine de önceliklidir. Aynı anahtarla
 bekle ve yeniden dene özelliği [`retryOn429`](/tr/reference/configuration/)
 aracılığıyla isteğe bağlı kalır.
@@ -427,17 +427,17 @@ aracılığıyla isteğe bağlı kalır.
 `x-opencode-session` başlığı olmadan gelen her isteği reddeder ve `MissingSessionID` hata
 tipiyle "OpenCode's free tier can only be used in OpenCode" mesajını döndürür. Kapıda
 yalnızca başlığın varlığı denetlenir; yani bir proxy uydurma bir değerle geçebilirdi,
-opencodex bunu yapmaz. Bir oturum kimliği ile sürüm taşıyan `opencode/<version>`
+OpenRelay bunu yapmaz. Bir oturum kimliği ile sürüm taşıyan `opencode/<version>`
 User-Agent üretmek, kendini OpenCode istemcisi ilan etmek demektir ve OpenCode bu
 anahtarsız katman için üçüncü taraf entegrasyon sözleşmesi yayımlamamıştır; böyle elde
-edilen bir HTTP 200, izin değil atlatılmış bir kabul denetimidir. Bu yüzden opencodex
+edilen bir HTTP 200, izin değil atlatılmış bir kabul denetimidir. Bu yüzden OpenRelay
 kısıtlamayı aşmak yerine bildirir: `opencode-free` sağlayıcısına giden bir istek, yukarı
 akıştaki kapıyı açıklayan bir hata döndürür.
 
 Aynı modellere giden desteklenen yol, [opencode.ai/auth](https://opencode.ai/auth)
 üzerinden alınan bir OpenCode Zen API anahtarıyla kullanılan anahtarlı
 **`opencode-zen`** sağlayıcısıdır. OpenCode ileride anahtarsız katman için desteklenen
-bir üçüncü taraf yolu yayımlarsa opencodex bunu izleyebilir; o zamana kadar önayar
+bir üçüncü taraf yolu yayımlarsa OpenRelay bunu izleyebilir; o zamana kadar önayar
 kısıtlamayı belgeler. Yukarı akış koşulları: [opencode.ai/docs/zen](https://opencode.ai/docs/zen/).
 
 Çoğu, taşıyıcı anahtarla `openai-chat` adaptörünü kullanır; **Xiaomi MiMo** (`xiaomi`)
@@ -446,12 +446,12 @@ Xiaomi'nin ayrıca bir OpenAI Chat önayarı (`xiaomi-mimo`) ve bir token planı
 (`mimo`) vardır. Üçü de varsayılan olarak MiMo V2.6 kullanır (`mimo-v2.6-pro`;
 `xiaomi-mimo` için `mimo-v2.6-flash`). Xiaomi, `mimo-v2.5` ve `mimo-v2.5-pro`
 modellerini 2026-10-21 tarihinde yönlendirme olmadan kullanımdan kaldıracak;
-bu tarihten önce kaydedilmiş bir V2.5 varsayılanını değiştirin. opencodex bunu
+bu tarihten önce kaydedilmiş bir V2.5 varsayılanını değiştirin. OpenRelay bunu
 sizin yerinize yeniden yazmaz. Volcengine Agent Plan,
 `openai-responses` aracılığıyla yerel Responses uç noktasını kullanır. Yerleşik
 DeepSeek önayarı da `deepseek-v4-flash`'ı yerel Responses uç noktası üzerinden
 yönlendirir ve yukarı akış SSE akışını etkin tutar. Bu model tüm çıktı öğelerini
-bitirir ancak son Responses olayını atlarsa opencodex beş saniyelik model
+bitirir ancak son Responses olayını atlarsa OpenRelay beş saniyelik model
 kapsamlı bir yetkisiz kullanım onarımı uygular; hatalı biçimlendirilmiş veya
 kısmi akışlar başarılı olarak bildirilmek yerine tamamlanmamış olarak kapanır.
 Birinci taraf `deepseek-flash` modeli yerel olarak `text` ve `image` girdilerini bildirir; bu nedenle
@@ -462,7 +462,7 @@ rotaları değişmedi ve bu güncellemede yoklanmadı.
 
 > **Üç Volcengine faturalandırma rotası:** `volcengine` kullandıkça öde Ark API'sidir, `volcengine-coding-plan` Coding Plan kotasını tüketir ve `volcengine-agent-plan` Agent Plan kotasını tüketir. Aynı ürün için verilen anahtarı ve uç noktayı kullanın; sıradan `/api/v3` uç noktası bir Plan aboneliği mevcut olduğunda bile kullandıkça öde ücretlerine neden olabilir. Önayarlar özenle seçilmiş statik model katalogları kullanır çünkü Ark'ın `/models` yanıtı yerleştirme, görsel, video ve 3D kaynaklarını da içerir, Coding ağ geçidi aynı geniş kataloğu döndürür ve Agent Plan ağ geçidinin `/models` kaynağı yoktur. Kullandıkça öde varsayılan olarak `doubao-seed-2-1-pro-260628`'dir; seçilmiş kataloğu güncel DeepSeek ve GLM metin modellerini de içerir. Coding Plan varsayılan olarak `ark-code-latest`, Agent Plan ise varsayılan olarak `deepseek-v4-flash`'dur.
 
-> **Volcengine Plan kullanım kısıtlaması:** Volcengine, Coding Plan ve Agent Plan kotasını yalnızca desteklenen yapay zeka kodlama araçları içinde geçerli olarak belgeler ve genel API çağrıları için bir plan anahtarı kullanmanın aboneliği askıya alabileceği veya hesabı yasaklayabileceği konusunda uyarır. Codex veya Claude Code'u opencodex üzerinden yönlendirmek belgelenmiş kullanımdır; diğer otomasyonları bir plan anahtarına yönlendirmek değildir. Kullandıkça öde `volcengine` rotası böyle bir kısıtlama taşımaz.
+> **Volcengine Plan kullanım kısıtlaması:** Volcengine, Coding Plan ve Agent Plan kotasını yalnızca desteklenen yapay zeka kodlama araçları içinde geçerli olarak belgeler ve genel API çağrıları için bir plan anahtarı kullanmanın aboneliği askıya alabileceği veya hesabı yasaklayabileceği konusunda uyarır. Codex veya Claude Code'u OpenRelay üzerinden yönlendirmek belgelenmiş kullanımdır; diğer otomasyonları bir plan anahtarına yönlendirmek değildir. Kullandıkça öde `volcengine` rotası böyle bir kısıtlama taşımaz.
 
 **Chutes keşfi.** `chutes` önayarı Chutes'un sabit paylaşılan OpenAI uyumlu LLM
 ağ geçidini kullanır. Genel `/v1/models` kataloğunu okur, yalnızca
@@ -501,7 +501,7 @@ içindeki abonelik genel bakışından Vultr'un çıkarım anahtarını kopyalay
 
 **Command Code keşfi.** Önayar, sabit Provider API sunucusundan Command Code'un
 `/provider/v1/models` listesini okur, sağlayıcının özgün model kimliklerini korur
-ve keşfi 256 KiB ile 256 ham satırla sınırlar. `ocx login command-code`, tarayıcıda
+ve keşfi 256 KiB ile 256 ham satırla sınırlar. `orl login command-code`, tarayıcıda
 oturum açarak OAuth kullanımını destekler; mevcut Command Code CLI kullanıcıları
 isterse yerel kimlik bilgilerini `~/.commandcode/auth.json` dosyasından içe aktarabilir.
 Model kataloğu hesaba özeldir ve oturum açıldıktan sonra kimlik doğrulamalı keşif
@@ -519,9 +519,9 @@ kesintiye uğrayan veya filtrelenen turlarda işaretleme metin olarak kalır.
 Provider API anahtarlarını [Command Code Studio](https://commandcode.ai/studio/)
 üzerinden oluşturun.
 
-**Command Code kotası.** Pano ve `ocx account refresh`, kanonik `https://api.commandcode.ai` ana bilgisayarında `/alpha/billing/credits` pencerelerini (5 saat ve haftalık) sorgular. OAuth önayarı (`command-code`) kayıtlı hesap bearer'ını kullanır; Provider-API anahtar önayarı (`commandcode`) etkin yapılandırılmış anahtarı kullanır. Kullanıcının değiştirdiği benzer bir temel URL asla sorgulanmaz. Command Code dönem harcamasını da bildirirse kalan monthly / purchased / free credits USD penceresi olarak gösterilir.
+**Command Code kotası.** Pano ve `orl account refresh`, kanonik `https://api.commandcode.ai` ana bilgisayarında `/alpha/billing/credits` pencerelerini (5 saat ve haftalık) sorgular. OAuth önayarı (`command-code`) kayıtlı hesap bearer'ını kullanır; Provider-API anahtar önayarı (`commandcode`) etkin yapılandırılmış anahtarı kullanır. Kullanıcının değiştirdiği benzer bir temel URL asla sorgulanmaz. Command Code dönem harcamasını da bildirirse kalan monthly / purchased / free credits USD penceresi olarak gösterilir.
 
-OrcaRouter tarayıcı oturum açma akışında (`ocx login orcarouter-oauth`), anahtar değişimi isteğinin
+OrcaRouter tarayıcı oturum açma akışında (`orl login orcarouter-oauth`), anahtar değişimi isteğinin
 başarılı yanıt gövdesi en fazla 64 KiB boyutunda geçerli UTF-8 JSON olmalıdır. Bu isteğin mevcut
 30 saniyelik süresi, yanıt başlıkları ile gövdenin tamamının alınmasını kapsar; sınırı aşan veya bozuk
 gövdeler anahtar kaydedilmeden önce reddedilir. Bu sınırlar yalnızca oturum açma sırasındaki anahtar
@@ -611,7 +611,7 @@ yöneticisinde](https://novita.ai/settings/key-management) bir anahtar oluşturu
 
 `authMode: "key"` ve kurallı `https://api.a6api.com` veya
 `https://api.a6api.com/v1` temel URL'sini kullanan özel bir `openai-chat`
-sağlayıcısı, kontrol panelinde ve `ocx account refresh <saglayici>` komutundan
+sağlayıcısı, kontrol panelinde ve `orl account refresh <saglayici>` komutundan
 bir A6API kredi sayacı alır. Sağlayıcı adı rastgeledir; algılama kurallı HTTPS
 uç noktasını kullanır. Sayaç, hesabın kesin kredi sınırını kullanarak A6API
 belirteç birimlerini USD'ye dönüştürür ve tüketilen yüzdeyi artı kalan krediyi
@@ -652,13 +652,13 @@ anahtarları değiştirebilir veya kaldırabilir; yönetim API'si
 ### Terminalden hesap değiştirme
 
 Kontrol panelini açmadan aynı Codex, OAuth ve API anahtarı havuzlarını incelemek
-veya değiştirmek için `ocx account list`, `ocx account current` ve `ocx account
+veya değiştirmek için `orl account list`, `orl account current` ve `ocx account
 use` komutlarını kullanın. Komutlar, JSON çıktısı ve yeni oturum davranışı için
 [CLI referansına](/tr/reference/cli/providers-accounts/#ocx-account-alt-komut) bakın.
 
 ### GPT-5.6 önizleme yolları
 
-GPT-5.6 Sol/Terra/Luna, canlı kataloglar geride kalsa bile `ocx sync`'in
+GPT-5.6 Sol/Terra/Luna, canlı kataloglar geride kalsa bile `orl sync`'in
 modelleri görünür tutabilmesi için sağlayıcı geri dönüş listelerine
 tohumlanmıştır:
 
@@ -677,7 +677,7 @@ ayrıca statik tohumunu oturum açmış hesabın kullanabileceği modellere gör
 filtreler.
 
 :::note[Ağ geçitleri ve abonelik proxy'leri]
-Bir sağlayıcı, bir "ajan" ürünü olup olmadığına göre **değil**, opencodex'in
+Bir sağlayıcı, bir "ajan" ürünü olup olmadığına göre **değil**, OpenRelay'in
 eşleşen bir hat adaptörüne sahip olmasına göre dahil edilir. Geçerli adaptör
 kimlikleri `openai-chat`, `openai-responses`, `anthropic`, `google` (AI Studio,
 Vertex ve Antigravity/Cloud Code Assist modları), `azure` / `azure-openai`,
@@ -691,7 +691,7 @@ URL'ye doldurulan hesap + ağ geçidi kimliklerinize ihtiyaç duyar.
 
 Copilot karma hatlı bir katalog sunar: modeller (`gpt-5.3-codex`, `gpt-5.4`,
 `gpt-5.4-mini`, `gpt-5.5`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-6-astra`, `grok-4.5`, `grok-4.6`, `mai-code-1.1-flash`, `mai-code-1-flash-picker`) ajan
-trafiği için `/chat/completions`'ı reddeder, bu nedenle opencodex yerleşik
+trafiği için `/chat/completions`'ı reddeder, bu nedenle OpenRelay yerleşik
 varsayılan olarak bu modelleri Responses API üzerinden yönlendirirken diğer tüm
 Copilot modelleri sohbet tamamlamalarında kalır. Öncelik sırası: sabit hat
 sabitlemesi → açık [`modelAdapters`](/tr/reference/configuration/providers/)
@@ -702,7 +702,7 @@ için `"modelAdapters": { "gpt-5.4-nano": "openai-responses" }` ayarlayın.
 Cursor deneysel bir adaptör olarak ayrı izlenir. `adapter: "cursor"`, `ocx
 init`'te ve kontrol paneli Sağlayıcı Ekle seçicisinde Cursor'ın statik geri
 dönüş model kataloğu meta verileriyle deneysel bir yerel yapılandırma girdisi
-olarak görünür. Bir Cursor erişim belirteci yapılandırıldığında opencodex
+olarak görünür. Bir Cursor erişim belirteci yapılandırıldığında OpenRelay
 Cursor'ın canlı HTTP/2 aktarımını kullanır. Paketlenmiş geri dönüş tohumu
 `gpt-5.6-sol` / `terra` / `luna` (1M bağlam), Grok 4.5, 4.6 ve 4.7 için normal/Fast satırları
 (500K) ve `kimi-k3` (262K) içerir; canlı keşif hesap için hangilerinin görünür
@@ -722,7 +722,7 @@ aracılığıyla) `~/.opencodex/config.json` içindeki `providers.cursor` nesnes
 `unsafeAllowNativeLocalExec: true` ayarlayın. Tam bir örnek için [Yapılandırma
 referansı](/tr/reference/configuration/providers/#cursor-sağlayıcısı-adapter-cursor)
 bölümüne bakın. MCP, ekran kaydı ve bilgisayar kullanımı yürütücü kancaları
-olarak mevcuttur; yapılandırılmış bir yerel yürütücü olmadan opencodex isteği
+olarak mevcuttur; yapılandırılmış bir yerel yürütücü olmadan OpenRelay isteği
 politika engellemek yerine tipli yürütücü yok sonuçları döndürür. Cursor OAuth
 ve canlı model keşfi bu deneysel adaptör için etkinleştirilmiştir; Cursor
 anahtar girişi listelerinde hala gösterilmez.
@@ -732,10 +732,10 @@ anahtar girişi listelerinde hala gösterilmez.
 
 Ollama Cloud, [ollama.com/settings/keys](https://ollama.com/settings/keys)
 adresinden alınan bir anahtarla `https://ollama.com/v1` adresinde yapılandırılan,
-barındırılan (yerel olmayan) bir Ollama'dır. opencodex ona OpenAI uyumlu yüzey
+barındırılan (yerel olmayan) bir Ollama'dır. OpenRelay ona OpenAI uyumlu yüzey
 yerine Ollama'nın kendi REST API'si (`POST /api/chat`) üzerinden erişir ve model
 listesini sağlayıcıdan keşfeder; böylece yeni Ollama Cloud modelleri yapılandırma
-değişikliği olmadan görünür. opencodex, bulut serisini vizyon
+değişikliği olmadan görünür. OpenRelay, bulut serisini vizyon
 yeteneğine göre sınıflandırır, böylece [vizyon sidecar'ı](/tr/guides/sidecars/)
 yalnızca salt metin modeller için devreye girer. Salt metin modeller (örneğin
 `glm-5.2`, `deepseek-v4-flash`, `gpt-oss`, `qwen3-coder`, `minimax-m2.x`,
@@ -746,13 +746,13 @@ etiketlerine toleranslıdır, bu nedenle `gpt-oss`, `gpt-oss:120b` ve
 `gpt-oss:20b`'yi kapsar.
 
 Ollama şu anda yapılandırılmış çıktıyı Ollama Cloud'da desteklemediğini belgeliyor. Kanonik
-`ollama-cloud` için opencodex, yapılandırılmış çıktı isteklerini (`text.format`) serbest metni
+`ollama-cloud` için OpenRelay, yapılandırılmış çıktı isteklerini (`text.format`) serbest metni
 sessizce döndürmek yerine net bir hatayla reddeder; yerel ve özel `ollama-native` uç noktaları
 Ollama'nın yerel `format` davranışını korur.
 
 ## 4. Yerel sağlayıcılar
 
-opencodex'i yerel bir OpenAI uyumlu sunucuya yönlendirin — genellikle boş bir
+OpenRelay'i yerel bir OpenAI uyumlu sunucuya yönlendirin — genellikle boş bir
 anahtarla:
 
 | Sağlayıcı | Temel URL |
@@ -764,7 +764,7 @@ anahtarla:
 ## Herhangi bir OpenAI uyumlu uç nokta
 
 Bir sağlayıcı Chat Completions konuşuyorsa `openai-chat` adaptörü bunu işler —
-kontrol panelinde **Özel (Custom)**'ı veya `ocx init`'te `custom`'ı seçin ve
+kontrol panelinde **Özel (Custom)**'ı veya `orl init`'te `custom`'ı seçin ve
 temel URL'yi girin. Her sağlayıcı alanı için (`headers`, `noReasoningModels`,
 `noVisionModels`, `models`, …) [Yapılandırma
 referansı](/tr/reference/configuration/) bölümüne bakın.

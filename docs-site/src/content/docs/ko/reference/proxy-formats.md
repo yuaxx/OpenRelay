@@ -3,7 +3,7 @@ title: 프록시 API 형식
 description: Responses, Chat Completions, Anthropic Messages, 모델 카탈로그, WebSocket, realtime, compaction 표면에 대한 와이어 레벨 참고 문서입니다.
 ---
 
-opencodex는 하나의 로컬 프록시를 여러 클라이언트 방언으로 제공합니다. Codex 클라이언트는
+OpenRelay는 하나의 로컬 프록시를 여러 클라이언트 방언으로 제공합니다. Codex 클라이언트는
 Responses API를 말할 수 있고, OpenAI 호환 앱은 Chat Completions를 말할 수 있으며, Claude Code는
 각 업스트림 공급자가 모든 형식을 구현하지 않아도 Anthropic Messages를 말할 수 있습니다.
 
@@ -27,7 +27,7 @@ Responses 표현이 이 연결의 중심입니다. 네이티브 호환 경로는
 
 일부 xAI Chat Completions 거부는 HTTP 200과 `finish_reason: content_filter` 대신, HTTP 403과 `I can't help with that request.` 같은 거절 문장만 돌려줍니다. Codex는 403을 전송 실패로 보므로 사용자 턴이 기록되지 않고 같은 요청을 다시 보냅니다.
 
-콤보가 아닌 Responses 요청에서 OpenCodex는 allowlist에 오른 그 403을 HTTP 200 Responses, `status: "incomplete"`, `incomplete_details.reason: "content_filter"`로 바꿉니다. openai-chat 어댑터 경로와 openai-responses passthrough(grok-4.6 / grok-4.5 OAuth) 모두에서 동작합니다. 스트리밍도 같은 incomplete 경계입니다. 빈 본문 403은 오류로 남습니다. 구독, 크레딧, 권한, `not allowed to use this model` 403은 오류로 남습니다. 콤보 페일오버는 원래 HTTP 403을 그대로 봅니다.
+콤보가 아닌 Responses 요청에서 OpenRelay는 allowlist에 오른 그 403을 HTTP 200 Responses, `status: "incomplete"`, `incomplete_details.reason: "content_filter"`로 바꿉니다. openai-chat 어댑터 경로와 openai-responses passthrough(grok-4.6 / grok-4.5 OAuth) 모두에서 동작합니다. 스트리밍도 같은 incomplete 경계입니다. 빈 본문 403은 오류로 남습니다. 구독, 크레딧, 권한, `not allowed to use this model` 403은 오류로 남습니다. 콤보 페일오버는 원래 HTTP 403을 그대로 봅니다.
 
 ## 엔드포인트 개요
 
@@ -43,7 +43,7 @@ Responses 표현이 이 연결의 중심입니다. 네이티브 호환 경로는
 
 ## `POST /v1/responses`
 
-이것이 opencodex의 기본 데이터 평면 형식입니다. 요청 본문은 비어 있지 않은 `model`을 가진 JSON 객체여야
+이것이 OpenRelay의 기본 데이터 평면 형식입니다. 요청 본문은 비어 있지 않은 `model`을 가진 JSON 객체여야
 합니다. `input`은 문자열이거나 Responses 항목 배열일 수 있습니다.
 
 ### 허용되는 요청 필드
@@ -74,7 +74,7 @@ deltas, 그리고 정확히 하나의 종료 `response.completed`, `response.fai
 두 형식 모두 선택한 모델, output item, 종료 상태, usage를 보존합니다.
 
 canonical ChatGPT Codex 경로는 upstream이 SSE만 받으므로 upstream 요청에만 `stream: true`를 사용합니다.
-OpenCodex는 종료 스트림을 제한된 크기 안에서 검증한 뒤 클라이언트가 요청한 JSON 형태로 접습니다.
+OpenRelay는 종료 스트림을 제한된 크기 안에서 검증한 뒤 클라이언트가 요청한 JSON 형태로 접습니다.
 명시적인 `store` 값은 바꾸지 않으며, 검증에 실패하면 일부 JSON을 HTTP 200으로 반환하지 않고 오류로
 끝냅니다. 한도는 프레임당 4 MiB, transcript와 재구성 입력 각각 32 MiB, 100,000 SSE 프레임, 재구성
 output item 10,000개입니다. `stallTimeoutSec`는 첫 body byte와 이후 무응답 간격에 모두 적용됩니다.
@@ -268,7 +268,7 @@ HTTP 400을 반환합니다. 두 경우 모두 날짜 제거나 다른 경로로
 Connections > API keys에는 받아쓰기와 실시간 음성 블록이 있습니다. 데이터 키는 입력란에만 잠시 유지됩니다. 받아쓰기는 선택한 파일을 전송하고, 음성 연결 확인은 마이크 없이 세션 응답을 기다립니다. 설정 표시는 실제 연결 성공을 뜻하지 않습니다.
 
 `POST /v1/live`는 ChatGPT/Codex App Frameless call-creation 표면을 받습니다.
-`POST /v1/realtime/calls`는 OpenAI Realtime call-creation 표면을 받습니다. opencodex는 적절한 OpenAI 계열
+`POST /v1/realtime/calls`는 OpenAI Realtime call-creation 표면을 받습니다. OpenRelay는 적절한 OpenAI 계열
 경로를 선택하고, 업스트림 인증 모드에 맞게 call-creation 요청을 정규화한 뒤, 제한된 응답을 릴레이합니다.
 
 call creation 이후 클라이언트는 다음의 지원되는 모든 inbound 형식 중 하나로 sideband WebSocket에 참여할 수
@@ -290,7 +290,7 @@ Direct 모드는 두 요청 모두 호출자의 현재 bearer를 전달합니다
 호출자가 보낸 경우에만 전달되고 프록시가 만들어 내지 않습니다. `Authorization`과 ChatGPT 계정 id는
 ChatGPT 경로에서 프록시가 소유합니다(Pool은 저장된 계정으로 교체, Direct는 검증된 호출자 bearer를 전달).
 API 키 프로바이더는 자체 bearer를 씁니다. Codex가 join을 프록시로 보내는 것은
-`experimental_realtime_ws_base_url`이 프록시를 가리킬 때뿐이며, `ocx start`가 이 키를
+`experimental_realtime_ws_base_url`이 프록시를 가리킬 때뿐이며, `orl start`가 이 키를
 `openai_base_url` 옆에 주입합니다([Codex 연동](/ko/guides/codex-integration/) 참고).
 
 ## `POST /v1/responses/compact`
@@ -360,25 +360,25 @@ OpenAI 스타일 `origin_rejected` body가 아니라 403 `permission_error`입�
 ## 암호화된 콘텐츠 위생
 
 프록시는 실제 백엔드 암호문을 불투명한 데이터로 취급합니다. 구조적으로 유효한 암호문은 바이트 단위로
-그대로 보존됩니다. opencodex는 이를 복호화하거나, 내용을 번역하거나, 다른 프로바이더용으로 다시
+그대로 보존됩니다. OpenRelay는 이를 복호화하거나, 내용을 번역하거나, 다른 프로바이더용으로 다시
 암호화하지 않습니다.
 
 일부 에이전트 hook은 과거에 평문 제어 텍스트를 `encrypted_content` 슬롯에 넣었습니다. 호환성을 위해
 프록시는 구조적으로 유효한 Fernet 구간은 그대로 유지하면서 해당 평문을 텍스트 파트로 분리합니다.
 이 복구 과정에서 `agent_message`의 암호화된 파트가 모두 사라지면 일반 user message가 됩니다. 현재 v2
 작업이 실제로 암호화된 상태이고 선택된 라우팅 대상이 네이티브 ChatGPT 암호문을 읽을 수 없다면,
-opencodex는 읽을 수 없는 바이트를 프로바이더에 보내는 대신 `unreadable_encrypted_agent_task`로
+OpenRelay는 읽을 수 없는 바이트를 프로바이더에 보내는 대신 `unreadable_encrypted_agent_task`로
 실패합니다. worker task와 관련된 클라이언트 동작은 [서브에이전트 표면](/guides/sub-agent-surface/)을
 참조하세요.
 
 ### 기존 대화에서 프로바이더를 바꿀 때
 
 다시 보내는 추론 항목의 `encrypted_content`는 그것을 만든 프로바이더와 자격 증명만 읽을 수 있습니다.
-대화를 마지막으로 처리한 프로바이더가 달랐다는 사실을 opencodex가 알고 있으면, 보내기 전에 그 blob을
+대화를 마지막으로 처리한 프로바이더가 달랐다는 사실을 OpenRelay가 알고 있으면, 보내기 전에 그 blob을
 빼고 항목의 요약은 남깁니다. 그 프로바이더가 엔드포인트나 자격 증명까지 달랐다면 항목의 `rs_…` id도
 뺍니다. 새 대상은 그 id가 가리키는 항목을 찾을 수 없기 때문입니다. 프록시를 다시 시작한 직후처럼
-opencodex가 알 수 없을 때는 새 대상이 blob을 거부합니다. OpenAI와 Azure OpenAI는
-`400 invalid_encrypted_content`로 응답합니다. 그러면 opencodex는 이전 프로바이더의 추론 상태, 즉 blob과
+OpenRelay가 알 수 없을 때는 새 대상이 blob을 거부합니다. OpenAI와 Azure OpenAI는
+`400 invalid_encrypted_content`로 응답합니다. 그러면 OpenRelay는 이전 프로바이더의 추론 상태, 즉 blob과
 `rs_…` id를 뺀 요청을 한 번만 다시 보냅니다. id를 남기면 `Item with id 'rs_…' not found`가 나기
 때문입니다.
 

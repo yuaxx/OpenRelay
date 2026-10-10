@@ -1,5 +1,7 @@
 # Foundations
 
+OpenRelay's migrated surfaces use the current color and material contract in [OpenRelay](./openrelay.md). The original tables below describe the inherited baseline; spacing, locale fallbacks and component semantics remain applicable.
+
 ## Color
 
 색상 토큰은 역할을 나타낸다. 컴포넌트에서 hex 값을 직접 사용하지 않는다.

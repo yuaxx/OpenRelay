@@ -1,11 +1,11 @@
 import { CliUsageError, printData, rejectArgs, runCliAction, runtimeRequest, takeFlag, takeOption, type RuntimeApiDeps } from "./runtime-api";
 
 const USAGE = `Usage:
-  ocx alias list [--json]
-  ocx alias set <provider> <alias>
-  ocx alias set <provider>/<native-model-id> <alias>
-  ocx alias rm <provider>[/<native-model-id>]
-  ocx alias defaults <on|off> [--provider <name>]`;
+  orl alias list [--json]
+  orl alias set <provider> <alias>
+  orl alias set <provider>/<native-model-id> <alias>
+  orl alias rm <provider>[/<native-model-id>]
+  orl alias defaults <on|off> [--provider <name>]`;
 
 function selector(value: string): { provider: string; model?: string } {
   const slash = value.indexOf("/");
@@ -41,7 +41,7 @@ async function runAliasAction(argv: string[], deps: RuntimeApiDeps): Promise<num
     printData(result, wantsJson, [`Default aliases ${state}${provider ? ` for ${provider}` : " globally"}.`]);
     return 0;
   }
-  if (action !== "set" && action !== "rm") throw new CliUsageError(`Unknown alias action: ${action}. See: ocx help alias`, USAGE);
+  if (action !== "set" && action !== "rm") throw new CliUsageError(`Unknown alias action: ${action}. See: orl help alias`, USAGE);
   const target = args.shift()?.trim();
   if (!target) throw new CliUsageError("alias target is required", USAGE);
   const parsed = selector(target);

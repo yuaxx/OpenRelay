@@ -419,7 +419,7 @@ touches anything else. `tests/ci-workflows/release-version-sources.test.ts` fail
 working tree and pins that wiring.
 
 The `package-standalone` job in `.github/workflows/release.yml` also builds Bun compiled
-`ocx` archives for Linux, macOS, and Windows, bundles `gui/dist`, smoke-tests `/healthz`, and
+`ocx` archives for Linux, macOS, and Windows, bundles `gui/dist` and the unchanged OmniRoute MIT notice as `RTK-NOTICE.md` via `scripts/build-standalone.ts`, smoke-tests `/healthz`, and
 publishes SHA-256 sidecars for the attach job. Each archive also carries the target-matching
 `@napi-rs/keyring` native addon under `keyring/`; the macOS release installs both optional Darwin
 packages so its separate arm64 and x64 builds cannot silently reuse the hosted runner's

@@ -16,7 +16,7 @@
  * that same user, and a same-uid process could call `kill` directly. A token here would
  * protect nothing and would imply a boundary that does not exist.
  */
-const USAGE = "Usage: ocx internal desktop-restart-handoff --plan <path> | chatgpt-app-server-filter [--self-test]";
+const USAGE = "Usage: orl internal desktop-restart-handoff --plan <path> | chatgpt-app-server-filter [--self-test]";
 
 function optionValue(args: readonly string[], name: string): string | undefined {
   const index = args.indexOf(name);

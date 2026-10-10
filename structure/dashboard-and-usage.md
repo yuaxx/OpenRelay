@@ -1,13 +1,11 @@
 # Dashboard Surfaces And Usage
 
-Dashboard page contracts, usage accounting and request metrics, and the management settings that
-back individual dashboard surfaces. Serving, authentication boundaries, and `/api/*` ownership are
-in [GUI and management API](gui-and-management-api.md).
+`gui/src/pages/dashboard-rtk.tsx` displays RTK controls and aggregate process statistics from the existing settings read; it adds no polling. `src/server/management/rtk-routes.ts` performs authenticated field-scoped writes without client synchronization. See [RTK](transports/rtk.md). Dashboard page contracts, usage accounting and request metrics, and the management settings that back individual dashboard surfaces. Serving, authentication boundaries, and `/api/*` ownership are in [GUI and management API](gui-and-management-api.md).
 
 ## UX boundary
 
 The dashboard is a local control surface, not a separate service. It should reflect the same config
-and catalog invariants documented in this folder rather than inventing parallel state.
+and catalog invariants documented in this folder rather than inventing parallel state. The OpenRelay shell in `gui/src/App.tsx` preserves navigation and client workflows, presents OpenRelay branding with OpenCodex attribution, and retains Light/Dark/System, focus and reduced motion. `gui/src/main.tsx` adds Tailwind without Preflight and staged visual styles; Dashboard and Providers use scoped presentation components, while other screens retain their CSS in the common shell. Native account disclosures change visibility without fetching or polling. The visual contract lives in `gui/design-system/`.
 
 Codex quota cards consume the display cache from `src/codex/quota.ts`. A partial refresh
 removes an omitted short tuple whose reset deadline has elapsed, so a stale model-derived
@@ -123,6 +121,7 @@ The sidebar exposes eight rows (`gui/src/nav-groups.ts` `NAV_GROUPS`), in order:
 | Surface | Shape |
 | --- | --- |
 | Providers | Rail of configured providers plus a detail pane whose tabs are Overview, Models, Usage, then Accounts or API Keys when the provider has an auth surface, then Settings (`gui/src/components/provider-workspace/ProviderDetails.tsx`). |
+| Providers quota overview | With no rail selection, `gui/src/components/provider-workspace/ProviderOverviewDashboard.tsx` presents provider reports and the already loaded Codex, OAuth, and API-key account readings. The roster keeps accounts without quota and excludes only the backend's empty main-login placeholder. Display classification distinguishes missing, unsupported, pending, stale, and failed reads without inferring a numeric limit; the 30-minute stale threshold is a presentation rule from the report display bound, not an upstream status. The provider refresh control drives only the provider-report read; account enrichment retains its existing owner and cadence. |
 | API keys | Key table plus per-key detail (`gui/src/components/apikeys-workspace/`). The list payload carries masked prefixes only; each row deletes in place behind a two-step confirm, and clicking a key fetches the full value from `POST /api/keys/reveal`, which requires a current pairing or trusted Tailscale-identity session and answers `no-store`; automatic loopback sessions and raw admin tokens cannot reveal stored values, and a refusal there answers with the pairing surface — on the same-origin standalone transport the local pairing form, elsewhere the explanation alone — and requires a fresh reveal click after pairing. Displayed secrets and copy feedback are cleared on shared-session loss, pairing, inactive/hidden views, or a target change; stale asynchronous completions cannot restore them. |
 | Storage | Rail plus cleanup and trash detail (`gui/src/components/storage-workspace/`). |
 | Subagents | Featured-roster selection workspace (`gui/src/components/subagents-workspace/`). |

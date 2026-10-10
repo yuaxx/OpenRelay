@@ -3,7 +3,7 @@ title: Adapters
 description: The provider adapters — what each targets, how it builds requests, and its quirks.
 ---
 
-An **adapter** translates between opencodex's internal request/response model and one provider wire
+An **adapter** translates between OpenRelay's internal request/response model and one provider wire
 format. Every adapter implements the `ProviderAdapter` interface (`src/adapters/base.ts`):
 
 ```ts
@@ -26,7 +26,7 @@ then turns the events into Responses SSE.
 ## External task input on translated Responses routes
 
 Codex task coordination can deliver input as `function_call_output` with nonblank
-`id`, `name` and `namespace` fields and no `call_id` property. OpenCodex maps this
+`id`, `name` and `namespace` fields and no `call_id` property. OpenRelay maps this
 complete envelope to a user message before adapter translation. Its output must be
 nonblank text or a fully supported array of text and `input_image` URL parts. Text
 and image order are preserved; image detail `original` maps to `high`.
@@ -132,7 +132,7 @@ be configured on a separately named custom or self-hosted Ollama provider with
   `tool_choice: "none"` and `auto` behave normally; **`required` or an exact named choice fails
   closed**, because Ollama's `/api/chat` has no `tool_choice` field to enforce it with.
 - **Structured output is refused on canonical Ollama Cloud.** Ollama currently documents structured
-  outputs as unsupported on its Cloud, and Cloud does not enforce the `format` field, so OpenCodex
+  outputs as unsupported on its Cloud, and Cloud does not enforce the `format` field, so OpenRelay
   fails that request closed rather than returning unconstrained prose in answer to a schema-shaped
   request. Local and custom `ollama-native` endpoints keep Ollama's native `format` mapping
   (`json_object` → `"json"`, `json_schema` → the schema object).
@@ -148,7 +148,7 @@ configured provider key.
 The adapter preserves the incoming client's `User-Agent` as a fallback in both auth modes because
 some Responses-compatible providers use the Codex client fingerprint for compatibility behavior.
 An explicitly configured provider `User-Agent` remains authoritative regardless of header casing;
-if the caller sends none, OpenCodex does not invent one. Additional caller metadata can be selected
+if the caller sends none, OpenRelay does not invent one. Additional caller metadata can be selected
 with `forwardClientHeaders`; provider `headers` win for this option, and credential or transport-owned
 names are refused. Canonical ChatGPT forward auth retains its separate fixed header allowlist.
 Only `originator`, `x-client-request-id`, `x-codex-app-version`, and `user-agent` are supported by `forwardClientHeaders`; arbitrary names are rejected on load/write and ignored at runtime.
@@ -200,7 +200,7 @@ pairs and `reasoning.effort` are preserved.
 [Luna Reserve compatibility](/reference/cli/providers-accounts/#luna-reserve-alongside-routed-models)
 uses this canonical ChatGPT-forward path, not key-auth or arbitrary Responses gateways. It retains
 the safe caller-header allowlist and destination-scoped request normalization described here.
-OpenCodex sends its Reserve capability header on the owned main-account usage lookup; that header
+OpenRelay sends its Reserve capability header on the owned main-account usage lookup; that header
 is not itself permission. Eligible compatibility requests recheck credential-bound authorization
 at dispatch. Conversation and compaction are supported; vision helpers, web-search helpers, and
 standalone search relay are not.
@@ -362,7 +362,7 @@ MiMo model Command Code serves.
   (`gemini-3.1-flash-image`, `gemini-2.0-flash-preview-image-generation`, or
   `gemini-3-pro-image-preview`), the adapter sends `responseModalities: ["TEXT", "IMAGE"]`.
   Standalone media-generation IDs such as `gemini-3-pro-image` are not included. Returned
-  `inlineData` parts are materialized under the configured OpenCodex `artifacts/` directory and
+  `inlineData` parts are materialized under the configured OpenRelay `artifacts/` directory and
   surfaced as markdown image links to the authenticated opaque route
   `/v1/opencodex/artifacts/<id>` (not `file:` URIs or host filesystem paths). Each image is capped
   at 50 MB and each response at 100 MB of decoded data; malformed base64 payloads are rejected.
@@ -458,7 +458,7 @@ output. Filtering and guardrail stops surface as filtered incomplete output, and
 that arrives without an actual tool call is reported as a contradiction rather than treated as
 progress.
 
-When an ordinary client tool exists, opencodex adds a private
+When an ordinary client tool exists, OpenRelay adds a private
 `codex_kiro_final_answer` tool to the upstream request; progress text streams as commentary and
 cannot terminate the turn. The adapter consumes the private call, emits its answer as final text,
 and never exposes the private tool to Codex or Claude Code. Because the stop reason only arrives at
@@ -588,7 +588,7 @@ login` completes the CLI's own PKCE sign-in and writes a `devin-session-token` t
 `credentials.toml`, which is the same credential `SeatManagementService.RegisterUser` mints for a
 browser sign-in. When no usable CLI credential exists, login falls back to Auth0 browser sign-in
 and exchanges the pasted token via `RegisterUser` for a long-lived API key. `devin-cli` survives
-only as a deprecated alias — `ocx login devin-cli` still routes to `devin`, and a saved
+only as a deprecated alias — `orl login devin-cli` still routes to `devin`, and a saved
 configuration that names the old id is rewritten at startup.
 
 - Uses `runTurn` rather than the ordinary fetch/parse path. Requests and server events are encoded
@@ -614,11 +614,11 @@ configuration that names the old id is rewritten at startup.
   blocklist; the adapter sanitizes known triggers and truncates over-long descriptions before
   encoding.
 - Devin/Cognition API keys have no refresh endpoint. If Cognition rejects a stored key with 401,
-  OpenCodex marks that account for reauthentication and can use another signed-in account for
-  the turn. Run `ocx login devin` again for a revoked browser-login key. A CLI-imported account
+  OpenRelay marks that account for reauthentication and can use another signed-in account for
+  the turn. Run `orl login devin` again for a revoked browser-login key. A CLI-imported account
   can follow a later `devin auth login` key rotation only when its stored account ID or email
   matches the minted CLI identity. Imports without a stored identity require an explicit
-  `ocx login devin` after rotation. A legacy `devin-cli` slot for that same account may already
+  `orl login devin` after rotation. A legacy `devin-cli` slot for that same account may already
   hold the new key; a different account holding it blocks adoption. If the CLI file is
   temporarily unreadable or the identity check is unavailable, retry after it recovers. A paused account stays paused
   during this recovery and returns 403.
@@ -693,7 +693,7 @@ appended to the id instead.
 **Targets:** Zed Hosted AI's `POST /completions` endpoint at `cloud.zed.dev`.
 **Auth:** Zed native-app account identity plus access token, exchanged for a short-lived LLM token.
 
-- Uses the native RSA callback login (`ocx login zed`) and pairs the returned `user_id` with the
+- Uses the native RSA callback login (`orl login zed`) and pairs the returned `user_id` with the
   access token for account-scoped user and organization lookups.
 - Wraps the existing Anthropic Messages, Google Gemini, OpenAI Responses, and xAI Chat builders
   inside Zed's provider envelope, then unwraps Zed's NDJSON/SSE events back into `AdapterEvent`.
@@ -726,7 +726,7 @@ Shared helpers used by the vision-aware adapters:
 ## Grok Build terminal snapshots
 
 Requests marked with `x-opencodex-grok: 1` opt into a narrow Responses terminal
-repair. If `response.completed.response.output` is missing or empty, opencodex
+repair. If `response.completed.response.output` is missing or empty, OpenRelay
 can reconstruct it from real, uniquely indexed, contiguous `output_item.done`
 items whose raw fields satisfy the supported shapes. Deltas alone do not create
 output. Malformed, contradictory, duplicated, gapped or oversized evidence keeps
@@ -740,7 +740,7 @@ function-completion and undeclared-tool handling keep their established order.
 
 ### DeepSeek and Claude Code Artifact
 
-For the official DeepSeek Chat Completions endpoint, opencodex relaxes regex and
+For the official DeepSeek Chat Completions endpoint, OpenRelay relaxes regex and
 `anyOf` constraints in Claude Code’s built-in `Artifact` tool schema to avoid
 schema-validation HTTP 400 errors. Strict mode is omitted for this tool. Fields
 defined only inside an `anyOf` are no longer constrained by that union; the tool

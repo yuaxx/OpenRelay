@@ -1,4 +1,5 @@
 import { resolveHelpPath } from "./help-catalog";
+import { PRODUCT_NAME } from "../lib/brand";
 import type { Capability } from "./capabilities";
 import { MODELS_CONTEXT_DETAILS, MODELS_CONTEXT_USAGE } from "./help-models-context";
 import { renderRootHelp } from "./help-navigation";
@@ -17,7 +18,7 @@ export function packageVersion(): string {
 }
 
 export function printVersion(): void {
-  console.log(`opencodex ${packageVersion()}`);
+  console.log(`${PRODUCT_NAME} ${packageVersion()}`);
 }
 
 export function printUsage(): void {
@@ -25,101 +26,101 @@ export function printUsage(): void {
 }
 
 export function printFullUsage(): void {
-  console.log(`opencodex (ocx) — Universal provider proxy for Codex
+  console.log(`OpenRelay (orl) — Universal provider proxy for Codex
 
 Usage:
-  ocx setup                   Interactive setup (alias: init)
-  ocx start [--port <port>] [--socks5 [host:port] | --socks5-off]
+  orl setup                   Interactive setup (alias: init)
+  orl start [--port <port>] [--socks5 [host:port] | --socks5-off]
                               Start the proxy; SOCKS5 defaults to 127.0.0.1:10808
-  ocx stop [--json]           Stop the proxy AND restore native Codex (plain codex works again)
-  ocx restore                 Restore native Codex without stopping (alias: eject)
-  ocx restore back            Re-point codex at the running proxy (undo restore)
-  ocx restore --remove-codex-provider-table
+  orl stop [--json]           Stop the proxy AND restore native Codex (plain codex works again)
+  orl restore                 Restore native Codex without stopping (alias: eject)
+  orl restore back            Re-point codex at the running proxy (undo restore)
+  orl restore --remove-codex-provider-table
                               Also drop [model_providers.opencodex] that a paginated restore kept
-  ocx recover-history --legacy-openai --yes
+  orl recover-history --legacy-openai --yes
                                Force all user-message opencodex rows to OpenAI (legacy recovery)
-  ocx recover-history --ocx-compaction <thread-id> --yes
+  orl recover-history --ocx-compaction <thread-id> --yes
                                Back up and make one ocx1-compacted thread replayable by native Codex
-  ocx uninstall               Remove service/shim/config and restore native Codex (alias: remove)
-  ocx service [sub]           Run as a background service (default: install if absent, otherwise repair)
-  ocx codex-shim <sub>        Auto-start proxy when \`codex\` launches (install|status|uninstall|remove)
-  ocx tray <sub>              Windows status tray (install|start|stop|status|uninstall)
-  ocx ensure                  Ensure the proxy is running and Codex config/cache are current
-  ocx connect <url>           Connect this machine to a remote OpenCodex hub (credential via stdin)
-  ocx remote-workspace <sub>  Pair/run an OCX-only remote execution computer
-  ocx disconnect              Restore local state and clear the hub connection
-  ocx sync [--restart-codex]  Fetch models from providers and inject into Codex config
-  ocx sync-cache [--restart-codex]
+  orl uninstall               Remove service/shim/config and restore native Codex (alias: remove)
+  orl service [sub]           Run as a background service (default: install if absent, otherwise repair)
+  orl codex-shim <sub>        Auto-start proxy when \`codex\` launches (install|status|uninstall|remove)
+  orl tray <sub>              Windows status tray (install|start|stop|status|uninstall)
+  orl ensure                  Ensure the proxy is running and Codex config/cache are current
+  orl connect <url>           Connect this machine to a remote OpenRelay hub (credential via stdin)
+  orl remote-workspace <sub>  Pair/run an OCX-only remote execution computer
+  orl disconnect              Restore local state and clear the hub connection
+  orl sync [--restart-codex]  Fetch models from providers and inject into Codex config
+  orl sync-cache [--restart-codex]
                               Refresh Codex's model cache from the active catalog
-  ocx catalog pull <https-url> Install a validated remote catalog and refresh the Codex cache
-  ocx status                  Check proxy server status (on a hub: one block with its ports and token source)
-  ocx doctor                  Diagnose environment/network issues (WSL, proxy, ChatGPT reachability)
-  ocx doctor --reclaim-response-temps
+  orl catalog pull <https-url> Install a validated remote catalog and refresh the Codex cache
+  orl status                  Check proxy server status (on a hub: one block with its ports and token source)
+  orl doctor                  Diagnose environment/network issues (WSL, proxy, ChatGPT reachability)
+  orl doctor --reclaim-response-temps
                               Reclaim abandoned response-state temp files (works without a running proxy)
-  ocx doctor --recover-zero-byte-coordinator --yes
+  orl doctor --recover-zero-byte-coordinator --yes
                               Back up a proven zero-byte Codex coordinator after stopping the proxy
-  ocx debug <scope>           provider/usage/injection/claude on|off|status|reset
-  ocx login <provider>        OAuth or API-key provider login (ocx login codex for Codex/ChatGPT)
-  ocx logout <provider>       Remove a stored OAuth login
-  ocx gui [pair --origin <browser-origin> [--json]]
+  orl debug <scope>           provider/usage/injection/claude on|off|status|reset
+  orl login <provider>        OAuth or API-key provider login (orl login codex for Codex/ChatGPT)
+  orl logout <provider>       Remove a stored OAuth login
+  orl gui [pair --origin <browser-origin> [--json]]
                               Open the dashboard or create a single-use remote pairing grant
-  ocx hub invite [--json]     Print a ready-to-run \`ocx connect\` line for one more machine
-                              (hub only; see \`ocx help hub\` for the one-port topology)
-  ocx link <sub>              Machine links over SSH (port|issue|revoke|status)
-  ocx update [--tag <tag>]    Update opencodex (keeps preview installs on @preview)
-  ocx restart                  Stop and restart the proxy
-  ocx v2 <sub>                multi_agent_v2 surface (status|on|off|mode|keep-native-v1|threads|mode-hint)
-  ocx health [--json]          Check proxy health (exit 0=healthy, 1=not)
-  ocx capabilities [--json]    List declared capabilities and the API routes they drive
-  ocx ready [--json] [--wait [--timeout <s>]]  Check post-sync readiness (exit 0 only when ready)
-  ocx resolve [--json]        Config home, effective port, and liveness (JSON for shells)
-  ocx provider <sub>          Providers, connectivity, quota, and selected models
-  ocx account <sub>           Accounts, login/reauth, key pools, and quota controls
-  ocx models <sub>            Live/custom models, visibility, context, and shadow calls
-  ocx alias <sub>             Short names for providers and models (list, set, rm, defaults)
-  ocx combo <sub>             Combo routing strategies and failover
-  ocx agent <sub>             Subagents, injection, effort caps, and sidecars
-  ocx message <sub>           Loaded local Codex sessions and queued peer messages (sessions|send)
-  ocx effort [sub]            Inspect and configure reasoning effort caps and defaults
-  ocx observe <sub>           Logs, usage, storage, memory, and debug data
-  ocx inspect <sub>           Effective config, catalog, analytics, pacing, client-config
-  ocx route <sub>             Routing features (combo, policy)
-  ocx logs [filters]          Alias of ocx observe logs
-  ocx usage [--range <today|1d|7d|30d|all>] [--provider <name>] [--model <id>]
-                              Token and estimated-cost report (alias of ocx observe usage)
-  ocx storage <sub>           Storage report, cleanup, trash, and the cleanup policy
-  ocx memory [--json]         Alias of ocx observe memory
-  ocx api-key <sub>           Alias of ocx access key
-  ocx access <sub>            External API keys and endpoint information
-  ocx api <sub>               Protocol paths: vocabulary, request-path preview, and policy
-  ocx export --client <id>    Print a client config wired to the running proxy (18 clients)
-  ocx integration client <sub> Enable, disable, inspect or roll back a client integration
-  ocx grok <sub>              Grok Build model selection and apply
-  ocx system <sub>            Runtime settings, startup, sync, OpenCodex updates, and Codex CLI inspection
-  ocx config [sub]            Validated configuration show/get/set/import/export
-  ocx companion <show|set|reset>  Menu-bar and widget companion usage settings
-  ocx lab <sub>               Inspect Lab evidence and control local automation
-  ocx chatgpt <sub>          Experimental app-server shim: launch|restore|status (macOS)
-  ocx claude [args...]        Launch Claude Code wired to the proxy (model discovery on)
-  ocx claude desktop [sub]    Manage and apply Claude Desktop's four-family profile
-  ocx opencode [args...]      Launch opencode wired to the proxy (runtime provider config)
-  ocx mcode [args...]         Launch MiniMax Code through its managed provider
-  ocx mmx text <sub> [args]   Launch MiniMax CLI text through the proxy
-  ocx zcode [sub]             Connect ZCode to the proxy (managed provider)
-  ocx commandcode [sub]       Connect Command Code CLI to the proxy (managed provider)
-  ocx cmd [sub]               Alias of ocx commandcode
-  ocx help [command]          Show help
-  ocx --version | -v          Print version
+  orl hub invite [--json]     Print a ready-to-run \`orl connect\` line for one more machine
+                              (hub only; see \`orl help hub\` for the one-port topology)
+  orl link <sub>              Machine links over SSH (port|issue|revoke|status)
+  orl update [--tag <tag>]    Update OpenRelay (keeps preview installs on @preview)
+  orl restart                  Stop and restart the proxy
+  orl v2 <sub>                multi_agent_v2 surface (status|on|off|mode|keep-native-v1|threads|mode-hint)
+  orl health [--json]          Check proxy health (exit 0=healthy, 1=not)
+  orl capabilities [--json]    List declared capabilities and the API routes they drive
+  orl ready [--json] [--wait [--timeout <s>]]  Check post-sync readiness (exit 0 only when ready)
+  orl resolve [--json]        Config home, effective port, and liveness (JSON for shells)
+  orl provider <sub>          Providers, connectivity, quota, and selected models
+  orl account <sub>           Accounts, login/reauth, key pools, and quota controls
+  orl models <sub>            Live/custom models, visibility, context, and shadow calls
+  orl alias <sub>             Short names for providers and models (list, set, rm, defaults)
+  orl combo <sub>             Combo routing strategies and failover
+  orl agent <sub>             Subagents, injection, effort caps, and sidecars
+  orl message <sub>           Loaded local Codex sessions and queued peer messages (sessions|send)
+  orl effort [sub]            Inspect and configure reasoning effort caps and defaults
+  orl observe <sub>           Logs, usage, storage, memory, and debug data
+  orl inspect <sub>           Effective config, catalog, analytics, pacing, client-config
+  orl route <sub>             Routing features (combo, policy)
+  orl logs [filters]          Alias of orl observe logs
+  orl usage [--range <today|1d|7d|30d|all>] [--provider <name>] [--model <id>]
+                              Token and estimated-cost report (alias of orl observe usage)
+  orl storage <sub>           Storage report, cleanup, trash, and the cleanup policy
+  orl memory [--json]         Alias of orl observe memory
+  orl api-key <sub>           Alias of orl access key
+  orl access <sub>            External API keys and endpoint information
+  orl api <sub>               Protocol paths: vocabulary, request-path preview, and policy
+  orl export --client <id>    Print a client config wired to the running proxy (18 clients)
+  orl integration client <sub> Enable, disable, inspect or roll back a client integration
+  orl grok <sub>              Grok Build model selection and apply
+  orl system <sub>            Runtime settings, startup, sync, OpenRelay updates, and Codex CLI inspection
+  orl config [sub]            Validated configuration show/get/set/import/export
+  orl companion <show|set|reset>  Menu-bar and widget companion usage settings
+  orl lab <sub>               Inspect Lab evidence and control local automation
+  orl chatgpt <sub>          Experimental app-server shim: launch|restore|status (macOS)
+  orl claude [args...]        Launch Claude Code wired to the proxy (model discovery on)
+  orl claude desktop [sub]    Manage and apply Claude Desktop's four-family profile
+  orl opencode [args...]      Launch opencode wired to the proxy (runtime provider config)
+  orl mcode [args...]         Launch MiniMax Code through its managed provider
+  orl mmx text <sub> [args]   Launch MiniMax CLI text through the proxy
+  orl zcode [sub]             Connect ZCode to the proxy (managed provider)
+  orl commandcode [sub]       Connect Command Code CLI to the proxy (managed provider)
+  orl cmd [sub]               Alias of orl commandcode
+  orl help [command]          Show help
+  orl --version | -v          Print version
 
 Examples:
-  ocx init                    Set up provider and inject into Codex
-  ocx start                   Start on default port (10100)
-  ocx start --port 8080       Start on custom port
-  ocx start --socks5          Outbound via SOCKS5 at 127.0.0.1:10808 (saved)
-  ocx start --socks5-off      Clear a saved SOCKS5 outbound proxy
-  ocx help service            Show service command help
-  ocx help hub                Explain the hub topology, token file, and invites
-  ocx sync                    Sync available models to Codex`);
+  orl init                    Set up provider and inject into Codex
+  orl start                   Start on default port (10100)
+  orl start --port 8080       Start on custom port
+  orl start --socks5          Outbound via SOCKS5 at 127.0.0.1:10808 (saved)
+  orl start --socks5-off      Clear a saved SOCKS5 outbound proxy
+  orl help service            Show service command help
+  orl help hub                Explain the hub topology, token file, and invites
+  orl sync                    Sync available models to Codex`);
 }
 
 export function hasHelpFlag(values: string[]): boolean {
@@ -160,29 +161,29 @@ export function printSubcommandUsage(
     if (result.capability) printCapabilityDetails(result.capability, write, result.entry.details);
     if (result.children.length) {
       write("\nDeclared commands (incomplete):");
-      for (const child of result.children) write(`  ocx help ${child.command.join(" ")}  ${child.summary}`);
+      for (const child of result.children) write(`  orl help ${child.command.join(" ")}  ${child.summary}`);
     }
-    if (result.canonicalName === "models") write("\nContext cap help: ocx help models context");
-    if (result.entry.name !== result.canonicalName) write(`\nCanonical help: ocx help ${result.canonicalName}`);
+    if (result.canonicalName === "models") write("\nContext cap help: orl help models context");
+    if (result.entry.name !== result.canonicalName) write(`\nCanonical help: orl help ${result.canonicalName}`);
     return;
   }
   if (result.kind === "models-context") {
     write(`Usage:\n${MODELS_CONTEXT_USAGE}\n\n${MODELS_CONTEXT_DETAILS.join("\n")}`);
   } else if (result.kind === "capability") {
     const { capability } = result;
-    const heading = capability.usage !== undefined ? `Usage: ${capability.usage}` : `Command: ocx ${result.path.join(" ")}`;
+    const heading = capability.usage !== undefined ? `Usage: ${capability.usage}` : `Command: orl ${result.path.join(" ")}`;
     write(`${heading}\n\n${capability.summary}`);
     printCapabilityDetails(capability, write);
     if (result.children.length) {
       write("\nDeclared commands (incomplete):");
-      for (const child of result.children) write(`  ocx help ${child.command.join(" ")}  ${child.summary}`);
+      for (const child of result.children) write(`  orl help ${child.command.join(" ")}  ${child.summary}`);
     }
     if (capability.usage === undefined) {
       write("\nCapability metadata is incomplete; this is not the full operand grammar.");
     }
   } else {
-    write(`Command group: ocx ${result.path.join(" ")}\n\nDeclared commands (incomplete):`);
-    for (const child of result.children) write(`  ocx ${child.command.join(" ")}  ${child.summary}`);
+    write(`Command group: orl ${result.path.join(" ")}\n\nDeclared commands (incomplete):`);
+    for (const child of result.children) write(`  orl ${child.command.join(" ")}  ${child.summary}`);
   }
-  write(`\nParent help: ocx help ${result.path.slice(0, -1).join(" ")}`);
+  write(`\nParent help: orl help ${result.path.slice(0, -1).join(" ")}`);
 }

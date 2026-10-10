@@ -1,10 +1,10 @@
 ---
 title: Model Ordering
-description: How opencodex determines model order in the Codex picker and spawn_agent model overrides.
+description: How OpenRelay determines model order in the Codex picker and spawn_agent model overrides.
 ---
 
 The Codex model picker does not preserve the order of provider declarations or model arrays in the
-opencodex configuration. Its final order comes from catalog priorities, with a deterministic
+OpenRelay configuration. Its final order comes from catalog priorities, with a deterministic
 alphabetical order for routed models that share the same priority.
 
 ## The rule Codex applies
@@ -14,7 +14,7 @@ discards the catalog array order, so moving an entry earlier in a generated JSON
 it earlier in the picker. The implementation records this constraint directly in
 `src/codex/catalog/sync.ts`.
 
-opencodex therefore controls featured placement by assigning lower priorities, not by relying on
+OpenRelay therefore controls featured placement by assigning lower priorities, not by relying on
 array position. Unless noted otherwise, the fixed priorities and worked example below describe a
 catalog with no eligible Codex account selectors. With `N` eligible selectors, featured priorities
 use `N` as a stride: a bare native choice at configured rank `i` expands to selector rows at
@@ -73,7 +73,7 @@ With no eligible account selectors and a non-empty featured list, the resulting 
 3. Unselected native models, pushed below the featured block during catalog merge.
 
 Without `subagentModels`, routed models remain at priority `5`, native GPT entries use their normal
-priority (normally `9` for entries built by opencodex), and the routed group remains provider/id
+priority (normally `9` for entries built by OpenRelay), and the routed group remains provider/id
 alphabetical.
 
 ## Example
@@ -111,7 +111,7 @@ have expanded into selector-qualified groups.
 
 Use `subagentModels` to choose and order the leading models that Codex also advertises to
 `spawn_agent`. The dashboard's **Sub-agents** page can reorder bare native and routed ids. Use
-`ocx agent subagents set` or edit the opencodex configuration for exact
+`orl agent subagents set` or edit the OpenRelay configuration for exact
 `<selector>/<native-openai-model>` choices; the dashboard retains those ids once saved, including choices currently unavailable. Use at most five configured ids. With account selectors, one bare native
 choice can expand into multiple selector-qualified catalog rows, so configured choices and
 advertised rows are not necessarily one-to-one.
@@ -158,19 +158,19 @@ their selector-qualified id in the list.
 Previously, native ids in `modelPickerOrder` were ignored. An existing list containing
 a bare native id now activates complete-picker ordering, including featured rows.
 Remove bare native ids to keep the previous routed-only behavior. Unset, empty and
-routed-only lists retain their behavior; OpenCodex's natural-priority guidance candidate calculation is unchanged.
+routed-only lists retain their behavior; OpenRelay's natural-priority guidance candidate calculation is unchanged.
 
-`modelPickerOrder` preserves OpenCodex's natural-priority calculation of up to five preferred
+`modelPickerOrder` preserves OpenRelay's natural-priority calculation of up to five preferred
 candidates for subagent guidance. Each moved row retains its natural priority separately from
-its native `priority`; changing picker order alone must not change that OpenCodex calculation.
+its native `priority`; changing picker order alone must not change that OpenRelay calculation.
 It does not restrict eligibility for an exact-name model override: the native advertised list
 is not an allowlist, and existing authentication, model/effort and backend constraints still apply.
 
 Native Codex uses native `priority` to select the first five eligible picker-visible models
 advertised by `spawn_agent` on V1 and on V2 when model overrides are exposed. Those advertised
-five may therefore change with picker order, even when OpenCodex's preferred candidates remain
-unchanged. V1 receives no OpenCodex preferred-roster injection. V2 may additionally receive
-OpenCodex's natural-priority guidance when the client catalog state permits; that guidance does
+five may therefore change with picker order, even when OpenRelay's preferred candidates remain
+unchanged. V1 receives no OpenRelay preferred-roster injection. V2 may additionally receive
+OpenRelay's natural-priority guidance when the client catalog state permits; that guidance does
 not reorder the native tool's advertised list.
 
 `disabledModels` and each provider's `selectedModels` remain visibility fields,
@@ -182,7 +182,7 @@ On **Models**, choose **Default**, **A–Z by model**, **Group by provider**, or
 
 The controls use `GET/PUT /api/subagent-models`: `chosen` and `available` retain saved roster choices, including disabled or missing models; `pickerAvailable` contains only eligible routed catalog ids. The Models page sends `pickerOrder` and `pickerOrderMode`, never `models`. Roster-only saves preserve picker settings. Invalid combined updates and failed persistence leave the previous picker/roster state intact.
 
-Routed-only presets keep the existing featured/native priority bands. They affect the Codex catalog and Claude discovery's routed groups; Claude's native prefix and explicit Desktop profile/alias ownership remain unchanged. OpenCodex guidance ranks and configured fallback settings are preserved, but native Codex's advertised five and recommended default can change with display priority. Saving does not restart clients; a catalog refresh may remain pending, and clients holding an old catalog may need reopening.
+Routed-only presets keep the existing featured/native priority bands. They affect the Codex catalog and Claude discovery's routed groups; Claude's native prefix and explicit Desktop profile/alias ownership remain unchanged. OpenRelay guidance ranks and configured fallback settings are preserved, but native Codex's advertised five and recommended default can change with display priority. Saving does not restart clients; a catalog refresh may remain pending, and clients holding an old catalog may need reopening.
 
 
 ### Custom routed order

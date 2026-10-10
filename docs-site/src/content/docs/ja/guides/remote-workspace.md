@@ -5,7 +5,7 @@ description: Codex、Claude Code、Pi とそのログインを 1 台の OCX Hub 
 
 SSH のマシンリンクについては、[リモートリンク](/ja/guides/remote-link/) を参照してください。
 
-Remote Workspace では、OpenCodex Hub でコーディングエージェントを実行し、別のコンピューターからプロジェクトファイル、コマンド、テスト、ビルド用の計算資源を提供できます。スマートフォンや 3 台目のコンピューターから、Hub のダッシュボードを通じてセッションを操作できます。
+Remote Workspace では、OpenRelay Hub でコーディングエージェントを実行し、別のコンピューターからプロジェクトファイル、コマンド、テスト、ビルド用の計算資源を提供できます。スマートフォンや 3 台目のコンピューターから、Hub のダッシュボードを通じてセッションを操作できます。
 
 ```text
 Phone browser -> Computer 1 OCX Hub -> encrypted channel -> Computer 2 OCX Executor
@@ -13,7 +13,7 @@ Phone browser -> Computer 1 OCX Hub -> encrypted channel -> Computer 2 OCX Execu
                  logins and sessions                      no coding CLI login
 ```
 
-Executor に必要なのは OpenCodex だけです。Codex、Claude Code、Pi、ChatGPT ログイン、プロバイダー API キーは不要です。Hub への外向き WebSocket 接続を開くため、Executor に公開ポートやルーターのポート転送は必要ありません。
+Executor に必要なのは OpenRelay だけです。Codex、Claude Code、Pi、ChatGPT ログイン、プロバイダー API キーは不要です。Hub への外向き WebSocket 接続を開くため、Executor に公開ポートやルーターのポート転送は必要ありません。
 
 :::caution[実験的な基盤]
 Remote Workspace は明示的に有効化する機能で、実運用向けの公開ではありません。Linux はファイルツールと、条件付きの bubblewrap コマンド実行を提供します。Windows と macOS が提供するのはファイルツールのみで、公式のネイティブヘルパーはプローブとコマンドの要求を拒否します。Windows のコマンドは、キャンセル後も掃除権限を保持できるライフサイクル管理主体が検証されるまで未対応です。コマンドが使えない場合も Hub 上での実行へ切り替わることはありません。
@@ -21,12 +21,12 @@ Remote Workspace は明示的に有効化する機能で、実運用向けの公
 
 ## Hub を設定する
 
-コンピューター 1 がすべてのコーディングエージェントのログインとモデルセッションを所有します。使いたいエージェントをそこにインストールしてログインし、OpenCodex を Hub として実行します。
+コンピューター 1 がすべてのコーディングエージェントのログインとモデルセッションを所有します。使いたいエージェントをそこにインストールしてログインし、OpenRelay を Hub として実行します。
 
 ```bash
-ocx config set runtimeRole hub
-OCX_REMOTE_WORKSPACE_ENABLED=1 ocx start
-ocx gui
+orl config set runtimeRole hub
+OCX_REMOTE_WORKSPACE_ENABLED=1 orl start
+orl gui
 ```
 
 `OCX_REMOTE_WORKSPACE_ENABLED=1` は Hub のプロセス自体に設定してください。ダッシュボード用コマンドにだけ設定しても、実行中のサービスは有効になりません。明示的に有効化されていない Hub は、ワークスペースキーの作成やコーディングエージェントのランタイム検査をせず、無効状態を返します。
@@ -40,30 +40,30 @@ Codex Remote Workspace は現行の App Server 権限プロファイルを使い
 1. Hub ダッシュボードで **Remote Workspace** を開きます。
 2. **Create pairing code** を選びます。
 3. コンピューター 2 で、公開したいプロジェクトのディレクトリへ移動します。
-4. そのコンピューター用に生成された **Linux / macOS terminal** または **Windows PowerShell** コマンドをコピーします。現在のディレクトリをペアリングし、その端末で `ocx remote-workspace agent` の接続を維持します。
+4. そのコンピューター用に生成された **Linux / macOS terminal** または **Windows PowerShell** コマンドをコピーします。現在のディレクトリをペアリングし、その端末で `orl remote-workspace agent` の接続を維持します。
 
 手動での同等の手順は次のとおりです。
 
 ```bash
 cd /path/to/project
-printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.example' \
+printf '%s\n' 'ONE-TIME-CODE' | orl remote-workspace pair 'https://your-hub.example' \
   --pairing-code-stdin --root "$PWD"
-ocx remote-workspace agent
+orl remote-workspace agent
 ```
 
 Windows PowerShell ではダッシュボードに表示されたコマンドを使います。同等の手動操作は次のとおりです。
 
 ```powershell
 $pairingCode = 'ONE-TIME-CODE'
-$pairingCode | ocx remote-workspace pair 'https://your-hub.example' `
+$pairingCode | orl remote-workspace pair 'https://your-hub.example' `
   --pairing-code-stdin --root (Get-Location).Path
-if ($LASTEXITCODE -eq 0) { ocx remote-workspace agent }
+if ($LASTEXITCODE -eq 0) { orl remote-workspace agent }
 ```
 
 現在の OCX Bun 実行ファイルは、Linux サンドボックスに読み取り専用のファイル 1 件として自動追加されます。プロジェクトでシステムパス外のユーザーインストール済みツールチェーンが必要なら、ホームディレクトリ全体を公開せず、明示的にペアリングします。
 
 ```bash
-printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.example' \
+printf '%s\n' 'ONE-TIME-CODE' | orl remote-workspace pair 'https://your-hub.example' \
   --pairing-code-stdin --root "$PWD" \
   --toolchain-root "$HOME/.nvm/versions/node/v24/bin"
 ```
@@ -75,7 +75,7 @@ printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.exam
 秘密情報を表示せずにローカルの登録状態を確認できます。
 
 ```bash
-ocx remote-workspace status
+orl remote-workspace status
 ```
 
 ## リモートコーディングセッションを開始する

@@ -1,15 +1,15 @@
 ---
 title: 管理 API
-description: opencodex 控制平面的認證、錯誤與端點參考。
+description: OpenRelay 控制平面的認證、錯誤與端點參考。
 ---
 
-管理 API 是 opencodex 的控制平面。`http://localhost:10100` 的儀表板是它的一個客戶端；無頭的 `ocx` 供應商、模型、組合、帳號、設定、診斷與生命週期指令也是客戶端。API 僅在代理執行時可用。
+管理 API 是 OpenRelay 的控制平面。`http://localhost:10100` 的儀表板是它的一個客戶端；無頭的 `ocx` 供應商、模型、組合、帳號、設定、診斷與生命週期指令也是客戶端。API 僅在代理執行時可用。
 
 使用[網頁儀表板](/zh-tw/guides/web-dashboard/)作為互動式客戶端，或在建構自動化時使用此參考。持久值最終遵循[設定](/zh-tw/reference/configuration/)。
 
 ## 認證模型
 
-管理 API 有自己的管理憑證，獨立於 data-plane API 金鑰。在啟動時，opencodex 依此順序解析它：
+管理 API 有自己的管理憑證，獨立於 data-plane API 金鑰。在啟動時，OpenRelay 依此順序解析它：
 
 1. `OPENCODEX_ADMIN_AUTH_TOKEN`，設定時。
 2. 強化秘密檔案中生成的 `ocx_admin_*` token。
@@ -73,7 +73,7 @@ Session 簽發在需要 data-plane 認證時停用，這包含遠端綁定。遠
 | `GET /api/claude-desktop/status` | 檢查已儲存 vs 已套用設定檔與 Desktop 健康 | 400 狀態讀取失敗 |
 | `GET, PUT /api/claude-code` | 讀取或更新 Claude Code 閘道、auth-mode、model-map、context、agent 與 sidecar 設定 | 400 無效欄位或結構 |
 
-儀表板從 **Providers > xAI Grok > Accounts** 驅動這兩條 coupon 路徑：每個已登入帳號列都帶有票券徽章，顯示剩餘的 reset coupon 數量，徽章會開啟對話框，列出有效期間並兌換最接近到期的 reset coupon。該對話框會送出由客戶端鑄造的 `operationId`，並在逾時後停止送出而不重試，因為日誌記錄仍為開啟的兌換會再次執行。`ocx account grok-reset-coupons` 仍是終端機等價指令。
+儀表板從 **Providers > xAI Grok > Accounts** 驅動這兩條 coupon 路徑：每個已登入帳號列都帶有票券徽章，顯示剩餘的 reset coupon 數量，徽章會開啟對話框，列出有效期間並兌換最接近到期的 reset coupon。該對話框會送出由客戶端鑄造的 `operationId`，並在逾時後停止送出而不重試，因為日誌記錄仍為開啟的兌換會再次執行。`orl account grok-reset-coupons` 仍是終端機等價指令。
 
 Claude 用量重設也可從 **Providers > Anthropic > Accounts** 以相同方式操作。每個已登入帳號列都有票券徽章，顯示剩餘重設次數；對話框會在第二次確認後使用一次重設機會。重設會補滿 5 小時與每週額度，但不會改變每週重設日。如果使用請求未收到回應，對話框會保留其 `operationId`，並在十分鐘內提供使用相同 ID 重試的選項；Claude Code 用戶端也以此方式復原。在此期間，系統會拒絕對同一重設機會發起新操作。重設機會只能透過儀表板使用：僅持有管理員權杖會收到 `403 session_required`。
 
@@ -295,7 +295,7 @@ OpenAI 也遵循此規則：開關不會選擇特殊的 922k 模式。生效中�
 | --- | --- | --- |
 | `GET /api/system/memory` | 回傳純量行程、heap、串流、回應狀態、看門狗與活躍回合指標 | — |
 | `POST /api/system/restart` | 在不移除客戶端注入的情況下開始感知排空的行程重啟 | 回傳 202；重複呼叫回報既有的排空 |
-| `POST /api/stop` | 停止服務、還原原生 Codex、移除受管 Grok 注入並排空代理 | 409 服務擁有權衝突；當 Windows 工作排程器包裝程序可能重新啟動 Proxy 且呼叫端不是 `ocx stop` 時回傳 409 `respawnable_service`（不會做任何變更）；已安裝的管理器拒絕停止時回傳 409；無法讀取工作排程器狀態時回傳 409 `service_state_unknown`（不會做任何變更；修復查詢後重試） |
+| `POST /api/stop` | 停止服務、還原原生 Codex、移除受管 Grok 注入並排空代理 | 409 服務擁有權衝突；當 Windows 工作排程器包裝程序可能重新啟動 Proxy 且呼叫端不是 `orl stop` 時回傳 409 `respawnable_service`（不會做任何變更）；已安裝的管理器拒絕停止時回傳 409；無法讀取工作排程器狀態時回傳 409 `service_state_unknown`（不會做任何變更；修復查詢後重試） |
 
 ### Codex 認證委派
 
@@ -344,7 +344,7 @@ HTTP: 400 invalid/unsupported; 404 missing account; `oauth_mutation_busy` on loc
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

@@ -1,9 +1,9 @@
 ---
 title: Pourquoi v1 est la surface de sous-agent par défaut
-description: Ce que bloque la limite des tâches chiffrées en v2, pourquoi OpenCodex livre désormais v1 et comment utiliser malgré tout v2.
+description: Ce que bloque la limite des tâches chiffrées en v2, pourquoi OpenRelay livre désormais v1 et comment utiliser malgré tout v2.
 ---
 
-OpenCodex s'installe avec la surface de sous-agent réglée sur **v1**. Les pages
+OpenRelay s'installe avec la surface de sous-agent réglée sur **v1**. Les pages
 Dashboard, Models et Subagents demandent toutes confirmation avant de passer à
 **base** ou **v2** et renvoient vers cette page. La CLI ne demande rien.
 
@@ -32,13 +32,13 @@ une consigne vide et conduirait à une réponse erronée présentée avec assura
 
 ## Pourquoi cela se produit
 
-![Comparaison de la même délégation sur deux voies. En v1, un parent ChatGPT envoie une tâche en texte clair via OpenCodex ; elle franchit la frontière fournisseur et l'enfant routé la lit. En v2, le parent envoie encrypted_content créé par le backend ChatGPT ; OpenCodex ne peut pas le déchiffrer. La tâche s'arrête donc à la frontière fournisseur et la requête échoue avec unreadable_encrypted_agent_task.](../../../../assets/subagent-v2-encrypted-task.svg)
+![Comparaison de la même délégation sur deux voies. En v1, un parent ChatGPT envoie une tâche en texte clair via OpenRelay ; elle franchit la frontière fournisseur et l'enfant routé la lit. En v2, le parent envoie encrypted_content créé par le backend ChatGPT ; OpenRelay ne peut pas le déchiffrer. La tâche s'arrête donc à la frontière fournisseur et la requête échoue avec unreadable_encrypted_agent_task.](../../../../assets/subagent-v2-encrypted-task.svg)
 
-En v1, le parent émet la tâche de l'enfant en texte clair. OpenCodex la lit et
+En v1, le parent émet la tâche de l'enfant en texte clair. OpenRelay la lit et
 l'achemine ; l'enfant routé reçoit une consigne exploitable.
 
 En v2, le parent émet la tâche sous forme de `encrypted_content`, produit par
-le backend ChatGPT. La clé reste dans ce backend. OpenCodex ne l'a jamais eue :
+le backend ChatGPT. La clé reste dans ce backend. OpenRelay ne l'a jamais eue :
 le proxy ne peut donc rien déchiffrer ni réécrire. La valeur est réellement du
 texte chiffré, et non du texte clair caché derrière un indicateur. La limite
 est structurelle, pas un défaut de configuration, et aucun réglage du proxy
@@ -70,7 +70,7 @@ L'envoi reste un problème ouvert :
 la pièce manquante : une règle de livraison côté envoi. Aucun des deux n'a
 d'engagement d'un mainteneur ni de date prévue.
 
-OpenCodex a consigné la conséquence dans [#92](https://github.com/lidge-jun/opencodex/issues/92),
+OpenRelay a consigné la conséquence dans [#92](https://github.com/lidge-jun/opencodex/issues/92),
 fermée sans suite prévue : rien dans ce dépôt ne peut la corriger. L'issue
 renvoie donc aux travaux en amont, plutôt qu'à une tâche en attente ici.
 
@@ -101,7 +101,7 @@ l'avis sans répondre, il réapparaît à la prochaine ouverture du tableau de b
 
 Les changements de mode s'appliquent aux **nouvelles** sessions Codex. Lancez
 une nouvelle session après votre choix. Si un hôte App durable affiche encore
-l'ancienne surface, exécutez `ocx sync` et redémarrez cette surface Codex.
+l'ancienne surface, exécutez `orl sync` et redémarrez cette surface Codex.
 
 ## Si vous voulez tout de même v2
 
@@ -142,8 +142,8 @@ Dashboard, Models et Subagents proposent le même sélecteur v1/base/v2 et
 demandent tous confirmation avant base ou v2. Depuis la CLI :
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
+orl v2 status
+orl v2 mode v1
 ```
 
 La CLI ne demande pas de confirmation. C'est le même paramètre : choisissez-le

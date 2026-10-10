@@ -7,7 +7,7 @@ description: 提供方配置、凭据、配额，以及模型目录命令。
 
 ## 提供方
 
-### `ocx provider <subcommand>`
+### `orl provider <subcommand>`
 
 非交互式提供方管理。注册表条目按名称预置；自定义名称必须同时提供
 `--adapter` 和 `--base-url`。
@@ -29,14 +29,14 @@ description: 提供方配置、凭据、配额，以及模型目录命令。
 默认的 `add`、`remove` 和 `set-default` 修改本地配置。修改运行中的代理需加 `--live`，在线删除还需 `--yes`。`--sync --json` 同样会在保存后尝试同步；失败时保留保存结果，以非零状态退出，并返回 `needsSync: true`。`--live` 不能与 `--sync` 同用。pacing 和 snapshot/apply 操作见[英文指南](/reference/cli/providers-accounts/#snapshot-edit-and-apply-with-a-baseline)。
 
 ```bash
-ocx provider list --json
-ocx provider list --jsonl
-ocx provider test ark
-ocx provider add anthropic --api-key sk-ant-... --set-default --sync
-ocx provider add local-dev --adapter openai-chat --base-url http://localhost:11434/v1
-ocx provider show anthropic --json
-ocx models --provider anthropic --json
-ocx models live --provider ark --json
+orl provider list --json
+orl provider list --jsonl
+orl provider test ark
+orl provider add anthropic --api-key sk-ant-... --set-default --sync
+orl provider add local-dev --adapter openai-chat --base-url http://localhost:11434/v1
+orl provider show anthropic --json
+orl models --provider anthropic --json
+orl models live --provider ark --json
 ```
 
 `--jsonl` 仅输出已配置的提供方，每行一个 JSON 对象。每个对象的字段与 `--json` 输出中 `configured` 数组的元素相同，不包含 `registryCount` 汇总。脚本可以逐行处理这些对象。`--json` 与 `--jsonl` 不能同时使用。
@@ -57,36 +57,36 @@ ocx models live --provider ark --json
 
 ## 认证
 
-### `ocx login <provider>`
+### `orl login <provider>`
 
 启动该提供方已注册的登录流程。OAuth 提供方会打开浏览器，并将自动刷新的
 凭据存储在 `~/.opencodex/` 下；API 密钥登录提供方会打开其密钥控制台，提示输入
 密钥，在可行时进行校验，并保存生成的提供方配置。当名称缺失或未知时，命令会
 打印当前可接受的 OAuth 和 API 密钥提供方 id。
 
-在 `ocx status` / `ocx doctor` 报告需要重新认证或终端刷新失败后，也可用同一条
+在 `orl status` / `orl doctor` 报告需要重新认证或终端刷新失败后，也可用同一条
 命令执行**重新认证**（或者在仪表盘中使用 Reauthenticate）。Codex 池账号不是上面
-那些 OAuth / API key 提供方，但 `ocx login codex` 可以到达：它会转到账号池登录，
-因此 `ocx login codex --reauth` 与 `ocx account reauth codex` 等价。仪表盘里的
+那些 OAuth / API key 提供方，但 `orl login codex` 可以到达：它会转到账号池登录，
+因此 `orl login codex --reauth` 与 `orl account reauth codex` 等价。仪表盘里的
 Codex 账号池（Reauthenticate）同样可以。这条路径跑在代理内部，需要代理正在运行。
 
 ```bash
-ocx login xai
-ocx login anthropic
+orl login xai
+orl login anthropic
 ```
 
-### `ocx logout <provider>`
+### `orl logout <provider>`
 
 移除某个提供方已存储的 OAuth 凭据。
 
 ## 账号与密钥池
 
-### `ocx account <subcommand>`
+### `orl account <subcommand>`
 
 通过正在运行的代理列出并切换提供方账号和 API 密钥池。随附的帮助输出如下：
 
 ```text
-Usage: ocx account <list|history|current|use|clear|refresh|auto-switch|alias|priority|pause|resume|pause-exhausted|strategy|sticky|remove|clear-cooldown|add-key|import|import-orca|login|reauth|code|cancel|reset-credits|grok-reset-coupons|main> ...
+Usage: orl account <list|history|current|use|clear|refresh|auto-switch|alias|priority|pause|resume|pause-exhausted|strategy|sticky|remove|clear-cooldown|add-key|import|import-orca|login|reauth|code|cancel|reset-credits|grok-reset-coupons|main> ...
 
 list [provider]     Codex account pool, OAuth accounts and API keys (identifiers shown masked as the API returns them).
 history openai <pool-account-id> [--limit <1-200>]  Recent routing decisions for one Codex pool account.
@@ -140,18 +140,18 @@ OAuth 账号会显示为 `Account N`，而 plan/label 列会在 plan、屏蔽后
 }
 ```
 
-### `ocx account list [provider] [--json] [--all] [--quota [--refresh]]`
+### `orl account list [provider] [--json] [--all] [--quota [--refresh]]`
 
 不指定提供方时，会列出 Codex 池、OAuth 账号和已配置的 API 密钥池。除非提供
 `--all`，否则会跳过空的提供方。指定提供方时，只列出该凭据家族。人类可读输出
 使用 `PROVIDER TYPE ID PLAN/LABEL PRIORITY STATUS`；手动选中的 Codex 行会标记为 `selected`。
-当存有两个或更多符合条件的 Kiro 账号时，默认情况下 429 会自动轮换到另一个账号，并优先选择已知剩余额度最多的账号；轮换由账号存在与否驱动，且无法关闭；`oauthAccountFailover.enabled: false` 拒绝的是发送前的账号优选，而非 429 恢复。`ocx account login kiro` 每次向池中添加一个账号。空结果仍然算成功。`--json` 返回：
+当存有两个或更多符合条件的 Kiro 账号时，默认情况下 429 会自动轮换到另一个账号，并优先选择已知剩余额度最多的账号；轮换由账号存在与否驱动，且无法关闭；`oauthAccountFailover.enabled: false` 拒绝的是发送前的账号优选，而非 429 恢复。`orl account login kiro` 每次向池中添加一个账号。空结果仍然算成功。`--json` 返回：
 
 ```text
 { accounts: AccountRow[], notes: string[] }
 ```
 
-### `ocx account current <provider> [--json]`
+### `orl account current <provider> [--json]`
 
 显示当前活动账号或密钥。没有手动固定的 Codex 池会报告自动选择最低使用量的结果；
 没有活动凭据的其他家族会报告该状态，但仍然以 0 退出。`--json` 返回：
@@ -160,12 +160,12 @@ OAuth 账号会显示为 `Account N`，而 plan/label 列会在 plan、屏蔽后
 { provider, type, activeId: string | null, autoSwitchThreshold?: number, account: AccountRow | null }
 ```
 
-### `ocx account use <provider> <account-or-key-id|alias|main|auto> [--json]`
+### `orl account use <provider> <account-or-key-id|alias|main|auto> [--json]`
 
-`auto` 会清除手动选择，让 Pool 重新按自身策略分配工作 — 但如果某个 Codex 账号的 id 恰为 `auto`，则精确 id 匹配优先；`ocx account clear <provider>` 始终恢复自动选择。Codex 账号可以用 `ocx account alias` 设置的别名代替 id 来指定；`priority`、`pause`、`resume`、`clear-cooldown`、`remove` 和 `alias` 同样如此。对于 Codex 账号，`auto`、`main` 和 `__main__` 为保留字（不区分大小写），不能设为别名。OAuth 账号和 API 密钥的显示名称仍遵循原有规则。
+`auto` 会清除手动选择，让 Pool 重新按自身策略分配工作 — 但如果某个 Codex 账号的 id 恰为 `auto`，则精确 id 匹配优先；`orl account clear <provider>` 始终恢复自动选择。Codex 账号可以用 `orl account alias` 设置的别名代替 id 来指定；`priority`、`pause`、`resume`、`clear-cooldown`、`remove` 和 `alias` 同样如此。对于 Codex 账号，`auto`、`main` 和 `__main__` 为保留字（不区分大小写），不能设为别名。OAuth 账号和 API 密钥的显示名称仍遵循原有规则。
 
 选择已有的 Codex 账号、OAuth 账号或 API key。对 `openai` 而言，`main` 选择 Codex App 登录。
-Codex Pool 选择会清除进程本地 affinity，并从下一次请求开始生效，包括已有可见任务的请求；代理重启或 affinity eviction 后，任务也可能变为未绑定，但进行中的请求保留已捕获账号。此选择只控制 Pool routing；Direct mode 继续使用 caller-owned/native main credential。基于用量的主动切换、401/403 重新认证、429/retry-after cooldown、排除，以及输出前 429/402 故障恢复之后仍可能选择其他合格 Pool 账号。这些恢复路径在关闭基于用量的切换时仍然有效。账号变化后 OpenCodex 会重放对话上下文，但 provider prompt cache 可能需要重新预热。未知 provider 或 id 返回退出码 1。`--json` 返回：
+Codex Pool 选择会清除进程本地 affinity，并从下一次请求开始生效，包括已有可见任务的请求；代理重启或 affinity eviction 后，任务也可能变为未绑定，但进行中的请求保留已捕获账号。此选择只控制 Pool routing；Direct mode 继续使用 caller-owned/native main credential。基于用量的主动切换、401/403 重新认证、429/retry-after cooldown、排除，以及输出前 429/402 故障恢复之后仍可能选择其他合格 Pool 账号。这些恢复路径在关闭基于用量的切换时仍然有效。账号变化后 OpenRelay 会重放对话上下文，但 provider prompt cache 可能需要重新预热。未知 provider 或 id 返回退出码 1。`--json` 返回：
 遇到 **401/403** 时，App 登录会清除该账户的进程内 affinity 并要求重新认证。
 遇到 **429** 时，它会遵循 `Retry-After`、启动账户 cooldown、清除 affinity，
 并可将请求切换到另一个符合条件的 Pool 账户。即使 `autoSwitchThreshold: 0`，
@@ -175,30 +175,30 @@ Codex Pool 选择会清除进程本地 affinity，并从下一次请求开始生
 { ok: true, provider, type, activeId }
 ```
 
-### `ocx account pause|resume anthropic <id|alias> [--json]`
+### `orl account pause|resume anthropic <id|alias> [--json]`
 
 CLI 命令通过 id 或唯一别名暂停或恢复 Anthropic OAuth 账户。别名先精确匹配，再进行不区分大小写的匹配。CLI 和仪表板使用同一个 `PUT /api/oauth/accounts/pause`，请求体为 `{ provider: "anthropic", accountId, paused }`。`paused` 保存在账户中，并通过 `GET /api/oauth/accounts` 返回。即使主动账户池已关闭，暂停账户也会从选择、会话绑定和 429 后继候选中排除。所有账户暂停时，请求返回 403，直到恢复一个账户。已经发送的请求继续执行，凭证和健康状态保持不变。重启或重新登录仍保留暂停，删除账户时一并清除。此操作不包含账户级自动切换阈值。
 
-### `ocx account clear <provider> [--json]`
+### `orl account clear <provider> [--json]`
 
 在不解析账号 id 的情况下清除 Codex 账号的手动选择，因此即使存在名为 `auto` 的账号也有效。仅适用于 Codex Pool；其他提供商类型没有可恢复的自动选择。
 
-### `ocx account clear-cooldown <openai|anthropic> <id|alias|main> [--json]`
+### `orl account clear-cooldown <openai|anthropic> <id|alias|main> [--json]`
 
 清除进程本地的失败冷却，但不更改已保存的凭据。Codex Pool 账号使用 `openai`，Anthropic
 OAuth 账号使用 `anthropic`；其他 provider 会被拒绝。两种形式都接受账号 id 或唯一别名，
 而 `main` 仅适用于 Codex Pool。
 
 ```bash
-ocx account clear-cooldown anthropic <id-or-alias>
+orl account clear-cooldown anthropic <id-or-alias>
 ```
 
 即使没有活动冷却，命令也会成功，JSON 中的 `cleared` 为 `false`。清除 Anthropic 冷却还会
 推进账号 generation，因此旧的 quota probe 无法恢复已清除的状态或发布过期的配额资格。
 
-### `ocx account refresh <provider> [--json]`
+### `orl account refresh <provider> [--json]`
 
-对于 Codex 池，请使用 `ocx account refresh openai [--json]`。它会强制刷新账号配额，
+对于 Codex 池，请使用 `orl account refresh openai [--json]`。它会强制刷新账号配额，
 并打印可用的周/月百分比和重置时间；缺失的配额数据会报告为未知，而不是 0%。其
 JSON 外壳是 `{ accounts: AccountRow[] }`，每个 Codex 行上都会带有 `quota`。
 
@@ -209,24 +209,24 @@ token，也不是简单重读账号列表。`--json` 返回
 会以 1 退出；上游配额探测如果失败或超时，则会降级为 `null` 或陈旧报告（以 0 退出），
 与仪表盘的配额条保持一致。
 
-### `ocx account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]`
+### `orl account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]`
 
 控制 `openai` Codex 账户池阈值，或保存通用 OAuth 账户池阈值。`on` 保存 80%，`off` 保存 0%，`threshold <n>` 接受 0–100。通用池的阈值只有在 `pool.kernel` 打开且 `strategy: "fill-first"` 时才参与选择；标志关闭时，保存阈值不会启用阈值切换。两种情况下都不会改变提供方启用设置或禁用 429 错误后的轮换。通用池的查询和修改结果使用服务器确认值。通用池的 `poolEnabled` 是已保存的提供方设置，`null` 表示未指定，并不代表继承后的实际状态。`inert: true` 表示阈值已保存但未应用，`inert: false` 表示账户池正在应用它。没有 `inert` 字段表示能力未知，此时同样不会报告 `enabled: true`。API 密钥提供方和无效值会被拒绝。
 
-### `ocx account auto-switch anthropic … --account <id>`
+### `orl account auto-switch anthropic … --account <id>`
 
-Anthropic OAuth 使用 `ocx account auto-switch anthropic threshold 90 --account <id>` 保存账户专属整数 0–100。`off --account <id>` 设为 0，`on --account <id>` 设为 80，`inherit --account <id>` 恢复继承，`status --account <id>` 只读查询；可加 `--json`。账户卡片提供相同控制。未设置/null 继承 `anthropicAccountPool.autoSwitchThreshold`（默认 80）；0 只禁用该账户按用量切换。设置在重启和重新登录后保留，删除账户时移除。手动选择、affinity、未知或全部耗尽时的后备行为与模型路由限制不变。池禁用时不应用阈值；暂停与 429 恢复仍有效。
+Anthropic OAuth 使用 `orl account auto-switch anthropic threshold 90 --account <id>` 保存账户专属整数 0–100。`off --account <id>` 设为 0，`on --account <id>` 设为 80，`inherit --account <id>` 恢复继承，`status --account <id>` 只读查询；可加 `--json`。账户卡片提供相同控制。未设置/null 继承 `anthropicAccountPool.autoSwitchThreshold`（默认 80）；0 只禁用该账户按用量切换。设置在重启和重新登录后保留，删除账户时移除。手动选择、affinity、未知或全部耗尽时的后备行为与模型路由限制不变。池禁用时不应用阈值；暂停与 429 恢复仍有效。
 
 ```text
 openai: { provider, autoSwitchThreshold: number, enabled: boolean }
 generic OAuth: { provider, autoSwitchThreshold: number | null, enabled: boolean, poolEnabled: boolean | null, inert: boolean | null }
 ```
 
-### `ocx account priority <provider> <account-id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]`
+### `orl account priority <provider> <account-id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]`
 
 读取或设置某个 Codex pool 账号的选择顺序：**数值越大越先使用**，默认值为 `0`，范围是 `-100` 到
 `100`。只有 `openai` 的 Codex pool 有选择顺序，其他 provider 返回退出码 1。`main` 指向 Codex Desktop
-登录账号，它与其他 pool 账号一样参与排序：`ocx account priority openai main last` 就能把它留作备用。
+登录账号，它与其他 pool 账号一样参与排序：`orl account priority openai main last` 就能把它留作备用。
 
 预设词只是小整数的别名：`first` 为 `+2`，`earlier` 为 `+1`，`normal` 为 `0`，`later` 为 `-1`，
 `last` 为 `-2`。`reset` 恢复默认值并删除已保存的条目。**省略取值即为读取**，不会改写当前顺序。
@@ -242,11 +242,11 @@ generic OAuth: { provider, autoSwitchThreshold: number | null, enabled: boolean,
 ```
 
 
-### `ocx account login|reauth|code|cancel ...`
+### `orl account login|reauth|code|cancel ...`
 
-在无头 shell 中通过浏览器或手动代码完成账号认证。提供方对应的命令语法见 `ocx account --help`。即使 Codex 登录已保存，只要验证或模型目录刷新仍待完成，普通输出和 `--json` 都会返回退出码 1。已保存的登录信息会保留，不要仅因后续操作待完成就重新发起认证。目录刷新待完成时，普通输出会在 stderr 显示 `ocx sync` 指引；`--json` 则在可解析的 stdout 中保留状态和待完成标志，不混入提示文字。
+在无头 shell 中通过浏览器或手动代码完成账号认证。提供方对应的命令语法见 `orl account --help`。即使 Codex 登录已保存，只要验证或模型目录刷新仍待完成，普通输出和 `--json` 都会返回退出码 1。已保存的登录信息会保留，不要仅因后续操作待完成就重新发起认证。目录刷新待完成时，普通输出会在 stderr 显示 `orl sync` 指引；`--json` 则在可解析的 stdout 中保留状态和待完成标志，不混入提示文字。
 
-### `ocx account remove <provider> <id|alias|main> --yes [--json]`
+### `orl account remove <provider> <id|alias|main> --yes [--json]`
 
 这个受保护的非交互式删除需要 `--yes`。删除前，它会验证 id 是否存在；缺失的 id
 会以 1 退出，而不会发送 DELETE。主 Codex App 登录不能被移除，因此会拒绝
@@ -260,83 +260,83 @@ generic OAuth: { provider, autoSwitchThreshold: number | null, enabled: boolean,
 ```
 
 `catalogRefreshPending` 只出现在 Codex 删除结果中。值为 `true` 时，账号删除已经保存；人类可读
-输出会在 stderr 打印通用的 `ocx sync` 恢复指引，并仍以 0 退出。OAuth 账号和 API 密钥删除的
+输出会在 stderr 打印通用的 `orl sync` 恢复指引，并仍以 0 退出。OAuth 账号和 API 密钥删除的
 响应结构不会增加此字段。
 
-### `ocx account add-key <provider> [--label <label>] [--json]`
+### `orl account add-key <provider> [--label <label>] [--json]`
 
 为 API 密钥提供方添加并激活一个密钥。该密钥只会从非 TTY 的管道/重定向 stdin
 读取；交互式 TTY 输入、空输入、OAuth/Codex 提供方，以及 API 失败都会以 1 退出。
 密钥永远不会回显，即使它出现在 label 里也是如此。建议使用秘密管理器或 here-string：
 
 ```bash
-ocx account add-key openrouter --label personal <<< "$OPENROUTER_API_KEY"
-security find-generic-password -w openrouter | ocx account add-key openrouter --json
+orl account add-key openrouter --label personal <<< "$OPENROUTER_API_KEY"
+security find-generic-password -w openrouter | orl account add-key openrouter --json
 ```
 
 `--json` 返回 `{ ok: true, id: string | null, label?: string }`，并且绝不会包含该密钥。
 
-### `ocx account reset-credits <id|main> [--consume --yes]`
+### `orl account reset-credits <id|main> [--consume --yes]`
 
 查看某个账号的 Codex 重置额度。消耗额度会造成破坏性影响，因此同时需要 `--consume`
 和 `--yes`。
 
-### `ocx account grok-reset-coupons [<account-id>] [--consume --yes [--token-id <id>] [--operation-id <uuid>]] [--json]`
+### `orl account grok-reset-coupons [<account-id>] [--consume --yes [--token-id <id>] [--operation-id <uuid>]] [--json]`
 
 检查或兑换 xAI / Grok 账号剩余的重置优惠券。
 
 不带 `--consume` 调用时，返回可用的优惠券 token 及其有效期窗口：
 
 ```bash
-ocx account grok-reset-coupons
-ocx account grok-reset-coupons acc_xai_01 --json
+orl account grok-reset-coupons
+orl account grok-reset-coupons acc_xai_01 --json
 ```
 
 兑换重置优惠券会改变计费状态，并永久消耗一个优惠券 token。`--consume` 严格要求同时提供 `--yes`：
 
 ```bash
-ocx account grok-reset-coupons --consume --yes
-ocx account grok-reset-coupons --consume --yes --token-id <token-id>
+orl account grok-reset-coupons --consume --yes
+orl account grok-reset-coupons --consume --yes --token-id <token-id>
 ```
 
 传入 `--operation-id <uuid>`（必须是有效的 UUIDv4）可保证结算具备幂等性。当网络中断或命令重试时，相同的 operation id 会重放已持久化的结果，而不会再次消耗一个优惠券。
 
-### `ocx account main <subcommand>`
+### `orl account main <subcommand>`
 
-管理命名的原生 Codex 主登录配置文件，而不更改 OpenCodex 账号池路由。
+管理命名的原生 Codex 主登录配置文件，而不更改 OpenRelay 账号池路由。
 
 ```text
-ocx account main doctor [--json]
-ocx account main list [--json]
-ocx account main register <label> [--json]
-ocx account main add <label>
-ocx account main reauth --device [--no-wait] [--json]
-ocx account main reauth status --flow <id> [--json]
-ocx account main reauth cancel --flow <id> [--json]
-ocx account main switch <profile-id-or-label> --yes [--json]
-ocx account main recover [--rollback --yes] [--json]
+orl account main doctor [--json]
+orl account main list [--json]
+orl account main register <label> [--json]
+orl account main add <label>
+orl account main reauth --device [--no-wait] [--json]
+orl account main reauth status --flow <id> [--json]
+orl account main reauth cancel --flow <id> [--json]
+orl account main switch <profile-id-or-label> --yes [--json]
+orl account main recover [--rollback --yes] [--json]
 ```
 
-`ocx account main reauth --device --no-wait --json` 成功时只向 stdout 输出一个 JSON 对象，不输出供人阅读的 `follow up:` 提示行。将返回的 `flowId` 传给 `ocx account main reauth status --flow <id> --json` 即可查看进度。
+`orl account main reauth --device --no-wait --json` 成功时只向 stdout 输出一个 JSON 对象，不输出供人阅读的 `follow up:` 提示行。将返回的 `flowId` 传给 `orl account main reauth status --flow <id> --json` 即可查看进度。
 
 每个变更命令都会显示运行中代理返回的规范化有效 `CODEX_HOME`。该路径可能与调用进程的
 `CODEX_HOME` 不同；支持 JSON 的命令会在 `effectiveCodexHome` 中返回相同的值。
 
 版本 1 支持基于文件的 Codex 身份验证，使用 AES-256-GCM 加密保存的配置文件，并将加密密钥保存在操作系统凭据存储中。`add` 会先在受限暂存环境中启动官方 Codex 登录，再导入生成的凭据。切换配置文件前请关闭 Codex。切换成功后会保留本地任务和历史记录，但继续使用前必须重启 Codex。使用 `doctor` 检查配置文件状态，使用 `recover` 完成或回滚中断的切换。`switch` 可接受配置文件 ID 或标签。
 
-v1 恢复矩阵覆盖的是事务文件通过重命名发布后 OpenCodex 进程退出的情况。它不声明能够在操作系统或内核崩溃、突然断电后持久保存：`atomicWriteFileAsync()` 不会对文件或父目录执行 `fsync`。
+v1 恢复矩阵覆盖的是事务文件通过重命名发布后 OpenRelay 进程退出的情况。它不声明能够在操作系统或内核崩溃、突然断电后持久保存：`atomicWriteFileAsync()` 不会对文件或父目录执行 `fsync`。
 
-加密保管库、切换日志、恢复标记和日志隔离文件位于规范的 `<real CODEX_HOME>/.opencodex-native-main-profiles` 目录中。因此，共用该 Codex 主目录的所有 OpenCodex 实例都会看到同一个所有者和同一份恢复状态。明文登录暂存数据仍分别隔离在各自的 `<OPENCODEX_HOME>/native-main-profile-staging` 目录下。
+加密保管库、切换日志、恢复标记和日志隔离文件位于规范的 `<real CODEX_HOME>/.opencodex-native-main-profiles` 目录中。因此，共用该 Codex 主目录的所有 OpenRelay 实例都会看到同一个所有者和同一份恢复状态。明文登录暂存数据仍分别隔离在各自的 `<OPENCODEX_HOME>/native-main-profile-staging` 目录下。
 
-在允许 native-main 流量或日志恢复之前，生命周期所有者会取得凭据的独占占用权，并且只删除名称与 `auth.json.ocx.<pid>.<sequence>.tmp` 完全匹配的崩溃残留文件。每个候选文件在整个过程中都必须位于未发生变化的规范 `CODEX_HOME` 下，并保持为硬链接计数为 1 的普通文件；系统会先将其截断，再刷新其内容，最后取消链接（unlink）。若发生链接或重解析点替换、文件标识发生变化或存在其他歧义，native-main 流量将继续保持关闭；名称仅近似匹配的文件绝不会被自动删除。这项防护针对正常协作的 OpenCodex 发生崩溃的情况，并不能抵御已经以同一操作系统用户身份运行的恶意进程。该用户以及承载 `CODEX_HOME` 的文件系统仍属于信任范围；截断文件也不保证从写时复制存储、快照或 SSD 残留数据中实现物理擦除。
+在允许 native-main 流量或日志恢复之前，生命周期所有者会取得凭据的独占占用权，并且只删除名称与 `auth.json.ocx.<pid>.<sequence>.tmp` 完全匹配的崩溃残留文件。每个候选文件在整个过程中都必须位于未发生变化的规范 `CODEX_HOME` 下，并保持为硬链接计数为 1 的普通文件；系统会先将其截断，再刷新其内容，最后取消链接（unlink）。若发生链接或重解析点替换、文件标识发生变化或存在其他歧义，native-main 流量将继续保持关闭；名称仅近似匹配的文件绝不会被自动删除。这项防护针对正常协作的 OpenRelay 发生崩溃的情况，并不能抵御已经以同一操作系统用户身份运行的恶意进程。该用户以及承载 `CODEX_HOME` 的文件系统仍属于信任范围；截断文件也不保证从写时复制存储、快照或 SSD 残留数据中实现物理擦除。
 
-预览版使用 `<OPENCODEX_HOME>/native-main-profiles`。该布局绝不会被静默导入。如果 `doctor` 报告旧版配置文件状态，请停止所有共用同一 `CODEX_HOME` 的 OpenCodex 代理。然后，请先备份，并在保留仅所有者可访问权限的情况下，将相应的 `*.vault.json`、`*.journal.json`、恢复标记以及任何被引用的日志隔离文件一起移动到规范目录中；或者删除旧的预览版文件集，再次运行 `ocx account main register`。只要仍有任何共用该 `CODEX_HOME` 的代理正在运行，就不要在多个旧根目录之间选择其一，也不要同时使用两种布局。在 Windows 上，按以前不区分大小写的主目录标识索引的预览状态必须重置，而不能直接移动，因为其加密 AAD 和操作系统密钥环标识被有意设计为不再复用。
+预览版使用 `<OPENCODEX_HOME>/native-main-profiles`。该布局绝不会被静默导入。如果 `doctor` 报告旧版配置文件状态，请停止所有共用同一 `CODEX_HOME` 的 OpenRelay 代理。然后，请先备份，并在保留仅所有者可访问权限的情况下，将相应的 `*.vault.json`、`*.journal.json`、恢复标记以及任何被引用的日志隔离文件一起移动到规范目录中；或者删除旧的预览版文件集，再次运行 `orl account main register`。只要仍有任何共用该 `CODEX_HOME` 的代理正在运行，就不要在多个旧根目录之间选择其一，也不要同时使用两种布局。在 Windows 上，按以前不区分大小写的主目录标识索引的预览状态必须重置，而不能直接移动，因为其加密 AAD 和操作系统密钥环标识被有意设计为不再复用。
 
 ## 模型
 
-### `ocx models [subcommand]` · `ocx model <subcommand>`
+### `orl models [subcommand]` · `orl model <subcommand>`
 
-`ocx model` 是 `ocx models` 的别名。没有子命令时，列出已配置提供方中静态预置的模型。
+`orl model` 是 `orl models` 的别名。没有子命令时，列出已配置提供方中静态预置的模型。
 `--provider` 可过滤单个已配置提供方，而 `--json` 会返回模型元数据。`live` 读取运行中
 的目录；`add`、`edit`、`remove` 和 `list-custom` 管理手动目录条目；`enable`、
 `disable` 和 `provider` 控制可见性；`selected` 控制提供方允许列表；`context` 控制提供方
@@ -360,15 +360,15 @@ v1 恢复矩阵覆盖的是事务文件通过重命名发布后 OpenCodex 进程
 | `shadow <status\|set> [model\|-]` | `--enabled <on\|off>`, `--json` | 读取或设置 Codex 后台辅助调用所替换的模型。`-` 会清除该模型。`status` 还会报告 `sourceModels`，即代理拦截的辅助器 slug（默认值：`gpt-6-luna`, `gpt-5.6-luna`；0.144.x 及更早客户端使用的 `gpt-5.4-mini` 可通过显式 `sourceModels` 覆盖恢复）。 |
 
 ```bash
-ocx models live --json                                  # what Codex can actually see right now
-ocx models disable anthropic/claude-haiku-4             # hide one routed model
-ocx models enable gpt-5.6-sol                           # no slash, so it is treated as native
-ocx models provider zenmux off                          # hide a noisy provider wholesale
-ocx models selected anthropic --set claude-opus-5,claude-fable-5
-ocx models selected anthropic --clear                   # drop the allowlist again
-ocx models add deepseek deepseek-v4 --display-name 'DeepSeek V4' --context-window 128000 --modalities text,image
-ocx models list-custom --json                           # read the custom-id for edit/remove
-ocx models remove deepseek/deepseek-v4 --yes
+orl models live --json                                  # what Codex can actually see right now
+orl models disable anthropic/claude-haiku-4             # hide one routed model
+orl models enable gpt-5.6-sol                           # no slash, so it is treated as native
+orl models provider zenmux off                          # hide a noisy provider wholesale
+orl models selected anthropic --set claude-opus-5,claude-fable-5
+orl models selected anthropic --clear                   # drop the allowlist again
+orl models add deepseek deepseek-v4 --display-name 'DeepSeek V4' --context-window 128000 --modalities text,image
+orl models list-custom --json                           # read the custom-id for edit/remove
+orl models remove deepseek/deepseek-v4 --yes
 ```
 
 带斜杠的模型选择器会按 routed 处理（`anthropic/claude-opus-5`）；裸 id 会被视为

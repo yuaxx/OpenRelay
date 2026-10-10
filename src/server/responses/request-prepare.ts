@@ -334,7 +334,7 @@ export async function prepareResponsesRequest(
     const replayFailure = previousResponseReplayFailure(body);
     if (replayFailure?.reason === "scope_mismatch") {
       // Bounded and content-free: no task scope and nothing about the retained entry.
-      console.warn("[opencodex] refusing continuation because the client task scope does not match replay state");
+      console.warn("[openrelay] refusing continuation because the client task scope does not match replay state");
     }
     // Local replay failures require full client replay.
     if (replayFailure) {
@@ -364,7 +364,7 @@ export async function prepareResponsesRequest(
     );
     if (rewritten > 0)
       console.warn(
-        `[opencodex] rewrote ${rewritten} plaintext encrypted_content part(s) to input_text (spawn-message compatibility)`,
+        `[openrelay] rewrote ${rewritten} plaintext encrypted_content part(s) to input_text (spawn-message compatibility)`,
       );
   }
 
@@ -883,7 +883,7 @@ export async function prepareResponsesRequest(
       (logCtx as unknown as Record<string, unknown>).subagentModelFallbackFrom = fallback.from;
       (logCtx as unknown as Record<string, unknown>).subagentModelFallbackTo = fallback.to;
       if (isInjectionDebugEnabled()) {
-        injectionDebugLog(`[opencodex] subagent model fallback ${fallback.from} -> ${fallback.to}`);
+        injectionDebugLog(`[openrelay] subagent model fallback ${fallback.from} -> ${fallback.to}`);
       }
     }
     subagentQuotaFailureModel = fallback?.to ?? parsed.modelId;
@@ -1099,7 +1099,7 @@ export async function prepareResponsesRequest(
             (logCtx as unknown as Record<string, unknown>).subagentModelFallbackFrom = fallback.from;
             (logCtx as unknown as Record<string, unknown>).subagentModelFallbackTo = fallback.to;
             if (isInjectionDebugEnabled()) {
-              injectionDebugLog(`[opencodex] subagent model fallback ${fallback.from} -> ${fallback.to}`);
+              injectionDebugLog(`[openrelay] subagent model fallback ${fallback.from} -> ${fallback.to}`);
             }
           }
           subagentQuotaFailureModel = fallback?.to ?? parsed.modelId;
@@ -1144,7 +1144,7 @@ export async function prepareResponsesRequest(
     );
     if (rewritten > 0) {
       console.warn(
-        `[opencodex] rewrote ${rewritten} non-Fernet encrypted_content part(s) before canonical native replay`,
+        `[openrelay] rewrote ${rewritten} non-Fernet encrypted_content part(s) before canonical native replay`,
       );
     }
   }
@@ -1200,7 +1200,7 @@ export async function prepareResponsesRequest(
       const repaired = stripAgentMessageCiphertextInPlace((body as { input?: unknown } | undefined)?.input);
       if (repaired > 0) {
         console.warn(
-          `[opencodex] replaced ciphertext in ${repaired} replayed agent message(s) with an omission marker; the selected provider cannot read native ChatGPT ciphertext`,
+          `[openrelay] replaced ciphertext in ${repaired} replayed agent message(s) with an omission marker; the selected provider cannot read native ChatGPT ciphertext`,
         );
       }
     }

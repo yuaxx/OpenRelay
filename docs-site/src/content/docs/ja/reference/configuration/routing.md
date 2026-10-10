@@ -14,7 +14,7 @@ description: デフォルトのプロバイダーの選択、モデルの解決�
 
 ## モデルの解決順序
 
-opencodex は、要求されたモデルを次の順序で解決します。
+OpenRelay は、要求されたモデルを次の順序で解決します。
 
 1. 設定済みの `policy/<id>` または routing-profile alias。policy evaluator を実行して選択した候補へ routing します。未解決の `policy/<id>` は後続のルールへフォールスルーします。
 2. 設定済みの `<account-selector>/<native-openai-model>` namespace。対応する保存済み Codex アカウントだけに routing され、無効または利用不能な exact target は fail closed します。
@@ -57,7 +57,7 @@ selector の後には bare native OpenAI-family id だけを指定できます�
 
 Codex Auth ページではこの picker 動作を opt-in できます。無効化すると selector-qualified row は非表示に
 なり通常の GPT row が戻りますが、mapping と exact `<selector>/<model>` routing は残るため、再有効化で
-同じ公開 label が復元されます。mutation は bounded catalog refresh より先に保存され、`ocx sync` warning は
+同じ公開 label が復元されます。mutation は bounded catalog refresh より先に保存され、`orl sync` warning は
 picker catalog の convergence だけが保留中で routing change は失われていないことを示します。
 
 ## コンボ (`config.combos`)
@@ -96,7 +96,7 @@ picker catalog の convergence だけが保留中で routing change は失われ
 
 ### カタログの適格性
 
-コンボは、リストに表示できない場合でも、直接ルーティング可能です。 `ocx sync`、`/v1/models`、および Codex ピッカーは、すべてのターゲットが交差できる機能を公開している場合にのみリストします。
+コンボは、リストに表示できない場合でも、直接ルーティング可能です。 `orl sync`、`/v1/models`、および Codex ピッカーは、すべてのターゲットが交差できる機能を公開している場合にのみリストします。
 
 - ライブメタデータ、レジストリヒント、またはプロバイダーからの正の `contextWindow`
 `modelContextWindows` / `contextWindow`;そして
@@ -108,7 +108,7 @@ picker catalog の convergence だけが保留中で routing change は失われ
 
 明示的に要求された `policy/<id>`（または設定されたエイリアス）が、固定された候補許可リストの中から、ハードな能力要件と決定的で説明可能なスコアリングで選択します。既存のモデル ID が暗黙的にプロファイルを通ることはありません。`candidates`（明示的な許可リスト）、オプションの `alias`、`require`（`minContextWindow`、`minQuotaHeadroom`、`tools`、`imageInput`、`structuredOutput`、`localOnly`、`remoteAllowed`、`encryptedCodexTasks`、`reasoningEffort`、`serviceTier`）、`optimize`（latency/health/cost/quota の重み）、`limits.maxEstimatedCostUsd`、`unknownEvidence`（allow/penalize/exclude）をサポートします。未知はゼロや無料にはなりません。
 
-CLI: `ocx route policy list`、`ocx route policy show <id>`、`ocx route policy dry-run <id> --model-context <tokens> --tools`、`ocx route policy evaluate <id>`。
+CLI: `orl route policy list`、`orl route policy show <id>`、`orl route policy dry-run <id> --model-context <tokens> --tools`、`orl route policy evaluate <id>`。
 
 コンボでは、明示的なターゲットを `failover`、`round-robin`、`random`、`least-used`、`reset-window` のいずれかでルーティングします。設定された戦略がターゲットを決定し、再試行可能な失敗時にはリスト内の次のターゲットへ進みます。ポリシープロファイルは、候補間の証拠に基づく選択です。
 
@@ -121,7 +121,7 @@ CLI: `ocx route policy list`、`ocx route policy show <id>`、`ocx route policy 
 
 返される履歴とルート決定ペイロードは、マスク済みのリクエストメタデータのみを公開します（例: 不透明な `apiKeyId` ラベル）。資格情報、生のプロンプト本文、プロバイダのシークレットは含みません。
 
-CLI: `ocx logs explain <request-id>`、`ocx logs rebuild-index`、`ocx logs index-status`。
+CLI: `orl logs explain <request-id>`、`orl logs rebuild-index`、`orl logs index-status`。
 
 ## 移行
 

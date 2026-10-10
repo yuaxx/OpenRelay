@@ -111,7 +111,7 @@ describe("generated operating-skill chapter contract", () => {
       const file = `01_surface_${domain}.md`;
       const text = files[file]!;
       const expected = CAPABILITIES.filter(cap => roots.includes(cap.command[0]!)).map(capabilityInvocation);
-      const actual = [...text.matchAll(/^### `?(ocx [^`\n]+)`?$/gm)].map(match => match[1]!);
+      const actual = [...text.matchAll(/^### `?(orl [^`\n]+)`?$/gm)].map(match => match[1]!);
       expect(actual, file).toEqual(expected);
       expect(text).toContain(`Declared capabilities: ${expected.length}.`);
       expect(files[INDEX]).toContain(`| [${domain}](${file}) | ${expected.length} |`);
@@ -120,7 +120,7 @@ describe("generated operating-skill chapter contract", () => {
     expect(owned.sort()).toEqual(CAPABILITIES.map(capabilityInvocation).sort());
     expect(new Set(owned).size).toBe(CAPABILITIES.length);
     const index = files[INDEX]!;
-    expect([...index.matchAll(/^### `?(ocx [^`\n]+)`?$/gm)].map(match => match[1]!))
+    expect([...index.matchAll(/^### `?(orl [^`\n]+)`?$/gm)].map(match => match[1]!))
       .toEqual(CAPABILITIES.map(capabilityInvocation));
     expect(index).toContain(`- declared capabilities: ${CAPABILITIES.length}`);
     expect(index).toContain(`- of those, state-changing: ${CAPABILITIES.filter(cap => cap.mutates).length}`);
@@ -147,7 +147,7 @@ describe("generated operating-skill chapter contract", () => {
   });
 
   test("secret-returning tasks remain prose handoffs even if usage is accidentally supplied", () => {
-    const tasks = ["ocx link issue", "ocx hub invite", "ocx config export"];
+    const tasks = ["orl link issue", "orl hub invite", "orl config export"];
     const files = renderManagementSurfaces();
     for (const task of tasks) {
       expect(CAPABILITIES.find(row => capabilityInvocation(row) === task)?.usage).toBeUndefined();
@@ -162,8 +162,8 @@ describe("generated operating-skill chapter contract", () => {
     withGenerator(root => {
       const result = renderFixture(root, `
         for (const row of CAPABILITIES) {
-          if (${JSON.stringify(tasks)}.includes("ocx " + row.command.join(" ")))
-            row.usage = "ocx " + row.command.join(" ") + " --unsafe-fixture";
+          if (${JSON.stringify(tasks)}.includes("orl " + row.command.join(" ")))
+            row.usage = "orl " + row.command.join(" ") + " --unsafe-fixture";
         }
       `);
       expect(result.status).toBe(0);
@@ -174,11 +174,11 @@ describe("generated operating-skill chapter contract", () => {
   test("link proof rejects wrong files, wrong fragments and disconnected pages", () => {
     const start = resolve("fixture", "SKILL.md");
     const target = resolve("fixture", "chapter.md");
-    expect(navigationErrors({ [start]: "[chapter](chapter.md#ocx-account-pause)",
-      [target]: "### `ocx account pause`" }, start)).toEqual([]);
-    for (const [link, error] of [["missing.md#ocx-account-pause", "missing file"],
-      ["chapter.md#ocx-account-resume", "missing anchor"]]) {
-      expect(navigationErrors({ [start]: `[chapter](${link})`, [target]: "### `ocx account pause`" }, start).join("\n"))
+    expect(navigationErrors({ [start]: "[chapter](chapter.md#orl-account-pause)",
+      [target]: "### `orl account pause`" }, start)).toEqual([]);
+    for (const [link, error] of [["missing.md#orl-account-pause", "missing file"],
+      ["chapter.md#orl-account-resume", "missing anchor"]]) {
+      expect(navigationErrors({ [start]: `[chapter](${link})`, [target]: "### `orl account pause`" }, start).join("\n"))
         .toContain(error!);
     }
     expect(navigationErrors({ [start]: "No link", [target]: "# Chapter" }, start)).toEqual([`unreachable: ${target}`]);
@@ -230,12 +230,12 @@ describe("generated operating-skill chapter contract", () => {
       const result = renderFixture(root, `
         for (const row of CAPABILITIES) delete row.usage;
         Object.assign(CAPABILITIES.find(cap => cap.command.join(" ") === "account pause"),
-          { usage: "ocx account pause <provider> <id> [--json]" });
+          { usage: "orl account pause <provider> <id> [--json]" });
       `);
       expect(result.status).toBe(0);
       const rendered = JSON.parse(result.stdout) as Record<string, string>;
-      const usage = "Usage: `ocx account pause <provider> <id> [--json]`\n\n";
-      expect(rendered["01_surface_accounts.md"]).toContain("### `ocx account pause`\n\n" + usage);
+      const usage = "Usage: `orl account pause <provider> <id> [--json]`\n\n";
+      expect(rendered["01_surface_accounts.md"]).toContain("### `orl account pause`\n\n" + usage);
       rendered["01_surface_accounts.md"] = rendered["01_surface_accounts.md"]!.replace(usage, "");
       expect(rendered).toEqual(original);
     });
@@ -251,7 +251,7 @@ describe("generated operating-skill chapter contract", () => {
       const result = renderFixture(root, `Object.assign(CAPABILITIES.find(cap => cap.command.join(" ") === "access key list"), { flags: ${JSON.stringify(flags)} });`);
       expect(result.status).toBe(0);
       const files = JSON.parse(result.stdout) as Record<string, string>;
-      const markdown = files["01_surface_access-remote.md"]!.split("### `ocx access key list`\n")[1]!.split("\n### ")[0]!;
+      const markdown = files["01_surface_access-remote.md"]!.split("### `orl access key list`\n")[1]!.split("\n### ")[0]!;
       const html = Bun.markdown.html(markdown);
       const rows = [...html.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map(row =>
         [...row[1]!.matchAll(/<td>([\s\S]*?)<\/td>/g)].map(cell => cell[1]!));

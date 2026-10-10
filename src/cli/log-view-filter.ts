@@ -49,7 +49,7 @@ function parseOptions(argv: string[]) {
   }
   const scanLimit = numberOption(args, "--scan-limit", true) ?? MAX_WINDOW;
   const limit = numberOption(args, "--limit", true) ?? 200;
-  if (args.length) throw new CliUsageError("Unknown or repeated option. Use ocx logs filter --help; follow/events are not supported");
+  if (args.length) throw new CliUsageError("Unknown or repeated option. Use orl logs filter --help; follow/events are not supported");
   if (json && jsonl) throw new CliUsageError("--json and --jsonl cannot be combined");
   if (minTokPerSec !== undefined && maxTokPerSec !== undefined && minTokPerSec >= maxTokPerSec) {
     throw new CliUsageError("--min-tok-per-sec must be less than --max-tok-per-sec");

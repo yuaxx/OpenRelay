@@ -3,26 +3,26 @@ title: CLI 代理、路由与集成
 description: 多代理、combo、可观测性、访问、集成、系统和配置命令。
 ---
 
-这些命令用于控制代理策略和路由，检查实时代理，并将受支持的客户端连接到 opencodex。
+这些命令用于控制代理策略和路由，检查实时代理，并将受支持的客户端连接到 OpenRelay。
 
 ## Agent policy
 
-### `ocx agent <status|injection|effort|subagents|fallback|sidecar> ...`
+### `orl agent <status|injection|effort|subagents|fallback|sidecar> ...`
 
 管理无头多代理列表、effort 上限、提示注入、回退和 sidecar 设置。使用 `status` 查看当前策略。有关 surface 模式、委派、effort 和回退行为如何协同工作，请参见 [子代理 surface](/guides/sub-agent-surface/)。
 
 ```bash
-ocx agent subagents set ark/model-a,openai/gpt-5.5
-ocx agent sidecar web --enabled off
+orl agent subagents set ark/model-a,openai/gpt-5.5
+orl agent sidecar web --enabled off
 ```
 
-`--enabled off` 与仪表盘中的 **关闭 (Off)** 行是同一个开关：OpenCodex 不再运行该 sidecar，
+`--enabled off` 与仪表盘中的 **关闭 (Off)** 行是同一个开关：OpenRelay 不再运行该 sidecar，
 Codex 集成会把 `web_search = "disabled"` 写入 `~/.codex/config.toml`，这正是让 MCP
 搜索服务器成为唯一搜索路径的前提。`--enabled on` 会再次移除该行。当保存确实改变了开关状态时，
 命令会报告由此触发的 Codex 侧写入（`--json` 中的 `codexWebSearch`，否则为末尾的
-`Codex config:` 行），并在无法写入时提示 `ocx sync`。该标志对 `vision` 同样有效。
+`Codex config:` 行），并在无法写入时提示 `orl sync`。该标志对 `vision` 同样有效。
 
-### `ocx v2 <status|on|off|mode <v1|default|v2>|threads <n>>`
+### `orl v2 <status|on|off|mode <v1|default|v2>|threads <n>>`
 
 管理 Codex 的 `multi_agent_v2` 功能标志和三态多代理 surface 模式。
 
@@ -37,24 +37,24 @@ Codex 集成会把 `web_search = "disabled"` 写入 `~/.codex/config.toml`，这
 | `threads <n>` | 将当前 v1/v2 线程上限设为一个至少为 1 的整数。 |
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
-ocx v2 mode default
-ocx v2 on
-ocx v2 threads 16
+orl v2 status
+orl v2 mode v1
+orl v2 mode default
+orl v2 on
+orl v2 threads 16
 ```
 
-`mode` 子命令会将 `multiAgentMode` 写入 opencodex 配置，并重新同步 Codex 目录。模式和标志的切换会在有效的 v1/v2 Codex 键之间迁移当前的数值线程上限；如果切换失败，会恢复原始的 `config.toml`。更改只会应用于新的 Codex 会话，正在运行的会话会保持其已固定的 surface。
+`mode` 子命令会将 `multiAgentMode` 写入 OpenRelay 配置，并重新同步 Codex 目录。模式和标志的切换会在有效的 v1/v2 Codex 键之间迁移当前的数值线程上限；如果切换失败，会恢复原始的 `config.toml`。更改只会应用于新的 Codex 会话，正在运行的会话会保持其已固定的 surface。
 
 ## Combo routing
 
-### `ocx combo <list|show|set|remove> ...` · `ocx route combo ...`
+### `orl combo <list|show|set|remove> ...` · `orl route combo ...`
 
-管理 combo 的故障转移和轮询虚拟模型。`ocx route combo` 是层级别名；combo 目前是受支持的路由资源。目标使用 `provider/model[:weight],provider/model[:weight]`。
+管理 combo 的故障转移和轮询虚拟模型。`orl route combo` 是层级别名；combo 目前是受支持的路由资源。目标使用 `provider/model[:weight],provider/model[:weight]`。
 
 ```bash
-ocx combo list
-ocx route combo set reliable --targets ark/model-a:2,openai/gpt-5.5
+orl combo list
+orl route combo set reliable --targets ark/model-a:2,openai/gpt-5.5
 ```
 
 `set` 支持 `--strategy`、`--sticky`、`--effort`、`--alias`、`--rename-from`、`--native-alias`
@@ -67,84 +67,84 @@ API key，且绝不会回退到 native alias。启用这组兼容选项前，请
 
 ## Observability and debug
 
-### `ocx observe <logs|usage|storage|memory|debug|claude-inbound|injection> ...`
+### `orl observe <logs|usage|storage|memory|debug|claude-inbound|injection> ...`
 
 检查代理请求、用量、存储、内存和调试数据。直接别名如下：
 
 | 别名 | 对应资源 |
 | --- | --- |
-| `ocx logs [filters] [--follow] [--json|--jsonl]` | `ocx observe logs` |
-| `ocx usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--provider <name>] [--model <id>] [--json]` | `ocx observe usage` |
-| `ocx storage [--json]` | `ocx observe storage` |
-| `ocx memory [--json]` | `ocx observe memory` |
+| `orl logs [filters] [--follow] [--json|--jsonl]` | `orl observe logs` |
+| `orl usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--provider <name>] [--model <id>] [--json]` | `orl observe usage` |
+| `orl storage [--json]` | `orl observe storage` |
+| `orl memory [--json]` | `orl observe memory` |
 
 ```bash
-ocx observe usage --range 30d --json
+orl observe usage --range 30d --json
 ```
 
 部分用量记录无法计入时，人类可读输出会显示警告，即使没有可读取的记录也是如此。显示的总数仅反映可读取的记录。如果筛选条件没有匹配到可读取的记录，输出将显示警告和提示，而不显示总数行；被跳过的记录可能包含匹配项。`--json` 原样保留响应中的 `usageIncomplete` 诊断及原因。
 
-### `ocx debug <provider|usage|injection|claude> <on|off|status|reset|logs [-f]>`
+### `orl debug <provider|usage|injection|claude> <on|off|status|reset|logs [-f]>`
 
 通过正在运行的代理的管理 API 读取或更改运行时调试覆盖项。
 
 ```bash
-ocx debug provider on|off|status|reset
-ocx debug provider logs [-f|--follow]
-ocx debug usage on|off|status|reset
-ocx debug usage logs [-f|--follow]
+orl debug provider on|off|status|reset
+orl debug provider logs [-f|--follow]
+orl debug usage on|off|status|reset
+orl debug usage logs [-f|--follow]
 ```
 
-没有指定作用域时，`ocx debug` 会输出用法；如果代理已停止，还会输出下次启动时的环境默认值。提供方调试默认来自 `OCX_DEBUG=1`（旧版 `OCX_DEBUG_FRAMES=1` 也可用）；用量调试默认来自 `OPENCODEX_USAGE_DEBUG=1`。
+没有指定作用域时，`orl debug` 会输出用法；如果代理已停止，还会输出下次启动时的环境默认值。提供方调试默认来自 `OCX_DEBUG=1`（旧版 `OCX_DEBUG_FRAMES=1` 也可用）；用量调试默认来自 `OPENCODEX_USAGE_DEBUG=1`。
 
 ## API access
 
-### `ocx access <key|endpoints|models|test> ...`
+### `orl access <key|endpoints|models|test> ...`
 
-查看 OpenCodex 接入 API 密钥列表、外部端点和模型。`ocx api-key` 是 `ocx access key` 命令组的别名。
+查看 OpenRelay 接入 API 密钥列表、外部端点和模型。`orl api-key` 是 `orl access key` 命令组的别名。
 
 创建密钥和开始轮换时，无论选择文本还是 JSON 输出，都会返回仅显示一次的明文凭据。代理应将这些步骤交给人在代理会话之外直接操作的终端完成。不要索要密钥本身，也不要让用户将其粘贴到聊天中；只接收配置和连接验证的确认，以及非秘密的密钥 ID 和轮换 ID。
 
 ```bash
-ocx access key list --json
+orl access key list --json
 ```
 
 确认新密钥已配置并验证连接，不等于批准撤销旧密钥。提交轮换或删除旧密钥前，需要另行获得撤销该密钥的明确授权。执行获准的操作后，再次查看列表。不要通过直接调用 API 绕过这一流程。
 
 ## Client integrations
 
-### `ocx integration <claude|grok> ...`
+### `orl integration <claude|grok> ...`
 
 管理受支持的 Claude 和 Grok 集成。下面的直接命令族会暴露各自客户端专属的控制项。
 
-### `ocx claude [claude args...]`
+### `orl claude [claude args...]`
 
 确保代理正在运行，然后使用 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN`、`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` 以及来自 `config.claudeCode` 的模型槽位启动 Claude Code。对于 Claude Code 2.1.129 或更新版本，路由后的模型会通过稳定的槽位别名出现在原生 `/model` 选择器中。在较旧版本中，请使用 `ANTHROPIC_MODEL` 或 `/model <id>` 选择。用户自行导出的 `ANTHROPIC_*` 变量始终优先生效。
 
 Claude Desktop 配置档案命令如下：
 
 ```text
-ocx claude desktop [apply]                         Save and apply the four-family profile
-ocx claude desktop show [--json]                   Show routes, families, and defaults
-ocx claude desktop move <route> <family> [--default]
-ocx claude desktop default <family> <route|none>
-ocx claude desktop export <path|->                 Export versioned JSON (`-` = stdout)
-ocx claude desktop import <path> [--apply]         Validate and import JSON
+orl claude desktop [apply]                         Save and apply the four-family profile
+orl claude desktop show [--json]                   Show routes, families, and defaults
+orl claude desktop move <route> <family> [--default]
+orl claude desktop default <family> <route|none>
+orl claude desktop export <path|->                 Export versioned JSON (`-` = stdout)
+orl claude desktop import <path> [--apply]         Validate and import JSON
 ```
 
-这些 family 是 `opus`、`fable`、`sonnet` 和 `haiku`；新路由默认进入 `opus`。只有在该 family 为空时，`none` 才有效。旧版 apply 标志 `--static`、`--hybrid` 和 `--discovery-only` 仍受支持。Claude Code 设置请使用 `ocx claude config <status|set> ...`。
+这些 family 是 `opus`、`fable`、`sonnet` 和 `haiku`；新路由默认进入 `opus`。只有在该 family 为空时，`none` 才有效。旧版 apply 标志 `--static`、`--hybrid` 和 `--discovery-only` 仍受支持。Claude Code 设置请使用 `orl claude config <status|set> ...`。
 
-### `ocx opencode [opencode args...]`
+### `orl opencode [opencode args...]`
 
 确保代理正在运行，然后在 OpenCode 的内联运行时层（`OPENCODE_CONFIG_CONTENT`）中启动 opencode，并注入生成的 `provider.opencodex` 和 `providers.opencodex` 块。现有的内联配置会被保留，仅本次启动会替换这两个键。可能会读取全局或项目级 `opencode.json` 文件以警告已有覆盖，但不会修改磁盘上的文件。路由后的模型会显示为 `opencodex/<provider>/<model>`。稍后再次启动普通 `opencode` 时，行为与之前完全一致。
 
-### `ocx grok <status|exclude|include|set|clear|apply> ...`
+### `orl grok <status|exclude|include|set|clear|apply> ...`
 
 管理并应用 Grok Build 模型边界。
 
 ## Client config export
 
-### `ocx export --client <opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh|mcode|zcode|prime|aside|raycast|omo|cline|kilo|commandcode|droid>`
+### `orl export --client <opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh|mcode|zcode|prime|aside|raycast|omo|cline|kilo|commandcode|droid>`
 
 输出连接到正在运行代理的客户端配置。此命令会以所选客户端的原生格式序列化 `opencodex` provider 块，其中包含基础 URL、模型列表，以及该客户端适用的凭据引用或 `opencodex-loopback` 占位值。
 
@@ -158,10 +158,10 @@ ocx claude desktop import <path> [--apply]         Validate and import JSON
 | `--force` | 允许 `--out` 替换已存在的文件。 |
 
 ```bash
-ocx export --client opencode                     # config plus destination, merge warning, and counts
-ocx export --client pi --json > pi-models.json   # JSON document for a pipe or a diff
-ocx export --client omp --out ./omp-models.yml    # native OMP YAML
-ocx export --client opencode --out ~/opencodex-opencode.json
+orl export --client opencode                     # config plus destination, merge warning, and counts
+orl export --client pi --json > pi-models.json   # JSON document for a pipe or a diff
+orl export --client omp --out ./omp-models.yml    # native OMP YAML
+orl export --client opencode --out ~/opencodex-opencode.json
 ```
 
 不使用 `--json` 时，会先输出所选客户端原生格式的生成配置，随后是规范目标路径、合并警告、客户端专属的启动前提示，以及一个模型计数，并标明有多少行省略了上下文限制（客户端会对这些项应用自己的默认值）。
@@ -188,10 +188,10 @@ ocx export --client opencode --out ~/opencodex-opencode.json
 
 Raycast 导出是一份独立的 `providers.yaml` 文档，在 `providers` 序列中只有一个 `id: opencodex` 元素：`name: OpenCodex`、代理的 `/v1` 基础 URL，以及每个已路由模型及其 `abilities`（`tools` 与 `system_message` 始终支持，`vision` 取自目录的输入模态，`reasoning_effort` 在模型有 effort 阶梯时设置，`temperature` 对推理模型关闭）。Custom Providers 是 Raycast Pro 功能，且 Raycast 会监视该文件，因此保存后的更改无需重启即可生效。格式见 [manual.raycast.com/ai/custom-providers](https://manual.raycast.com/ai/custom-providers)。不会写入任何 `api_keys` 条目，所以该导出仅限回环，非回环绑定会被拒绝。
 
-opencode 会插值 `{env:OPENCODEX_OPENCODE_API_KEY}`。opencodex 生成的 Pi 导出不需要环境变量，而是携带字面占位值 `opencodex-loopback`。这个值是必需的：Pi 在构建模型列表时会解析 `apiKey`，如果已有配置包含未设置的环境变量引用，它就会隐藏整个 provider。回环上的代理从不校验生成的占位值。
+opencode 会插值 `{env:OPENCODEX_OPENCODE_API_KEY}`。OpenRelay 生成的 Pi 导出不需要环境变量，而是携带字面占位值 `opencodex-loopback`。这个值是必需的：Pi 在构建模型列表时会解析 `apiKey`，如果已有配置包含未设置的环境变量引用，它就会隐藏整个 provider。回环上的代理从不校验生成的占位值。
 
 :::caution[合并，不要替换]
-`ocx export` 从不写入你的真实客户端配置。该命令只会打印目标路径供你手动合并，而 `--out` 在没有 `--force` 的情况下拒绝覆盖已有文件，因为替换配置会破坏其中已有的其他 providers、agents 和 MCP 条目。
+`orl export` 从不写入你的真实客户端配置。该命令只会打印目标路径供你手动合并，而 `--out` 在没有 `--force` 的情况下拒绝覆盖已有文件，因为替换配置会破坏其中已有的其他 providers、agents 和 MCP 条目。
 :::
 
 任何密钥都不会被序列化。生成的配置里携带的要么是有文档记录的环境引用，要么是非机密的环回占位值。仅凭环回地址（`127.0.0.1`）不能认定无需密钥；应检查目标的认证策略和端点。使用所选密钥的模型及音频 CLI 即使在环回上也需要明确提供密钥。当代理绑定到环回地址之外时，只有在客户端配置格式支持的情况下才设置相应的环境变量。有关准入密钥的签发方法，请参阅 [Remote access](/zh-cn/reference/configuration/server/#远程访问)。上游 provider 自身的密钥需要单独配置，请参阅 [Providers](/guides/providers/)。
@@ -202,20 +202,20 @@ opencode 会插值 `{env:OPENCODEX_OPENCODE_API_KEY}`。opencodex 生成的 Pi �
 
 ## Runtime and configuration
 
-### `ocx system <status|settings|startup|diagnostics|sync|codex-app-server|codex-restart|update|codex-cli-update> ...`
+### `orl system <status|settings|startup|diagnostics|sync|codex-app-server|codex-restart|update|codex-cli-update> ...`
 
 管理无头运行时设置、启动、同步、诊断和更新。
 
-`ocx system codex-restart --yes` 通过与 `ocx sync --restart-codex` 相同的模块重启 Codex app-server，并完全退出再重新启动 Codex 桌面应用。若代理本身运行在 Codex 应用内部，该命令会给出可执行提示并拒绝，而不是承诺无法完成的移交。
+`orl system codex-restart --yes` 通过与 `orl sync --restart-codex` 相同的模块重启 Codex app-server，并完全退出再重新启动 Codex 桌面应用。若代理本身运行在 Codex 应用内部，该命令会给出可执行提示并拒绝，而不是承诺无法完成的移交。
 
 ```bash
-ocx system settings --stream-mode eager-relay
+orl system settings --stream-mode eager-relay
 ```
 
-`ocx system update` 更新 OpenCodex 本身。Codex CLI 使用以下独立的只读检查命令：
+`orl system update` 更新 OpenRelay 本身。Codex CLI 使用以下独立的只读检查命令：
 
 ```bash
-ocx system codex-cli-update check --json
+orl system codex-cli-update check --json
 ```
 
 `check` 不会向软件包注册表发起请求，只会在限定范围内检查已配置候选项的来源证据，包括经过脱敏的可执行文件位置和所有权证据。受信任的已发布启动器上下文只能验证该候选项快照，并不证明 Codex 已成功运行。由于这条一次性命令绝不会运行 Codex，来自环境变量和持久化记录的候选项仅用于报告（`managed: false`，通常为 `selection_unattested`）；JSON 输出包含 `candidateAvailable`、`candidateVersion` 和 `candidateSource`，且 `selectionAttested` 始终为 `false`。检查已配置候选项需要受信任的已发布启动器上下文；直接使用 Bun 启动或从源码运行时没有这项证明，因此会忽略环境变量和持久化记录中的候选项状态，并可能在 POSIX 系统上报告 `candidate_unavailable`。在 Windows 上，这个首个切片不会对候选路径或配置路径执行任何文件系统 I/O。只有由受信任启动器捕获的绝对环境候选项可以获得应用捆绑或版本管理器的纯词法标签；其他所有 Windows 候选项都会以失败关闭方式处理。由于这个切片完全不读取持久化的选择状态，在未捕获任何环境候选项的 Windows 运行中会报告 `windows_inspection_deferred` 而非 `candidate_unavailable`：该命令无法观测 Codex CLI 是否已安装，因此报告检查被推迟，而不是断言不存在候选项。该命令不会运行 Codex 或软件包管理器，不会修复 shim，不会写入配置或缓存，不会停止进程，也不会安装任何内容。随应用捆绑的候选项、位于已识别版本管理器路径中的候选项、未经验证的独立候选项以及 shim 状态不明确的候选项，都会报告为 `unmanaged` 或 `unknown`，绝不会归类为 `managed`。
@@ -225,27 +225,27 @@ ocx system codex-cli-update check --json
 #### 显式观察 Windows x64 安装
 
 ```text
-ocx system codex-cli-update attest [--json]
-ocx system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
+orl system codex-cli-update attest [--json]
+orl system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
 ```
 
-`attest` 是可选的只读操作，用于观察所选或明确指定的 Windows x64 npm 安装。不带任何选项时，命令会观察由可信启动器快照识别的所选候选项（已配置的 `CODEX_CLI_PATH` 或所捕获 PATH 中的第一个 `codex`），其中 opencodex 包装脚本会解析到其重命名的 `codex.opencodex-real.cmd` npm 备份。提供全部四个绝对路径可覆盖自动识别；自动识别仅提出路径，持有句柄的观察才是最终依据。`--candidate` 必须是标准 npm `<prefix>/codex.cmd` 或 `<prefix>/node_modules/@openai/codex/bin/codex.js`。`--npm-cli` 必须以 `node_modules/npm/bin/npm-cli.js` 结尾，`--node` 明确指定 `node.exe`。应用捆绑安装、已识别的版本管理器布局、缺少 npm 备份的 opencodex 自有 shim 和自定义包装脚本均会被拒绝。
+`attest` 是可选的只读操作，用于观察所选或明确指定的 Windows x64 npm 安装。不带任何选项时，命令会观察由可信启动器快照识别的所选候选项（已配置的 `CODEX_CLI_PATH` 或所捕获 PATH 中的第一个 `codex`），其中 OpenRelay 包装脚本会解析到其重命名的 `codex.opencodex-real.cmd` npm 备份。提供全部四个绝对路径可覆盖自动识别；自动识别仅提出路径，持有句柄的观察才是最终依据。`--candidate` 必须是标准 npm `<prefix>/codex.cmd` 或 `<prefix>/node_modules/@openai/codex/bin/codex.js`。`--npm-cli` 必须以 `node_modules/npm/bin/npm-cli.js` 结尾，`--node` 明确指定 `node.exe`。应用捆绑安装、已识别的版本管理器布局、缺少 npm 备份的 OpenRelay 自有 shim 和自定义包装脚本均会被拒绝。
 
 在有界读取期间，原生句柄保持祖先目录和文件打开。非支持平台、重解析点/junction、冲突的写入者、不安全路径以及超出大小限制的文件均会被拒绝。固定格式的报告不包含路径：`status` 为 `observed` 或 `refused`，并提供 `installationIdentityObserved`；`selectionAttested`、`managed` 和 `applyAllowed` 始终为 `false`。报告拒绝时也可能返回退出码 0，因此应检查 `status`。
 
 标识或摘要仅描述观察时的文件，不是持久的更新许可，也不证明选中的运行时、过去的安装程序、实际 npm 配置或工具真实性。明确指定的 Node 也只是被观察，不证明启动器会选择它。命令不会执行目标、请求包注册表、安装、写入配置或控制进程。现有 Windows `check` 仍不执行候选项或配置的文件系统 I/O。
 
-### `ocx config [show|get|set|unset|validate|export|import] ...`
+### `orl config [show|get|set|unset|validate|export|import] ...`
 
-`ocx config [show] [--json] [--source]` 无需运行代理即可显示本地配置。省略 `show` 时，可使用任一标志或按任意顺序组合使用。`--source` 包含诊断来源、错误和警告，仅适用于显示操作。`--json` 可放在显式操作之前，不会改变执行的操作。重复的 `--json` 或 `--source` 标志及未知参数会被拒绝。
+`orl config [show] [--json] [--source]` 无需运行代理即可显示本地配置。省略 `show` 时，可使用任一标志或按任意顺序组合使用。`--source` 包含诊断来源、错误和警告，仅适用于显示操作。`--json` 可放在显式操作之前，不会改变执行的操作。重复的 `--json` 或 `--source` 标志及未知参数会被拒绝。
 
-检查并安全修改已验证的 OpenCodex 配置。`show` 和 `get` 会隐藏密钥。导入会先验证再写入，并且需要 `--yes`。
+检查并安全修改已验证的 OpenRelay 配置。`show` 和 `get` 会隐藏密钥。导入会先验证再写入，并且需要 `--yes`。
 
 ### Forced Claude Code subagent model
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

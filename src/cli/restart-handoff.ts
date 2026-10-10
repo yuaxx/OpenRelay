@@ -91,7 +91,7 @@ export async function probeOwnerPastRestartParent<T extends OwnerProbeResult>(
   const sleep = io.sleep ?? Bun.sleep;
   const log = io.log ?? ((line: string) => console.log(line));
   const timeoutMs = io.timeoutMs ?? RESTART_PARENT_EXIT_TIMEOUT_MS;
-  log(`Waiting for the restarting OpenCodex process (PID ${parentPid}) to hand over its port...`);
+  log(`Waiting for the restarting OpenRelay process (PID ${parentPid}) to hand over its port...`);
   const deadline = now() + timeoutMs;
   let reprobeAt = now() + OWNER_REPROBE_MS;
   while (now() < deadline) {
@@ -105,6 +105,6 @@ export async function probeOwnerPastRestartParent<T extends OwnerProbeResult>(
     if (remainingMs <= 0) break;
     await sleep(Math.min(PARENT_EXIT_POLL_MS, remainingMs));
   }
-  log(`The restarting OpenCodex process (PID ${parentPid}) did not exit within ${Math.round(timeoutMs / 1000)}s.`);
+  log(`The restarting OpenRelay process (PID ${parentPid}) did not exit within ${Math.round(timeoutMs / 1000)}s.`);
   return owner;
 }

@@ -5,7 +5,7 @@ description: 將 Codex、Claude Code、Pi 及其登入集中在一台 OCX Hub，
 
 如需 SSH 機器連結，請參閱[遠端連結](/zh-tw/guides/remote-link/)。
 
-Remote Workspace 讓一台 OpenCodex Hub 執行程式碼代理，另一台電腦則提供專案檔案、指令、測試與建置運算。手機或第三台電腦可透過 Hub 儀表板控制工作階段。
+Remote Workspace 讓一台 OpenRelay Hub 執行程式碼代理，另一台電腦則提供專案檔案、指令、測試與建置運算。手機或第三台電腦可透過 Hub 儀表板控制工作階段。
 
 ```text
 Phone browser -> Computer 1 OCX Hub -> encrypted channel -> Computer 2 OCX Executor
@@ -13,7 +13,7 @@ Phone browser -> Computer 1 OCX Hub -> encrypted channel -> Computer 2 OCX Execu
                  logins and sessions                      no coding CLI login
 ```
 
-Executor 只需要 OpenCodex，不需要 Codex、Claude Code、Pi、ChatGPT 登入或供應商 API key。它會主動向 Hub 建立對外 WebSocket 連線，因此 Executor 不需要公開連接埠或路由器連接埠轉送。
+Executor 只需要 OpenRelay，不需要 Codex、Claude Code、Pi、ChatGPT 登入或供應商 API key。它會主動向 Hub 建立對外 WebSocket 連線，因此 Executor 不需要公開連接埠或路由器連接埠轉送。
 
 :::caution[Experimental foundation]
 Remote Workspace 是須自行啟用的實驗基礎功能，尚未用於正式環境。Linux 提供檔案工具與有條件的 bubblewrap 指令執行。Windows 和 macOS 只提供檔案工具：其官方原生 helper 會拒絕探測與指令請求。Windows 指令須待經驗證的生命週期擁有者能在取消期間保有清理權限後才會支援。缺少指令支援時，絕不會回退到 Hub 執行。
@@ -21,12 +21,12 @@ Remote Workspace 是須自行啟用的實驗基礎功能，尚未用於正式環
 
 ## 設定 Hub
 
-電腦 1 擁有所有程式碼代理的登入與模型工作階段。在該電腦安裝並登入要使用的代理，然後以 Hub 角色執行 OpenCodex：
+電腦 1 擁有所有程式碼代理的登入與模型工作階段。在該電腦安裝並登入要使用的代理，然後以 Hub 角色執行 OpenRelay：
 
 ```bash
-ocx config set runtimeRole hub
-OCX_REMOTE_WORKSPACE_ENABLED=1 ocx start
-ocx gui
+orl config set runtimeRole hub
+OCX_REMOTE_WORKSPACE_ENABLED=1 orl start
+orl gui
 ```
 
 請在 Hub 程序本身設定 `OCX_REMOTE_WORKSPACE_ENABLED=1`；只在儀表板指令上設定，不會啟用已在執行的服務。未明確啟用的 Hub 會回傳停用狀態，不會建立工作區金鑰，也不會探測程式碼代理執行環境。
@@ -40,30 +40,30 @@ Codex Remote Workspace 使用目前的 App Server 權限設定檔。若 Hub 選�
 1. 在 Hub 儀表板開啟 **Remote Workspace**。
 2. 選擇 **Create pairing code**。
 3. 在電腦 2 上，切換至要公開的專案目錄。
-4. 複製儀表板為該電腦產生的 **Linux / macOS terminal** 或 **Windows PowerShell** 指令。它會配對目前目錄，並讓 `ocx remote-workspace agent` 在該終端機中保持連線。
+4. 複製儀表板為該電腦產生的 **Linux / macOS terminal** 或 **Windows PowerShell** 指令。它會配對目前目錄，並讓 `orl remote-workspace agent` 在該終端機中保持連線。
 
 等效的手動流程如下：
 
 ```bash
 cd /path/to/project
-printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.example' \
+printf '%s\n' 'ONE-TIME-CODE' | orl remote-workspace pair 'https://your-hub.example' \
   --pairing-code-stdin --root "$PWD"
-ocx remote-workspace agent
+orl remote-workspace agent
 ```
 
 在 Windows PowerShell 上，請使用儀表板顯示的指令。等效的手動形式如下：
 
 ```powershell
 $pairingCode = 'ONE-TIME-CODE'
-$pairingCode | ocx remote-workspace pair 'https://your-hub.example' `
+$pairingCode | orl remote-workspace pair 'https://your-hub.example' `
   --pairing-code-stdin --root (Get-Location).Path
-if ($LASTEXITCODE -eq 0) { ocx remote-workspace agent }
+if ($LASTEXITCODE -eq 0) { orl remote-workspace agent }
 ```
 
 目前的 OCX Bun 可執行檔會自動以單一唯讀檔案加入 Linux sandbox。若專案需要位於系統路徑之外、由使用者安裝的工具鏈，可明確配對該路徑，而不用公開 home 目錄其餘部分：
 
 ```bash
-printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.example' \
+printf '%s\n' 'ONE-TIME-CODE' | orl remote-workspace pair 'https://your-hub.example' \
   --pairing-code-stdin --root "$PWD" \
   --toolchain-root "$HOME/.nvm/versions/node/v24/bin"
 ```
@@ -75,7 +75,7 @@ printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.exam
 不印出機密資訊即可檢查本機登記狀態：
 
 ```bash
-ocx remote-workspace status
+orl remote-workspace status
 ```
 
 ## 啟動遠端程式碼工作階段

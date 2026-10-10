@@ -1,6 +1,6 @@
 ---
 title: 기여하기
-description: opencodex 개발 환경, 구조, 컨벤션, 프로바이더와 어댑터 추가 방법.
+description: OpenRelay 개발 환경, 구조, 컨벤션, 프로바이더와 어댑터 추가 방법.
 ---
 
 ## 설정
@@ -77,7 +77,7 @@ GitHub Actions는 필요한 작업만 수행합니다.
 - **Cross-platform CI**(`.github/workflows/ci.yml`)는 런타임, 테스트, 패키지, 스크립트,
   TypeScript, 워크플로 파일이 바뀐 pull request와 `main` push에서 실행됩니다. Bun matrix는 Linux,
   Windows, macOS에서 install, typecheck, tests, privacy scan, release helper build smoke, GUI build,
-  `ocx help`를 검사합니다. 별도의 3개 OS lane은 번들 런타임을 사용해 Bun을 따로 설치하지 않아도
+  `orl help`를 검사합니다. 별도의 3개 OS lane은 번들 런타임을 사용해 Bun을 따로 설치하지 않아도
   npm global install이 동작하는지 확인합니다.
 - **Release**(`.github/workflows/release.yml`)는 수동으로 실행합니다. 두 번째 전체 CI 파이프라인이
   아니며, dry-run이나 publish 전에 정확한 릴리즈 커밋(`GITHUB_SHA`)에서 Cross-platform CI가
@@ -149,7 +149,7 @@ Go 네이티브 포트를 담당했던 `dev2-go`는 정리했고, 두 라인을 
 },
 ```
 
-`src/providers/derive.ts`는 이 항목을 `ocx init`, `ocx provider`, 대시보드 preset, API 키 로그인,
+`src/providers/derive.ts`는 이 항목을 `orl init`, `orl provider`, 대시보드 preset, API 키 로그인,
 OAuth 설정 seed에 공급합니다. `enrichProviderFromCatalog()`는 모델 메타데이터와 capability 분류를
 저장할 프로바이더 설정에 복사합니다. OAuth 프로토콜 구현은 여전히 `src/oauth/`에 있습니다.
 레지스트리 메타데이터만 추가해서 OAuth flow가 생기지는 않습니다.

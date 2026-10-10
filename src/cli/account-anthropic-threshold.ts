@@ -45,6 +45,6 @@ export async function cmdAnthropicAccountThreshold(args: string[], action: strin
 }
 
 function invalid(): number {
-  console.error("Usage: ocx account auto-switch <anthropic|anthropic2> <status|inherit|on|off|threshold <0-100>> --account <id> [--json]");
+  console.error("Usage: orl account auto-switch <anthropic|anthropic2> <status|inherit|on|off|threshold <0-100>> --account <id> [--json]");
   return 2;
 }

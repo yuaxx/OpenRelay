@@ -155,39 +155,39 @@ export function describeUpdateRestartFailure(code: string, reason?: UpdateRestar
   if (reason && (code === "update_restart_eligibility_failed" || code === "update_restart_stop_failed")) {
     const action = (() => {
       switch (reason) {
-        case "windows": return "Restart from a newer CLI is unavailable on Windows. Run `ocx status`, then restart through the owning service or desktop app.";
-        case "unsupported_platform": return "Restart from a newer CLI requires macOS or Linux. Run `ocx status`, then use the owning lifecycle manager.";
-        case "desktop": return "OpenCodex Desktop supervises this proxy. Use the app's updater (tray → Check for Updates), or quit OpenCodex before updating and restarting from this CLI.";
-        case "service": return "An installed or active service owns lifecycle control. Run `ocx status`, then use the owning installation's `ocx service restart`.";
-        case "foreground": return "The proxy is attached to a parent process. Run `ocx status`; if it runs in a terminal, restart it in that terminal, otherwise use its owning app or supervisor.";
-        case "shared_or_client": return "This is a shared or connected-client runtime. Run `ocx status` and restart through its owning Hub, service or desktop app.";
+        case "windows": return "Restart from a newer CLI is unavailable on Windows. Run `orl status`, then restart through the owning service or desktop app.";
+        case "unsupported_platform": return "Restart from a newer CLI requires macOS or Linux. Run `orl status`, then use the owning lifecycle manager.";
+        case "desktop": return "OpenRelay Desktop supervises this proxy. Use the app's updater (tray → Check for Updates), or quit OpenRelay before updating and restarting from this CLI.";
+        case "service": return "An installed or active service owns lifecycle control. Run `orl status`, then use the owning installation's `orl service restart`.";
+        case "foreground": return "The proxy is attached to a parent process. Run `orl status`; if it runs in a terminal, restart it in that terminal, otherwise use its owning app or supervisor.";
+        case "shared_or_client": return "This is a shared or connected-client runtime. Run `orl status` and restart through its owning Hub, service or desktop app.";
         case "package_tree_fenced": return `The proxy's package files are unsettled. Wait for the install to finish. ${INCOMPLETE_INSTALL_RECOVERY}`;
-        case "unverifiable_ancestry": return "The proxy's process ancestry or manager could not be verified. Run `ocx status` to identify its owner before restarting.";
-        case "configuration_changed": return "The selected configuration or connection changed. Run `ocx status` to inspect the intended proxy before restarting.";
-        case "target_changed": return "The captured proxy identity changed. Run `ocx status` to inspect the intended proxy before restarting.";
+        case "unverifiable_ancestry": return "The proxy's process ancestry or manager could not be verified. Run `orl status` to identify its owner before restarting.";
+        case "configuration_changed": return "The selected configuration or connection changed. Run `orl status` to inspect the intended proxy before restarting.";
+        case "target_changed": return "The captured proxy identity changed. Run `orl status` to inspect the intended proxy before restarting.";
       }
     })();
     return `${action} Nothing was stopped by this restart attempt.`;
   }
   switch (code) {
     case "update_restart_runtime_incomplete":
-      return `This installation's Bun runtime is incomplete; nothing was stopped. Wait for the install to finish, then run \`ocx restart\` again. ${INCOMPLETE_INSTALL_RECOVERY}`;
+      return `This installation's Bun runtime is incomplete; nothing was stopped. Wait for the install to finish, then run \`orl restart\` again. ${INCOMPLETE_INSTALL_RECOVERY}`;
     case "update_restart_eligibility_failed":
-      return "The running proxy is not eligible for an update restart from this CLI (it is supervised, shared, or changed); nothing was stopped. Run `ocx status` to inspect the intended proxy.";
+      return "The running proxy is not eligible for an update restart from this CLI (it is supervised, shared, or changed); nothing was stopped. Run `orl status` to inspect the intended proxy.";
     case "update_restart_stop_failed":
-      return "The guarded stop of the old proxy could not be confirmed; inspect `ocx status` before retrying.";
+      return "The guarded stop of the old proxy could not be confirmed; inspect `orl status` before retrying.";
     case "update_restart_settle_failed":
-      return "The old proxy was not confirmed stopped, so no second proxy was started; inspect `ocx status` before retrying.";
+      return "The old proxy was not confirmed stopped, so no second proxy was started; inspect `orl status` before retrying.";
     case "update_restart_prelaunch_failed":
-      return "The old proxy stopped, but its home, ownership or deadline changed before launch, so nothing was launched. Check `ocx status`; if no proxy is running, run `ocx start`.";
+      return "The old proxy stopped, but its home, ownership or deadline changed before launch, so nothing was launched. Check `orl status`; if no proxy is running, run `orl start`.";
     case "update_restart_runtime_failed":
-      return `The old proxy stopped, but this installation's Bun runtime did not finish installing in time, so nothing was launched. ${INCOMPLETE_INSTALL_RECOVERY} Run \`ocx status\`; if no proxy is running, run \`ocx start\` once the install completes.`;
+      return `The old proxy stopped, but this installation's Bun runtime did not finish installing in time, so nothing was launched. ${INCOMPLETE_INSTALL_RECOVERY} Run \`orl status\`; if no proxy is running, run \`orl start\` once the install completes.`;
     case "update_restart_start_failed":
-      return "The old proxy stopped, but the new proxy's launch could not be confirmed. Check `ocx status`; if no proxy is running, run `ocx start`.";
+      return "The old proxy stopped, but the new proxy's launch could not be confirmed. Check `orl status`; if no proxy is running, run `orl start`.";
     case "update_restart_replacement_failed":
-      return "The new proxy did not verify as the expected replacement in time; inspect `ocx status` before retrying.";
+      return "The new proxy did not verify as the expected replacement in time; inspect `orl status` before retrying.";
     default:
-      return "Update restart could not be confirmed; inspect `ocx status` before retrying.";
+      return "Update restart could not be confirmed; inspect `orl status` before retrying.";
   }
 }
 

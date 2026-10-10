@@ -3,18 +3,18 @@ title: Grok Build
 description: Use any opencodex-routed model from xAI's Grok Build CLI — models are auto-registered into ~/.grok/config.toml while the proxy runs.
 ---
 
-opencodex serves an OpenAI-compatible `POST /v1/responses` on its local port, and Grok Build
+OpenRelay serves an OpenAI-compatible `POST /v1/responses` on its local port, and Grok Build
 supports custom models against OpenAI-compatible servers. Starting with this integration,
-opencodex registers its whole visible catalog into Grok Build automatically — no manual config
+OpenRelay registers its whole visible catalog into Grok Build automatically — no manual config
 editing required.
 
 ## Auto-registration
 
-When `~/.grok` exists, `ocx start` (and `ocx ensure` / `ocx restart`) writes a managed block
+When `~/.grok` exists, `orl start` (and `orl ensure` / `orl restart`) writes a managed block
 into `~/.grok/config.toml`:
 
 ```toml
-# >>> opencodex managed block — do not edit (removed by `ocx stop`) >>>
+# >>> opencodex managed block — do not edit (removed by `orl stop`) >>>
 [model_providers.opencodex]
 base_url = "http://127.0.0.1:10100/v1"
 api_backend = "responses"
@@ -43,14 +43,14 @@ default = true
 - **Additive:** your own config outside the fence is never touched. Before the first
   injection into a pre-existing file, a one-time backup is written to
   `~/.grok/config.toml.bak-opencodex`.
-- **Idempotent:** every `ocx start` (and `ocx ensure` while autostart is enabled) replaces
+- **Idempotent:** every `orl start` (and `orl ensure` while autostart is enabled) replaces
   the fenced block with the current catalog.
-- **Removed on teardown:** `ocx stop`, `ocx eject`, `ocx uninstall`, and graceful
+- **Removed on teardown:** `orl stop`, `orl eject`, `orl uninstall`, and graceful
   non-service daemon shutdown strip the fenced block and restore your file
-  byte-for-byte. Under a service manager, teardown goes through `ocx stop`/`ocx
+  byte-for-byte. Under a service manager, teardown goes through `orl stop`/`ocx
   uninstall` (service-mode processes intentionally keep the block across respawns).
 - **Conflict-safe:** aliases already defined by your own `[model.*]` tables are respected
-  (opencodex suffixes its own entries); a damaged fence (begin marker without end marker)
+  (OpenRelay suffixes its own entries); a damaged fence (begin marker without end marker)
   refuses any automatic change and asks for manual repair.
 
 Then pick a model inside Grok Build:
@@ -70,7 +70,7 @@ options. A Grok-compatible projection of that ladder is written into each manage
 `[model.*]` table
 (`supports_reasoning_effort`, default `reasoning_effort`, and
 `[[model.<alias>.reasoning_efforts]]` picker rows) so the menu is present when Grok
-reads the model from `config.toml`. For routed model entries, opencodex mirrors the
+reads the model from `config.toml`. For routed model entries, OpenRelay mirrors the
 configured provider tiers (`reasoningEfforts` / `modelReasoningEfforts`, and the default
 from `modelDefaultReasoningEfforts`). This metadata describes the proxy-configured
 routed ladder. Adapters may emulate reasoning or map levels onto provider-specific
@@ -83,7 +83,7 @@ ladders rather than provider-configured routed metadata. Valid Grok rungs, inclu
 including Codex-only `ultra`, are omitted from the file, keeping every emitted picker
 option selectable.
 
-Grok Build talks to opencodex over the Responses API. When the route advertises a reasoning
+Grok Build talks to OpenRelay over the Responses API. When the route advertises a reasoning
 ladder, the Responses passthrough forwards `reasoning.summary` as configured, so thinking
 traces reach Grok natively as Responses reasoning items. Set `reasoning.summary: "none"` if
 a client wants the model to think without returning the trace. An explicit `reasoning.summary`
@@ -92,16 +92,16 @@ wins over the route default.
 ## Authentication note
 
 Grok Build requires a non-empty API key for custom models even on loopback. The injected
-entries carry a placeholder (`opencodex-loopback`) — opencodex ignores admission keys for
+entries carry a placeholder (`opencodex-loopback`) — OpenRelay ignores admission keys for
 loopback connections, so no real secret is involved.
 
-**Auto-registration is loopback-only.** When opencodex binds a non-loopback host — including
+**Auto-registration is loopback-only.** When OpenRelay binds a non-loopback host — including
 the wildcards `0.0.0.0` and `::`, which expose every interface — requests need your real
 admission token, and a managed block cannot carry one safely. Writing the literal token would
 put your secret into `~/.grok/config.toml` and overwrite whatever you set there on the next
-`ocx start`/`ensure`/`restart`. So opencodex writes nothing at all in that case (and removes
+`orl start`/`ensure`/`restart`. So OpenRelay writes nothing at all in that case (and removes
 any block left over from an earlier loopback bind), and you configure the models yourself
-outside the managed markers, where nothing opencodex does can clobber them. See
+outside the managed markers, where nothing OpenRelay does can clobber them. See
 [Manual recipe](#manual-recipe-without-auto-registration) for the exact table, and set both
 `base_url` (a host that is actually reachable from where you run `grok`) and `api_key`
 (your `OPENCODEX_API_AUTH_TOKEN`).
@@ -112,13 +112,13 @@ token and sends it to whatever `base_url` the entry names, which for a LAN deplo
 plaintext HTTP endpoint that is not xAI.
 
 The injected `api_key` on the provider entry sits first in Grok's credential chain for
-these models, so turns against opencodex need no additional Grok login. Keep your normal
+these models, so turns against OpenRelay need no additional Grok login. Keep your normal
 `grok login` / `XAI_API_KEY` setup for native grok models and any harness features that
 contact xAI directly.
 
 ## Manual recipe (without auto-registration)
 
-If you manage `~/.grok/config.toml` yourself — or opencodex is on a non-loopback bind — add
+If you manage `~/.grok/config.toml` yourself — or OpenRelay is on a non-loopback bind — add
 a `[model_providers.opencodex]` block and per-model tables that reference it, outside the
 `# >>> opencodex managed block` markers:
 
@@ -163,28 +163,28 @@ the id `grok-4.5`. Generated aliases avoid dots entirely for this reason.
   also remains in place across the handoff; non-loopback deployments use manually managed Grok
   configuration instead. The command succeeds only after a different, identity-verified process is
   healthy on the same port.
-- **Config read timing:** start opencodex first, then launch `grok` for the most
+- **Config read timing:** start OpenRelay first, then launch `grok` for the most
   predictable results. Grok Build watches `~/.grok/config.toml` and reloads when the
   `[model]` table actually changes (roughly a one-second debounce, compared by content), so
   a refreshed block reaches an open session without a restart. To confirm what Grok parsed,
   run `grok inspect`: it lists the config sources it loaded and warns about any field it
   rejected. It does not print the resolved model list. Current Grok Build reports and skips
   invalid model fields while retaining the rest of the model entry. A TOML syntax error still
-  prevents the file from loading. opencodex writes atomically, so Grok observes a complete
+  prevents the file from loading. OpenRelay writes atomically, so Grok observes a complete
   document on every reload.
 - **Catalog updates:** the fenced block reflects the catalog at injection time. After
-  adding providers or models, run `ocx ensure` (or restart the proxy) to refresh it.
+  adding providers or models, run `orl ensure` (or restart the proxy) to refresh it.
 
 ## Devin rate limits
 
 If Devin rejects a direct request with a rate limit before producing output or performing
-an action, OpenCodex returns HTTP 429 with a JSON error. Grok can then recognize the limit
+an action, OpenRelay returns HTTP 429 with a JSON error. Grok can then recognize the limit
 instead of displaying a generic 500 error from a failed HTTP 200 stream. If the response
 includes `Retry-After`, follow that delay before retrying. Exhausted quotas without a reset
 hint do not receive a default delay. Existing OAuth account failover still applies. This
 HTTP 429 handling also applies to non-streaming Responses requests.
 
-For streaming requests, OpenCodex waits up to the configured stall timeout for this early
+For streaming requests, OpenRelay waits up to the configured stall timeout for this early
 refusal. If that wait
 expires, it opens the SSE response and lets the existing stream watchdog handle stalls.
 After HTTP headers are sent, a later failure stays in the stream as `response.failed`.

@@ -1,6 +1,6 @@
 ---
 title: Model Routing
-description: How opencodex decides which provider serves a given model id.
+description: How OpenRelay decides which provider serves a given model id.
 ---
 
 When Codex asks for a model, `router.ts` resolves it to exactly one configured provider. The rules are
@@ -90,8 +90,8 @@ Routing and catalog visibility are separate controls:
   Enabling an arrival manually keeps it enabled on later refreshes and exports.
   If the running provider configuration differs from disk, model lists still apply the policy
   using a temporary projection; they leave the running configuration and saved choices untouched.
-  Use `ocx models new-policy off` globally, add `--provider <name>` for an override, and inspect
-  `ocx models new-arrivals [--json]`. Failed/degraded fetches never change the baseline. Providers
+  Use `orl models new-policy off` globally, add `--provider <name>` for an override, and inspect
+  `orl models new-arrivals [--json]`. Failed/degraded fetches never change the baseline. Providers
   with a non-empty `selectedModels` (including preset mode) are already curated, so this policy is
   deliberately inert for them.
 - `provider.disabled: true` removes that provider from catalog discovery. Explicit
@@ -112,7 +112,7 @@ Routing and catalog visibility are separate controls:
   global value and replaces their remembered selections.
 - A GitHub Copilot model that supports the upstream long-context tier can opt in with
   `providers.github-copilot.modelContextTiers.<model> = "long_context"` or
-  `ocx provider edit github-copilot --model-context-tier <model>=long_context`.
+  `orl provider edit github-copilot --model-context-tier <model>=long_context`.
   The tier sends `contextTier: "long_context"` on Copilot Chat and Responses requests.
   It raises the advertised window only when that exact model has a known per-model window
   in `modelContextWindows` (for example, `1000000`); an unknown model keeps its live window.

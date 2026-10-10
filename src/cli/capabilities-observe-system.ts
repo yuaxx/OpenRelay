@@ -2,14 +2,14 @@ import type { Capability } from "./capability-types";
 
 /** Verified existing handlers only; local operations never claim management routes. */
 export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
-  {"command": ["logs", "filter"], "summary": "Select a bounded log snapshot with dashboard filters.", "usage": "ocx logs filter [--surface <all|codex|claude|grok>] [--model <id>] [--provider <name>] [--status <all|success|errors>] [--time-window <all|15m|1h|24h>] [--min-tok-per-sec <n>] [--max-tok-per-sec <n>] [--intercepted-only] [--protocol-mode <all|native|translated|legacy-bridge|blocked|none>] [--conversation <id>] [--scan-limit <1-2000>] [--limit <1-2000>] [--json|--jsonl]", "routes": [{"method": "GET", "path": "/api/logs"}], "flags": [{"name": "--surface", "value": "string", "summary": "all | codex | claude | grok."}, {"name": "--model", "value": "string", "summary": "Case-insensitive exact identity across requested, resolved, served and attempted models."}, {"name": "--provider", "value": "string", "summary": "Case-insensitive provider or failover attempt identity."}, {"name": "--status", "value": "string", "summary": "all | success (200-299) | errors (400-599)."}, {"name": "--time-window", "value": "string", "summary": "all | 15m | 1h | 24h, relative to observation time."}, {"name": "--min-tok-per-sec", "value": "number", "summary": "Inclusive minimum observed token speed."}, {"name": "--max-tok-per-sec", "value": "number", "summary": "Exclusive maximum observed token speed."}, {"name": "--intercepted-only", "value": "boolean", "summary": "Rows carrying an observed rewrite marker."}, {"name": "--protocol-mode", "value": "string", "summary": "all | native | translated | legacy-bridge | blocked | none."}, {"name": "--conversation", "value": "string", "summary": "Conversation ID or stored hash."}, {"name": "--conversationId", "value": "string", "summary": "Alias of --conversation."}, {"name": "--scan-limit", "value": "number", "summary": "1-2000 raw rows inspected; default 2000."}, {"name": "--limit", "value": "number", "summary": "1-2000 matching rows returned; default 200."}, {"name": "--json", "value": "boolean", "summary": "Versioned view with filters, cursor and observed-window counts."}, {"name": "--jsonl", "value": "boolean", "summary": "Matching rows only; exclusive with --json."}], "mutates": false, "json": "envelope", "details": ["One snapshot: filters run locally over the raw server window before the output limit. No follow/events; existing logs behavior remains available.", "JSON schemaVersion1 reports scanLimit, loaded, matched, returned and limit for this observed window only. Cursor is not a resumable filter token.", "Empty matches succeed; malformed, refused, oversized or unavailable responses fail. SIGINT130/SIGTERM143 preserve cancellation."]},
-  {"command": ["observe", "logs", "filter"], "summary": "Select a bounded log snapshot with dashboard filters.", "usage": "ocx observe logs filter [--surface <all|codex|claude|grok>] [--model <id>] [--provider <name>] [--status <all|success|errors>] [--time-window <all|15m|1h|24h>] [--min-tok-per-sec <n>] [--max-tok-per-sec <n>] [--intercepted-only] [--protocol-mode <all|native|translated|legacy-bridge|blocked|none>] [--conversation <id>] [--scan-limit <1-2000>] [--limit <1-2000>] [--json|--jsonl]", "routes": [{"method": "GET", "path": "/api/logs"}], "flags": [{"name": "--surface", "value": "string", "summary": "all | codex | claude | grok."}, {"name": "--model", "value": "string", "summary": "Case-insensitive exact identity across requested, resolved, served and attempted models."}, {"name": "--provider", "value": "string", "summary": "Case-insensitive provider or failover attempt identity."}, {"name": "--status", "value": "string", "summary": "all | success (200-299) | errors (400-599)."}, {"name": "--time-window", "value": "string", "summary": "all | 15m | 1h | 24h, relative to observation time."}, {"name": "--min-tok-per-sec", "value": "number", "summary": "Inclusive minimum observed token speed."}, {"name": "--max-tok-per-sec", "value": "number", "summary": "Exclusive maximum observed token speed."}, {"name": "--intercepted-only", "value": "boolean", "summary": "Rows carrying an observed rewrite marker."}, {"name": "--protocol-mode", "value": "string", "summary": "all | native | translated | legacy-bridge | blocked | none."}, {"name": "--conversation", "value": "string", "summary": "Conversation ID or stored hash."}, {"name": "--conversationId", "value": "string", "summary": "Alias of --conversation."}, {"name": "--scan-limit", "value": "number", "summary": "1-2000 raw rows inspected; default 2000."}, {"name": "--limit", "value": "number", "summary": "1-2000 matching rows returned; default 200."}, {"name": "--json", "value": "boolean", "summary": "Versioned view with filters, cursor and observed-window counts."}, {"name": "--jsonl", "value": "boolean", "summary": "Matching rows only; exclusive with --json."}], "mutates": false, "json": "envelope", "details": ["One snapshot: filters run locally over the raw server window before the output limit. No follow/events; existing logs behavior remains available.", "JSON schemaVersion1 reports scanLimit, loaded, matched, returned and limit for this observed window only. Cursor is not a resumable filter token.", "Empty matches succeed; malformed, refused, oversized or unavailable responses fail. SIGINT130/SIGTERM143 preserve cancellation."]},
-  {"command": ["companion", "usage"], "summary": "Read today and 30-day totals using saved companion filters.", "usage": "ocx companion usage [--json]", "routes": [{"method": "GET", "path": "/api/companion/settings"}, {"method": "GET", "path": "/api/usage"}], "flags": [{"name": "--json", "value": "boolean", "summary": "Versioned filtered ranges, settings provenance and partial status."}], "mutates": false, "json": "envelope", "details": ["Reads saved settings then two usage ranges on the same runtime; this is not an atomic snapshot. No connected-client management relay or local fallback.", "Preserves null/default/corrupt settings provenance, missing measurements and incomplete reports. Filters follow saved model and hidden-provider preferences.", "Any unavailable range yields partial:true and exit1 while preserving the other result. Both available yields exit0 even when incomplete. SIGINT130/SIGTERM143 emit no late report."]},
+  {"command": ["logs", "filter"], "summary": "Select a bounded log snapshot with dashboard filters.", "usage": "orl logs filter [--surface <all|codex|claude|grok>] [--model <id>] [--provider <name>] [--status <all|success|errors>] [--time-window <all|15m|1h|24h>] [--min-tok-per-sec <n>] [--max-tok-per-sec <n>] [--intercepted-only] [--protocol-mode <all|native|translated|legacy-bridge|blocked|none>] [--conversation <id>] [--scan-limit <1-2000>] [--limit <1-2000>] [--json|--jsonl]", "routes": [{"method": "GET", "path": "/api/logs"}], "flags": [{"name": "--surface", "value": "string", "summary": "all | codex | claude | grok."}, {"name": "--model", "value": "string", "summary": "Case-insensitive exact identity across requested, resolved, served and attempted models."}, {"name": "--provider", "value": "string", "summary": "Case-insensitive provider or failover attempt identity."}, {"name": "--status", "value": "string", "summary": "all | success (200-299) | errors (400-599)."}, {"name": "--time-window", "value": "string", "summary": "all | 15m | 1h | 24h, relative to observation time."}, {"name": "--min-tok-per-sec", "value": "number", "summary": "Inclusive minimum observed token speed."}, {"name": "--max-tok-per-sec", "value": "number", "summary": "Exclusive maximum observed token speed."}, {"name": "--intercepted-only", "value": "boolean", "summary": "Rows carrying an observed rewrite marker."}, {"name": "--protocol-mode", "value": "string", "summary": "all | native | translated | legacy-bridge | blocked | none."}, {"name": "--conversation", "value": "string", "summary": "Conversation ID or stored hash."}, {"name": "--conversationId", "value": "string", "summary": "Alias of --conversation."}, {"name": "--scan-limit", "value": "number", "summary": "1-2000 raw rows inspected; default 2000."}, {"name": "--limit", "value": "number", "summary": "1-2000 matching rows returned; default 200."}, {"name": "--json", "value": "boolean", "summary": "Versioned view with filters, cursor and observed-window counts."}, {"name": "--jsonl", "value": "boolean", "summary": "Matching rows only; exclusive with --json."}], "mutates": false, "json": "envelope", "details": ["One snapshot: filters run locally over the raw server window before the output limit. No follow/events; existing logs behavior remains available.", "JSON schemaVersion1 reports scanLimit, loaded, matched, returned and limit for this observed window only. Cursor is not a resumable filter token.", "Empty matches succeed; malformed, refused, oversized or unavailable responses fail. SIGINT130/SIGTERM143 preserve cancellation."]},
+  {"command": ["observe", "logs", "filter"], "summary": "Select a bounded log snapshot with dashboard filters.", "usage": "orl observe logs filter [--surface <all|codex|claude|grok>] [--model <id>] [--provider <name>] [--status <all|success|errors>] [--time-window <all|15m|1h|24h>] [--min-tok-per-sec <n>] [--max-tok-per-sec <n>] [--intercepted-only] [--protocol-mode <all|native|translated|legacy-bridge|blocked|none>] [--conversation <id>] [--scan-limit <1-2000>] [--limit <1-2000>] [--json|--jsonl]", "routes": [{"method": "GET", "path": "/api/logs"}], "flags": [{"name": "--surface", "value": "string", "summary": "all | codex | claude | grok."}, {"name": "--model", "value": "string", "summary": "Case-insensitive exact identity across requested, resolved, served and attempted models."}, {"name": "--provider", "value": "string", "summary": "Case-insensitive provider or failover attempt identity."}, {"name": "--status", "value": "string", "summary": "all | success (200-299) | errors (400-599)."}, {"name": "--time-window", "value": "string", "summary": "all | 15m | 1h | 24h, relative to observation time."}, {"name": "--min-tok-per-sec", "value": "number", "summary": "Inclusive minimum observed token speed."}, {"name": "--max-tok-per-sec", "value": "number", "summary": "Exclusive maximum observed token speed."}, {"name": "--intercepted-only", "value": "boolean", "summary": "Rows carrying an observed rewrite marker."}, {"name": "--protocol-mode", "value": "string", "summary": "all | native | translated | legacy-bridge | blocked | none."}, {"name": "--conversation", "value": "string", "summary": "Conversation ID or stored hash."}, {"name": "--conversationId", "value": "string", "summary": "Alias of --conversation."}, {"name": "--scan-limit", "value": "number", "summary": "1-2000 raw rows inspected; default 2000."}, {"name": "--limit", "value": "number", "summary": "1-2000 matching rows returned; default 200."}, {"name": "--json", "value": "boolean", "summary": "Versioned view with filters, cursor and observed-window counts."}, {"name": "--jsonl", "value": "boolean", "summary": "Matching rows only; exclusive with --json."}], "mutates": false, "json": "envelope", "details": ["One snapshot: filters run locally over the raw server window before the output limit. No follow/events; existing logs behavior remains available.", "JSON schemaVersion1 reports scanLimit, loaded, matched, returned and limit for this observed window only. Cursor is not a resumable filter token.", "Empty matches succeed; malformed, refused, oversized or unavailable responses fail. SIGINT130/SIGTERM143 preserve cancellation."]},
+  {"command": ["companion", "usage"], "summary": "Read today and 30-day totals using saved companion filters.", "usage": "orl companion usage [--json]", "routes": [{"method": "GET", "path": "/api/companion/settings"}, {"method": "GET", "path": "/api/usage"}], "flags": [{"name": "--json", "value": "boolean", "summary": "Versioned filtered ranges, settings provenance and partial status."}], "mutates": false, "json": "envelope", "details": ["Reads saved settings then two usage ranges on the same runtime; this is not an atomic snapshot. No connected-client management relay or local fallback.", "Preserves null/default/corrupt settings provenance, missing measurements and incomplete reports. Filters follow saved model and hidden-provider preferences.", "Any unavailable range yields partial:true and exit1 while preserving the other result. Both available yields exit0 even when incomplete. SIGINT130/SIGTERM143 emit no late report."]},
 
   {
     command: ["observe","logs"],
     summary: "Read or follow request logs.",
-    usage: "ocx observe logs [--provider <name>] [--model <id>] [--status <code>] [--conversation <id>] [--account <label>] [--limit <n>] [--follow] [--json|--jsonl]; ocx observe logs --follow --events [--limit <1-2000>]",
+    usage: "orl observe logs [--provider <name>] [--model <id>] [--status <code>] [--conversation <id>] [--account <label>] [--limit <n>] [--follow] [--json|--jsonl]; orl observe logs --follow --events [--limit <1-2000>]",
     routes: [{"method":"GET","path":"/api/logs"}],
     flags: [{"name":"--provider","value":"string","summary":"Filter provider, including failover attempts."},{"name":"--model","value":"string","summary":"Filter model, including failover attempts."},{"name":"--status","value":"string","summary":"Filter status code."},{"name":"--conversation","value":"string","summary":"Filter conversation ID."},{"name":"--conversationId","value":"string","summary":"Alias of --conversation."},{"name":"--account","value":"string","summary":"Filter stable account log label."},{"name":"--limit","value":"number","summary":"Positive row limit; default 200."},{"name":"--follow","value":"boolean","summary":"Poll once per second; use --jsonl for streaming."},{"name":"-f","value":"boolean","summary":"Alias of --follow."},{"name":"--json","value":"boolean","summary":"Emit the result as JSON."},{"name":"--jsonl","value":"boolean","summary":"Emit one row per JSON line; exclusive with --json."},{"name":"--events","value":"boolean","summary":"Versioned snapshot/append JSONL; requires --follow, conflicts with --json. Redundant --jsonl is accepted."}],
     mutates: false,
@@ -18,7 +18,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["logs", "explain"], summary: "Explain the recorded routing decision for one request.",
-    usage: "ocx logs explain <request-id> [--json]",
+    usage: "orl logs explain <request-id> [--json]",
     routes: [{"method": "GET", "path": "/api/request-history/{id}/route-decision"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -26,7 +26,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["logs", "rebuild-index"], summary: "Rebuild the local request-history index.",
-    usage: "ocx logs rebuild-index [--json]",
+    usage: "orl logs rebuild-index [--json]",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -34,7 +34,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["logs", "index-status"], summary: "Read and refresh local request-history index metadata.",
-    usage: "ocx logs index-status [--json]",
+    usage: "orl logs index-status [--json]",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -43,16 +43,16 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   {
     command: ["observe","usage"],
     summary: "Read token and estimated-cost usage.",
-    usage: "ocx observe usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--since <epoch-ms|ISO-datetime>] [--until <epoch-ms|ISO-datetime>] [--provider <name>] [--model <id>] [--api-key-id <id>] [--search <text>] [--json]",
+    usage: "orl observe usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--since <epoch-ms|ISO-datetime>] [--until <epoch-ms|ISO-datetime>] [--provider <name>] [--model <id>] [--api-key-id <id>] [--search <text>] [--json]",
     routes: [{"method":"GET","path":"/api/usage"}],
     flags: [{"name":"--range","value":"string","summary":"today | 1d | 7d | 30d | all; default 30d."},{"name":"--surface","value":"string","summary":"all | codex | claude | grok; default all."},{"name":"--since","value":"string","summary":"Inclusive epoch milliseconds or ISO datetime with timezone; requires --until."},{"name":"--until","value":"string","summary":"Inclusive end; requires --since. Custom bounds override --range."},{"name":"--provider","value":"string","summary":"Filter provider."},{"name":"--model","value":"string","summary":"Filter model."},{"name":"--json","value":"boolean","summary":"Emit the result as JSON."},{"name":"--api-key-id","value":"string","summary":"Exact nonblank management key scope; connected clients refuse this before reading their enrolled key."},{"name":"--search","value":"string","summary":"Model-row substring view over model/provider/resolvedModel; top100 by tokens. Whole-report totals stay unchanged."}],
     mutates: false,
     json: "payload",
-    details: ["Also available as ocx usage. Connected clients read only their enrolled-key Hub report through /v1/usage; caller --api-key-id is refused before key read/transport and never grants management authority.","Nonclient --api-key-id uses /api/usage and requires matching filter acknowledgment. An unknown acknowledged key is empty/matched:false, not404. Custom-window acknowledgment remains required.","--search filters only returned model rows after scope acknowledgment. Blank search selects the top100 model rows; modelView reports match/return counts without recomputing totals."],
+    details: ["Also available as orl usage. Connected clients read only their enrolled-key Hub report through /v1/usage; caller --api-key-id is refused before key read/transport and never grants management authority.","Nonclient --api-key-id uses /api/usage and requires matching filter acknowledgment. An unknown acknowledged key is empty/matched:false, not404. Custom-window acknowledgment remains required.","--search filters only returned model rows after scope acknowledgment. Blank search selects the top100 model rows; modelView reports match/return counts without recomputing totals."],
   },
   {
     command: ["observe", "storage"], summary: "Read storage diagnostics.",
-    usage: "ocx observe storage [--limit <n>] [--json]",
+    usage: "orl observe storage [--limit <n>] [--json]",
     routes: [{"method": "GET", "path": "/api/storage"}],
     flags: [{"name": "--limit", "value": "number", "summary": "Positive limit forwarded to the endpoint; endpoint semantics apply."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -60,7 +60,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["observe", "memory"], summary: "Read memory diagnostics.",
-    usage: "ocx observe memory [--limit <n>] [--json]",
+    usage: "orl observe memory [--limit <n>] [--json]",
     routes: [{"method": "GET", "path": "/api/system/memory"}],
     flags: [{"name": "--limit", "value": "number", "summary": "Positive limit forwarded to the endpoint; endpoint semantics apply."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -68,7 +68,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["observe", "debug"], summary: "Read debug diagnostics.",
-    usage: "ocx observe debug [--limit <n>] [--json]",
+    usage: "orl observe debug [--limit <n>] [--json]",
     routes: [{"method": "GET", "path": "/api/debug"}],
     flags: [{"name": "--limit", "value": "number", "summary": "Positive limit forwarded to the endpoint; endpoint semantics apply."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -76,7 +76,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["observe", "claude-inbound"], summary: "Read claude-inbound diagnostics.",
-    usage: "ocx observe claude-inbound [--limit <n>] [--json]",
+    usage: "orl observe claude-inbound [--limit <n>] [--json]",
     routes: [{"method": "GET", "path": "/api/claude/inbound-debug"}],
     flags: [{"name": "--limit", "value": "number", "summary": "Positive limit forwarded to the endpoint; endpoint semantics apply."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -85,7 +85,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   {
     command: ["observe","injection"],
     summary: "Read or follow the existing injection diagnostic buffer.",
-    usage: "ocx observe injection [--limit <n>] [--json]; ocx observe injection --follow [--limit <1-2000>] [--jsonl]",
+    usage: "orl observe injection [--limit <n>] [--json]; orl observe injection --follow [--limit <1-2000>] [--jsonl]",
     routes: [{"method":"GET","path":"/api/debug/injection-logs"}],
     flags: [{"name":"--limit","value":"number","summary":"Follow1–2000, default500; one-shot retains its existing positive endpoint limit."},{"name":"--follow","value":"boolean","summary":"Follow increasing observed sequence values without enabling capture."},{"name":"--jsonl","value":"boolean","summary":"Follow only: emit one diagnostic row per line."},{"name":"--json","value":"boolean","summary":"Emit the command result as JSON."}],
     mutates: false,
@@ -94,7 +94,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["memory"], summary: "Read runtime memory and active-turn diagnostics.",
-    usage: "ocx memory [--limit <n>] [--json]",
+    usage: "orl memory [--limit <n>] [--json]",
     routes: [{"method": "GET", "path": "/api/system/memory"}],
     flags: [{"name": "--limit", "value": "number", "summary": "Positive limit forwarded to the endpoint."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -102,7 +102,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["storage", "codex-logs", "status"], summary: "Inspect Codex Log Guard state.",
-    usage: "ocx storage codex-logs status [--json]",
+    usage: "orl storage codex-logs status [--json]",
     routes: [{"method": "GET", "path": "/api/storage/codex-logs"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -110,7 +110,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["storage", "codex-logs", "protect"], summary: "Protect Codex logs in compat or quiet mode.",
-    usage: "ocx storage codex-logs protect [--mode <compat|quiet>] [--json]",
+    usage: "orl storage codex-logs protect [--mode <compat|quiet>] [--json]",
     routes: [{"method": "POST", "path": "/api/storage/codex-logs/protect"}],
     flags: [{"name": "--mode", "value": "string", "summary": "compat | quiet; default compat."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -118,7 +118,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["storage", "codex-logs", "unprotect"], summary: "Remove Codex log protection.",
-    usage: "ocx storage codex-logs unprotect [--json]",
+    usage: "orl storage codex-logs unprotect [--json]",
     routes: [{"method": "POST", "path": "/api/storage/codex-logs/unprotect"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -126,7 +126,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["storage", "codex-logs", "repair"], summary: "Repair Codex log protection.",
-    usage: "ocx storage codex-logs repair [--json]",
+    usage: "orl storage codex-logs repair [--json]",
     routes: [{"method": "POST", "path": "/api/storage/codex-logs/repair"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -134,7 +134,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["storage", "codex-logs", "compact"], summary: "Compact Codex logs.",
-    usage: "ocx storage codex-logs compact [--json]",
+    usage: "orl storage codex-logs compact [--json]",
     routes: [{"method": "POST", "path": "/api/storage/codex-logs/compact"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -142,7 +142,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["storage", "trash", "list"], summary: "Read quarantine batches.",
-    usage: "ocx storage trash list [--json]",
+    usage: "orl storage trash list [--json]",
     routes: [{"method": "GET", "path": "/api/storage/trash"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -150,7 +150,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["storage", "policy", "show"], summary: "Read cleanup policy and job state.",
-    usage: "ocx storage policy show [--json]",
+    usage: "orl storage policy show [--json]",
     routes: [{"method": "GET", "path": "/api/storage/cleanup-policy"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -158,7 +158,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["storage", "trash", "restore"], summary: "Restore one quarantined session batch.",
-    usage: "ocx storage trash restore <entry-id> --yes [--json]",
+    usage: "orl storage trash restore <entry-id> --yes [--json]",
     routes: [{"method": "POST", "path": "/api/storage/trash/restore"}],
     flags: [{"name": "--yes", "value": "boolean", "summary": "Required confirmation before restoring stored sessions.", "required": true}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -167,7 +167,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   {
     command: ["storage","policy","set"],
     summary: "Save submitted cleanup policy fields.",
-    usage: "ocx storage policy set [--enabled <true|false>] [--archived-bytes-over <bytes>] [--reduce-to-bytes <bytes> | --remove-oldest-percent <1-100> | --percent <1-100>] [--mode <quarantine|permanent>] [--schedule <startup|daily|weekly|manual>] [--json]",
+    usage: "orl storage policy set [--enabled <true|false>] [--archived-bytes-over <bytes>] [--reduce-to-bytes <bytes> | --remove-oldest-percent <1-100> | --percent <1-100>] [--mode <quarantine|permanent>] [--schedule <startup|daily|weekly|manual>] [--json]",
     routes: [{"method":"PUT","path":"/api/storage/cleanup-policy"}],
     flags: [{"name":"--enabled","value":"string","summary":"true | false."},{"name":"--percent","value":"number","summary":"Oldest archived-session percentage; server validates the 1-100 policy range."},{"name":"--mode","value":"string","summary":"quarantine | permanent."},{"name":"--schedule","value":"string","summary":"startup | daily | weekly | manual."},{"name":"--json","value":"boolean","summary":"Emit the result as JSON."},{"name":"--archived-bytes-over","value":"number","summary":"Nonnegative safe integer byte trigger; zero is valid."},{"name":"--reduce-to-bytes","value":"number","summary":"Nonnegative safe integer cleanup target, exclusive with either percentage spelling."},{"name":"--remove-oldest-percent","value":"number","summary":"Canonical integer percentage spelling; mutually exclusive with --percent and byte target."}],
     mutates: true,
@@ -176,7 +176,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["storage", "policy", "run"], summary: "Run the stored cleanup policy immediately.",
-    usage: "ocx storage policy run --yes [--json]",
+    usage: "orl storage policy run --yes [--json]",
     routes: [{"method": "POST", "path": "/api/storage/cleanup-policy/run"}],
     flags: [{"name": "--yes", "value": "boolean", "summary": "Required confirmation for immediate archived-session cleanup.", "required": true}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -184,7 +184,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "provider"], summary: "Read or change the provider debug override.",
-    usage: "ocx debug provider [status|on|off|reset]",
+    usage: "orl debug provider [status|on|off|reset]",
     routes: [{"method": "GET", "path": "/api/debug"}, {"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -192,7 +192,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "provider", "status"], summary: "Read provider debug state.",
-    usage: "ocx debug provider status",
+    usage: "orl debug provider status",
     routes: [{"method": "GET", "path": "/api/debug"}],
     flags: [],
     mutates: false, json: "none",
@@ -200,7 +200,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "provider", "on"], summary: "Set provider debug override on.",
-    usage: "ocx debug provider on",
+    usage: "orl debug provider on",
     routes: [{"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -208,7 +208,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "provider", "off"], summary: "Set provider debug override off.",
-    usage: "ocx debug provider off",
+    usage: "orl debug provider off",
     routes: [{"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -216,7 +216,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "provider", "reset"], summary: "Set provider debug override reset.",
-    usage: "ocx debug provider reset",
+    usage: "orl debug provider reset",
     routes: [{"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -224,7 +224,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "provider", "logs"], summary: "Read or follow provider debug log lines.",
-    usage: "ocx debug provider logs [-f|--follow]",
+    usage: "orl debug provider logs [-f|--follow]",
     routes: [{"method": "GET", "path": "/api/debug/logs"}],
     flags: [{"name": "-f", "value": "boolean", "summary": "Follow new sequence numbers."}, {"name": "--follow", "value": "boolean", "summary": "Alias of -f."}],
     mutates: false, json: "none",
@@ -232,7 +232,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "usage"], summary: "Read or change the usage debug override.",
-    usage: "ocx debug usage [status|on|off|reset]",
+    usage: "orl debug usage [status|on|off|reset]",
     routes: [{"method": "GET", "path": "/api/debug"}, {"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -240,7 +240,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "usage", "status"], summary: "Read usage debug state.",
-    usage: "ocx debug usage status",
+    usage: "orl debug usage status",
     routes: [{"method": "GET", "path": "/api/debug"}],
     flags: [],
     mutates: false, json: "none",
@@ -248,7 +248,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "usage", "on"], summary: "Set usage debug override on.",
-    usage: "ocx debug usage on",
+    usage: "orl debug usage on",
     routes: [{"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -256,7 +256,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "usage", "off"], summary: "Set usage debug override off.",
-    usage: "ocx debug usage off",
+    usage: "orl debug usage off",
     routes: [{"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -264,7 +264,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "usage", "reset"], summary: "Set usage debug override reset.",
-    usage: "ocx debug usage reset",
+    usage: "orl debug usage reset",
     routes: [{"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -272,7 +272,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "usage", "logs"], summary: "Read or follow usage debug log lines.",
-    usage: "ocx debug usage logs [-f|--follow]",
+    usage: "orl debug usage logs [-f|--follow]",
     routes: [{"method": "GET", "path": "/api/debug/usage-logs"}],
     flags: [{"name": "-f", "value": "boolean", "summary": "Follow new sequence numbers."}, {"name": "--follow", "value": "boolean", "summary": "Alias of -f."}],
     mutates: false, json: "none",
@@ -280,7 +280,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "injection"], summary: "Read or change the injection debug override.",
-    usage: "ocx debug injection [status|on|off|reset]",
+    usage: "orl debug injection [status|on|off|reset]",
     routes: [{"method": "GET", "path": "/api/debug"}, {"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -288,7 +288,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "injection", "status"], summary: "Read injection debug state.",
-    usage: "ocx debug injection status",
+    usage: "orl debug injection status",
     routes: [{"method": "GET", "path": "/api/debug"}],
     flags: [],
     mutates: false, json: "none",
@@ -296,7 +296,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "injection", "on"], summary: "Set injection debug override on.",
-    usage: "ocx debug injection on",
+    usage: "orl debug injection on",
     routes: [{"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -304,7 +304,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "injection", "off"], summary: "Set injection debug override off.",
-    usage: "ocx debug injection off",
+    usage: "orl debug injection off",
     routes: [{"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -312,7 +312,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "injection", "reset"], summary: "Set injection debug override reset.",
-    usage: "ocx debug injection reset",
+    usage: "orl debug injection reset",
     routes: [{"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -320,7 +320,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "claude"], summary: "Read or change the claude debug override.",
-    usage: "ocx debug claude [status|on|off|reset]",
+    usage: "orl debug claude [status|on|off|reset]",
     routes: [{"method": "GET", "path": "/api/debug"}, {"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -328,7 +328,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "claude", "status"], summary: "Read claude debug state.",
-    usage: "ocx debug claude status",
+    usage: "orl debug claude status",
     routes: [{"method": "GET", "path": "/api/debug"}],
     flags: [],
     mutates: false, json: "none",
@@ -336,7 +336,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "claude", "on"], summary: "Set claude debug override on.",
-    usage: "ocx debug claude on",
+    usage: "orl debug claude on",
     routes: [{"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -344,7 +344,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "claude", "off"], summary: "Set claude debug override off.",
-    usage: "ocx debug claude off",
+    usage: "orl debug claude off",
     routes: [{"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -352,7 +352,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["debug", "claude", "reset"], summary: "Set claude debug override reset.",
-    usage: "ocx debug claude reset",
+    usage: "orl debug claude reset",
     routes: [{"method": "PUT", "path": "/api/debug"}],
     flags: [],
     mutates: true, json: "none",
@@ -360,7 +360,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["system", "status"], summary: "Read settings, startup health and memory together.",
-    usage: "ocx system status [--json]",
+    usage: "orl system status [--json]",
     routes: [{"method": "GET", "path": "/api/settings"}, {"method": "GET", "path": "/api/startup-health"}, {"method": "GET", "path": "/api/system/memory"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "envelope",
@@ -369,7 +369,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   {
     command: ["system","settings"],
     summary: "Read or update supported runtime settings.",
-    usage: "ocx system settings [--auto-start <on|off>] [--stream-mode <auto|legacy-tee|eager-relay>] [--desktop-authless <on|off>] [--client-compaction <on|off>] [--show-codex-credits <on|off>] [--account-picker <on|off>] [--main-account-hard-lock <on|off>] [--ultra-fast-tier <on|off>] [--fast-rows <on|off>] [--json]",
+    usage: "orl system settings [--auto-start <on|off>] [--stream-mode <auto|legacy-tee|eager-relay>] [--desktop-authless <on|off>] [--client-compaction <on|off>] [--show-codex-credits <on|off>] [--account-picker <on|off>] [--main-account-hard-lock <on|off>] [--ultra-fast-tier <on|off>] [--fast-rows <on|off>] [--json]",
     routes: [{"method":"GET","path":"/api/settings"},{"method":"PUT","path":"/api/settings"}],
     flags: [{"name":"--auto-start","value":"string","summary":"on | off for Codex autostart."},{"name":"--stream-mode","value":"string","summary":"auto | legacy-tee | eager-relay."},{"name":"--desktop-authless","value":"string","summary":"on | off for Codex Desktop authless."},{"name":"--client-compaction","value":"string","summary":"on | off for native replay portability; summaries may consume provider quota."},{"name":"--json","value":"boolean","summary":"Emit the result as JSON."},{"name":"--show-codex-credits","value":"string","summary":"on/off display preference only; never paid-credit permission."},{"name":"--account-picker","value":"string","summary":"on/off Codex account picker visibility."},{"name":"--main-account-hard-lock","value":"string","summary":"on/off routing ownership policy; does not rotate native login."},{"name":"--ultra-fast-tier","value":"string","summary":"on/off routing tier; confirmed by same-target read-back."},{"name":"--fast-rows","value":"string","summary":"on/off Fast model rows, separate from provider Fast."}],
     mutates: true,
@@ -378,7 +378,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["system", "startup", "health"], summary: "Read startup protection.",
-    usage: "ocx system startup health [--json]",
+    usage: "orl system startup health [--json]",
     routes: [{"method": "GET", "path": "/api/startup-health"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -386,7 +386,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["system", "startup", "install-service"], summary: "Request startup install-service.",
-    usage: "ocx system startup install-service [--json]",
+    usage: "orl system startup install-service [--json]",
     routes: [{"method": "POST", "path": "/api/startup-action"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -394,7 +394,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["system", "startup", "install-shim"], summary: "Request startup install-shim.",
-    usage: "ocx system startup install-shim [--json]",
+    usage: "orl system startup install-shim [--json]",
     routes: [{"method": "POST", "path": "/api/startup-action"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -402,7 +402,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["system", "diagnostics"], summary: "Read project-config diagnostics.",
-    usage: "ocx system diagnostics [--json]",
+    usage: "orl system diagnostics [--json]",
     routes: [{"method": "GET", "path": "/api/diagnostics/project-config"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -410,7 +410,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["system", "sync"], summary: "Synchronize client catalogs and configuration.",
-    usage: "ocx system sync [--json]",
+    usage: "orl system sync [--json]",
     routes: [{"method": "POST", "path": "/api/sync"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -418,7 +418,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["system", "update", "check"], summary: "Check the package update channel.",
-    usage: "ocx system update check [--channel <latest|preview>] [--json]",
+    usage: "orl system update check [--channel <latest|preview>] [--json]",
     routes: [{"method": "GET", "path": "/api/update/check"}],
     flags: [{"name": "--channel", "value": "string", "summary": "latest | preview; default latest."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -426,7 +426,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["system", "update", "run"], summary: "Start a package update job.",
-    usage: "ocx system update run [--channel <latest|preview>] [--restart <on|off>] --yes [--json]",
+    usage: "orl system update run [--channel <latest|preview>] [--restart <on|off>] --yes [--json]",
     routes: [{"method": "POST", "path": "/api/update/run"}],
     flags: [{"name": "--channel", "value": "string", "summary": "latest | preview; default latest."}, {"name": "--restart", "value": "string", "summary": "on | off; default on."}, {"name": "--yes", "value": "boolean", "summary": "Required confirmation for package update.", "required": true}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -434,7 +434,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["system", "update", "status"], summary: "Read one package update job.",
-    usage: "ocx system update status <job-id> [--json]",
+    usage: "orl system update status <job-id> [--json]",
     routes: [{"method": "GET", "path": "/api/update/status"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -442,7 +442,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["config", "show"], summary: "Local configuration show.",
-    usage: "ocx config show [--json] [--source]",
+    usage: "orl config show [--json] [--source]",
     routes: [],
     flags: [{"name": "--source", "value": "boolean", "summary": "Include source diagnostics."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "envelope",
@@ -450,7 +450,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["config", "get"], summary: "Local configuration get.",
-    usage: "ocx config get <dot.path> [--json]",
+    usage: "orl config get <dot.path> [--json]",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -458,7 +458,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["config", "set"], summary: "Local configuration set.",
-    usage: "ocx config set <dot.path> <json-or-string> [--json]",
+    usage: "orl config set <dot.path> <json-or-string> [--json]",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "envelope",
@@ -466,7 +466,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["config", "unset"], summary: "Local configuration unset.",
-    usage: "ocx config unset <dot.path> [--json]",
+    usage: "orl config unset <dot.path> [--json]",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "envelope",
@@ -474,7 +474,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["config", "validate"], summary: "Local configuration validate.",
-    usage: "ocx config validate [path|-] [--json]",
+    usage: "orl config validate [path|-] [--json]",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "envelope",
@@ -489,7 +489,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["config", "import"], summary: "Local configuration import.",
-    usage: "ocx config import <path|-> --yes [--json]",
+    usage: "orl config import <path|-> --yes [--json]",
     routes: [],
     flags: [{"name": "--yes", "value": "boolean", "summary": "Required confirmation before replacing local config.", "required": true}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "envelope",
@@ -497,7 +497,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["companion", "show"], summary: "Read companion settings, defaults and presence.",
-    usage: "ocx companion show [--json]",
+    usage: "orl companion show [--json]",
     routes: [{"method": "GET", "path": "/api/companion/settings"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -505,7 +505,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["companion", "set"], summary: "Save selected companion settings.",
-    usage: "ocx companion set <key>=<value> [...] [--json]",
+    usage: "orl companion set <key>=<value> [...] [--json]",
     routes: [{"method": "PUT", "path": "/api/companion/settings"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -513,7 +513,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["companion", "reset"], summary: "Restore companion defaults.",
-    usage: "ocx companion reset [--json]",
+    usage: "orl companion reset [--json]",
     routes: [{"method": "PUT", "path": "/api/companion/settings"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -521,7 +521,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["service", "install"], summary: "Install the local background service.",
-    usage: "ocx service install [--native|--scheduler]",
+    usage: "orl service install [--native|--scheduler]",
     routes: [],
     flags: [{"name": "--native", "value": "boolean", "summary": "Windows WinSW backend; exclusive with --scheduler."}, {"name": "--scheduler", "value": "boolean", "summary": "Scheduled backend; exclusive with --native."}],
     mutates: true, json: "none",
@@ -529,7 +529,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["service", "repair"], summary: "Repair local service registration and verify serving health.",
-    usage: "ocx service repair",
+    usage: "orl service repair",
     routes: [],
     flags: [],
     mutates: true, json: "none",
@@ -537,7 +537,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["service", "restart"], summary: "Restart the local background service.",
-    usage: "ocx service restart",
+    usage: "orl service restart",
     routes: [],
     flags: [],
     mutates: true, json: "none",
@@ -545,7 +545,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["service", "start"], summary: "Start the registered local service.",
-    usage: "ocx service start",
+    usage: "orl service start",
     routes: [],
     flags: [],
     mutates: true, json: "none",
@@ -553,7 +553,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["service", "stop"], summary: "Stop the registered local service.",
-    usage: "ocx service stop",
+    usage: "orl service stop",
     routes: [],
     flags: [],
     mutates: true, json: "none",
@@ -561,7 +561,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["service", "status"], summary: "Inspect local service-manager status.",
-    usage: "ocx service status",
+    usage: "orl service status",
     routes: [],
     flags: [],
     mutates: false, json: "none",
@@ -569,7 +569,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["service", "uninstall"], summary: "Uninstall the local service.",
-    usage: "ocx service uninstall",
+    usage: "orl service uninstall",
     routes: [],
     flags: [],
     mutates: true, json: "none",
@@ -577,7 +577,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["codex-shim", "install"], summary: "Local Codex launcher shim install.",
-    usage: "ocx codex-shim install",
+    usage: "orl codex-shim install",
     routes: [],
     flags: [],
     mutates: true, json: "none",
@@ -585,15 +585,15 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["codex-shim", "status"], summary: "Local Codex launcher shim status.",
-    usage: "ocx codex-shim status",
+    usage: "orl codex-shim status",
     routes: [],
     flags: [],
     mutates: false, json: "none",
-    details: ["Local launcher/PATH wrapper operation on macOS, Linux and Windows; no management API or JSON mode.", "Reports wrapper health, Unix overlay PATH activation, and explicit legacy migration guidance.", "For JSON, run ocx status --json and inspect codexShim; this command rejects --json and unexpected arguments."],
+    details: ["Local launcher/PATH wrapper operation on macOS, Linux and Windows; no management API or JSON mode.", "Reports wrapper health, Unix overlay PATH activation, and explicit legacy migration guidance.", "For JSON, run orl status --json and inspect codexShim; this command rejects --json and unexpected arguments."],
   },
   {
     command: ["codex-shim", "uninstall"], summary: "Local Codex launcher shim uninstall.",
-    usage: "ocx codex-shim uninstall",
+    usage: "orl codex-shim uninstall",
     routes: [],
     flags: [],
     mutates: true, json: "none",
@@ -601,7 +601,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["tray", "install"], summary: "Windows tray install.",
-    usage: "ocx tray install [--no-start] [--json]",
+    usage: "orl tray install [--no-start] [--json]",
     routes: [],
     flags: [{"name": "--no-start", "value": "boolean", "summary": "Install without starting the tray."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "envelope",
@@ -609,7 +609,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["tray", "start"], summary: "Windows tray start.",
-    usage: "ocx tray start [--json]",
+    usage: "orl tray start [--json]",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "envelope",
@@ -617,7 +617,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["tray", "stop"], summary: "Windows tray stop.",
-    usage: "ocx tray stop [--json]",
+    usage: "orl tray stop [--json]",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "envelope",
@@ -625,7 +625,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["tray", "status"], summary: "Windows tray status.",
-    usage: "ocx tray status [--json]",
+    usage: "orl tray status [--json]",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "envelope",
@@ -633,7 +633,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["tray", "uninstall"], summary: "Windows tray uninstall.",
-    usage: "ocx tray uninstall [--json]",
+    usage: "orl tray uninstall [--json]",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "envelope",
@@ -641,7 +641,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["system","health"],
-    usage: "ocx system health [--json]",
+    usage: "orl system health [--json]",
     summary: "Read authenticated service health and spend-ledger diagnostics.",
     routes: [{"method":"GET","path":"/api/system/health"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit the command result as JSON."}],
@@ -651,7 +651,7 @@ export const OBSERVE_SYSTEM_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["companion","timeline"],
-    usage: "ocx companion timeline [--hours <6|24|72|168>] [--bucket-minutes <1-1440>] [--metric <total|input|output|cached>] [--aggregation <sum|average|max>] [--grouping <model|modelAccount>] [--model <provider/model> ...] [--hide-provider <name> ...] [--json]",
+    usage: "orl companion timeline [--hours <6|24|72|168>] [--bucket-minutes <1-1440>] [--metric <total|input|output|cached>] [--aggregation <sum|average|max>] [--grouping <model|modelAccount>] [--model <provider/model> ...] [--hide-provider <name> ...] [--json]",
     summary: "Read usage timeline buckets with explicit completeness and filter metadata.",
     routes: [{"method":"GET","path":"/api/usage/timeline"}],
     flags: [{"name":"--hours","value":"number","summary":"6,24,72 or168; default24."},{"name":"--bucket-minutes","value":"number","summary":"1–1440 and at most2000 buckets; default60."},{"name":"--metric","value":"string","summary":"total,input,output orcached; defaulttotal."},{"name":"--aggregation","value":"string","summary":"sum,average ormax; defaultsum."},{"name":"--grouping","value":"string","summary":"model ormodelAccount; defaultmodel."},{"name":"--model","value":"string","summary":"Repeat exact provider/model IDs; encoded as the existing models list, up to100."},{"name":"--hide-provider","value":"string","summary":"Repeat providers to exclude; this is not positive provider inclusion."},{"name":"--json","value":"boolean","summary":"Emit the command result as JSON."}],

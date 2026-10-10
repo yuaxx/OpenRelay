@@ -40,7 +40,7 @@ function renderHuman(caps: readonly Capability[], includeHead: boolean): void {
   }
   if (!includeHead) return;
   for (const head of HEAD_CAPABILITIES) {
-    console.log(`  ocx ${head.invocations[0]}`);
+    console.log(`  orl ${head.invocations[0]}`);
     console.log(`    ${head.summary}`);
   }
 }
@@ -53,7 +53,7 @@ export async function runCapabilities(argv: string[]): Promise<number> {
   const route = takeValueFlag(args, "--route");
 
   if (args.length > 0 || (route !== undefined && route.trim().length === 0)) {
-    console.error("Usage: ocx capabilities [--json] [--mutating-only] [--route <path>]");
+    console.error("Usage: orl capabilities [--json] [--mutating-only] [--route <path>]");
     return 64;
   }
 

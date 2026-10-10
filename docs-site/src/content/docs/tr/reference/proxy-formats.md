@@ -3,7 +3,7 @@ title: Proxy API Formatları
 description: Responses, Chat Completions, Anthropic Messages, model kataloğu, WebSocket, gerçek zamanlı ve sıkıştırma yüzeyleri için hat düzeyinde referans.
 ---
 
-opencodex, tek bir yerel proxy'yi çeşitli istemci lehçelerinde sunar. Bir Codex
+OpenRelay, tek bir yerel proxy'yi çeşitli istemci lehçelerinde sunar. Bir Codex
 istemcisi Responses API'sini, OpenAI uyumlu bir uygulama Chat Completions'ı ve
 Claude Code, her yukarı akış sağlayıcısının her formatı uygulamasını
 gerektirmeden Anthropic Messages'ı konuşabilir.
@@ -31,7 +31,7 @@ Kimlik bilgisi taşıyan model, görsel, video ve arama istekleri, aynı origin 
 
 Bazı xAI Chat Completions retleri, HTTP 200 ve `finish_reason: content_filter` yerine `I can't help with that request.` gibi tam bir ret cümlesiyle HTTP 403 olarak gelir. Codex 403'ü taşıma hatası sayar; kullanıcı turu kaydedilmez ve aynı istek yeniden gönderilir.
 
-Kombo olmayan bir Responses isteğinde OpenCodex, izin listesindeki bu 403'ü `status: "incomplete"` ve `incomplete_details.reason: "content_filter"` içeren bir HTTP 200 Responses yanıtına dönüştürür. Dönüştürme openai-chat bağdaştırıcı yolunda ve openai-responses geçişinde (grok-4.6 / grok-4.5 OAuth) çalışır. Akış da aynı incomplete sınırını kullanır. Boş veya yalnızca boşluk içeren 403 gövdeleri hata olarak kalır. Abonelik, kredi, yetki ve `not allowed to use this model` 403'leri hata olarak kalır. Kombo yük devretmesi özgün HTTP 403'ü görmeye devam eder.
+Kombo olmayan bir Responses isteğinde OpenRelay, izin listesindeki bu 403'ü `status: "incomplete"` ve `incomplete_details.reason: "content_filter"` içeren bir HTTP 200 Responses yanıtına dönüştürür. Dönüştürme openai-chat bağdaştırıcı yolunda ve openai-responses geçişinde (grok-4.6 / grok-4.5 OAuth) çalışır. Akış da aynı incomplete sınırını kullanır. Boş veya yalnızca boşluk içeren 403 gövdeleri hata olarak kalır. Abonelik, kredi, yetki ve `not allowed to use this model` 403'leri hata olarak kalır. Kombo yük devretmesi özgün HTTP 403'ü görmeye devam eder.
 
 ## Uç nokta genel bakışı
 
@@ -47,7 +47,7 @@ Kombo olmayan bir Responses isteğinde OpenCodex, izin listesindeki bu 403'ü `s
 
 ## `POST /v1/responses`
 
-Bu, yerel opencodex veri düzlemi şeklidir. İstek gövdesi boş olmayan bir `model`
+Bu, yerel OpenRelay veri düzlemi şeklidir. İstek gövdesi boş olmayan bir `model`
 içeren bir JSON nesnesi olmalıdır. `input` bir dize veya Responses öğeleri
 dizisi olabilir.
 
@@ -82,7 +82,7 @@ Responses JSON nesnesinde toplanır. Her iki form da seçilen modeli, çıktı
 öğelerini, terminal durumunu ve kullanımı korur.
 
 Canonical ChatGPT Codex rotasının yukarı akışı yalnızca SSE kabul ettiğinden,
-yalnızca yukarı akış isteği `stream: true` kullanır. OpenCodex terminal akışı
+yalnızca yukarı akış isteği `stream: true` kullanır. OpenRelay terminal akışı
 sınırlı boyutlar içinde doğrular ve istemcinin istediği JSON biçimine katlar;
 açık bir `store` değeri değişmez. Doğrulama başarısız olursa HTTP 200 ile kısmi
 JSON yerine hata döner. Sınırlar çerçeve başına 4 MiB, transcript ve yeniden
@@ -304,7 +304,7 @@ Connections > API keys altında Dikte ve Canlı Ses bölümleri bulunur. Veri an
 
 `POST /v1/live`, ChatGPT/Codex App Frameless çağrı oluşturma yüzeyini kabul
 eder. `POST /v1/realtime/calls`, OpenAI Realtime çağrı oluşturma yüzeyini kabul
-eder. opencodex uygun bir OpenAI ailesi rotası seçer, yukarı akış kimlik
+eder. OpenRelay uygun bir OpenAI ailesi rotası seçer, yukarı akış kimlik
 doğrulama modu için çağrı oluşturma isteğini normalleştirir ve sınırlı yanıtı
 iletir.
 
@@ -393,7 +393,7 @@ kaynak reddi OpenAI tarzı `origin_rejected` gövdesi yerine bu lehçede 403
 ## Şifrelenmiş içerik hijyeni
 
 Proxy gerçek arka uç şifreli metnine donuk muamelesi yapar. Yapısal olarak
-geçerli şifreli metin bayt bayt korunur: opencodex şifresini çözmez, içeriğini
+geçerli şifreli metin bayt bayt korunur: OpenRelay şifresini çözmez, içeriğini
 çevirmez veya başka bir sağlayıcı için yeniden şifrelemez.
 
 Bazı ajan kancaları geçmişte `encrypted_content` yuvasına düz metin denetim
@@ -402,7 +402,7 @@ metni yerleştirmiştir. Uyumluluk için proxy yapısal olarak geçerli Fernet
 `agent_message` bu onarım sırasında tüm şifrelenmiş parçaları kaybederse normal
 bir kullanıcı mesajı haline gelir. Geçerli bir v2 görevi gerçekten şifrelenmiş
 kalırsa ancak seçilen yönlendirilen hedef yerel ChatGPT şifreli metnini
-okuyamazsa opencodex bu sağlayıcıya okunamayan baytlar göndermek yerine
+okuyamazsa OpenRelay bu sağlayıcıya okunamayan baytlar göndermek yerine
 `unreadable_encrypted_agent_task` ile başarısız olur. Çalışan görevleri
 etrafındaki istemci davranışı için [Alt Ajan
 Arayüzü](/tr/guides/sub-agent-surface/) sayfasına bakın.
@@ -410,12 +410,12 @@ Arayüzü](/tr/guides/sub-agent-surface/) sayfasına bakın.
 ### Mevcut bir konuşmada sağlayıcı değiştirmek
 
 Yeniden gönderilen bir akıl yürütme öğesi, yalnızca onu üreten sağlayıcı ve kimlik bilgisinin
-okuyabildiği bir `encrypted_content` taşır. opencodex konuşmaya en son başka bir sağlayıcının hizmet
+okuyabildiği bir `encrypted_content` taşır. OpenRelay konuşmaya en son başka bir sağlayıcının hizmet
 verdiğini biliyorsa bu blob'u göndermeden önce kaldırır ve öğenin özetini korur. O sağlayıcı farklı bir
 uç nokta veya kimlik bilgisi de kullandıysa öğenin `rs_…` kimliği de kaldırılır, çünkü yeni hedefin
-bulamayacağı bir öğeyi gösterir. opencodex bunu bilemediğinde, örneğin proxy yeniden başlatıldıktan
+bulamayacağı bir öğeyi gösterir. OpenRelay bunu bilemediğinde, örneğin proxy yeniden başlatıldıktan
 sonra, yeni hedef blob'u reddeder: OpenAI ve Azure OpenAI `400 invalid_encrypted_content` döndürür.
-opencodex bu durumda isteği önceki sağlayıcının akıl yürütme durumu olmadan, yani blob ve `rs_…` kimliği
+OpenRelay bu durumda isteği önceki sağlayıcının akıl yürütme durumu olmadan, yani blob ve `rs_…` kimliği
 olmadan yalnızca bir kez yeniden gönderir; aksi hâlde yanıt `Item with id 'rs_…' not found` olurdu.
 
 Bu kurtarma Responses protokolünü konuşan her adaptör için geçerlidir, bu nedenle `openai-responses` ve

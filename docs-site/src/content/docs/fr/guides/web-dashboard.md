@@ -1,16 +1,16 @@
 ---
 title: Tableau de bord web
-description: L'interface graphique d'opencodex pour l'état du proxy, les fournisseurs, les modèles, les consignes de délégation, les groupes d'authentification, l'utilisation et les journaux.
+description: L'interface graphique d'OpenRelay pour l'état du proxy, les fournisseurs, les modèles, les consignes de délégation, les groupes d'authentification, l'utilisation et les journaux.
 ---
 
-opencodex fournit un tableau de bord web local — une application Vite/React située sous `gui/` — servi par
+OpenRelay fournit un tableau de bord web local — une application Vite/React située sous `gui/` — servi par
 le proxy. C'est le moyen le plus direct de gérer les fournisseurs, les comptes Codex/ChatGPT, les modèles du
 catalogue, les services auxiliaires, les réglages des sous-agents et le trafic des requêtes.
 
 ## Ouverture
 
 ```bash
-ocx gui
+orl gui
 ```
 
 Cette commande ouvre `http://localhost:<port>` dans votre navigateur — ou
@@ -19,7 +19,7 @@ proxy si nécessaire. En développement, vous pouvez lancer séparément le serv
 l'interface contre un proxy déjà actif :
 
 ```bash
-ocx start
+orl start
 bun run dev:gui
 ```
 
@@ -65,12 +65,12 @@ force jamais d'actualisation en amont.
 | Zone | Fonction |
 | --- | --- |
 | **Résumé du tableau de bord** | Mode multi-agent, état en ligne, version, durée de fonctionnement, nombre de fournisseurs, total de jetons sur 30 jours, fournisseurs actifs et modèles natifs/routés disponibles. |
-| **Délégation de sous-agent** | Choisissez un modèle natif ou routé et, facultativement, un effort de raisonnement partagés entre les consignes de délégation OpenCodex et l'option distincte de valeurs par défaut natives. Il ne s'agit pas d'un routeur par création de sous-agent côté proxy ; voir ci-dessous. |
+| **Délégation de sous-agent** | Choisissez un modèle natif ou routé et, facultativement, un effort de raisonnement partagés entre les consignes de délégation OpenRelay et l'option distincte de valeurs par défaut natives. Il ne s'agit pas d'un routeur par création de sous-agent côté proxy ; voir ci-dessous. |
 | **Services auxiliaires** | Choisissez le modèle et l'effort de recherche web, ainsi que le modèle de description visuelle. Les modifications s'appliquent à la requête suivante. |
 | **Maintenance** | Resynchronisez le catalogue de modèles Codex, examinez les avertissements de contournement par une configuration locale au projet, recherchez la dernière version stable ou préliminaire et lancez une mise à jour avec redémarrage facultatif du proxy. Dans le shell de bureau, son entrée de mise à jour ouvre la page de mise à jour native au lieu d’exécuter la mise à jour du paquet. |
 | **Sécurité au démarrage** | Vérifiez si le routage Codex injecté résiste à un redémarrage, avec des états distincts pour le service et le lanceur intermédiaire, ainsi que les commandes de réparation exactes. |
 | **Zone de notification Windows** | Installez au niveau de l'utilisateur un contrôleur lancé à la connexion pour démarrer, arrêter ou redémarrer le proxy en un clic, ouvrir le tableau de bord et consulter l'état. Ce contrôleur n'est pas un service de redémarrage du proxy. |
-| **Démarrage automatique de Codex** | Autorisez un lanceur intermédiaire Codex déjà installé à exécuter `ocx ensure`. Ce commutateur n'installe ni lanceur ni service d'arrière-plan. |
+| **Démarrage automatique de Codex** | Autorisez un lanceur intermédiaire Codex déjà installé à exécuter `orl ensure`. Ce commutateur n'installe ni lanceur ni service d'arrière-plan. |
 | **Fournisseurs** | Ajoutez, modifiez, activez, désactivez ou supprimez des fournisseurs, définissez le fournisseur par défaut parmi ceux activés et gérez, lorsqu'ils sont pris en charge, les groupes de comptes OAuth et de clés API. Si le fournisseur par défaut actuel est supprimé, le premier fournisseur activé restant prend sa place ; s'il n'en reste aucun, la suppression est refusée et le fournisseur par défaut actuel est conservé. Les réglages d'un fournisseur peuvent désactiver la découverte dynamique pour les points de terminaison dont le catalogue `/models` est absent, lent ou trop volumineux. Pour les groupes OAuth Claude (Anthropic), chaque compte connecté affiche ses propres barres de limites sur 5 heures et une semaine — l'utilisation est propre à chaque identifiant. En cas d'échec d'une sonde, les dernières barres connues sont conservées et marquées indisponibles jusqu'à la prochaine actualisation réussie. |
 | **Ajouter un fournisseur** | Recherchez dans les préréglages du registre une connexion par compte, un service à clé API, un serveur local ou un point de terminaison personnalisé. |
 | **Authentification Codex** | Ajoutez des comptes ChatGPT/Codex au groupe, sélectionnez le compte de la prochaine session, actualisez les quotas sur 5 h, une semaine et 30 jours, activez ou désactivez le changement automatique selon les quotas, réglez son seuil de 1 à 100 % et configurez le basculement en cas de défaillance transitoire. |
@@ -79,7 +79,7 @@ force jamais d'actualisation en amont.
 | **Journaux** | Actualisez automatiquement les requêtes récentes et consultez les jetons, l'effort demandé et, lorsqu'il est disponible, l'effort sortant effectif, le modèle résolu, le fournisseur, l'état, l'identifiant de requête, la durée et les détails de l'erreur. La vue détaillée inclut le champ exact de raisonnement transmis lorsque l'adaptateur en émet un. Filtrez par identifiant opaque de conversation ou de session — si le client en fournit un — afin d'obtenir le total des jetons et le coût estimé au tarif catalogue pour l'anneau de journaux actuellement chargé. |
 | **Utilisation / Débogage** | Examinez la couverture et les tendances d'utilisation des jetons, ou activez à la demande les diagnostics de transport et d'extraction de l'utilisation propres aux fournisseurs. |
 | **Stockage** | Consultez en lecture seule la répartition du disque de CODEX_HOME — sessions, archives, bases de données et pièces jointes. Pour le nettoyage facultatif des archives, prévisualisez les N % les plus anciennes, puis placez-les en quarantaine dans `CODEX_HOME/.trash` (par défaut) ou supprimez-les définitivement après avoir coché une case explicite. **La stratégie de nettoyage automatique** est facultative et **désactivée par défaut** (`storageCleanupPolicy.enabled`) ; configurez son seuil, sa cible, sa planification et son mode sur la page **Stockage**, ou lancez **Exécuter maintenant**. Les entrées mises en quarantaine peuvent être restaurées depuis cette page (JSONL et fils). Les sessions actives restent en lecture seule. Le nettoyage et la restauration sont refusés tant que Codex verrouille le fichier `state_*.sqlite` le plus récent ou actif. |
-| **Arrêter** | Arrêtez proprement le proxy et le service d'arrière-plan installé, restaurez Codex natif et quittez (`POST /api/stop`). Sur Windows avec le backend Planificateur de tâches, le tableau de bord refuse et vous demande d'exécuter `ocx stop` : le wrapper peut relancer le proxy après la fin de la tâche, et seul un stop exécuté hors du proxy peut vérifier cette fenêtre de redémarrage avant de restaurer votre configuration client. Rien n'est modifié en cas de refus. |
+| **Arrêter** | Arrêtez proprement le proxy et le service d'arrière-plan installé, restaurez Codex natif et quittez (`POST /api/stop`). Sur Windows avec le backend Planificateur de tâches, le tableau de bord refuse et vous demande d'exécuter `orl stop` : le wrapper peut relancer le proxy après la fin de la tâche, et seul un stop exécuté hors du proxy peut vérifier cette fenêtre de redémarrage avant de restaurer votre configuration client. Rien n'est modifié en cas de refus. |
 
 Les vues Utilisation, Tableau de bord, Fournisseurs, Catalogue des fournisseurs et Clés API signalent les enregistrements exclus, même sans résultat lisible. Les décomptes, les dates et les classements reposent uniquement sur les lignes lisibles. L’enregistrement de l’ordre des modèles par utilisation est refusé si l’historique est incomplet : choisissez un autre ordre ou réparez l’historique avant de réessayer.
 
@@ -134,21 +134,21 @@ entrée. Les badges de sélection et les informations de découverte restent dis
 ## Sélecteur de délégation et routage des créations de sous-agents
 
 Le sélecteur **Délégation de sous-agent** du tableau de bord enregistre `injectionModel` et, facultativement,
-`injectionEffort`. L'option **Consignes multi-agents OpenCodex** contrôle indépendamment les instructions de
+`injectionEffort`. L'option **Consignes multi-agents OpenRelay** contrôle indépendamment les instructions de
 délégation qui emploient ces valeurs. Pendant les tours v2 admissibles, ces consignes indiquent à l'agent
 parent le modèle exact et l'effort de raisonnement à transmettre à `spawn_agent` ; effacer le modèle efface
 aussi l'effort enregistré.
 
 Le commutateur **Utiliser comme valeurs par défaut des sous-agents Codex natifs**, désactivé par défaut,
 applique la même sélection aux valeurs par défaut `[agents]` natives de Codex lors de la synchronisation ou du
-redémarrage suivant, lorsque OpenCodex gère le routage Codex actif. Les configurations de fournisseurs externes
+redémarrage suivant, lorsque OpenRelay gère le routage Codex actif. Les configurations de fournisseurs externes
 gérées par l'utilisateur restent intactes. Ces valeurs par défaut concernent les nouvelles tâches Codex et ne
 provoquent pas à elles seules une délégation. Les valeurs `[agents]` existantes appartenant à l'utilisateur
 sont préservées au lieu d'être remplacées et peuvent donc continuer à primer sur celles demandées.
 
 :::caution
 Aucun de ces contrôles n'est un routeur intermodèle de création de sous-agents côté proxy. Les consignes
-OpenCodex demandent à Codex de transmettre les remplacements à `spawn_agent` ; les valeurs par défaut natives
+OpenRelay demandent à Codex de transmettre les remplacements à `spawn_agent` ; les valeurs par défaut natives
 `[agents]` ne s'appliquent que lorsque Codex crée une nouvelle tâche après leur synchronisation. Consultez
 [Surface des sous-agents](/fr/guides/sub-agent-surface/) pour le comportement canonique v1/base/v2.
 :::
@@ -198,7 +198,7 @@ capturés. Une réauthentification 401/403 ou un temps de recharge 429 peut effa
 la route à un autre compte Pool admissible. Ce mécanisme est distinct d'`openai-apikey` et des autres fournisseurs.
 
 - Choisir manuellement un compte s'applique immédiatement : un fil déjà associé y passe à sa prochaine requête, et seules les requêtes déjà en cours conservent le compte capturé. Le choix manuel est aussi épinglé : la fiche affiche le badge **ÉPINGLÉ**, et un ordre de sélection supérieur ne peut pas prendre la priorité sur ce compte avant son épuisement, la sélection d'un autre compte ou la modification de l'ordre de sélection de n'importe quel compte.
-- Chaque fiche de compte possède un contrôle **Ordre de sélection** (**Premier**, **Plus tôt**, **Normal**, **Plus tard**, **Dernier**). Les ordres supérieurs sont utilisés en premier ; le pool ne descend à un ordre inférieur qu'une fois tous les comptes supérieurs épuisés ou indisponibles. Un changement d'ordre s'applique dès la prochaine requête sans association et ne déplace jamais un fil déjà associé. Le compte Codex Desktop principal est ordonné comme les autres : il peut être placé en **Dernier** et conservé comme réserve. Un ordre défini avec `ocx account priority` en dehors de ces cinq préréglages reste visible et sélectionnable sur la fiche.
+- Chaque fiche de compte possède un contrôle **Ordre de sélection** (**Premier**, **Plus tôt**, **Normal**, **Plus tard**, **Dernier**). Les ordres supérieurs sont utilisés en premier ; le pool ne descend à un ordre inférieur qu'une fois tous les comptes supérieurs épuisés ou indisponibles. Un changement d'ordre s'applique dès la prochaine requête sans association et ne déplace jamais un fil déjà associé. Le compte Codex Desktop principal est ordonné comme les autres : il peut être placé en **Dernier** et conservé comme réserve. Un ordre défini avec `orl account priority` en dehors de ces cinq préréglages reste visible et sélectionnable sur la fiche.
 - L'affinité des fils évite les changements à chaque requête. Avec `pool.cacheAffinity` activé (par défaut), un fil de longue durée n'est pas réassocié simplement parce que l'utilisation a atteint le seuil ; il reste jusqu'à ce que le compte soit épuisé ou ne puisse plus servir, puis seulement vers un compte dont l'utilisation est strictement inférieure et qui dispose d'une véritable marge de quota. Définissez le drapeau à `false` pour rétablir la réaffectation au seuil lorsqu'un compte admissible strictement moins utilisé existe.
 - Les nouvelles sessions peuvent choisir le compte admissible le moins utilisé. Pour les forfaits payants, le score retient la fenêtre connue la plus sollicitée parmi 5 h, une semaine et 30 jours ; les forfaits Go/Free utilisent uniquement la fenêtre de 30 jours.
 - Lorsque WHAM fournit `limit_window_seconds`, **Authentification Codex** classe une fenêtre principale d'au moins 28 jours comme une fenêtre de 30 jours au lieu de supposer que toute fenêtre principale est hebdomadaire. Les réponses sans durée conservent l'ancienne interprétation hebdomadaire.
@@ -206,7 +206,7 @@ la route à un autre compte Pool admissible. Ce mécanisme est distinct d'`opena
 - Les journaux des requêtes du pool utilisent des libellés opaques comme `p3fa91c`, jamais les adresses courriel des comptes.
 - Chaque fiche affiche aussi ce libellé stable de journal, le total de jetons observé sur 30 jours, un coût approximatif équivalent à l'API selon les tarifs d'affichage actuellement configurés et la proportion de tentatives dont l'utilisation a été mesurée. Les remplacements `modelCosts` actifs de l'utilisateur priment sur le catalogue vérifié fourni et les tarifs de secours ; l'utilisation historique est réestimée d'après les tarifs actifs au moment de la lecture du résumé. Ce coût sert au rapprochement et reste une estimation, pas une facture d'abonnement ChatGPT Plus/Pro. Les anciennes lignes `openai` non qualifiées antérieures à l'attribution explicite restent ambiguës au lieu d'être affectées au compte principal actuel.
 - **Cibler un compte Codex précis depuis le sélecteur de modèles** est une option explicite. Lorsqu'elle est activée, les lignes GPT ordinaires prises en charge sont remplacées par une entrée par sélecteur public de compte. En choisir une verrouille cette conversation sur le compte associé : elle ne change pas de compte, ne se rabat pas et ne modifie pas le compte Pool actif. La connexion intégrée de Codex App possède son propre sélecteur ; les tables générées utilisent normalement `main`, avec un suffixe sans collision comme `main-2` si nécessaire. Les comptes ajoutés reçoivent des libellés stables qui préservent la confidentialité, et les libellés personnalisés existants sont conservés. Les conversations existantes et les sélections de modèles enregistrées continuent d'être routées. Désactiver le réglage masque les entrées générées sans supprimer les comptes, les sélecteurs ni les routes exactes. Les identifiants GPT non qualifiés continuent d'employer le comportement Pool ou Direct configuré.
-- Les changements d'ajout, de suppression et de réglage des sélecteurs de compte sont enregistrés avant l'actualisation du catalogue de modèles. Si cette actualisation limitée dans le temps n'aboutit pas, le tableau de bord affiche un avis orange indiquant la réussite et la procédure de récupération ; exécutez `ocx sync` pour réessayer. Le changement de compte ou de réglage reste enregistré.
+- Les changements d'ajout, de suppression et de réglage des sélecteurs de compte sont enregistrés avant l'actualisation du catalogue de modèles. Si cette actualisation limitée dans le temps n'aboutit pas, le tableau de bord affiche un avis orange indiquant la réussite et la procédure de récupération ; exécutez `orl sync` pour réessayer. Le changement de compte ou de réglage reste enregistré.
 
 La vue d'ensemble des **Fournisseurs** résume séparément l'utilisation du mode Pool sous forme d'une estimation
 pondérée de la capacité destinée uniquement à l'affichage, avec le quota brut du compte effectif et la
@@ -216,14 +216,14 @@ pour les champs affichés, la signification d'une couverture incomplète et la l
 
 ## Mettre le dépôt en vedette relève de votre choix, pas de celui d'un agent
 
-Le bouton étoile de la barre latérale — et la question unique posée par `ocx start` dans un terminal
-interactif — utilise **votre propre connexion `gh`**. opencodex ne détient aucun jeton GitHub et apprend
+Le bouton étoile de la barre latérale — et la question unique posée par `orl start` dans un terminal
+interactif — utilise **votre propre connexion `gh`**. OpenRelay ne détient aucun jeton GitHub et apprend
 uniquement votre réponse affirmative ou négative.
 
 Comme cette action écrit dans votre compte GitHub, les appels pilotés par un agent sont refusés au lieu
 d'être autorisés à répondre à votre place :
 
-- `ocx start` et `ocx service install` **ignorent entièrement la question** lorsqu'ils sont pilotés par un agent ou un environnement CI (`CLAUDECODE`, `CODEX_THREAD_ID`, `CURSOR_TRACE_ID`, `CI` et équivalents). Le marqueur unique n'est pas écrit : la véritable question apparaîtra encore lors de votre prochaine exécution manuelle. L'agent reçoit l'instruction de vous la poser directement, sous la forme d'un choix clair **Oui/Non** exigeant votre réponse, et non d'une remarque discrète qu'il pourrait contourner. Si vous ne répondez pas, il doit vous la poser de nouveau plutôt que d'interpréter votre silence comme un refus.
+- `orl start` et `orl service install` **ignorent entièrement la question** lorsqu'ils sont pilotés par un agent ou un environnement CI (`CLAUDECODE`, `CODEX_THREAD_ID`, `CURSOR_TRACE_ID`, `CI` et équivalents). Le marqueur unique n'est pas écrit : la véritable question apparaîtra encore lors de votre prochaine exécution manuelle. L'agent reçoit l'instruction de vous la poser directement, sous la forme d'un choix clair **Oui/Non** exigeant votre réponse, et non d'une remarque discrète qu'il pourrait contourner. Si vous ne répondez pas, il doit vous la poser de nouveau plutôt que d'interpréter votre silence comme un refus.
 - `POST /api/github/star` répond `403` avec `code: "agent_consent_required"` lorsque le proxy s'exécute dans une session d'agent et que la requête ne possède aucune session de navigateur du tableau de bord. Détenir le jeton administrateur ne vaut pas consentement : un agent sur votre machine peut lire ce fichier.
 - Le bouton du tableau de bord continue de fonctionner normalement. Un véritable clic apporte la preuve d'une session de même origine ; il est donc reconnu comme provenant de vous, même si un agent a démarré le proxy.
 - Un refus met fin à la demande. Rien n'est conservé et rien n'est ajouté à une invite de modèle pour vous inciter à accepter plus tard.

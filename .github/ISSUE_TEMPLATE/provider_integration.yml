@@ -1,0 +1,103 @@
+name: Provider integration
+description: Request or report behavior for a provider, endpoint, or model integration.
+labels:
+  - provider-compatibility
+  - provider
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to propose a new provider or report model compatibility behavior in OpenRelay.
+        **Warning**: Redact all API keys, session tokens, cookies, passwords, and account IDs before submitting.
+
+  - type: input
+    id: provider
+    attributes:
+      label: Provider or upstream service
+      description: Name of the provider or service (e.g. anthropic, google-ai, xai, deepseek, ollama, api.navy).
+      placeholder: "api.navy, antigravity-google, anthropic"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: client
+    attributes:
+      label: Client or surface
+      description: Which client is calling this provider through OpenRelay?
+      options:
+        - Codex CLI
+        - Codex App
+        - Codex SDK
+        - Claude Code
+        - Direct HTTP / Responses API
+        - Chat Completions
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: models
+    attributes:
+      label: Model name(s)
+      description: Relevant model identifiers tested or requested.
+      placeholder: "claude-sonnet-4-6, gemini-2.5-pro, deepseek-r1"
+
+  - type: input
+    id: version
+    attributes:
+      label: OpenRelay version
+      description: Installed OpenRelay version (`orl --version`) or commit SHA.
+      placeholder: "2.82.0"
+    validations:
+      required: true
+
+  - type: input
+    id: bun-version
+    attributes:
+      label: Bun version
+      description: Version of Bun runtime (`bun --version`).
+      placeholder: "1.4.0"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      description: OS and architecture (e.g. Windows 11 x64, macOS arm64, Linux x64).
+      placeholder: "Windows 11 24H2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What response format, quota reading, or capability should be supported?
+    validations:
+      required: true
+
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: What happened instead? Include error codes, status headers, or streaming traces.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized trace or logs
+      description: Paste relevant redacted logs or wire traces.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing provider issues and documentation.
+          required: true
+        - label: I verified all secrets, API keys, and account tokens are completely removed.
+          required: true

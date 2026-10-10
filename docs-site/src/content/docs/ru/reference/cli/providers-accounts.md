@@ -8,7 +8,7 @@ pool'ами и контролируют каталог моделей, кото�
 
 ## Провайдеры
 
-### `ocx provider <subcommand>`
+### `orl provider <subcommand>`
 
 Неинтерактивное управление провайдерами. Записи из registry задаются по имени; для custom-имени
 нужно одновременно передать и `--adapter`, и `--base-url`.
@@ -30,14 +30,14 @@ pool'ами и контролируют каталог моделей, кото�
 По умолчанию `add`, `remove` и `set-default` меняют локальную конфигурацию. Для работающего прокси добавьте `--live`, а для удаления — также `--yes`. `--sync --json` тоже пытается синхронизировать после сохранения; при сбое сохранение остаётся, код выхода ненулевой и `needsSync: true`. Флаги `--live` и `--sync` несовместимы. Pacing и snapshot/apply описаны в [английской инструкции](/reference/cli/providers-accounts/#snapshot-edit-and-apply-with-a-baseline).
 
 ```bash
-ocx provider list --json
-ocx provider list --jsonl
-ocx provider test ark
-ocx provider add anthropic --api-key sk-ant-... --set-default --sync
-ocx provider add local-dev --adapter openai-chat --base-url http://localhost:11434/v1
-ocx provider show anthropic --json
-ocx models --provider anthropic --json
-ocx models live --provider ark --json
+orl provider list --json
+orl provider list --jsonl
+orl provider test ark
+orl provider add anthropic --api-key sk-ant-... --set-default --sync
+orl provider add local-dev --adapter openai-chat --base-url http://localhost:11434/v1
+orl provider show anthropic --json
+orl models --provider anthropic --json
+orl models live --provider ark --json
 ```
 
 `--jsonl` выводит только настроенных провайдеров: один JSON-объект на строку. Поля каждого объекта совпадают с полями элемента массива `configured` в `--json`; сводка `registryCount` не включается. Скрипты могут обрабатывать объекты построчно. Флаги `--json` и `--jsonl` нельзя использовать вместе.
@@ -63,7 +63,7 @@ ocx models live --provider ark --json
 
 ## Аутентификация
 
-### `ocx login <provider>`
+### `orl login <provider>`
 
 Запустить зарегистрированный login-flow провайдера. OAuth-провайдеры открывают браузер и
 сохраняют auto-refreshed credential'ы в `~/.opencodex/`; API-key login-провайдеры открывают свою
@@ -71,32 +71,32 @@ key-dashboard, запрашивают ключ, по возможности ва
 провайдера. Если имя отсутствует или неизвестно, команда печатает список принимаемых id OAuth- и
 API-key-провайдеров.
 
-Ту же команду используйте и для **reauthentication**, когда `ocx status` / `ocx doctor`
+Ту же команду используйте и для **reauthentication**, когда `orl status` / `orl doctor`
 сообщают, что нужна переавторизация или refresh завершился терминальной ошибкой (либо используйте
 Reauthenticate в дашборде). Аккаунты пула Codex не входят в список OAuth- и API-key-провайдеров выше,
-но `ocx login codex` до них доходит: команда направляется во вход пула аккаунтов, поэтому
-`ocx login codex --reauth` — это то же самое, что `ocx account reauth codex`. Пул аккаунтов Codex в
+но `orl login codex` до них доходит: команда направляется во вход пула аккаунтов, поэтому
+`orl login codex --reauth` — это то же самое, что `orl account reauth codex`. Пул аккаунтов Codex в
 дашборде (Reauthenticate) делает то же. Этот маршрут работает внутри прокси, поэтому ему нужен
 запущенный прокси.
 
 ```bash
-ocx login xai
-ocx login anthropic
+orl login xai
+orl login anthropic
 ```
 
-### `ocx logout <provider>`
+### `orl logout <provider>`
 
 Удалить сохранённый OAuth credential провайдера.
 
 ## Аккаунты и key pool'ы
 
-### `ocx account <subcommand>`
+### `orl account <subcommand>`
 
 Показывать и переключать provider-account'ы и API-key pool'ы через работающий прокси.
 Поставляемая help-surface выглядит так:
 
 ```text
-Usage: ocx account <list|history|current|use|clear|refresh|auto-switch|alias|priority|pause|resume|pause-exhausted|strategy|sticky|remove|clear-cooldown|add-key|import|import-orca|login|reauth|code|cancel|reset-credits|grok-reset-coupons|main> ...
+Usage: orl account <list|history|current|use|clear|refresh|auto-switch|alias|priority|pause|resume|pause-exhausted|strategy|sticky|remove|clear-cooldown|add-key|import|import-orca|login|reauth|code|cancel|reset-credits|grok-reset-coupons|main> ...
 
 list [provider]     Codex account pool, OAuth accounts and API keys (identifiers shown masked as the API returns them).
 history openai <pool-account-id> [--limit <1-200>]  Recent routing decisions for one Codex pool account.
@@ -152,20 +152,20 @@ label и masked key.
 }
 ```
 
-### `ocx account list [provider] [--json] [--all]`
+### `orl account list [provider] [--json] [--all]`
 
 Без провайдера команда показывает пул Codex, OAuth-аккаунты и настроенные API-key pool'ы.
 Пустые провайдеры пропускаются, если не задан `--all`. С провайдером выводится только это
 семейство credential'ов. Human-output использует формат
 `PROVIDER TYPE ID PLAN/LABEL PRIORITY STATUS`; строка Codex, выбранная вручную, помечается `selected`.
-При наличии двух или более подходящих сохранённых аккаунтов Kiro по умолчанию ответ 429 автоматически переключает запрос на другой аккаунт, предпочитая аккаунт с наибольшим известным остатком лимита; ротация включается самим наличием аккаунтов и не отключается — `oauthAccountFailover.enabled: false` отклоняет предварительный выбор аккаунта, а не восстановление после 429; `ocx account login kiro` добавляет аккаунты в пул по одному. Пустой результат всё равно считается успехом.
+При наличии двух или более подходящих сохранённых аккаунтов Kiro по умолчанию ответ 429 автоматически переключает запрос на другой аккаунт, предпочитая аккаунт с наибольшим известным остатком лимита; ротация включается самим наличием аккаунтов и не отключается — `oauthAccountFailover.enabled: false` отклоняет предварительный выбор аккаунта, а не восстановление после 429; `orl account login kiro` добавляет аккаунты в пул по одному. Пустой результат всё равно считается успехом.
 `--json` возвращает:
 
 ```text
 { accounts: AccountRow[], notes: string[] }
 ```
 
-### `ocx account current <provider> [--json]`
+### `orl account current <provider> [--json]`
 
 Показывает активный аккаунт или ключ. Если в пуле Codex нет ручного pin'а, команда сообщает об
 автоматическом выборе с учётом порядка: выбирается самый высокий подходящий уровень, а внутри него при quota-маршрутизации аккаунт с наименьшим usage; если в другом семействе нет активного
@@ -176,12 +176,12 @@ credential'а, это состояние тоже печатается, но к�
 { provider, type, activeId: string | null, autoSwitchThreshold?: number, account: AccountRow | null }
 ```
 
-### `ocx account use <provider> <account-or-key-id|alias|main|auto> [--json]`
+### `orl account use <provider> <account-or-key-id|alias|main|auto> [--json]`
 
-`auto` снимает ручной выбор, и пул снова распределяет работу по своей стратегии — если только аккаунт Codex буквально не имеет id `auto`: точное совпадение id выигрывает, а `ocx account clear <provider>` всегда восстанавливает автоматический выбор. Аккаунт Codex можно указать по псевдониму, заданному через `ocx account alias`, вместо id; это относится и к `priority`, `pause`, `resume`, `clear-cooldown`, `remove` и `alias`. Для аккаунтов Codex значения `auto`, `main` и `__main__` зарезервированы независимо от регистра и не могут назначаться как псевдонимы. Для отображаемых имён аккаунтов OAuth и API-ключей действуют прежние правила.
+`auto` снимает ручной выбор, и пул снова распределяет работу по своей стратегии — если только аккаунт Codex буквально не имеет id `auto`: точное совпадение id выигрывает, а `orl account clear <provider>` всегда восстанавливает автоматический выбор. Аккаунт Codex можно указать по псевдониму, заданному через `orl account alias`, вместо id; это относится и к `priority`, `pause`, `resume`, `clear-cooldown`, `remove` и `alias`. Для аккаунтов Codex значения `auto`, `main` и `__main__` зарезервированы независимо от регистра и не могут назначаться как псевдонимы. Для отображаемых имён аккаунтов OAuth и API-ключей действуют прежние правила.
 
 Выбирает существующий аккаунт Codex, OAuth-аккаунт или API-ключ. Для `openai` значение `main`
-выбирает вход Codex App. Выбор Codex Pool очищает process-local affinity и применяется к следующему запросу, включая запрос существующей видимой задачи; после перезапуска прокси или affinity eviction задача также может стать непривязанной, а выполняющиеся запросы сохраняют захваченный аккаунт. Это управляет только Pool routing; Direct mode продолжает использовать caller-owned/native main credential. Проактивное переключение по использованию, повторная аутентификация 401/403, cooldown 429/retry-after, исключение и восстановление после отказа 429/402 до вывода могут позже выбрать другой подходящий Pool-аккаунт. Эти пути восстановления остаются активными, когда переключение по использованию выключено. После смены аккаунта OpenCodex воспроизводит контекст разговора, но prompt cache провайдера может потребовать прогрева. Неизвестные провайдеры
+выбирает вход Codex App. Выбор Codex Pool очищает process-local affinity и применяется к следующему запросу, включая запрос существующей видимой задачи; после перезапуска прокси или affinity eviction задача также может стать непривязанной, а выполняющиеся запросы сохраняют захваченный аккаунт. Это управляет только Pool routing; Direct mode продолжает использовать caller-owned/native main credential. Проактивное переключение по использованию, повторная аутентификация 401/403, cooldown 429/retry-after, исключение и восстановление после отказа 429/402 до вывода могут позже выбрать другой подходящий Pool-аккаунт. Эти пути восстановления остаются активными, когда переключение по использованию выключено. После смены аккаунта OpenRelay воспроизводит контекст разговора, но prompt cache провайдера может потребовать прогрева. Неизвестные провайдеры
 или id завершаются с кодом 1. `--json` возвращает:
 При **401/403** локальная для процесса привязка к аккаунту сбрасывается и требуется повторная аутентификация.
 При **429** учитывается `Retry-After`, для аккаунта запускается cooldown, привязка сбрасывается,
@@ -192,15 +192,15 @@ credential'а, это состояние тоже печатается, но к�
 { ok: true, provider, type, activeId }
 ```
 
-### `ocx account pause|resume anthropic <id|alias> [--json]`
+### `orl account pause|resume anthropic <id|alias> [--json]`
 
 Команда CLI приостанавливает или возобновляет аккаунт Anthropic OAuth по id или уникальному alias: сначала точное совпадение, затем без учёта регистра. CLI и дашборд используют `PUT /api/oauth/accounts/pause` с `{ provider: "anthropic", accountId, paused }`. Поле `paused` сохраняется в аккаунте и возвращается через `GET /api/oauth/accounts`. Пауза действует и при отключённом проактивном пуле: аккаунт исключается из выбора, привязок сессий и кандидатов после 429. Если приостановлены все аккаунты, запросы получают 403 до возобновления одного из них. Уже отправленные запросы продолжаются; учётные данные и состояние здоровья сохраняются. Пауза переживает перезапуск и повторный вход, но удаляется вместе с аккаунтом. Индивидуальные пороги в эту операцию не входят.
 
-### `ocx account clear <provider> [--json]`
+### `orl account clear <provider> [--json]`
 
 Снимает ручной выбор аккаунта Codex без разрешения id, поэтому работает, даже когда аккаунт буквально называется `auto`. Только для пулов Codex; у других типов провайдеров нет автоматического выбора для восстановления.
 
-### `ocx account clear-cooldown <openai|anthropic> <id|alias|main> [--json]`
+### `orl account clear-cooldown <openai|anthropic> <id|alias|main> [--json]`
 
 Снимает локальный для процесса cooldown после сбоя, не меняя сохранённые учётные данные. Используйте
 `openai` для аккаунта пула Codex или `anthropic` для OAuth-аккаунта Anthropic; другие провайдеры
@@ -208,16 +208,16 @@ credential'а, это состояние тоже печатается, но к�
 пулу Codex.
 
 ```bash
-ocx account clear-cooldown anthropic <id-or-alias>
+orl account clear-cooldown anthropic <id-or-alias>
 ```
 
 Команда завершается успешно и без активного cooldown, возвращая `cleared: false` в JSON. При снятии
 cooldown Anthropic также увеличивается поколение аккаунта, поэтому старый quota probe не сможет
 восстановить снятое состояние или опубликовать устаревшую доступность.
 
-### `ocx account refresh <provider> [--json]`
+### `orl account refresh <provider> [--json]`
 
-Для пула Codex используйте `ocx account refresh openai [--json]`. Команда принудительно
+Для пула Codex используйте `orl account refresh openai [--json]`. Команда принудительно
 обновляет account quota и печатает проценты недельной/месячной квоты и reset-time; отсутствующие
 данные о quota сообщаются как unknown, а не как 0%. JSON-envelope имеет форму
 `{ accounts: AccountRow[] }`, причём на каждой строке Codex присутствует `quota`.
@@ -230,25 +230,25 @@ cooldown Anthropic также увеличивается поколение ак
 таймауту, результат деградирует до `null` или stale report, но остаётся успехом (код 0), как и у
 quota-bar'ов дашборда.
 
-### `ocx account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]`
+### `orl account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]`
 
 Управляет порогом пула Codex `openai` или сохраняет порог общего пула OAuth. `on` сохраняет 80 %, `off` — 0 %, а `threshold <n>` принимает 0–100. Порог общего пула влияет на выбор только при включённом `pool.kernel` и `strategy: "fill-first"`; при выключенном флаге сохранение не включает переключение по порогу. В обоих случаях оно не меняет настройку включения провайдера и не отключает ротацию после ошибки 429. Для общего пула результат чтения и изменения берётся из подтверждённого ответа сервера. Для общего пула `poolEnabled` — сохранённая настройка провайдера (`null` означает отсутствие настройки), а не итоговое унаследованное состояние. `inert: true` означает, что порог сохранён, но не применяется, а `inert: false` — что пул его применяет. Отсутствие `inert` означает неизвестную возможность, которая также не даёт `enabled: true`. Провайдеры с ключом API и неверные значения отклоняются.
 
-### `ocx account auto-switch anthropic … --account <id>`
+### `orl account auto-switch anthropic … --account <id>`
 
-Для Anthropic OAuth команда `ocx account auto-switch anthropic threshold 90 --account <id>` сохраняет целое число 0–100. `off --account <id>` задаёт 0, `on --account <id>` — 80, `inherit --account <id>` восстанавливает наследование, а `status --account <id>` только читает; доступен `--json`. Карточка аккаунта предлагает тот же контроль. Отсутствующее/null значение наследует `anthropicAccountPool.autoSwitchThreshold` (по умолчанию 80); 0 отключает только переключение по использованию этого аккаунта. Настройка переживает перезапуск и повторный вход, удаляется вместе с аккаунтом. Ручной выбор, affinity, резервный выбор при неизвестных или исчерпанных квотах и ограничения маршрутов не меняются. При выключенном пуле пороги не действуют; пауза и восстановление после 429 сохраняются.
+Для Anthropic OAuth команда `orl account auto-switch anthropic threshold 90 --account <id>` сохраняет целое число 0–100. `off --account <id>` задаёт 0, `on --account <id>` — 80, `inherit --account <id>` восстанавливает наследование, а `status --account <id>` только читает; доступен `--json`. Карточка аккаунта предлагает тот же контроль. Отсутствующее/null значение наследует `anthropicAccountPool.autoSwitchThreshold` (по умолчанию 80); 0 отключает только переключение по использованию этого аккаунта. Настройка переживает перезапуск и повторный вход, удаляется вместе с аккаунтом. Ручной выбор, affinity, резервный выбор при неизвестных или исчерпанных квотах и ограничения маршрутов не меняются. При выключенном пуле пороги не действуют; пауза и восстановление после 429 сохраняются.
 
 ```text
 openai: { provider, autoSwitchThreshold: number, enabled: boolean }
 generic OAuth: { provider, autoSwitchThreshold: number | null, enabled: boolean, poolEnabled: boolean | null, inert: boolean | null }
 ```
 
-### `ocx account priority <provider> <account-id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]`
+### `orl account priority <provider> <account-id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]`
 
 Читает или задаёт порядок выбора одного аккаунта пула Codex: **больше — используется раньше**,
 значение по умолчанию `0`, диапазон от `-100` до `100`. Порядок есть только у пула Codex `openai`,
 поэтому другие провайдеры завершаются с кодом 1. `main` указывает на логин Codex Desktop, который
-упорядочивается наравне с остальными: `ocx account priority openai main last` оставляет его резервным.
+упорядочивается наравне с остальными: `orl account priority openai main last` оставляет его резервным.
 
 Слова-пресеты заменяют небольшие целые числа: `first` — это `+2`, `earlier` — `+1`, `normal` — `0`,
 `later` — `-1`, `last` — `-2`. `reset` возвращает значение по умолчанию и удаляет сохранённую запись.
@@ -268,11 +268,11 @@ generic OAuth: { provider, autoSwitchThreshold: number | null, enabled: boolean,
 ```
 
 
-### `ocx account login|reauth|code|cancel ...`
+### `orl account login|reauth|code|cancel ...`
 
-Выполняет аутентификацию через браузер или ручной ввод кода из консоли без графического интерфейса. Синтаксис для конкретного провайдера указан в `ocx account --help`. Если вход Codex сохранён, но проверка или обновление каталога ещё не завершены, текстовый режим и `--json` возвращают код 1. Сохранённый вход остаётся видимым; не начинайте аутентификацию заново только из-за ожидающих операций. При ожидании каталога текстовый режим выводит рекомендацию `ocx sync` в stderr. Режим `--json` сохраняет машиночитаемый stdout и признаки ожидания без текстового предупреждения.
+Выполняет аутентификацию через браузер или ручной ввод кода из консоли без графического интерфейса. Синтаксис для конкретного провайдера указан в `orl account --help`. Если вход Codex сохранён, но проверка или обновление каталога ещё не завершены, текстовый режим и `--json` возвращают код 1. Сохранённый вход остаётся видимым; не начинайте аутентификацию заново только из-за ожидающих операций. При ожидании каталога текстовый режим выводит рекомендацию `orl sync` в stderr. Режим `--json` сохраняет машиночитаемый stdout и признаки ожидания без текстового предупреждения.
 
-### `ocx account remove <provider> <id|alias|main> --yes [--json]`
+### `orl account remove <provider> <id|alias|main> --yes [--json]`
 
 Это защищённое неинтерактивное удаление требует `--yes`. Перед удалением оно проверяет, что id
 существует; если id отсутствует, команда завершается кодом 1 и DELETE даже не отправляется.
@@ -288,10 +288,10 @@ generic OAuth: { provider, autoSwitchThreshold: number | null, enabled: boolean,
 ```
 
 `catalogRefreshPending` присутствует только при удалении аккаунтов Codex. Значение `true` означает,
-что удаление уже сохранено; human-readable вывод печатает в stderr общую рекомендацию `ocx sync` и
+что удаление уже сохранено; human-readable вывод печатает в stderr общую рекомендацию `orl sync` и
 по-прежнему завершается с кодом 0. Форматы удаления OAuth-аккаунтов и API-key не меняются.
 
-### `ocx account add-key <provider> [--label <label>] [--json]`
+### `orl account add-key <provider> [--label <label>] [--json]`
 
 Добавить и активировать ключ для API-key-провайдера. Ключ читается только из piped/redirected
 stdin, который не является TTY; интерактивный TTY-ввод, пустой ввод, OAuth/Codex-провайдеры и
@@ -299,55 +299,55 @@ stdin, который не является TTY; интерактивный TTY-
 label. Предпочитайте secret manager или here-string:
 
 ```bash
-ocx account add-key openrouter --label personal <<< "$OPENROUTER_API_KEY"
-security find-generic-password -w openrouter | ocx account add-key openrouter --json
+orl account add-key openrouter --label personal <<< "$OPENROUTER_API_KEY"
+security find-generic-password -w openrouter | orl account add-key openrouter --json
 ```
 
 `--json` возвращает `{ ok: true, id: string | null, label?: string }` и никогда не включает сам
 ключ.
 
-### `ocx account reset-credits <id|main> [--consume --yes]`
+### `orl account reset-credits <id|main> [--consume --yes]`
 
 Проверить reset-credit'ы Codex для аккаунта. Расходование кредита разрушительно и требует сразу
 оба флага: и `--consume`, и `--yes`.
 
-### `ocx account grok-reset-coupons [<account-id>] [--consume --yes [--token-id <id>] [--operation-id <uuid>]] [--json]`
+### `orl account grok-reset-coupons [<account-id>] [--consume --yes [--token-id <id>] [--operation-id <uuid>]] [--json]`
 
 Показывает оставшиеся купоны сброса или обменивает один для аккаунта xAI / Grok.
 
 Без `--consume` команда возвращает доступные токены купонов и окна их действия:
 
 ```bash
-ocx account grok-reset-coupons
-ocx account grok-reset-coupons acc_xai_01 --json
+orl account grok-reset-coupons
+orl account grok-reset-coupons acc_xai_01 --json
 ```
 
 Обмен купона сброса изменяет платежное состояние и безвозвратно расходует один токен купона. Для `--consume` строго требуется `--yes`:
 
 ```bash
-ocx account grok-reset-coupons --consume --yes
-ocx account grok-reset-coupons --consume --yes --token-id <token-id>
+orl account grok-reset-coupons --consume --yes
+orl account grok-reset-coupons --consume --yes --token-id <token-id>
 ```
 
 Передайте `--operation-id <uuid>` (должен быть корректным UUIDv4), чтобы гарантировать идемпотентное завершение. При обрыве сети или повторном запуске команды одинаковые идентификаторы операции воспроизводят сохраненный результат вместо расходования второго купона.
 
-### `ocx account main <subcommand>`
+### `orl account main <subcommand>`
 
 Управлять именованными профилями нативного основного логина Codex, не изменяя маршрутизацию пула аккаунтов OpenCodex.
 
 ```text
-ocx account main doctor [--json]
-ocx account main list [--json]
-ocx account main register <label> [--json]
-ocx account main add <label>
-ocx account main reauth --device [--no-wait] [--json]
-ocx account main reauth status --flow <id> [--json]
-ocx account main reauth cancel --flow <id> [--json]
-ocx account main switch <profile-id-or-label> --yes [--json]
-ocx account main recover [--rollback --yes] [--json]
+orl account main doctor [--json]
+orl account main list [--json]
+orl account main register <label> [--json]
+orl account main add <label>
+orl account main reauth --device [--no-wait] [--json]
+orl account main reauth status --flow <id> [--json]
+orl account main reauth cancel --flow <id> [--json]
+orl account main switch <profile-id-or-label> --yes [--json]
+orl account main recover [--rollback --yes] [--json]
 ```
 
-При успехе `ocx account main reauth --device --no-wait --json` выводит в stdout один объект JSON без строки `follow up:`, предназначенной для чтения человеком. Чтобы проверить ход процесса, передайте полученный `flowId` в `ocx account main reauth status --flow <id> --json`.
+При успехе `orl account main reauth --device --no-wait --json` выводит в stdout один объект JSON без строки `follow up:`, предназначенной для чтения человеком. Чтобы проверить ход процесса, передайте полученный `flowId` в `orl account main reauth status --flow <id> --json`.
 
 Каждая изменяющая команда показывает канонический эффективный `CODEX_HOME`, возвращенный
 работающим прокси. Этот путь может отличаться от `CODEX_HOME` вызывающего процесса; команды с
@@ -355,19 +355,19 @@ ocx account main recover [--rollback --yes] [--json]
 
 Версия 1 поддерживает файловую аутентификацию Codex, шифрует сохранённые профили с помощью AES-256-GCM и хранит ключ шифрования в хранилище учётных данных операционной системы. `add` запускает официальный вход Codex в промежуточной среде перед импортом полученных учётных данных. Перед переключением профиля закройте Codex. Успешное переключение сохраняет локальные задачи и историю, после чего Codex необходимо перезапустить. Используйте `doctor` для проверки состояния профилей, а `recover` для завершения или отката прерванного перехода. `switch` принимает ID профиля или его label.
 
-Матрица восстановления v1 охватывает завершение процесса OpenCodex после публикации файла транзакции переименованием. Она не заявляет устойчивость при сбое ОС или ядра либо внезапном отключении питания: `atomicWriteFileAsync()` не вызывает `fsync` ни для файла, ни для родительского каталога.
+Матрица восстановления v1 охватывает завершение процесса OpenRelay после публикации файла транзакции переименованием. Она не заявляет устойчивость при сбое ОС или ядра либо внезапном отключении питания: `atomicWriteFileAsync()` не вызывает `fsync` ни для файла, ни для родительского каталога.
 
-Зашифрованное хранилище (vault), журнал переключения, маркер восстановления и файл карантина журнала находятся в каноническом каталоге `<real CODEX_HOME>/.opencodex-native-main-profiles`. Поэтому все экземпляры OpenCodex, использующие один и тот же Codex home, видят одного владельца и одно состояние восстановления. Промежуточные данные входа в незашифрованном виде остаются изолированными в каталоге `<OPENCODEX_HOME>/native-main-profile-staging` каждого экземпляра.
+Зашифрованное хранилище (vault), журнал переключения, маркер восстановления и файл карантина журнала находятся в каноническом каталоге `<real CODEX_HOME>/.opencodex-native-main-profiles`. Поэтому все экземпляры OpenRelay, использующие один и тот же Codex home, видят одного владельца и одно состояние восстановления. Промежуточные данные входа в незашифрованном виде остаются изолированными в каталоге `<OPENCODEX_HOME>/native-main-profile-staging` каждого экземпляра.
 
-До допуска трафика native-main или восстановления по журналу владелец на весь срок жизни получает исключительное право на учётные данные и удаляет только остаточные после сбоя файлы, имена которых точно соответствуют `auth.json.ocx.<pid>.<sequence>.tmp`. Каждый файл-кандидат должен оставаться обычным файлом ровно с одной жёсткой ссылкой внутри неизменившегося канонического `CODEX_HOME`; его усекают, сбрасывают его буферы, а затем удаляют ссылку на него (unlink). Подмена ссылкой или точкой повторной обработки (reparse point), изменение идентификационных данных файла или любая другая неоднозначность сохраняют запрет на трафик native-main; файлы с лишь похожими именами никогда не удаляются автоматически. Эта защита рассчитана на сбои добросовестно взаимодействующих экземпляров OpenCodex, а не на вредоносный процесс, уже запущенный от имени того же пользователя ОС. Этот пользователь и файловая система, содержащая `CODEX_HOME`, остаются доверенными, а усечение файла не гарантирует физического стирания данных из хранилища с копированием при записи, снимков или остаточных данных SSD.
+До допуска трафика native-main или восстановления по журналу владелец на весь срок жизни получает исключительное право на учётные данные и удаляет только остаточные после сбоя файлы, имена которых точно соответствуют `auth.json.ocx.<pid>.<sequence>.tmp`. Каждый файл-кандидат должен оставаться обычным файлом ровно с одной жёсткой ссылкой внутри неизменившегося канонического `CODEX_HOME`; его усекают, сбрасывают его буферы, а затем удаляют ссылку на него (unlink). Подмена ссылкой или точкой повторной обработки (reparse point), изменение идентификационных данных файла или любая другая неоднозначность сохраняют запрет на трафик native-main; файлы с лишь похожими именами никогда не удаляются автоматически. Эта защита рассчитана на сбои добросовестно взаимодействующих экземпляров OpenRelay, а не на вредоносный процесс, уже запущенный от имени того же пользователя ОС. Этот пользователь и файловая система, содержащая `CODEX_HOME`, остаются доверенными, а усечение файла не гарантирует физического стирания данных из хранилища с копированием при записи, снимков или остаточных данных SSD.
 
-Предварительные сборки использовали `<OPENCODEX_HOME>/native-main-profiles`. Эта схема никогда не импортируется без явного действия. Если `doctor` сообщает о состоянии профилей старого формата, остановите все прокси OpenCodex, использующие тот же `CODEX_HOME`. Затем создайте резервную копию и вместе переместите соответствующие `*.vault.json`, `*.journal.json`, маркер восстановления и любой указанный файл карантина журнала в канонический каталог, сохранив права доступа только для владельца. Либо удалите старый набор файлов предварительной версии и снова выполните `ocx account main register`. Пока работает хотя бы один прокси, использующий тот же `CODEX_HOME`, не выбирайте один из нескольких старых корневых каталогов и не используйте обе схемы одновременно. В Windows состояние предварительной версии, привязанное к прежнему идентификатору домашнего каталога без учёта регистра, необходимо сбросить, а не перемещать, поскольку его зашифрованные AAD и идентификатор в системном хранилище ключей намеренно не используются повторно.
+Предварительные сборки использовали `<OPENCODEX_HOME>/native-main-profiles`. Эта схема никогда не импортируется без явного действия. Если `doctor` сообщает о состоянии профилей старого формата, остановите все прокси OpenRelay, использующие тот же `CODEX_HOME`. Затем создайте резервную копию и вместе переместите соответствующие `*.vault.json`, `*.journal.json`, маркер восстановления и любой указанный файл карантина журнала в канонический каталог, сохранив права доступа только для владельца. Либо удалите старый набор файлов предварительной версии и снова выполните `orl account main register`. Пока работает хотя бы один прокси, использующий тот же `CODEX_HOME`, не выбирайте один из нескольких старых корневых каталогов и не используйте обе схемы одновременно. В Windows состояние предварительной версии, привязанное к прежнему идентификатору домашнего каталога без учёта регистра, необходимо сбросить, а не перемещать, поскольку его зашифрованные AAD и идентификатор в системном хранилище ключей намеренно не используются повторно.
 
 ## Модели
 
-### `ocx models [subcommand]` · `ocx model <subcommand>`
+### `orl models [subcommand]` · `orl model <subcommand>`
 
-`ocx model` — alias команды `ocx models`. Без подкоманды команда показывает модели, статически
+`orl model` — alias команды `orl models`. Без подкоманды команда показывает модели, статически
 засеянные в настроенных провайдерах. `--provider` фильтрует один провайдер, а `--json` возвращает
 метаданные моделей. `live` читает работающий каталог; `add`, `edit`, `remove` и `list-custom`
 управляют ручными записями каталога; `enable`, `disable` и `provider` управляют видимостью;
@@ -392,15 +392,15 @@ ocx account main recover [--rollback --yes] [--json]
 | `shadow <status\|set> [model\|-]` | `--enabled <on\|off>`, `--json` | Прочитать или задать модель-замену для background helper-call'ов Codex. `-` очищает модель. `status` также показывает `sourceModels` — helper-slug'и, которые перехватывает proxy (по умолчанию `gpt-6-luna`, `gpt-5.6-luna`; `gpt-5.4-mini` для клиентов до 0.144.x включительно можно восстановить явным переопределением `sourceModels`). |
 
 ```bash
-ocx models live --json                                  # what Codex can actually see right now
-ocx models disable anthropic/claude-haiku-4             # hide one routed model
-ocx models enable gpt-5.6-sol                           # no slash, so it is treated as native
-ocx models provider zenmux off                          # hide a noisy provider wholesale
-ocx models selected anthropic --set claude-opus-5,claude-fable-5
-ocx models selected anthropic --clear                   # drop the allowlist again
-ocx models add deepseek deepseek-v4 --display-name 'DeepSeek V4' --context-window 128000 --modalities text,image
-ocx models list-custom --json                           # read the custom-id for edit/remove
-ocx models remove deepseek/deepseek-v4 --yes
+orl models live --json                                  # what Codex can actually see right now
+orl models disable anthropic/claude-haiku-4             # hide one routed model
+orl models enable gpt-5.6-sol                           # no slash, so it is treated as native
+orl models provider zenmux off                          # hide a noisy provider wholesale
+orl models selected anthropic --set claude-opus-5,claude-fable-5
+orl models selected anthropic --clear                   # drop the allowlist again
+orl models add deepseek deepseek-v4 --display-name 'DeepSeek V4' --context-window 128000 --modalities text,image
+orl models list-custom --json                           # read the custom-id for edit/remove
+orl models remove deepseek/deepseek-v4 --yes
 ```
 
 Селектор модели со слэшем трактуется как routed (`anthropic/claude-opus-5`); bare-id считается

@@ -2,7 +2,7 @@ import { JEV_DECISION_GATES } from "../usage/jev-stats";
 import { runCatalogAction } from "./catalog-command-result";
 import { CliUsageError, printData, runtimeBaseUrl, runtimeRequest, takeFlag, takeOptionWithSyntax, type RuntimeApiDeps } from "./runtime-api";
 
-const USAGE = "Usage: ocx combo stats <stored-id> [--range <7d|30d|all>] [--json]";
+const USAGE = "Usage: orl combo stats <stored-id> [--range <7d|30d|all>] [--json]";
 const SUMMARY_COUNTS = [
   "decisions", "appliedDecisions", "failOpenDecisions", "successfulRequests", "requestsWithModelFallback",
   "modelAttempts", "measuredModelAttempts", "modelInputTokens", "modelOutputTokens", "modelReasoningTokens",

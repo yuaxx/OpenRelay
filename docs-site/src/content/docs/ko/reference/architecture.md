@@ -1,9 +1,9 @@
 ---
 title: 아키텍처
-description: opencodex 내부 구조 — 모듈 맵, AdapterEvent 브리지, 요청 파서, 그리고 캐싱.
+description: OpenRelay 내부 구조 — 모듈 맵, AdapterEvent 브리지, 요청 파서, 그리고 캐싱.
 ---
 
-opencodex는 단일 Bun 프로세스입니다. 요청은 OpenAI Responses로 들어와 내부 모델로 정규화되고,
+OpenRelay는 단일 Bun 프로세스입니다. 요청은 OpenAI Responses로 들어와 내부 모델로 정규화되고,
 라우팅된 뒤, 어댑터를 통해 프로바이더로 전송되고, 다시 Responses SSE로 브리징됩니다. 엔드투엔드
 플로우는 [동작 원리](/ko/getting-started/how-it-works/)를 참조하세요.
 
@@ -11,7 +11,7 @@ opencodex는 단일 Bun 프로세스입니다. 요청은 OpenAI Responses로 들
 
 ```
 src/
-├── cli/                # ocx command dispatch, init, status, provider commands
+├── cli/                # orl command dispatch, init, status, provider commands
 ├── server/             # Bun.serve, /v1/* proxy, /api/* management API, WS bridge
 ├── codex/              # Codex config injection, catalog sync, auth/account integration
 ├── providers/          # provider metadata, API-key pool, quota and labels
@@ -125,7 +125,7 @@ Responses 항목 타입으로 구분됩니다 — 따라서 MCP 네임스페이�
 ## 전송과 compaction
 
 `server/index/serve-options.ts`는 기본적으로 `/v1/responses`를 HTTP/SSE로 제공합니다. `websockets`가 `false`인
-상태에서 Codex가 Responses WebSocket 업그레이드를 시도하면 opencodex는 `426 upgrade_required`를
+상태에서 Codex가 Responses WebSocket 업그레이드를 시도하면 OpenRelay는 `426 upgrade_required`를
 반환하고, Codex는 해당 세션에서 HTTP로 폴백합니다. `"websockets": true`가 설정되면 같은
 엔드포인트가 업그레이드를 받아들이고 WebSocket 브리지를 사용합니다.
 

@@ -45,43 +45,43 @@ const MAIN_CODEX_ID = "__main__";
 const REPLACEMENT_STYLE_OAUTH = new Set<string>();
 
 const ACCOUNT_USAGE = `Usage:
-  ocx account list [provider] [--json] [--all] [--quota [--refresh]]
-  ocx account history openai <pool-account-id> [--limit <1-200>] [--json]
-  ocx account current <provider> [--json]
-  ocx account use <provider> <account-or-key-id|alias|main|auto> [--json]
-  ocx account clear <provider> [--json]
-  ocx account refresh <provider> [--json]
-  ocx account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]
-  ocx account auto-switch <anthropic|anthropic2> <on|off|status|inherit|threshold <0-100>> --account <id> [--json]
-  ocx account alias <provider> <account-or-key-id|alias> <display-name|-> [--json]
-  ocx account priority <provider> <account-id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]
-  ocx account pause <provider> <account-id|alias|main> [--json]
-  ocx account resume <provider> <account-id|alias|main> [--json]
-  ocx account pause-exhausted <provider> [--json]
-  ocx account strategy <provider> [<quota|round-robin|fill-first|least-loaded|reset-first>] [--json]
-  ocx account sticky <provider> [<1-100>] [--json]
-  ocx account routes <anthropic|anthropic2> [--file <json-file>|--clear] [--json]
-  ocx account remove <provider> <account-or-key-id|alias|main> --yes [--json]
-  ocx account clear-cooldown <provider> <account-id|alias|main> [--json]
-  ocx account add-key <provider> [--label <label>] [--json]
-  ocx account import <provider> --format <format> (--file <path>|--stdin) [--json]
-  ocx account import-orca --source <orca-data-directory> --registry <orca-data.json> [--apply] [--json]
-  ocx account login <provider> [--id <account-id>] [--reauth] [--open-browser on|off] [--add-account on|off] [--code -] [--no-wait] [--json]
-  ocx account pool <provider> [--enabled on|off] [--threshold N] [--strategy NAME] [--sticky N] [--quota-window W] [--json]
-  ocx account credits openai <ID on|off|--all on|off> [--json]
-  ocx account quota-activation openai ID --window fiveHour|weekly <on|off> [--json]
-  ocx account anthropic-reset-grants [ID] [--provider anthropic|anthropic2] [--json]
-  ocx account code <provider> [--flow <flow-id>] [--json]   (reads the code from stdin)
-  ocx account cancel <provider> [--flow <flow-id>] [--json] (--flow required for codex)
-  ocx account reset-credits <account-id|main> [--consume --yes] [--json]
-  ocx account grok-reset-coupons [<account-id>] [--consume --yes] [--token-id <token-id>] [--json]
-  ocx account main <doctor|list|register|add|reauth|switch|recover> ...
+  orl account list [provider] [--json] [--all] [--quota [--refresh]]
+  orl account history openai <pool-account-id> [--limit <1-200>] [--json]
+  orl account current <provider> [--json]
+  orl account use <provider> <account-or-key-id|alias|main|auto> [--json]
+  orl account clear <provider> [--json]
+  orl account refresh <provider> [--json]
+  orl account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]
+  orl account auto-switch <anthropic|anthropic2> <on|off|status|inherit|threshold <0-100>> --account <id> [--json]
+  orl account alias <provider> <account-or-key-id|alias> <display-name|-> [--json]
+  orl account priority <provider> <account-id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]
+  orl account pause <provider> <account-id|alias|main> [--json]
+  orl account resume <provider> <account-id|alias|main> [--json]
+  orl account pause-exhausted <provider> [--json]
+  orl account strategy <provider> [<quota|round-robin|fill-first|least-loaded|reset-first>] [--json]
+  orl account sticky <provider> [<1-100>] [--json]
+  orl account routes <anthropic|anthropic2> [--file <json-file>|--clear] [--json]
+  orl account remove <provider> <account-or-key-id|alias|main> --yes [--json]
+  orl account clear-cooldown <provider> <account-id|alias|main> [--json]
+  orl account add-key <provider> [--label <label>] [--json]
+  orl account import <provider> --format <format> (--file <path>|--stdin) [--json]
+  orl account import-orca --source <orca-data-directory> --registry <orca-data.json> [--apply] [--json]
+  orl account login <provider> [--id <account-id>] [--reauth] [--open-browser on|off] [--add-account on|off] [--code -] [--no-wait] [--json]
+  orl account pool <provider> [--enabled on|off] [--threshold N] [--strategy NAME] [--sticky N] [--quota-window W] [--json]
+  orl account credits openai <ID on|off|--all on|off> [--json]
+  orl account quota-activation openai ID --window fiveHour|weekly <on|off> [--json]
+  orl account anthropic-reset-grants [ID] [--provider anthropic|anthropic2] [--json]
+  orl account code <provider> [--flow <flow-id>] [--json]   (reads the code from stdin)
+  orl account cancel <provider> [--flow <flow-id>] [--json] (--flow required for codex)
+  orl account reset-credits <account-id|main> [--consume --yes] [--json]
+  orl account grok-reset-coupons [<account-id>] [--consume --yes] [--token-id <token-id>] [--json]
+  orl account main <doctor|list|register|add|reauth|switch|recover> ...
 
 List and switch provider accounts and API-key pools (masked output only).
 'main' selects the Codex App login for the openai account pool; 'auto' clears the
 selection so the pool places work by its own strategy — unless an account actually
-carries that id, which wins, so 'ocx account clear' is the spelling that always
-clears. A Codex account can be named by the alias set with 'ocx account alias'
+carries that id, which wins, so 'orl account clear' is the spelling that always
+clears. A Codex account can be named by the alias set with 'orl account alias'
 wherever an id is accepted.`;
 
 function consumeFlag(args: string[], flag: string): boolean {

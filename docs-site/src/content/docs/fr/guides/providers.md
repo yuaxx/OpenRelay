@@ -1,6 +1,6 @@
 ---
 title: Fournisseurs
-description: Toutes les méthodes utilisées par opencodex pour s'authentifier auprès d'un fournisseur de LLM et communiquer avec lui — OAuth, clé API, transfert ChatGPT et exécution locale.
+description: Toutes les méthodes utilisées par OpenRelay pour s'authentifier auprès d'un fournisseur de LLM et communiquer avec lui — OAuth, clé API, transfert ChatGPT et exécution locale.
 ---
 
 Un **fournisseur** associe un point de terminaison LLM en amont à la façon de l'atteindre : un adaptateur,
@@ -95,26 +95,26 @@ Le catalogue du transfert ChatGPT ajoute également les identifiants non qualifi
 ## 2. Connexion au compte (OAuth)
 
 Des préréglages de fournisseurs peuvent utiliser une connexion au compte, y compris GitHub Copilot au moyen d'un pont
-expérimental et non officiel reposant sur un flux d'autorisation d'appareil. opencodex enregistre leurs identifiants dans
+expérimental et non officiel reposant sur un flux d'autorisation d'appareil. OpenRelay enregistre leurs identifiants dans
 `~/.opencodex/auth.json` et les actualise automatiquement. La CLI de connexion accepte également
-`ocx login codex`, qui n'est pas l'un des fournisseurs ci-dessus : la commande est routée vers la
-connexion au pool de comptes Codex (le même flux que `ocx account login codex`). Ce pool tient son
+`orl login codex`, qui n'est pas l'un des fournisseurs ci-dessus : la commande est routée vers la
+connexion au pool de comptes Codex (le même flux que `orl account login codex`). Ce pool tient son
 propre registre de comptes, donc cette route nécessite un proxy en cours d'exécution. `chatgpt` et
 `openai` sont des alias de la même route.
 
 ```bash
-ocx login xai          # xAI Grok
-ocx login anthropic    # Anthropic Claude (Pro/Max)
-ocx login kimi         # Moonshot Kimi
-ocx login nous         # Nous Portal (device grant; free + paid models)
-ocx login kiro         # import kiro-cli credentials (or token fallback)
-ocx login google-antigravity
-ocx login cursor       # standalone Cursor PKCE login
-ocx login command-code # Command Code browser OAuth (or import ~/.commandcode/auth.json)
-ocx login devin       # Cognition/Devin : import de l'identifiant du Devin CLI, sinon connexion navigateur Auth0
-ocx login github-copilot  # GitHub device flow → Copilot token (Copilot Pro/Business)
-ocx login codex        # pool de comptes Codex (alias : chatgpt, openai ; nécessite un proxy en cours d'exécution)
-ocx logout <provider>
+orl login xai          # xAI Grok
+orl login anthropic    # Anthropic Claude (Pro/Max)
+orl login kimi         # Moonshot Kimi
+orl login nous         # Nous Portal (device grant; free + paid models)
+orl login kiro         # import kiro-cli credentials (or token fallback)
+orl login google-antigravity
+orl login cursor       # standalone Cursor PKCE login
+orl login command-code # Command Code browser OAuth (or import ~/.commandcode/auth.json)
+orl login devin       # Cognition/Devin : import de l'identifiant du Devin CLI, sinon connexion navigateur Auth0
+orl login github-copilot  # GitHub device flow → Copilot token (Copilot Pro/Business)
+orl login codex        # pool de comptes Codex (alias : chatgpt, openai ; nécessite un proxy en cours d'exécution)
+orl logout <provider>
 ```
 
 | Fournisseur | Adaptateur | URL de base | Remarques |
@@ -124,10 +124,10 @@ ocx logout <provider>
 | `kimi` | `openai-chat` | `https://api.kimi.com/coding/v1` | Modèles Kimi Code. L'alias `kimi-for-coding` pointe actuellement vers K2.8 Preview (contexte de 1 M de tokens, raisonnement `low`/`high`/`max`, texte et images). `k3-256k` offre une limite fixe de 256 K. |
 | `kimi-responses` | `openai-responses` | `https://api.kimi.com/coding/v1` | Réutilise la connexion OAuth de `kimi` avec les mêmes modèles sur le protocole Responses. Le contenu du raisonnement reste chiffré côté serveur ; les appels d'outils et leurs résultats restent visibles. |
 | `nous` | `openai-chat` | `https://inference-api.nousresearch.com/v1` | Passerelle d'abonnement Nous Research (le même service en amont que celui utilisé par Hermes Agent). Connexion par autorisation d'appareil auprès de `portal.nousresearch.com` ; le jeton d'accès est le JWT d'inférence envoyé avec chaque requête. Le catalogue mixte de modèles payants et `:free` (`tencent/hy3:free`, `stepfun/step-3.7-flash:free`, ...) est découvert en direct pour le compte connecté. Les jetons d'actualisation sont à usage unique et renouvelés à chaque actualisation. |
-| `kiro` | `kiro` | `https://runtime.us-east-1.kiro.dev` | La connexion initiale importe la session de l'installation locale de `kiro-cli`, déjà authentifiée (sous Unix, installez avec `curl -fsSL https://cli.kiro.dev/install` &#124; `bash`; sous Windows PowerShell, utilisez `irm 'https://cli.kiro.dev/install.ps1'` &#124; `iex`; puis exécutez `kiro-cli login`). **Ajouter un compte** déconnecte `kiro-cli`, lance une nouvelle connexion dans le navigateur qui change le compte utilisé par `kiro-cli`, puis enregistre les métadonnées propres au profil. Les comptes OpenCodex existants sont préservés ; une annulation ou un échec restaure la session `kiro-cli` précédente. |
+| `kiro` | `kiro` | `https://runtime.us-east-1.kiro.dev` | La connexion initiale importe la session de l'installation locale de `kiro-cli`, déjà authentifiée (sous Unix, installez avec `curl -fsSL https://cli.kiro.dev/install` &#124; `bash`; sous Windows PowerShell, utilisez `irm 'https://cli.kiro.dev/install.ps1'` &#124; `iex`; puis exécutez `kiro-cli login`). **Ajouter un compte** déconnecte `kiro-cli`, lance une nouvelle connexion dans le navigateur qui change le compte utilisé par `kiro-cli`, puis enregistre les métadonnées propres au profil. Les comptes OpenRelay existants sont préservés ; une annulation ou un échec restaure la session `kiro-cli` précédente. |
 | `google-antigravity` | `google` | `https://daily-cloudcode-pa.googleapis.com` | Google OAuth avec le protocole Cloud Code Assist. La découverte en direct utilise le point de terminaison CCA authentifié `v1internal:fetchAvailableModels` et publie les modèles d'agent accessibles au compte connecté ; le catalogue maintenu reste la solution de repli. |
 | `cursor` | `cursor` | `https://api2.cursor.sh` | Connexion PKCE expérimentale, transport HTTP/2 en direct et découverte de modèles filtrés par compte. |
-| `devin` | `devin` | `https://server.codeium.com` | Passerelle Cognition/Devin non officielle et expérimentale. La connexion importe d'abord l'identifiant que le Devin CLI installé détient déjà (`devin auth login` écrit un `devin-session-token` dans son propre `credentials.toml`) ; à défaut, elle ouvre l'authentification Auth0 dans le navigateur puis échange le jeton collé via `RegisterUser` contre une clé d'API durable. `ocx login devin-cli` reste accepté comme alias déprécié. Les modèles sont découverts par compte avec `GetCascadeModelConfigs` ; le streaming passe uniquement par `runTurn` sur Connect-RPC. Absente du préréglage du tableau de bord par défaut. |
+| `devin` | `devin` | `https://server.codeium.com` | Passerelle Cognition/Devin non officielle et expérimentale. La connexion importe d'abord l'identifiant que le Devin CLI installé détient déjà (`devin auth login` écrit un `devin-session-token` dans son propre `credentials.toml`) ; à défaut, elle ouvre l'authentification Auth0 dans le navigateur puis échange le jeton collé via `RegisterUser` contre une clé d'API durable. `orl login devin-cli` reste accepté comme alias déprécié. Les modèles sont découverts par compte avec `GetCascadeModelConfigs` ; le streaming passe uniquement par `runTurn` sur Connect-RPC. Absente du préréglage du tableau de bord par défaut. |
 | `github-copilot` | `openai-chat` | `https://api.githubcopilot.com` | Expérimental. Flux d'appareil GitHub et échange `copilot_internal` (client OAuth de VS Code). Nécessite un abonnement Copilot actif ; il ne s'agit pas d'une API tierce officielle. |
 
 Les vérifications de quota Google Antigravity utilisent des points de terminaison Google fixes, y compris le repli vers la liste des modèles. Elles prennent en charge le DNS Fake-IP transparent pour ces destinations en conservant la vérification TLS, le refus des redirections et les contrôles des adresses privées. Une URL de base personnalisée ne modifie que les requêtes de modèles ; `NO_PROXY` conserve la politique de connexion directe.
@@ -135,10 +135,10 @@ Les vérifications de quota Google Antigravity utilisent des points de terminais
 ### Diagnostic de perte du schéma d’outil Google
 
 Les déclarations d’outils Google sont compilées selon la classe du point de terminaison sélectionné.
-Lorsque le débogage du fournisseur est activé — avec `ocx debug provider on`, le bouton Logs du
+Lorsque le débogage du fournisseur est activé — avec `orl debug provider on`, le bouton Logs du
 tableau de bord ou `OCX_DEBUG=1` — la perte de schéma lors de la conversion de compatibilité sur le
 chemin où la politique est absente ou vaut `compatible` émet un enregistrement
-`[ocx:google:google-tool-schema-loss]` (à suivre avec `ocx debug provider logs -f`) ne contenant que
+`[ocx:google:google-tool-schema-loss]` (à suivre avec `orl debug provider logs -f`) ne contenant que
 la version du rapport, la classe du point de terminaison, un indicateur `lossy`, un compteur borné de
 comparaisons indéterminées, des catégories de perte fixes avec des compteurs bornés et un indicateur de troncature. Les noms d’outils et de
 propriétés, les chemins, les valeurs et le texte du schéma ne sont jamais inclus. Avec une politique
@@ -152,13 +152,13 @@ de sortie natifs restent hors de ces deux chemins. Consultez la
 [référence des commandes de débogage](/fr/reference/cli/agents/).
 
 
-Après un échec définitif d'actualisation de Nous, exécutez `ocx login nous` pour vous réauthentifier.
+Après un échec définitif d'actualisation de Nous, exécutez `orl login nous` pour vous réauthentifier.
 
 Pour les préréglages canoniques du forfait Kimi Coding (`kimi` pour la connexion au compte et `kimi-code`
-pour la clé API), opencodex ne transmet à la requête Chat Completions qu'un `prompt_cache_key` stable fourni
+pour la clé API), OpenRelay ne transmet à la requête Chat Completions qu'un `prompt_cache_key` stable fourni
 par l'appelant ; il n'en génère jamais. Selon la documentation de Kimi, une clé de session ou de tâche stable
 est nécessaire pour améliorer le taux de succès du cache du Coding Plan ; les requêtes dépourvues de clé le
-restent. Si un service en amont explicitement activé rejette ce champ, opencodex ne le retire pas avant de
+restent. Si un service en amont explicitement activé rejette ce champ, OpenRelay ne le retire pas avant de
 réessayer et ne modifie pas la configuration enregistrée. Tous les autres fournisseurs le refusent par défaut.
 
 Les prix de `k3`, `k3[1m]` et `k3-256k` pour `kimi`, `kimi-code` et `kimi-responses`
@@ -184,7 +184,7 @@ métadonnées masquées.
 
 ### Importation Cockpit Tools Antigravity
 
-Dans la v1, OpenCodex importe uniquement les exportations JSON **Cockpit Tools Antigravity** destinées au
+Dans la v1, OpenRelay importe uniquement les exportations JSON **Cockpit Tools Antigravity** destinées au
 fournisseur `google-antigravity`. Dans le tableau de bord **Fournisseurs**, sélectionnez le fichier JSON local
 depuis l'onglet **Comptes** de ce fournisseur. Le tableau de bord n'affiche ni le contenu du fichier ni les
 valeurs des identifiants ; il indique uniquement le nombre d'éléments importés, mis à jour, en échec ou non pris
@@ -193,8 +193,8 @@ en charge. Les autres fournisseurs Cockpit sont refusés dans la v1.
 La CLI accepte l'exportation uniquement depuis un fichier ou l'entrée standard : ne la collez jamais dans un argument de commande :
 
 ```bash
-ocx account import google-antigravity --format cockpit-tools --file <path> [--json]
-cat accounts.json | ocx account import google-antigravity --format cockpit-tools --stdin [--json]
+orl account import google-antigravity --format cockpit-tools --file <path> [--json]
+cat accounts.json | orl account import google-antigravity --format cockpit-tools --stdin [--json]
 ```
 
 Le JSON en ligne et les arguments positionnels supplémentaires sont refusés. Gardez les fichiers exportés
@@ -202,7 +202,7 @@ confidentiels et supprimez-les ou conservez-les de façon sécurisée après l'i
 
 ### Fiabilité OAuth
 
-opencodex coordonne l'actualisation des jetons et le routage du pool Codex afin que les requêtes simultanées
+OpenRelay coordonne l'actualisation des jetons et le routage du pool Codex afin que les requêtes simultanées
 n'entrent pas en concurrence dans le magasin d'identifiants. Il s'agit d'un mécanisme de fiabilité et de
 diagnostic : il ne garantit **aucune** protection contre l'application des règles du fournisseur, les limites
 de débit ou les mesures prises à l'encontre d'un compte.
@@ -238,50 +238,50 @@ ne restent pas épinglés après une réponse de limite de débit.
 sélectionnée `FORWARD_HEADERS` — autorisation, `chatgpt-account-id`, originator, identifiants de session et de
 fil, ainsi que les en-têtes Codex associés ; voir [Adaptateurs](/fr/reference/adapters/). Le mode Pool ne
 remplace que l'authentification et `chatgpt-account-id` afin qu'ils correspondent à l'identifiant sélectionné.
-opencodex ne fabrique **aucune** identité de client officiel, comme les en-têtes `originator`, de session ou
+OpenRelay ne fabrique **aucune** identité de client officiel, comme les en-têtes `originator`, de session ou
 de fil, si l'appelant ne les a pas fournis.
 
-**Diagnostics et réauthentification.** La sortie de `ocx status` destinée aux utilisateurs affiche un bloc d'état OAuth —
-identifiants de compte expurgés, aucun jeton. `ocx doctor` ajoute une section sur la fiabilité OAuth, avec des
+**Diagnostics et réauthentification.** La sortie de `orl status` destinée aux utilisateurs affiche un bloc d'état OAuth —
+identifiants de compte expurgés, aucun jeton. `orl doctor` ajoute une section sur la fiabilité OAuth, avec des
 contrôles du magasin accessible en écriture et de l'appel unique, ainsi que des lignes WARN qui indiquent une
 action de récupération. Lorsqu'un compte de fournisseur OAuth doit être réauthentifié, exécutez
-`ocx login <provider>` ou utilisez **Réauthentifier** dans le tableau de bord. Les comptes du pool Codex ne
-font pas partie de ces fournisseurs, mais `ocx login codex --reauth` est routé vers leur réauthentification
+`orl login <provider>` ou utilisez **Réauthentifier** dans le tableau de bord. Les comptes du pool Codex ne
+font pas partie de ces fournisseurs, mais `orl login codex --reauth` est routé vers leur réauthentification
 dans le pool de comptes, ce que fait aussi le pool de comptes Codex du tableau de bord. Consultez
-[`ocx status` / `ocx doctor`](/fr/reference/cli/) dans la référence CLI.
+[`orl status` / `orl doctor`](/fr/reference/cli/) dans la référence CLI.
 
 ### Importation des identifiants Kiro
 
 La connexion Kiro nécessite la CLI Kiro : sous Unix, installez-la avec `curl -fsSL https://cli.kiro.dev/install | bash` ;
 sous Windows PowerShell, utilisez `irm 'https://cli.kiro.dev/install.ps1' | iex`, puis connectez-vous avec `kiro-cli login`.
-En l'absence de session `kiro-cli`, `ocx login kiro` se rabat sur un jeton d'accès collé ou sur la variable
+En l'absence de session `kiro-cli`, `orl login kiro` se rabat sur un jeton d'accès collé ou sur la variable
 d'environnement `KIRO_ACCESS_TOKEN`.
 
-Le parcours d'importation `ocx login kiro` recherche les magasins de la CLI Kiro propres à la plateforme et
+Le parcours d'importation `orl login kiro` recherche les magasins de la CLI Kiro propres à la plateforme et
 ouvre les bases SQLite en lecture seule. Deux variables d'environnement permettent de sélectionner explicitement
 la source et la ligne du jeton :
 
 - `KIROCLI_DB_PATH` sélectionne une base de données Kiro CLI SQLite non standard. Le chemin doit déjà exister ;
-  pendant ce chemin d'importation, opencodex ne crée ni ne modifie la base de données, ni les fichiers WAL ou SHM.
+  pendant ce chemin d'importation, OpenRelay ne crée ni ne modifie la base de données, ni les fichiers WAL ou SHM.
 - `KIROCLI_TOKEN_KEY` sélectionne la clé de jeton `auth_kv` exacte lorsqu'une base de données contient plusieurs
   lignes de jeton qui seraient autrement ambiguës. En l'absence de sélection, la connexion échoue au lieu de
   choisir arbitrairement.
 
 Sous Windows, l'importation recherche `%LOCALAPPDATA%\Kiro-Cli\data.sqlite3`. La connexion forcée ou par
-**Ajouter un compte** nécessite également le binaire local de la CLI : opencodex consulte d'abord `PATH`, puis se rabat sur
+**Ajouter un compte** nécessite également le binaire local de la CLI : OpenRelay consulte d'abord `PATH`, puis se rabat sur
 `%LOCALAPPDATA%\Kiro-Cli\kiro-cli.exe` et `C:\Program Files\Kiro-Cli\kiro-cli.exe`.
 Si aucun de ces dossiers ne contient `kiro-cli.exe`, un `kiro.exe` placé dans ces deux mêmes dossiers
-`Kiro-Cli` est utilisé. opencodex n'exécute jamais un `kiro` ou `kiro.exe` trouvé dans le `PATH`
+`Kiro-Cli` est utilisé. OpenRelay n'exécute jamais un `kiro` ou `kiro.exe` trouvé dans le `PATH`
 ou dans les répertoires bin partagés de macOS/Linux : installez ou liez la CLI sous le nom `kiro-cli`.
 
-Après une importation réussie, opencodex conserve les informations d'identification importées dans
+Après une importation réussie, OpenRelay conserve les informations d'identification importées dans
 `~/.opencodex/auth.json`.
 Gardez ces variables et la base sélectionnée confidentielles. Ne joignez ni fichier de base de données ni
 diagnostic de connexion brut aux rapports de bogue.
 
-**Ajouter un compte** suit un parcours d'écriture distinct : opencodex crée un instantané de la session en
+**Ajouter un compte** suit un parcours d'écriture distinct : OpenRelay crée un instantané de la session en
 cours, déconnecte `kiro-cli`, puis importe la nouvelle connexion effectuée dans le navigateur. Si la connexion
-est annulée ou échoue, y compris pendant l'enregistrement des identifiants par OpenCodex, la restauration remplace
+est annulée ou échoue, y compris pendant l'enregistrement des identifiants par OpenRelay, la restauration remplace
 la base de données de la CLI Kiro et supprime ses fichiers auxiliaires WAL, SHM et journal avant de rétablir
 l'instantané de la session précédente.
 
@@ -295,18 +295,18 @@ existante n'est pas concernée.
 
 ## 3. Catalogue des clés API
 
-opencodex fournit 103 préréglages intégrés : 84 à clé, 15 OAuth, trois locaux et un préréglage par défaut de
+OpenRelay fournit 103 préréglages intégrés : 84 à clé, 15 OAuth, trois locaux et un préréglage par défaut de
 transfert ChatGPT. Dans le tableau de bord, le sélecteur **Ajouter un fournisseur** ouvre le tableau de bord du
 fournisseur à clé, valide la clé et l'enregistre ; la validation dépend du fournisseur. Parmi les entrées notables :
 
 **ClinePass** utilise une clé API Cline avec le [catalogue d'abonnement officiel](https://docs.cline.bot/getting-started/clinepass)
 et le [point de terminaison Chat Completions](https://docs.cline.bot/api/chat-completions), exploités par Cline Bot Inc. selon
 les [conditions de Cline](https://cline.bot/tos). Un identifiant routé tel que `cline-pass/cline-pass/kimi-k3`
-est intentionnel : le premier segment sélectionne le fournisseur opencodex, tandis que `cline-pass/kimi-k3`
+est intentionnel : le premier segment sélectionne le fournisseur OpenRelay, tandis que `cline-pass/kimi-k3`
 est l'identifiant complet du modèle envoyé en amont. Le quota ClinePass est partagé par le compte entre des
 limites glissantes sur 5 heures, hebdomadaires et mensuelles. Une sonde en direct effectuée le 2026-08-13 a
 confirmé que tous les modèles ClinePass statiques acceptent `low`, `medium`, `high`, `xhigh` et `max` à
-l'entrée de la passerelle. opencodex conserve les niveaux demandés ; toute normalisation propre au service en
+l'entrée de la passerelle. OpenRelay conserve les niveaux demandés ; toute normalisation propre au service en
 amont reste de la responsabilité de ClinePass.
 
 **Cline** utilise la même clé API et le même point de terminaison, avec une facturation à l'usage pour plus de
@@ -369,7 +369,7 @@ promotionnels de Cline ne sont accessibles que dans l'IDE ou la CLI Cline, pas p
 `GET /v1/models` public et conserve les modèles Chat Completions actifs (ainsi que `openai/o3-pro`, réservé à Responses et routé vers Responses). Les modèles servis
 par Sionic, `deepseek/deepseek-v4.1-flash-ultrafast` et `z-ai/glm-5.3-flash-ultrafast`,
 sont affichés en premier. Créez une clé dans le [tableau de bord OpenGateway](https://opengateway.ai/api-keys),
-puis lancez `ocx provider add opengateway` ou sélectionnez **OpenGateway** dans le tableau de bord.
+puis lancez `orl provider add opengateway` ou sélectionnez **OpenGateway** dans le tableau de bord.
 Les requêtes chat utilisent la clé Bearer configurée ; la liste publique ne valide pas cette clé.
 
 **OpenCode Zen** (`opencode-zen`) et le préréglage sans clé **OpenCode Free** utilisent tous deux
@@ -378,7 +378,7 @@ rafale sur une courte fenêtre, d'environ 15 à 20 requêtes par minute (mesure 
 pas de valeur RPM). Zen peut renvoyer des erreurs génériques 429 de limitation de débit sans en-têtes
 `Retry-After` / `X-RateLimit-*`. Cette limite est distincte du quota sans clé pour application de bureau
 annoncé par OpenCode (environ 200 requêtes Big Pickle ou vers des modèles gratuits toutes les 5 heures sur
-`opencode-free`). Lorsque Zen omet `Retry-After` sur une telle réponse 429, opencodex ajoute à l'erreur client
+`opencode-free`). Lorsque Zen omet `Retry-After` sur une telle réponse 429, OpenRelay ajoute à l'erreur client
 des indications propres au fournisseur ainsi qu'un `Retry-After` synthétique ; un `Retry-After` reçu en amont
 reste prioritaire. L'attente et la nouvelle tentative avec la même clé restent facultatives et s'activent avec
 [`retryOn429`](/fr/reference/configuration/).
@@ -386,16 +386,16 @@ reste prioritaire. L'attente et la nouvelle tentative avec la même clé restent
 **Le niveau sans clé `opencode-free` est actuellement fermé aux clients tiers.** Zen refuse toute requête
 qui arrive sans en-tête `x-opencode-session` et répond avec le type d'erreur `MissingSessionID` et le message
 « OpenCode's free tier can only be used in OpenCode ». Le contrôle porte uniquement sur la présence de
-l'en-tête : un proxy pourrait donc le franchir en inventant une valeur, ce que opencodex ne fait pas.
+l'en-tête : un proxy pourrait donc le franchir en inventant une valeur, ce que OpenRelay ne fait pas.
 Fabriquer un identifiant de session et un User-Agent versionné `opencode/<version>` revient à se déclarer
 client OpenCode, alors qu'OpenCode ne publie aucun contrat d'intégration tierce pour ce niveau sans clé ;
-une réponse HTTP 200 obtenue ainsi est un contrôle d'admission contourné, pas une autorisation. opencodex
+une réponse HTTP 200 obtenue ainsi est un contrôle d'admission contourné, pas une autorisation. OpenRelay
 signale donc la restriction au lieu de la contourner : une requête vers `opencode-free` renvoie une erreur
 qui explique le blocage en amont.
 
 La voie prise en charge vers les mêmes modèles est le fournisseur **`opencode-zen`** avec une clé d'API
 OpenCode Zen obtenue sur [opencode.ai/auth](https://opencode.ai/auth). Si OpenCode publie plus tard un accès
-tiers pour le niveau sans clé, opencodex pourra le suivre ; d'ici là, le préréglage sert à documenter la
+tiers pour le niveau sans clé, OpenRelay pourra le suivre ; d'ici là, le préréglage sert à documenter la
 restriction. Conditions en amont : [opencode.ai/docs/zen](https://opencode.ai/docs/zen/).
 
 La plupart utilisent l'adaptateur `openai-chat` avec une clé Bearer ; les préréglages compatibles
@@ -403,11 +403,11 @@ Anthropic, comme **Xiaomi MiMo** (`xiaomi`), utilisent l'adaptateur `anthropic` 
 aussi un préréglage OpenAI Chat, `xiaomi-mimo`, et un préréglage avec forfait de jetons, `mimo`. Tous trois
 utilisent MiMo V2.6 par défaut (`mimo-v2.6-pro`, ou `mimo-v2.6-flash` pour `xiaomi-mimo`). Xiaomi retirera
 `mimo-v2.5` et `mimo-v2.5-pro` le 2026-10-21 sans redirection : changez toute valeur V2.5 par défaut
-enregistrée avant cette date ; opencodex ne la modifiera pas à votre place.
+enregistrée avant cette date ; OpenRelay ne la modifiera pas à votre place.
 Volcengine Coding Plan et Agent Plan utilisent leur point de terminaison Responses natif par `openai-responses`. Lors des continuations d'outils validées sur Ark Coding Plan, renvoyer l'élément `reasoning` retourné par le tour précédent provoque `400 InvalidParameter` ; le préréglage Coding Plan retire donc ces éléments avant de transmettre l'entrée de continuation. Cela perd l'état de raisonnement de ce tour et se désactive avec `dropResponsesReasoningItems: false`. Une configuration Coding Plan déjà enregistrée en `openai-chat` n'est pas réécrite et reste sur Chat : pour basculer, passez `adapter` à `openai-responses` et `responsesPath` à `/responses`, ou supprimez puis rajoutez le préréglage.
 Le préréglage DeepSeek intégré route également `deepseek-v4-flash` par son point de terminaison Responses natif
 et conserve le streaming SSE en amont. Si ce modèle termine tous les éléments de sortie mais omet l'événement
-Responses final, opencodex applique une réparation après un délai de grâce de cinq secondes, limitée à ce
+Responses final, OpenRelay applique une réparation après un délai de grâce de cinq secondes, limitée à ce
 modèle ; les flux mal formés ou partiels sont fermés comme incomplets, et non déclarés réussis.
 Le modèle DeepSeek de première partie `deepseek-flash` déclare nativement les entrées `text` et `image` ;
 les requêtes contenant une image sont donc envoyées directement à DeepSeek par défaut sans passer par le
@@ -428,7 +428,7 @@ par défaut ; les routes Zen sont inchangées et n'ont pas été sondées dans c
 > **Restriction d'utilisation des forfaits Volcengine :** selon la documentation de Volcengine, les quotas
 > Coding Plan et Agent Plan ne sont valables que dans les outils de programmation par IA pris en charge. Elle
 > avertit que l'utilisation d'une clé de forfait pour des appels API généraux peut entraîner la suspension de
-> l'abonnement ou le bannissement du compte. Le routage de Codex ou Claude Code par opencodex correspond à
+> l'abonnement ou le bannissement du compte. Le routage de Codex ou Claude Code par OpenRelay correspond à
 > l'usage documenté ; l'emploi d'une clé de forfait par une autre automatisation n'en fait pas partie. La route
 > `volcengine` facturée à l'usage n'est pas soumise à cette restriction.
 
@@ -464,7 +464,7 @@ et copiez la clé d'inférence de Vultr depuis la vue d'ensemble de l'abonnement
 
 **Découverte Command Code.** Le préréglage lit la liste `/provider/v1/models` de Command Code depuis
 l'hôte fixe de l'API Provider, conserve les identifiants natifs et limite la découverte à 256 KiB et
-256 lignes brutes. `ocx login command-code` permet une connexion OAuth dans le navigateur, avec importation
+256 lignes brutes. `orl login command-code` permet une connexion OAuth dans le navigateur, avec importation
 facultative des identifiants de la CLI depuis `~/.commandcode/auth.json` pour ses utilisateurs actuels. Le
 catalogue des modèles est propre au compte et provient du point de terminaison de découverte authentifié après
 la connexion. Le préréglage Provider-API (`commandcode`) envoie la clé active configurée : la plupart des
@@ -478,7 +478,7 @@ les modèles MiMo, un appel complet à un outil déclaré, sans équivalent nati
 sans erreur ; si le tour est interrompu ou filtré, le balisage reste du texte. Créez des clés Provider-API dans
 [Command Code Studio](https://commandcode.ai/studio/).
 
-**Quota Command Code.** Le tableau de bord et `ocx account refresh` sondent les fenêtres
+**Quota Command Code.** Le tableau de bord et `orl account refresh` sondent les fenêtres
 `/alpha/billing/credits` de Command Code (5 heures et hebdomadaire) sur l'hôte canonique
 `https://api.commandcode.ai`. Le préréglage OAuth (`command-code`) utilise le jeton porteur du compte
 enregistré ; le préréglage à clé d'API fournisseur (`commandcode`) utilise la clé active configurée. Une
@@ -486,7 +486,7 @@ URL de base modifiée ressemblant à l'original n'est jamais sondée. Les crédi
 gratuits restants sont affichés sous forme de fenêtre en USD lorsque Command Code signale également les
 dépenses de la période.
 
-Lors de la connexion à OrcaRouter par navigateur (`ocx login orcarouter-oauth`), le corps d’une
+Lors de la connexion à OrcaRouter par navigateur (`orl login orcarouter-oauth`), le corps d’une
 réponse réussie à l’échange de clé doit être un JSON UTF-8 valide d’au plus 64 KiB. Le délai existant
 de 30 secondes pour cette requête couvre les en-têtes et la réception complète du corps ; tout corps
 trop volumineux ou mal formé est rejeté avant l’enregistrement de la clé. Ces limites concernent
@@ -567,7 +567,7 @@ Créez une clé dans le [gestionnaire de clés Novita](https://novita.ai/setting
 
 Un fournisseur `openai-chat` personnalisé qui utilise `authMode: "key"` et l'URL de base canonique
 `https://api.a6api.com` ou `https://api.a6api.com/v1` bénéficie d'un indicateur de crédits A6API dans le tableau
-de bord et dans la sortie de `ocx account refresh <provider>`. Le nom du fournisseur est libre ; la détection
+de bord et dans la sortie de `orl account refresh <provider>`. Le nom du fournisseur est libre ; la détection
 repose sur le point de terminaison HTTPS canonique. L'indicateur convertit les unités de jetons A6API en USD à
 partir de la limite de crédit ferme du compte, puis affiche le pourcentage consommé et le crédit restant.
 L'expiration du jeton n'est pas présentée comme une réinitialisation du quota, car elle n'implique pas le
@@ -607,14 +607,14 @@ ou de supprimer une clé ; l'API de gestion est `/api/providers/keys` et ne renv
 
 ### Changer de compte depuis le terminal
 
-Utilisez `ocx account list`, `ocx account current` et `ocx account use` pour consulter ou changer les mêmes
+Utilisez `orl account list`, `orl account current` et `orl account use` pour consulter ou changer les mêmes
 groupes de comptes Codex, de comptes OAuth et de clés API sans ouvrir le tableau de bord. Consultez la
 [référence de la CLI](/fr/reference/cli/providers-accounts/#ocx-account-subcommand) pour les commandes, la sortie JSON et le
 comportement lors de l'ouverture d'une nouvelle session.
 
 ### Routes de préversion GPT-5.6
 
-GPT-5.6 Sol/Terra/Luna sont préchargés dans les listes de repli des fournisseurs afin que `ocx sync` puisse
+GPT-5.6 Sol/Terra/Luna sont préchargés dans les listes de repli des fournisseurs afin que `orl sync` puisse
 maintenir leur visibilité même lorsque les catalogues en direct ne sont pas encore à jour :
 
 | Route Codex | Identifiants de modèle préchargés | Contexte visible dans Codex |
@@ -630,30 +630,30 @@ leur fournisseur. Les quatre routes restent soumises aux autorisations du servic
 également sa liste statique pour ne conserver que les modèles utilisables par le compte connecté.
 
 :::note[Passerelles et proxys d'abonnement]
-Un fournisseur est inclus lorsque opencodex dispose d'un adaptateur de protocole correspondant, **et non** selon
+Un fournisseur est inclus lorsque OpenRelay dispose d'un adaptateur de protocole correspondant, **et non** selon
 qu'il s'agit ou non d'un produit « agent ». Les identifiants d'adaptateur actuels sont `openai-chat`, `openai-responses`, `anthropic`, `google`
 (modes AI Studio, Vertex et Antigravity/Cloud Code Assist), `azure` / `azure-openai`, `kiro` et
 `cursor`. Une API propriétaire dépourvue de l'une de ces implémentations, comme l'API native Amazon Bedrock,
 n'est pas prise en charge directement.
 
-**GitHub Copilot** est un fournisseur OAuth (`ocx login github-copilot`) qui échange une connexion GitHub par
+**GitHub Copilot** est un fournisseur OAuth (`orl login github-copilot`) qui échange une connexion GitHub par
 flux d'appareil contre un jeton d'API Copilot de courte durée, et non contre une clé API collée. **GitLab Duo**
 reste une passerelle à clé ou jeton d'abonnement sur son point de terminaison compatible OpenAI.
 **Cloudflare AI Gateway** exige que les identifiants de votre compte et de votre passerelle figurent dans l'URL.
 
 Copilot présente un catalogue qui utilise plusieurs protocoles : ces modèles (`gpt-5.3-codex`, `gpt-5.4`,
 `gpt-5.4-mini`, `gpt-5.5`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-6-astra`, `grok-4.5`, `grok-4.6`, `mai-code-1.1-flash`, `mai-code-1-flash-picker`) rejettent
-`/chat/completions` pour le trafic d'agent. opencodex route donc ces modèles sur l'API Responses par défaut,
+`/chat/completions` pour le trafic d'agent. OpenRelay route donc ces modèles sur l'API Responses par défaut,
 tandis que tous les autres modèles Copilot restent sur Chat Completions. L'ordre de priorité est le suivant :
 verrouillage explicite du protocole → entrée [`modelAdapters`](/fr/reference/configuration/providers/) définie
 par l'utilisateur → valeur par défaut du registre → adaptateur commun au fournisseur. Pour faire passer par
 Responses un modèle dépourvu de valeur par défaut intégrée, par exemple `gpt-5.4-nano`, définissez
 `"modelAdapters": { "gpt-5.4-nano": "openai-responses" }`.
 
-Cursor est géré séparément comme adaptateur expérimental. `adapter: "cursor"` apparaît dans `ocx init` et dans
+Cursor est géré séparément comme adaptateur expérimental. `adapter: "cursor"` apparaît dans `orl init` et dans
 le sélecteur **Ajouter un fournisseur** du tableau de bord comme entrée expérimentale de la configuration locale,
 avec les métadonnées du catalogue statique de repli de Cursor. Lorsqu'un jeton d'accès Cursor est configuré,
-opencodex utilise le transport HTTP/2 direct de Cursor. Sa liste de repli intégrée comprend `gpt-5.6-sol` /
+OpenRelay utilise le transport HTTP/2 direct de Cursor. Sa liste de repli intégrée comprend `gpt-5.6-sol` /
 `terra` / `luna` (contexte de 1M), les variantes ordinaires et Fast de Grok 4.5, 4.6 et 4.7 (500K), ainsi que
 `kimi-k3` (262K) ; la découverte en direct détermine celles qui restent visibles pour le compte. Grok 4.6 et 4.7 exposent
 `low` / `medium` / `high` / `xhigh` sous les deux formes, tandis que 4.5 s'arrête à `high`. Pour Grok 4.5 et 4.6,
@@ -669,7 +669,7 @@ Codex ; définissez
 uniquement pour des expériences locales de confiance, ou via **Fournisseurs → Cursor → Modifier le JSON** dans
 le tableau de bord. Consultez la [référence de configuration](/fr/reference/configuration/providers/#fournisseur-cursor-adapter-cursor)
 pour un exemple complet. MCP, l'enregistrement d'écran et l'utilisation de l'ordinateur sont disponibles sous
-forme de points d'intégration pour un exécuteur ; sans exécuteur local configuré, opencodex renvoie des résultats
+forme de points d'intégration pour un exécuteur ; sans exécuteur local configuré, OpenRelay renvoie des résultats
 typés indiquant son absence au lieu de bloquer la requête par stratégie. OAuth Cursor et la découverte en direct
 des modèles sont activés pour cet adaptateur expérimental ; Cursor ne figure toujours pas dans les listes de
 connexion par clé.
@@ -679,10 +679,10 @@ connexion par clé.
 
 Ollama Cloud est une version hébergée — et non locale — d'Ollama, à configurer à l'adresse
 `https://ollama.com/v1` avec une clé créée sur
-[ollama.com/settings/keys](https://ollama.com/settings/keys). opencodex l'atteint via l'API REST
+[ollama.com/settings/keys](https://ollama.com/settings/keys). OpenRelay l'atteint via l'API REST
 native d'Ollama (`POST /api/chat`) plutôt que via la surface compatible OpenAI, et découvre la
 liste des modèles auprès du fournisseur : les nouveaux modèles Ollama Cloud apparaissent sans
-modifier la configuration. opencodex classe les modèles cloud selon leurs
+modifier la configuration. OpenRelay classe les modèles cloud selon leurs
 capacités visuelles, afin que le [service auxiliaire de vision](/fr/guides/sidecars/) n'intervienne que pour les modèles
 exclusivement textuels. Ces derniers, par exemple `glm-5.2`, `deepseek-v4-flash`, `gpt-oss`, `qwen3-coder`,
 `minimax-m2.x` et `nemotron-3-*`, figurent dans `noVisionModels` ; les modèles à vision native, comme
@@ -690,14 +690,14 @@ exclusivement textuels. Ces derniers, par exemple `glm-5.2`, `deepseek-v4-flash`
 tolère les balises `:size` d'Ollama : `gpt-oss` couvre donc `gpt-oss:120b` et `gpt-oss:20b`.
 
 Ollama documente actuellement la sortie structurée comme non prise en charge sur Ollama Cloud.
-Pour `ollama-cloud` canonique, opencodex refuse donc les requêtes à sortie structurée
+Pour `ollama-cloud` canonique, OpenRelay refuse donc les requêtes à sortie structurée
 (`text.format`) avec une erreur explicite plutôt que de renvoyer silencieusement une prose libre ;
 les points de terminaison locaux et personnalisés `ollama-native` conservent le comportement
 natif `format` d'Ollama.
 
 ## 4. Fournisseurs locaux
 
-Faites pointer opencodex vers un serveur local compatible OpenAI, généralement avec une clé vide :
+Faites pointer OpenRelay vers un serveur local compatible OpenAI, généralement avec une clé vide :
 
 | Fournisseur | URL de base |
 | --- | --- |
@@ -708,7 +708,7 @@ Faites pointer opencodex vers un serveur local compatible OpenAI, généralement
 ## Tout point de terminaison compatible OpenAI
 
 Si un fournisseur prend en charge Chat Completions, l'adaptateur `openai-chat` peut le gérer. Choisissez
-**Personnalisé** dans le tableau de bord ou `custom` dans `ocx init`, puis saisissez l'URL de base. Consultez la
+**Personnalisé** dans le tableau de bord ou `custom` dans `orl init`, puis saisissez l'URL de base. Consultez la
 [référence de configuration](/fr/reference/configuration/) pour tous les champs de fournisseur
 (`headers`, `noReasoningModels`, `noVisionModels`, `models`, …).
 

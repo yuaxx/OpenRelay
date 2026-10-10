@@ -103,7 +103,7 @@ export function failureWindowSteersNewThreads(
   if (config.codexPinnedTransientPolicy === "detour-new-threads") return true;
   if (!pinnedDegradeWarned.has(accountId)) {
     pinnedDegradeWarned.add(accountId);
-    console.warn("[opencodex] pinned Codex account is degraded; new threads stay on it until it recovers");
+    console.warn("[openrelay] pinned Codex account is degraded; new threads stay on it until it recovers");
   }
   return false;
 }

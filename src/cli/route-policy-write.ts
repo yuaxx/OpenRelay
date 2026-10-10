@@ -5,9 +5,9 @@ import { readJsonInput, serializeManagementJson } from "./json-input";
 import { CliUsageError, runtimeBaseUrl, runtimeRequest, takeFlag, takeOptionWithSyntax, type RuntimeApiDeps } from "./runtime-api";
 
 const USAGE = `Usage:
-  ocx route policy create <id> --file <profile.json|-> [--json]
-  ocx route policy update <id> --file <profile.json|-> --expected-revision <revision> [--json]
-  ocx route policy remove <id> --yes [--json]`;
+  orl route policy create <id> --file <profile.json|-> [--json]
+  orl route policy update <id> --file <profile.json|-> --expected-revision <revision> [--json]
+  orl route policy remove <id> --yes [--json]`;
 const ERRORS: Readonly<Record<string, string>> = {
   profile_exists: "Routing profile already exists. Use show and review an explicit update.",
   profile_revision_conflict: "Routing profile changed. Read show again and review the changes before updating with its revision.",

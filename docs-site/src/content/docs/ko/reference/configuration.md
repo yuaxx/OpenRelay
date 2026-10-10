@@ -1,9 +1,9 @@
 ---
 title: 설정 레퍼런스
-description: opencodex가 설정을 저장하는 위치, 편집 방식, 각 설정 도메인으로 가는 링크를 안내합니다.
+description: OpenRelay가 설정을 저장하는 위치, 편집 방식, 각 설정 도메인으로 가는 링크를 안내합니다.
 ---
 
-opencodex는 지속 설정을 `$OPENCODEX_HOME/config.json`에 저장합니다. 보통은
+OpenRelay는 지속 설정을 `$OPENCODEX_HOME/config.json`에 저장합니다. 보통은
 `~/.opencodex/config.json`이며, Windows에서는 기본값이
 `%USERPROFILE%\.opencodex\config.json`입니다.
 
@@ -12,8 +12,8 @@ opencodex는 지속 설정을 `$OPENCODEX_HOME/config.json`에 저장합니다. 
 작업에 맞는 편집 경로를 선택하세요.
 
 - **대시보드:** 안내형 UI에서 프로바이더, 모델, 에이전트, 접근, 저장소 설정을 조정합니다.
-- **CLI:** `ocx init`은 초기 파일을 만들고, `ocx provider`, `ocx models`, `ocx combo`,
-  `ocx agent`, `ocx config` 같은 명령은 각 명령이 맡은 설정을 갱신하거나 조회합니다.
+- **CLI:** `orl init`은 초기 파일을 만들고, `orl provider`, `orl models`, `orl combo`,
+  `orl agent`, `orl config` 같은 명령은 각 명령이 맡은 설정을 갱신하거나 조회합니다.
 - **파일:** 전용 UI나 CLI 명령이 없는 필드는 `config.json`을 직접 편집합니다. 파일은 유효한 JSON이어야
   합니다.
 
@@ -23,7 +23,7 @@ opencodex는 지속 설정을 `$OPENCODEX_HOME/config.json`에 저장합니다. 
 경로가 명시된 `claudeCode`와 리스너 바인딩 필드의 외부 수정분을 병합하지만, 그 보호가 모든 하위 트리를
 덮지는 않습니다.
 
-파일을 파싱할 수 없으면 opencodex는 `config.json.invalid-<timestamp>`로 백업하고, 콘솔에 경고를
+파일을 파싱할 수 없으면 OpenRelay는 `config.json.invalid-<timestamp>`로 백업하고, 콘솔에 경고를
 남긴 뒤 기본값으로 시작합니다. 파일이 없어도 새로 설치한 경우의 기본값을 그대로 사용하며, 그것은 단일
 `openai` forward 프로바이더입니다.
 
@@ -57,8 +57,8 @@ OAuth와 forward-provider 토큰은 `config.json`이 아니라 별도의 자격 
 account id와 이메일도 공개하지 않는 편이 좋으니, 가능하면 공개 selector alias를 사용하세요.
 
 :::note[원자적 쓰기]
-opencodex는 관리형 `config.toml`과 `opencodex-catalog.json` 파일을 임시 파일로 쓴 뒤 rename하는
+OpenRelay는 관리형 `config.toml`과 `opencodex-catalog.json` 파일을 임시 파일로 쓴 뒤 rename하는
 방식(`atomicWriteFile`)으로 저장합니다.
-이렇게 하면 `ocx stop`과 프록시 종료 handler처럼 동시에 실행되는 writer가 Codex를 되돌릴 때도
+이렇게 하면 `orl stop`과 프록시 종료 handler처럼 동시에 실행되는 writer가 Codex를 되돌릴 때도
 부분 파일이 생기지 않습니다.
 :::

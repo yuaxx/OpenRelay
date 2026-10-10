@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
 // Bake the parent package version into the bundle as a fallback for moments when the runtime
 // `/healthz` version is not reachable yet.
@@ -9,7 +10,7 @@ const proxyTarget = process.env.OPENCODEX_PROXY_TARGET
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   define: { __APP_VERSION__: JSON.stringify(version) },
   /* [Decision Log]
   - 목적: 로컬 Vite GUI가 실행 중인 opencodex API를 same-origin으로 호출해 CORS 잡음 없이 실제 데이터를 보여준다.

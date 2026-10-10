@@ -10,6 +10,7 @@ import { createBoundedFetch } from "../../bounded-fetch";
 import { readUsageMetadata, readUsageResponseJson, usageSummary30dResourceKey, type UsageReadMetadata } from "../../usage-summary-resource";
 import { UsageIncompleteNotice } from "../usage-incomplete-notice";
 import { useT } from "../../i18n/shared";
+import { Input } from "../ui/controls";
 import { IconFilter, IconSearch, IconBoxes, IconGlobe, IconLock, IconKey, IconTrash } from "../../icons";
 import {
   applyActiveAccountReauth,
@@ -36,6 +37,7 @@ import { RailRow } from "./ProviderRail";
 import type { PricingFilter, ProviderModelUsageRow, ProviderUsageTotals, StatusFilter, TypeFilter } from "./types";
 import ProviderOverviewDashboard from "./ProviderOverviewDashboard";
 import ProviderJsonEditor, { type JsonEditorState } from "./ProviderJsonEditor";
+import { nextProbedQuotaReadTimes, probedQuotaReadTimes, type QuotaOverviewAccount } from "../../provider-workspace/quota-overview";
 
 import type { ModelRow } from "../../pages/models-shared";
 import { parseModelInventory, countModelInventory, parseModelSelection } from "../../provider-workspace/model-inventory";
@@ -93,6 +95,8 @@ export default function ProviderWorkspaceShell({
   quotaForceRefresh = false,
   onQuotaRefreshSettled,
   onRefreshAllQuotas,
+  quotaOverviewAccounts = {},
+  accountQuotaReadFailed = {},
   detail,
 }: {
   providers: Record<string, WorkspaceProvider>;
@@ -135,6 +139,8 @@ export default function ProviderWorkspaceShell({
    * Omitted when the page cannot drive one, which is what hides the control.
    */
   onRefreshAllQuotas?: () => Promise<boolean>;
+  quotaOverviewAccounts?: Record<string, QuotaOverviewAccount[]>;
+  accountQuotaReadFailed?: Record<string, boolean>;
   /** Detail body for the selected provider (WP090); a placeholder renders when absent. */
   detail?: (item: WorkspaceItem, data: DetailSlotData) => ReactNode;
 }) {
@@ -165,6 +171,9 @@ export default function ProviderWorkspaceShell({
   const [quotaReports, setQuotaReports] = useState<Record<string, ProviderQuotaReportView>>(() => (
     readFreshQuotaReportCache(quotasCacheKey) ?? {}
   ));
+  const [lastQuotaReads, setLastQuotaReads] = useState(() => ({
+    apiBase, times: probedQuotaReadTimes(readSessionListCache(quotasCacheKey)),
+  }));
   const [usageLoading, setUsageLoading] = useState(() => !readSessionListCache(usageCacheKey));
   const [quotasLoading, setQuotasLoading] = useState(() => {
     const cached = readFreshQuotaReportCache(quotasCacheKey);
@@ -256,6 +265,9 @@ export default function ProviderWorkspaceShell({
     let cancelled = false;
     const timeout = window.setTimeout(() => {
       const cached = readFreshQuotaReportCache(quotasCacheKey);
+      setLastQuotaReads(current => current.apiBase === apiBase ? current : {
+        apiBase, times: probedQuotaReadTimes(readSessionListCache(quotasCacheKey)),
+      });
       if (!cached || Object.keys(cached).length === 0) setQuotasLoading(true);
       // A forced bump means a mutation just changed the answer, so the server's TTL has to
       // be bypassed. The old derived-key effect always read the cached view, which is why a
@@ -275,6 +287,12 @@ export default function ProviderWorkspaceShell({
           }
           // A successful endpoint response is authoritative, including an empty report list.
           const next = freshQuotaReportsFromResponse(data.reports);
+          setLastQuotaReads(previous => {
+            const times = nextProbedQuotaReadTimes(
+              previous.apiBase === apiBase ? previous.times : {}, data.reports, next, Date.now(),
+            );
+            return { apiBase, times };
+          });
           setQuotaReports(next);
           writeSessionListCache(quotasCacheKey, next);
           // Report only for a forced read: an ordinary revalidation has no operator waiting on it.
@@ -400,15 +418,15 @@ export default function ProviderWorkspaceShell({
       : visibleRailNames[0] ?? null;
 
   return (
-    <div className="pws-shell-container">
+    <div className="pws-shell-container or-redesign">
       <div className="pws-root">
         <aside className="pws-rail" aria-label={t("pws.providerList")}>
         <div className="pws-search-row">
           <div className="pws-search-wrap">
             <IconSearch className="pws-search-icon" width={14} height={14} aria-hidden="true" />
-            <input
+            <Input
               type="search"
-              className="input pws-search-input"
+              className="pws-search-input"
               placeholder={t("pws.searchPlaceholder")}
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -607,6 +625,9 @@ export default function ProviderWorkspaceShell({
           <ProviderOverviewDashboard
             sections={sections}
             quotaReports={quotaReports}
+            lastQuotaReadTimes={lastQuotaReads.apiBase === apiBase ? lastQuotaReads.times : {}}
+            accountRows={quotaOverviewAccounts}
+            accountReadFailed={accountQuotaReadFailed}
             usageTotals={usageTotals}
             usageLoading={usageLoading}
             quotasLoading={quotasLoading}

@@ -3,7 +3,7 @@ title: "Services auxiliaires : recherche web et vision"
 description: Dotez les modèles routés d’une véritable recherche web et donnez aux modèles textuels une compréhension des images grâce à des services auxiliaires ChatGPT natifs.
 ---
 
-Tous les modèles routés ne proposent pas une **recherche web** hébergée ni une **entrée d’image** native. opencodex complète
+Tous les modèles routés ne proposent pas une **recherche web** hébergée ni une **entrée d’image** native. OpenRelay complète
 ces capacités au moyen de deux services auxiliaires. Chacun peut s’appuyer sur un fournisseur connecté à ChatGPT (`forward`) ou sur un
 fournisseur Anthropic OAuth enregistré ; la recherche web peut aussi utiliser un OAuth Grok enregistré via le moteur `xai` explicite. Les erreurs des services auxiliaires sont converties en résultats d’outil limités ou en marqueurs d’image,
 au lieu de faire échouer l’intégralité du tour.
@@ -17,11 +17,11 @@ fournisseur `forward` actif.
 
 ## Service auxiliaire de recherche web
 
-Lorsque Codex demande un hébergement `web_search` pour un modèle routé sans passage, opencodex :
+Lorsque Codex demande un hébergement `web_search` pour un modèle routé sans passage, OpenRelay :
 
 1. **Supprime** l'outil hébergé `web_search` et expose à sa place un outil de fonction synthétique `web_search(query)`
    au modèle routé. Les options de l'outil hébergé d'origine sont conservées pour l'appel du service auxiliaire.
-2. Exécute le modèle routé dans une petite **boucle d'agent**. Lorsqu'il appelle `web_search`, opencodex utilise le
+2. Exécute le modèle routé dans une petite **boucle d'agent**. Lorsqu'il appelle `web_search`, OpenRelay utilise le
    moteur du service auxiliaire sélectionné : OpenAI exécute l'outil hébergé `web_search` avec `gpt-5.6-luna` par défaut ;
    Anthropic exécute `web_search_20250305` avec `claude-sonnet-5` par défaut. La réponse en streaming et
    les citations deviennent le résultat d’un outil. xAI exécute `web_search` avec `grok-4.6` par défaut et ajoute
@@ -30,7 +30,7 @@ Lorsque Codex demande un hébergement `web_search` pour un modèle routé sans p
    (par défaut 3), supprime ensuite l'outil de recherche et force une réponse finale. De vrais outils clients tels que
    `apply_patch` ou le shell mettent fin au tour afin que ces appels parviennent à Codex.
 
-Chaque itération du modèle routé envoie `stream: true` en amont, mais, par défaut, opencodex met entièrement
+Chaque itération du modèle routé envoie `stream: true` en amont, mais, par défaut, OpenRelay met entièrement
 en mémoire tampon les événements sémantiques avant de décider s'il faut lancer une recherche ou renvoyer la réponse finale.
 Seuls les en-têtes et le statut du tour final, ainsi que les réponses 429 de la première itération, sont traités immédiatement. Ainsi,
 les appels de recherche synthétiques et les résultats préliminaires ne sont jamais exposés comme sorties du modèle visibles par le client.
@@ -86,7 +86,7 @@ les échecs de génération postérieurs à l'envoi des en-têtes sont transmis 
 ## Service auxiliaire de vision
 
 Lorsqu'un modèle routé figure dans le `noVisionModels` de son fournisseur — ou est déclaré texte seul pour ce modèle
-via `modelInputModalities` — et qu'une requête porte une image, opencodex décrit chaque image **avant** l'appel principal
+via `modelInputModalities` — et qu'une requête porte une image, OpenRelay décrit chaque image **avant** l'appel principal
 et la remplace par du texte, à condition qu'un plan de sidecar vision soit disponible. Sans plan disponible, l'image brute
 est supprimée au lieu d'être transmise à un backend texte seul. Le catalogue de modèles annonce l'entrée image pour chaque
 modèle couvert par le sidecar. Les combos annoncent l'entrée image seulement lorsque chaque membre accepte les images,
@@ -166,13 +166,13 @@ les clés omises inchangées. `timeoutMs` utilise les limites entières de l'env
 
 La carte du service auxiliaire de recherche web reprend la même forme de contrôle : la première
 ligne du sélecteur de modèle est **Désactivé (Off)**. La désactivation arrête l'interception de
-`web_search` par OpenCodex et l'intégration Codex écrit `web_search = "disabled"` dans
+`web_search` par OpenRelay et l'intégration Codex écrit `web_search = "disabled"` dans
 `~/.codex/config.toml`, car Codex continue sinon d'annoncer son propre outil hébergé
 `web_search` natif, ce qu'il faut lorsqu'un serveur de recherche MCP doit être le seul chemin
 de recherche. La réactivation supprime cette ligne et rétablit la ligne racine `web_search`
 écrite par l'opérateur, enregistrée dans le journal Codex. L'écriture exige un
-`~/.codex/config.toml` géré (`ocx sync`) ; la carte du tableau de bord vous avertit
-lorsqu'elle n'a pas eu lieu et `ocx agent sidecar web --enabled off` indique si elle a réussi.
+`~/.codex/config.toml` géré (`orl sync`) ; la carte du tableau de bord vous avertit
+lorsqu'elle n'a pas eu lieu et `orl agent sidecar web --enabled off` indique si elle a réussi.
 
 Vous pouvez toujours définir `enabled: false` dans `config.json` si vous préférez modifier le
 fichier directement. La recherche et la description d'images avec OAuth Anthropic réutilisent les identifiants

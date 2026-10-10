@@ -83,7 +83,7 @@ describe("CLI help recovery", () => {
       expect(suggestHelpPaths([...prefix, "delet"])).toEqual([["access", "key", "remove"]]);
       expect(suggestHelpPaths([...prefix, "rotate", "commti"])).toEqual([["access", "key", "rotate", "commit"]]);
       expect(formatHelpRecovery([...prefix, "lisst"])).toBe(
-        "Detailed help unavailable for the requested topic.\nDid you mean:\n  ocx help access key list\nSee: ocx help access key");
+        "Detailed help unavailable for the requested topic.\nDid you mean:\n  orl help access key list\nSee: orl help access key");
     }
     expect(suggestHelpPaths(["api-ke"])).toEqual([["access", "key"]]);
     expect(suggestHelpPaths(["access", "kyes"])).toEqual([["access", "key"]]);
@@ -105,10 +105,10 @@ describe("CLI help recovery", () => {
     expect(suggestHelpPaths(atLimit)).toEqual([["models", "context"]]);
     expect(suggestHelpPaths([...atLimit, "operand"])).toEqual([]);
     expect(formatHelpRecovery(["m".repeat(64)])).toContain(`Unknown command: ${"m".repeat(64)}`);
-    expect(formatHelpRecovery(["m".repeat(65)])).toBe("Unknown command.\nSee: ocx help --all");
+    expect(formatHelpRecovery(["m".repeat(65)])).toBe("Unknown command.\nSee: orl help --all");
     const longPath = ["models", "context", ...Array(10_000).fill("operand")];
     expect(resolveHelpPath(longPath)).toMatchObject({ kind: "unavailable", parent: ["models", "context"] });
-    expect(formatHelpRecovery(longPath)).toBe("Detailed help unavailable for the requested topic.\nSee: ocx help models context");
+    expect(formatHelpRecovery(longPath)).toBe("Detailed help unavailable for the requested topic.\nSee: orl help models context");
   });
 
   test("ties sort by name and cap at three destinations in an isolated catalog fixture", () => {
@@ -129,7 +129,7 @@ describe("CLI help recovery", () => {
       expect(result.status).toBe(1);
       expect(result.stdout).toBe("");
       expect(result.stderr).toContain("Unknown command: modles");
-      expect(result.stderr).toContain("ocx help models");
+      expect(result.stderr).toContain("orl help models");
       expect(result.stderr.trim().split("\n").length).toBeLessThan(10);
     }
   });
@@ -139,18 +139,18 @@ describe("CLI help recovery", () => {
     expect(result.status).toBe(1);
     expect(result.stdout).toBe("");
     expect(result.stderr).toContain("Detailed help unavailable");
-    expect(result.stderr).toContain("ocx help account list");
-    expect(result.stderr).not.toContain("ocx help models");
+    expect(result.stderr).toContain("orl help account list");
+    expect(result.stderr).not.toContain("orl help models");
     const context = cli(["help", "model", "contetx"]);
     expect(context.status).toBe(1);
-    expect(context.stderr).toContain("ocx help models context");
+    expect(context.stderr).toContain("orl help models context");
   });
 
   test("distant roots get only the full-reference escape", () => {
     const result = cli(["help", "qzxv"]);
     expect(result.status).toBe(1);
     expect(result.stdout).toBe("");
-    expect(result.stderr).toBe("Unknown command: qzxv\nSee: ocx help --all\n");
+    expect(result.stderr).toBe("Unknown command: qzxv\nSee: orl help --all\n");
   });
 
   test("unsafe roots and trailing operands never enter diagnostic output", () => {
@@ -159,10 +159,10 @@ describe("CLI help recovery", () => {
       const result = cli([root, "private-operand", "--api-key", secret]);
       expect(result.status).toBe(1);
       expect(result.stdout).toBe("");
-      expect(result.stderr).toBe("Unknown command.\nSee: ocx help --all\n");
+      expect(result.stderr).toBe("Unknown command.\nSee: orl help --all\n");
     }
     const typo = cli(["modles", secret]);
-    expect(typo.stderr).toContain("ocx help models");
+    expect(typo.stderr).toContain("orl help models");
     expect(typo.stderr).not.toContain(secret);
   });
 
@@ -182,7 +182,7 @@ describe("CLI help recovery", () => {
       printSubcommandUsage("account", ["account", "lisst", "private-operand"], { write: console.log });`);
     expect(result.status).toBe(1);
     expect(result.stdout).toBe("");
-    expect(result.stderr).toContain("ocx help account list");
+    expect(result.stderr).toContain("orl help account list");
     expect(result.stderr).not.toContain("private-operand");
   });
 

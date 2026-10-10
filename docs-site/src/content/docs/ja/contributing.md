@@ -1,6 +1,6 @@
 ---
 title: コントリビュート
-description: opencodex の開発環境、構成、規約、プロバイダーとアダプターの追加方法。
+description: OpenRelay の開発環境、構成、規約、プロバイダーとアダプターの追加方法。
 ---
 
 ## セットアップ
@@ -77,7 +77,7 @@ GitHub Actions は必要な作業のみを行います。
 - **Cross-platform CI**(`.github/workflows/ci.yml`)はランタイム、テスト、パッケージ、スクリプト、
   TypeScript、ワークフローファイルが変更された pull request と `main` push で実行されます。Bun matrix は Linux、
   Windows、macOS で install、typecheck、tests、privacy scan、release helper build smoke、GUI build、
-  `ocx help` を検査します。別途 3 OS レーンはバンドルランタイムを使い、Bun を別途インストールしなくても
+  `orl help` を検査します。別途 3 OS レーンはバンドルランタイムを使い、Bun を別途インストールしなくても
   npm global install が動作するか確認します。
 - **Release**(`.github/workflows/release.yml`)は手動で実行します。2 つ目の完全 CI パイプラインではなく、
   dry-run や publish 前に正確なリリースコミット(`GITHUB_SHA`)で Cross-platform CI が
@@ -150,7 +150,7 @@ Go ネイティブポートを担っていた `dev2-go` は廃止し、2 本の�
 },
 ```
 
-`src/providers/derive.ts` はこのエントリを `ocx init`、`ocx provider`、ダッシュボード preset、API キーログイン、
+`src/providers/derive.ts` はこのエントリを `orl init`、`orl provider`、ダッシュボード preset、API キーログイン、
 OAuth 設定 seed に供給します。`enrichProviderFromCatalog()` はモデルメタデータと capability 分類を
 保存するプロバイダー設定にコピーします。OAuth プロトコル実装は引き続き `src/oauth/` にあります。
 レジストリメタデータを追加するだけでは OAuth flow は生まれません。

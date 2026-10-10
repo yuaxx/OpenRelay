@@ -3,7 +3,7 @@ title: Local Codex Messaging
 description: Discover loaded local Codex sessions and submit one correlated queued message.
 ---
 
-`ocx message` is an opt-in, command-local surface for existing Codex sessions.
+`orl message` is an opt-in, command-local surface for existing Codex sessions.
 It starts no proxy or app-server, resumes no thread and installs no skill.
 Linux/macOS Unix sockets are supported; Windows fails explicitly. The existing
 Codex daemon must support experimental `thread/queue/add`. No CLI version pin or
@@ -12,9 +12,9 @@ Codex daemon must support experimental `thread/queue/add`. No CLI version pin or
 ## Discover and send
 
 ```bash
-ocx message sessions --json
+orl message sessions --json
 printf '%s\n' 'Please review the current change and send your findings back.' |
-  ocx message send --name 'reviewer' --stdin --json
+  orl message send --name 'reviewer' --stdin --json
 ```
 
 Discovery returns only loaded thread IDs, names and runtime statuses, not history,
@@ -54,7 +54,7 @@ the envelope, or explicitly correlate a response:
 
 ```bash
 printf '%s\n' 'Review findings: ...' |
-  ocx message send --thread <sender-thread-uuid> --kind response \
+  orl message send --thread <sender-thread-uuid> --kind response \
     --in-reply-to <request-message-uuid> --stdin --json
 ```
 
@@ -79,11 +79,11 @@ error schema without a send status. Invalid usage exits 64 on stderr before I/O.
 
 The application message UUID is also the queue request's `clientUserMessageId`.
 The daemon's submission ID is separate; neither proves recipient processing.
-Queueing is not steering and can wait for a busy turn to end. OpenCodex performs
+Queueing is not steering and can wait for a busy turn to end. OpenRelay performs
 no automatic replay, follow-up probing, persistence or delivery monitoring.
 The final loaded-target check and queue submission are not atomic: if the target
 unloads afterwards, an explicit rejection is `not_sent` with `queue_rejected`;
-a lost or invalid reply is `unknown`. OpenCodex does not resume it or retry.
+a lost or invalid reply is `unknown`. OpenRelay does not resume it or retry.
 
 No remote hosts, bearer management, SSH, Claude messaging,
 dashboard, isolation or idle-notification controls are part of this surface.

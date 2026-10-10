@@ -3,11 +3,11 @@ title: Codex Log Guard
 description: Examinez et réduisez explicitement la persistance des journaux de diagnostic Codex sans exposer leur contenu.
 ---
 
-OpenCodex peut examiner la base persistante des journaux de diagnostic Codex et, si vous l’activez, réduire les lignes de diagnostic que Codex conserve. L’inspection reste en lecture seule ; la protection est une modification explicite, refusée si le schéma connu des journaux Codex est absent ou si Codex est en cours d’exécution.
+OpenRelay peut examiner la base persistante des journaux de diagnostic Codex et, si vous l’activez, réduire les lignes de diagnostic que Codex conserve. L’inspection reste en lecture seule ; la protection est une modification explicite, refusée si le schéma connu des journaux Codex est absent ou si Codex est en cours d’exécution.
 
 ## Ce que rapporte Inspect
 
-OpenCodex détermine le `sqlite_home` effectif de Codex selon l’ordre de priorité existant de Codex et examine la base canonique `logs_2.sqlite` qui s’y trouve. Un fichier `logs_N.sqlite` de numéro supérieur ou hérité ne remplace jamais la cible susceptible d’être modifiée.
+OpenRelay détermine le `sqlite_home` effectif de Codex selon l’ordre de priorité existant de Codex et examine la base canonique `logs_2.sqlite` qui s’y trouve. Un fichier `logs_N.sqlite` de numéro supérieur ou hérité ne remplace jamais la cible susceptible d’être modifiée.
 
 La vue Stockage indique :
 
@@ -19,11 +19,11 @@ La vue Stockage indique :
 
 Si `sqlite_home` se trouve hors de `CODEX_HOME`, la base de diagnostic est affichée séparément. Ses octets ne sont pas ajoutés silencieusement au total de stockage `CODEX_HOME` existant.
 
-OpenCodex ne sélectionne ni n’expose `feedback_log_body` pour produire ces diagnostics. Les niveaux de journal sont réduits à l’ensemble fixe des niveaux connus, plus `OTHER`, et les noms des cibles ne sont pas sérialisés.
+OpenRelay ne sélectionne ni n’expose `feedback_log_body` pour produire ces diagnostics. Les niveaux de journal sont réduits à l’ensemble fixe des niveaux connus, plus `OTHER`, et les noms des cibles ne sont pas sérialisés.
 
 ## Modes de Protect
 
-La protection est **désactivée par défaut**. Son activation installe un déclencheur `BEFORE INSERT` appartenant à OpenCodex dans la base canonique `logs_2.sqlite` de Codex. OpenCodex ne remplace jamais un déclencheur inconnu portant l’un de ses noms réservés et ne supprime que les déclencheurs dont le SQL correspond à sa propre version.
+La protection est **désactivée par défaut**. Son activation installe un déclencheur `BEFORE INSERT` appartenant à OpenRelay dans la base canonique `logs_2.sqlite` de Codex. OpenRelay ne remplace jamais un déclencheur inconnu portant l’un de ses noms réservés et ne supprime que les déclencheurs dont le SQL correspond à sa propre version.
 
 Deux modes sont disponibles :
 
@@ -36,7 +36,7 @@ Log Guard filtre uniquement les lignes de journaux SQLite locaux persistants. Il
 
 ### Contrôles de sécurité
 
-Avant que Protect, Disable ou Repair ne modifie cette base externe, OpenCodex :
+Avant que Protect, Disable ou Repair ne modifie cette base externe, OpenRelay :
 
 1. résout exactement le chemin canonique de `logs_2.sqlite` ;
 2. vérifie qu’il s’agit d’un fichier ordinaire, sans lien symbolique, et que le schéma connu correspond exactement ;
@@ -44,52 +44,52 @@ Avant que Protect, Disable ou Repair ne modifie cette base externe, OpenCodex :
 4. acquiert un verrou Log Guard dédié, partagé entre processus ;
 5. répète la vérification des processus Codex après l’acquisition du verrou ;
 6. ouvre la base en lecture et écriture **sans** autoriser sa création et acquiert `BEGIN IMMEDIATE` dans SQLite sans attente en cas d’occupation ;
-7. ne modifie que les déclencheurs Log Guard appartenant à OpenCodex et relit le résultat avant validation ; et
-8. enregistre le mode demandé dans la configuration OpenCodex pendant que le verrou Log Guard est encore détenu.
+7. ne modifie que les déclencheurs Log Guard appartenant à OpenRelay et relit le résultat avant validation ; et
+8. enregistre le mode demandé dans la configuration OpenRelay pendant que le verrou Log Guard est encore détenu.
 
-Si l’énumération des processus est incertaine, si la base est occupée, si le schéma est inconnu ou si un nom de déclencheur réservé appartient à un autre SQL, la modification est refusée par précaution. OpenCodex n’arrête pas Codex automatiquement.
+Si l’énumération des processus est incertaine, si la base est occupée, si le schéma est inconnu ou si un nom de déclencheur réservé appartient à un autre SQL, la modification est refusée par précaution. OpenRelay n’arrête pas Codex automatiquement.
 
 ## Dérive et réparation
 
-Le mode de protection demandé est enregistré dans la configuration OpenCodex, séparément de la base des journaux Codex. C’est important, car une migration Codex peut reconstruire la table `logs`, et SQLite supprime les déclencheurs attachés à une table remplacée.
+Le mode de protection demandé est enregistré dans la configuration OpenRelay, séparément de la base des journaux Codex. C’est important, car une migration Codex peut reconstruire la table `logs`, et SQLite supprime les déclencheurs attachés à une table remplacée.
 
-Lorsque le mode enregistré est `compat` ou `quiet`, mais que le déclencheur correspondant n’est plus observé, Log Guard signale une **dérive**. `ocx doctor` la signale sans jamais la réparer automatiquement.
+Lorsque le mode enregistré est `compat` ou `quiet`, mais que le déclencheur correspondant n’est plus observé, Log Guard signale une **dérive**. `orl doctor` la signale sans jamais la réparer automatiquement.
 
 La réparation est explicite :
 
 ```bash
-ocx storage codex-logs repair
+orl storage codex-logs repair
 ```
 
-OpenCodex ne recrée délibérément pas la protection à chaque démarrage. Une version ultérieure pourra réexaminer la réparation automatique lorsque suffisamment d’observations sur le terrain auront établi sa sûreté lors des migrations Codex.
+OpenRelay ne recrée délibérément pas la protection à chaque démarrage. Une version ultérieure pourra réexaminer la réparation automatique lorsque suffisamment d’observations sur le terrain auront établi sa sûreté lors des migrations Codex.
 
 ## CLI
 
 Consultez l’état :
 
 ```bash
-ocx storage codex-logs status
-ocx storage codex-logs status --json
-ocx doctor
+orl storage codex-logs status
+orl storage codex-logs status --json
+orl doctor
 ```
 
 Activez la politique de compatibilité recommandée :
 
 ```bash
-ocx storage codex-logs protect
+orl storage codex-logs protect
 ```
 
 Choisissez explicitement le mode silencieux :
 
 ```bash
-ocx storage codex-logs protect --mode quiet
+orl storage codex-logs protect --mode quiet
 ```
 
-Désactivez la protection OpenCodex ou réparez une dérive :
+Désactivez la protection OpenRelay ou réparez une dérive :
 
 ```bash
-ocx storage codex-logs unprotect
-ocx storage codex-logs repair
+orl storage codex-logs unprotect
+orl storage codex-logs repair
 ```
 
 Ajoutez `--json` aux commandes Log Guard pour obtenir une sortie lisible par machine. Consultez la [référence CLI](/fr/reference/cli/) pour la syntaxe canonique et le comportement JSON.
@@ -97,7 +97,7 @@ Ajoutez `--json` aux commandes Log Guard pour obtenir une sortie lisible par mac
 La commande existante reste inchangée :
 
 ```bash
-ocx storage --json
+orl storage --json
 ```
 
 Sa réponse contient le même état des journaux Codex que celui utilisé par la page Stockage.
@@ -124,9 +124,9 @@ Le corps de Protect est soit `{"mode":"compat"}`, soit `{"mode":"quiet"}`. `GET 
 
 L’inspection de l’état ouvre la base en lecture seule avec SQLite `immutable=1`. Une lecture de diagnostic ne peut ainsi ni créer ni mettre à jour les fichiers annexes `-wal` ou `-shm`.
 
-Ce choix a une conséquence importante : les agrégats SQL et les métadonnées de déclencheurs observées décrivent le dernier instantané de la base ayant fait l’objet d’un checkpoint. Si Codex écrit activement, le WAL courant peut contenir des lignes ou des pages de schéma plus récentes que l’instantané immuable. Une réponse de modification réussie s’appuie sur l’état du déclencheur vérifié par OpenCodex dans sa transaction d’écriture ; une requête ultérieure d’état en lecture seule peut rester temporairement en retard jusqu’à ce que SQLite effectue un checkpoint de ces pages de schéma.
+Ce choix a une conséquence importante : les agrégats SQL et les métadonnées de déclencheurs observées décrivent le dernier instantané de la base ayant fait l’objet d’un checkpoint. Si Codex écrit activement, le WAL courant peut contenir des lignes ou des pages de schéma plus récentes que l’instantané immuable. Une réponse de modification réussie s’appuie sur l’état du déclencheur vérifié par OpenRelay dans sa transaction d’écriture ; une requête ultérieure d’état en lecture seule peut rester temporairement en retard jusqu’à ce que SQLite effectue un checkpoint de ces pages de schéma.
 
-OpenCodex indique séparément la taille du fichier WAL et ne présente **pas** le résultat comme un débit d’écriture SSD, des écritures NAND ou une consommation d’usure/TBW du disque.
+OpenRelay indique séparément la taille du fichier WAL et ne présente **pas** le résultat comme un débit d’écriture SSD, des écritures NAND ou une consommation d’usure/TBW du disque.
 
 ## États de compatibilité
 

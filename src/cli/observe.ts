@@ -27,20 +27,20 @@ import { fetchHubUsage } from "../client/hub-client";
 import type { HubUsageReport } from "../remote/hub-usage";
 
 const USAGE = `Usage:
-  ocx observe logs [--provider <name>] [--model <id>] [--status <code>]
+  orl observe logs [--provider <name>] [--model <id>] [--status <code>]
       [--conversation <id>] [--account <label>] [--limit <n>] [--follow] [--json|--jsonl] [--events]
-  ocx logs explain <request-id> [--json]
-  ocx logs filter [selectors] [--scan-limit <1..2000>] [--limit <1..2000>] [--json|--jsonl]
-  ocx logs rebuild-index
-  ocx logs index-status
-  ocx observe usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>]
+  orl logs explain <request-id> [--json]
+  orl logs filter [selectors] [--scan-limit <1..2000>] [--limit <1..2000>] [--json|--jsonl]
+  orl logs rebuild-index
+  orl logs index-status
+  orl observe usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>]
       [--since <epoch-ms|ISO-datetime>] [--until <epoch-ms|ISO-datetime>]
       [--provider <name>] [--model <id>] [--api-key-id <id>] [--search <text>] [--json]
-  ocx observe storage [codex-logs [status|protect|unprotect|repair|compact] [--mode <compat|quiet>]] [--json]
-  ocx observe memory [--json]
-  ocx observe debug [--json]
-  ocx observe claude-inbound [--limit <n>] [--json]
-  ocx observe injection [--limit <n>] [--follow [--jsonl]] [--json]`;
+  orl observe storage [codex-logs [status|protect|unprotect|repair|compact] [--mode <compat|quiet>]] [--json]
+  orl observe memory [--json]
+  orl observe debug [--json]
+  orl observe claude-inbound [--limit <n>] [--json]
+  orl observe injection [--limit <n>] [--follow [--jsonl]] [--json]`;
 
 type LogEntry = Record<string, unknown> & { id?: string | number; timestamp?: string; provider?: string; model?: string; status?: number };
 

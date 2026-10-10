@@ -53,7 +53,7 @@ const LABELS: Record<Locale, Record<LogGuardLabelKey, string>> = {
     "error.trigger_collision": "A reserved Log Guard trigger name is already in use. Protection was not changed.",
     "error.unsafe_path": "The Codex logs database path failed the safety check.",
     "error.database_error": "Could not update the Codex logs database.",
-    "error.config_write_failed": "The database changed, but OpenCodex could not save the protection setting. Fix config storage, then run Repair.",
+    "error.config_write_failed": "The database changed, but OpenRelay could not save the protection setting. Fix config storage, then run Repair.",
   },
   de: {
     compact: 'Komprimieren',
@@ -80,7 +80,7 @@ const LABELS: Record<Locale, Record<LogGuardLabelKey, string>> = {
     "error.trigger_collision": "Ein reservierter Log-Guard-Triggername wird bereits verwendet. Der Schutz wurde nicht geändert.",
     "error.unsafe_path": "Der Pfad der Codex-Protokolldatenbank hat die Sicherheitsprüfung nicht bestanden.",
     "error.database_error": "Die Codex-Protokolldatenbank konnte nicht aktualisiert werden.",
-    "error.config_write_failed": "Die Datenbank wurde geändert, aber OpenCodex konnte die Schutzeinstellung nicht speichern. Repariere den Konfigurationsspeicher und führe danach Reparieren aus.",
+    "error.config_write_failed": "Die Datenbank wurde geändert, aber OpenRelay konnte die Schutzeinstellung nicht speichern. Repariere den Konfigurationsspeicher und führe danach Reparieren aus.",
   },
   fr: {
     compact: "Compacter",
@@ -107,7 +107,7 @@ const LABELS: Record<Locale, Record<LogGuardLabelKey, string>> = {
     "error.trigger_collision": "Un nom de déclencheur Log Guard réservé est déjà utilisé. La protection n’a pas été modifiée.",
     "error.unsafe_path": "Le chemin de la base de données des journaux Codex a échoué au contrôle de sécurité.",
     "error.database_error": "Impossible de mettre à jour la base de données des journaux Codex.",
-    "error.config_write_failed": "La base de données a été modifiée, mais OpenCodex n’a pas pu enregistrer le paramètre de protection. Corrigez le stockage de configuration, puis lancez Réparer.",
+    "error.config_write_failed": "La base de données a été modifiée, mais OpenRelay n’a pas pu enregistrer le paramètre de protection. Corrigez le stockage de configuration, puis lancez Réparer.",
   },
   ko: {
     compact: '압축',
@@ -134,7 +134,7 @@ const LABELS: Record<Locale, Record<LogGuardLabelKey, string>> = {
     "error.trigger_collision": "예약된 Log Guard 트리거 이름이 이미 사용 중입니다. 보호를 변경하지 않았습니다.",
     "error.unsafe_path": "Codex 로그 데이터베이스 경로가 안전성 검사를 통과하지 못했습니다.",
     "error.database_error": "Codex 로그 데이터베이스를 업데이트하지 못했습니다.",
-    "error.config_write_failed": "데이터베이스는 변경되었지만 OpenCodex가 보호 설정을 저장하지 못했습니다. 구성 저장소를 수정한 뒤 복구를 실행하세요.",
+    "error.config_write_failed": "데이터베이스는 변경되었지만 OpenRelay가 보호 설정을 저장하지 못했습니다. 구성 저장소를 수정한 뒤 복구를 실행하세요.",
   },
   zh: {
     compact: '压缩',
@@ -161,7 +161,7 @@ const LABELS: Record<Locale, Record<LogGuardLabelKey, string>> = {
     "error.trigger_collision": "保留的 Log Guard 触发器名称已被占用，因此未更改保护设置。",
     "error.unsafe_path": "Codex 日志数据库路径未通过安全检查。",
     "error.database_error": "无法更新 Codex 日志数据库。",
-    "error.config_write_failed": "数据库已更改，但 OpenCodex 无法保存保护设置。请先修复配置存储，然后运行“修复保护”。",
+    "error.config_write_failed": "数据库已更改，但 OpenRelay 无法保存保护设置。请先修复配置存储，然后运行“修复保护”。",
   },
   "zh-TW": {
     compact: '壓縮',
@@ -188,7 +188,7 @@ const LABELS: Record<Locale, Record<LogGuardLabelKey, string>> = {
     "error.trigger_collision": "保留的 Log Guard 觸發器名稱已被使用，因此未變更保護設定。",
     "error.unsafe_path": "Codex 日誌資料庫路徑未通過安全檢查。",
     "error.database_error": "無法更新 Codex 日誌資料庫。",
-    "error.config_write_failed": "資料庫已變更，但 OpenCodex 無法儲存保護設定。請先修復設定儲存空間，再執行「修復保護」。",
+    "error.config_write_failed": "資料庫已變更，但 OpenRelay 無法儲存保護設定。請先修復設定儲存空間，再執行「修復保護」。",
   },
   ru: {
     compact: 'Сжать',
@@ -215,7 +215,7 @@ const LABELS: Record<Locale, Record<LogGuardLabelKey, string>> = {
     "error.trigger_collision": "Зарезервированное имя триггера Log Guard уже используется. Защита не изменена.",
     "error.unsafe_path": "Путь к базе журналов Codex не прошёл проверку безопасности.",
     "error.database_error": "Не удалось обновить базу журналов Codex.",
-    "error.config_write_failed": "База была изменена, но OpenCodex не смог сохранить настройку защиты. Исправьте хранилище конфигурации и затем запустите восстановление.",
+    "error.config_write_failed": "База была изменена, но OpenRelay не смог сохранить настройку защиты. Исправьте хранилище конфигурации и затем запустите восстановление.",
   },
   ja: {
     compact: '圧縮',
@@ -242,7 +242,7 @@ const LABELS: Record<Locale, Record<LogGuardLabelKey, string>> = {
     "error.trigger_collision": "予約済みの Log Guard トリガー名が既に使用されています。保護は変更されませんでした。",
     "error.unsafe_path": "Codex ログデータベースのパスが安全性チェックに失敗しました。",
     "error.database_error": "Codex ログデータベースを更新できませんでした。",
-    "error.config_write_failed": "データベースは変更されましたが、OpenCodex は保護設定を保存できませんでした。設定ストレージを修正してから保護を修復してください。",
+    "error.config_write_failed": "データベースは変更されましたが、OpenRelay は保護設定を保存できませんでした。設定ストレージを修正してから保護を修復してください。",
   },
   tr: {
     compact: 'Sıkıştır',
@@ -269,7 +269,7 @@ const LABELS: Record<Locale, Record<LogGuardLabelKey, string>> = {
     "error.trigger_collision": "Ayrılmış bir Log Guard tetikleyici adı zaten kullanılıyor. Koruma değiştirilmedi.",
     "error.unsafe_path": "Codex günlük veritabanı yolu güvenlik denetimini geçemedi.",
     "error.database_error": "Codex günlük veritabanı güncellenemedi.",
-    "error.config_write_failed": "Veritabanı değişti ancak OpenCodex koruma ayarını kaydedemedi. Yapılandırma depolamasını düzeltip ardından korumayı onarın.",
+    "error.config_write_failed": "Veritabanı değişti ancak OpenRelay koruma ayarını kaydedemedi. Yapılandırma depolamasını düzeltip ardından korumayı onarın.",
   },
   vi: {
     compact: 'Nén',
@@ -296,7 +296,7 @@ const LABELS: Record<Locale, Record<LogGuardLabelKey, string>> = {
     "error.trigger_collision": "Tên trình kích hoạt Log Guard dành riêng đã được sử dụng. Bảo vệ chưa được thay đổi.",
     "error.unsafe_path": "Đường dẫn cơ sở dữ liệu nhật ký Codex không vượt qua được kiểm tra an toàn.",
     "error.database_error": "Không thể cập nhật cơ sở dữ liệu nhật ký Codex.",
-    "error.config_write_failed": "Cơ sở dữ liệu đã thay đổi nhưng OpenCodex không thể lưu cài đặt bảo vệ. Vui lòng sửa lỗi lưu trữ cấu hình, sau đó chạy Sửa chữa.",
+    "error.config_write_failed": "Cơ sở dữ liệu đã thay đổi nhưng OpenRelay không thể lưu cài đặt bảo vệ. Vui lòng sửa lỗi lưu trữ cấu hình, sau đó chạy Sửa chữa.",
   },
   pt: {
     compact: 'Compactar',
@@ -323,7 +323,7 @@ const LABELS: Record<Locale, Record<LogGuardLabelKey, string>> = {
     "error.trigger_collision": "Um nome de trigger reservado do Log Guard já está em uso. A proteção não foi alterada.",
     "error.unsafe_path": "O caminho do banco de dados de logs do Codex falhou na verificação de segurança.",
     "error.database_error": "Não foi possível atualizar o banco de dados de logs do Codex.",
-    "error.config_write_failed": "O banco de dados foi alterado, mas o OpenCodex não conseguiu salvar a configuração de proteção. Corrija o armazenamento de configuração e execute Reparar.",
+    "error.config_write_failed": "O banco de dados foi alterado, mas o OpenRelay não conseguiu salvar a configuração de proteção. Corrija o armazenamento de configuração e execute Reparar.",
   },
 };
 

@@ -64,7 +64,7 @@ export async function handleV2RuntimeCommand(parsed: V2ParsedCommand, deps: Runt
       response = await runtimeRequest("/api/v2", { method: read ? "GET" : "PUT", redirect: "error", ...(body ? { body } : {}) }, pinned);
     } catch (error) {
       if (error instanceof RuntimeApiError && error.status === 502) {
-        console.error("Error: Native V2 settings may be partially applied. Read ocx v2 status --live before retrying; no rollback is implied.");
+        console.error("Error: Native V2 settings may be partially applied. Read orl v2 status --live before retrying; no rollback is implied.");
         return 1;
       }
       throw error;

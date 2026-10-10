@@ -1,6 +1,6 @@
 ---
 title: Ordre des modèles
-description: Découvrez comment opencodex détermine l’ordre des modèles dans le sélecteur Codex et les substitutions de modèle de spawn_agent.
+description: Découvrez comment OpenRelay détermine l’ordre des modèles dans le sélecteur Codex et les substitutions de modèle de spawn_agent.
 ---
 
 Le sélecteur de modèles Codex ne conserve ni l’ordre de déclaration des fournisseurs ni celui des tableaux de modèles dans la
@@ -14,7 +14,7 @@ ignore l’ordre du tableau du catalogue : avancer une entrée dans un tableau J
 dans le sélecteur. L’implémentation consigne cette contrainte directement dans
 `src/codex/catalog/sync.ts`.
 
-opencodex contrôle donc la mise en avant en attribuant des priorités plus faibles, et non en s’appuyant sur la
+OpenRelay contrôle donc la mise en avant en attribuant des priorités plus faibles, et non en s’appuyant sur la
 position dans le tableau. Sauf indication contraire, les priorités fixes et l’exemple détaillé ci-dessous décrivent un
 catalogue sans sélecteur de compte Codex admissible. Avec `N` sélecteurs admissibles, les priorités mises en avant
 utilisent `N` comme pas : un choix natif non qualifié de rang configuré `i` se décline en lignes de sélecteur aux
@@ -73,7 +73,7 @@ Sans sélecteur de compte éligible et sans liste de sélection non vide, l'ordr
 3. Modèles natifs non sélectionnés, poussés sous le bloc sélectionné lors de la fusion du catalogue.
 
 Sans `subagentModels`, les modèles routés restent en priorité `5`, les entrées natives GPT utilisent leur
-priorité (normalement `9` pour les entrées construites par opencodex), et le groupe routé reste provider/id
+priorité (normalement `9` pour les entrées construites par OpenRelay), et le groupe routé reste provider/id
 alphabétique.
 
 ## Exemple
@@ -111,8 +111,8 @@ ont été déclinés en groupes qualifiés par sélecteur.
 
 Utilisez `subagentModels` pour choisir et ordonner les premiers modèles que Codex annonce également à
 `spawn_agent`. La page **Sous-agents** du tableau de bord peut réorganiser les identifiants natifs non
-qualifiés et les identifiants routés. Utilisez `ocx agent subagents set` ou modifiez la configuration
-OpenCodex pour définir des choix exacts de la forme `<selector>/<native-openai-model>` ; le tableau de bord
+qualifiés et les identifiants routés. Utilisez `orl agent subagents set` ou modifiez la configuration
+OpenRelay pour définir des choix exacts de la forme `<selector>/<native-openai-model>` ; le tableau de bord
 conserve ces identifiants déjà enregistrés, même indisponibles. Configurez au maximum cinq identifiants. Avec
 des sélecteurs de compte, un choix natif non qualifié peut se décliner en plusieurs lignes de catalogue
 qualifiées par sélecteur ; les choix configurés et les lignes annoncées ne correspondent donc pas
@@ -158,9 +158,9 @@ Auparavant, les identifiants natifs dans `modelPickerOrder` étaient ignorés. U
 existante contenant un identifiant natif non qualifié ordonne désormais tout le sélecteur,
 y compris les lignes mises en avant. Supprimez ces identifiants pour conserver l’ancien
 comportement limité aux lignes routées. Les listes absentes, vides ou uniquement routées
-conservent leur comportement ; le calcul des candidats pour les consignes d’OpenCodex selon les priorités naturelles reste inchangé.
+conservent leur comportement ; le calcul des candidats pour les consignes d’OpenRelay selon les priorités naturelles reste inchangé.
 
-`modelPickerOrder` préserve le calcul d’OpenCodex qui retient jusqu’à cinq candidats préférés
+`modelPickerOrder` préserve le calcul d’OpenRelay qui retient jusqu’à cinq candidats préférés
 pour les consignes aux sous-agents, selon leur priorité naturelle. Chaque ligne déplacée conserve
 cette priorité séparément de son `priority` natif ; changer uniquement l’ordre du sélecteur ne doit
 pas modifier ce calcul. Cela ne restreint pas l’admissibilité d’un modèle désigné par son nom exact :
@@ -170,7 +170,7 @@ d’effort et de backend restent applicables.
 Codex natif utilise le `priority` natif pour annoncer les cinq premiers modèles admissibles et
 visibles dans le sélecteur via `spawn_agent`, en V1 et en V2 lorsque les substitutions de modèle
 sont exposées. Ces cinq modèles peuvent donc changer avec l’ordre du sélecteur, même si les
-candidats préférés d’OpenCodex restent identiques. La V1 ne reçoit aucune injection de liste
+candidats préférés d’OpenRelay restent identiques. La V1 ne reçoit aucune injection de liste
 préférée d’OpenCodex. La V2 peut recevoir en plus des consignes fondées sur les priorités naturelles
 si l’état du catalogue client le permet ; ces consignes ne réordonnent pas la liste annoncée par
 l’outil natif.
@@ -185,4 +185,4 @@ Dans **Models**, choisissez Par défaut, A–Z par modèle, Par fournisseur ou I
 
 `GET/PUT /api/subagent-models` conserve les choix enregistrés désactivés ou absents dans `chosen` et `available` ; `pickerAvailable` contient les identifiants routés admissibles. Models envoie `pickerOrder` et `pickerOrderMode`, jamais `models`. Une sauvegarde du roster seul conserve l’ordre. Entrée invalide ou échec de sauvegarde préserve l’état précédent.
 
-Les plages prioritaires et natives restent en place. Les préréglages affectent le catalogue Codex et les groupes routés de la découverte Claude, sans modifier le préfixe natif Claude ni les profils Desktop explicites ou la propriété des alias. Les rangs de guidage OpenCodex et les réglages de repli sont conservés ; les cinq choix annoncés nativement par Codex et le défaut recommandé peuvent changer. Aucun client n’est redémarré ; une actualisation peut rester en attente et nécessiter de rouvrir le client.
+Les plages prioritaires et natives restent en place. Les préréglages affectent le catalogue Codex et les groupes routés de la découverte Claude, sans modifier le préfixe natif Claude ni les profils Desktop explicites ou la propriété des alias. Les rangs de guidage OpenRelay et les réglages de repli sont conservés ; les cinq choix annoncés nativement par Codex et le défaut recommandé peuvent changer. Aucun client n’est redémarré ; une actualisation peut rester en attente et nécessiter de rouvrir le client.

@@ -26,6 +26,7 @@ const BRAND_LITERALS = new Set([
   "Claude",
   "ChatGPT",
   "OpenCodex",
+  "OpenRelay",
   "opencodex",
   "OAuth",
   "API",

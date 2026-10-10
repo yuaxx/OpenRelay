@@ -1,6 +1,6 @@
 ---
 title: 贡献指南
-description: opencodex 的开发环境、结构、约定，以及添加 provider 或 adapter 的方法。
+description: OpenRelay 的开发环境、结构、约定，以及添加 provider 或 adapter 的方法。
 ---
 
 ## 环境搭建
@@ -72,7 +72,7 @@ GitHub Actions 有意只保留必要步骤：
 - **Cross-platform CI**（`.github/workflows/ci.yml`）会在改动 runtime、test、package、script、
   TypeScript 或 workflow 文件的 pull request 与 `main` push 上运行。Bun matrix 覆盖 Linux、
   Windows 和 macOS，执行 install、typecheck、test、privacy scan、release-helper build smoke、GUI
-  build 和 `ocx help`。另一个三系统 lane 使用 package 内置 runtime，验证无需单独安装 Bun 也能
+  build 和 `orl help`。另一个三系统 lane 使用 package 内置 runtime，验证无需单独安装 Bun 也能
   完成 npm global install。
 - **Release**（`.github/workflows/release.yml`）只能手动运行。它不是第二套完整 CI；dry-run 或
   publish 前，精确的 release commit（`GITHUB_SHA`）必须已有成功的 Cross-platform CI run。
@@ -138,7 +138,7 @@ bun run release:watch               # 观察最新的 Release workflow run
 },
 ```
 
-`src/providers/derive.ts` 会把该条目提供给 `ocx init`、`ocx provider`、仪表盘 preset、API-key
+`src/providers/derive.ts` 会把该条目提供给 `orl init`、`orl provider`、仪表盘 preset、API-key
 登录和 OAuth config seed。`enrichProviderFromCatalog()` 会把模型 metadata 与 capability 分类复制到
 保存的 provider 配置。OAuth protocol 实现仍位于 `src/oauth/`；只有 registry metadata 并不会
 自动形成 OAuth flow。

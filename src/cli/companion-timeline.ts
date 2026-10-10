@@ -3,7 +3,7 @@ import { isTimelineModelId, normalizeTimelineModelId, parseTimelineQuery, type T
 import { runCatalogAction } from "./catalog-command-result";
 import { CliUsageError, printData, runtimeRequest, takeFlag, takeOptionWithSyntax, type RuntimeApiDeps } from "./runtime-api";
 
-const USAGE = `Usage: ocx companion timeline [--hours <6|24|72|168>] [--bucket-minutes <1..1440>]
+const USAGE = `Usage: orl companion timeline [--hours <6|24|72|168>] [--bucket-minutes <1..1440>]
   [--metric <total|input|output|cached>] [--aggregation <sum|average|max>]
   [--grouping <model|modelAccount>] [--model <provider/model>]... [--hide-provider <name>]... [--json]
 Providers are excluded with --hide-provider; --provider is not supported.`;

@@ -7,7 +7,7 @@ description: Codex'in tüm modeller genelinde alt ajanları nasıl oluşturup y�
 
 Bir alt ajan, ana ajanın odaklanmış bir görev için oluşturabileceği ayrı bir
 Codex çalışanıdır. Kendi bağlamına ve araçlarına sahiptir, bu sayede birkaç
-bağımsız görev paralel olarak çalışabilir. opencodex bu çalışanları hangi Codex
+bağımsız görev paralel olarak çalışabilir. OpenRelay bu çalışanları hangi Codex
 işbirliği yüzeyinin açığa çıkaracağını, Codex'in onlar için hangi modelleri
 sunacağını ve başarısız bir modelin nasıl geri dönebileceğini denetler. Ana
 ajanınızın ne zaman devretmesi gerektiğine karar vermez.
@@ -38,7 +38,7 @@ alanını denetler:
   yerel `multi_agent_v2` özellik bayrağını takip eder.
 - **v2**, her modele `multi_agent_version = "v2"` damgalar; ancak **ChatGPT'yi v1'de tut** etkinken bu kural dışıdır: ChatGPT yerel satırları `"v1"` kalır, yönlendirilen ve combo satırları `"v2"` kalır.
 
-opencodex bunu hem canlı `/v1/models` kataloğuna hem de diske senkronize edilen
+OpenRelay bunu hem canlı `/v1/models` kataloğuna hem de diske senkronize edilen
 kataloğa son geçiş olarak uygular. Bir mod değişikliğinin yeni oluşturulan App,
 CLI ve TUI oturumlarını tutarlı bir şekilde etkilemesinin nedeni budur.
 
@@ -51,17 +51,17 @@ yüzeyine ait olduğunu belirtir.
 
 Kontrol panelinin **Alt ajan yetkilendirmesi** üç ilgili ayarı denetler:
 
-- `injectionModel`, opencodex rehberliğinde adı geçen tercih edilen çalışan
+- `injectionModel`, OpenRelay rehberliğinde adı geçen tercih edilen çalışan
   modelidir.
 - `injectionEffort`, bu model için talep edilecek isteğe bağlı
   `reasoning_effort` değeridir.
 - `injectionPrompt`, yerleşik v2 rehberlik metninin yerini alır.
 
 `multiAgentGuidanceEnabled` varsayılan olarak açıktır ve her iki yüzeyde de
-opencodex tarafından yazılan rehberlik için ana anahtardır. Kapatılması hem v2
+OpenRelay tarafından yazılan rehberlik için ana anahtardır. Kapatılması hem v2
 atama bloğunu hem de v1 proaktif metnini bastırır.
 
-Dizi biçimli durum bilgisi olmayan Responses istekleri için opencodex,
+Dizi biçimli durum bilgisi olmayan Responses istekleri için OpenRelay,
 oluşturulan rehberliği geliştirici `additional_tools` dahil olmak üzere öndeki
 sistem ve geliştirici meta verilerinden sonra ve konuşma girdisinden önce
 yerleştirir. Durum bilgili `previous_response_id` devamları, etiketli rehberliği
@@ -88,22 +88,22 @@ getirmesini söyler.
 | `{{fallback}}` | Yapılandırılmış genel geri dönüş rehberliği |
 
 Yerleşik v2 rehberliğinin 700 karakterlik bir bütçesi vardır. Bütçeyi aşacaksa
-opencodex temel spawn talimatlarını kesmek yerine önce kadroyu bırakır. Yerleşik
+OpenRelay temel spawn talimatlarını kesmek yerine önce kadroyu bırakır. Yerleşik
 rehberlik yalnızca tercih edilen bir model, uygun kadro veya geri dönüş zinciri
 çözümlendiğinde devreye girer. Yapılandırılmış bir `injectionModel` özel bir
 istem oluşturmak için yeterlidir; yalın bir değer benzersiz şekilde
 çözümlenemezse `{{model}}` boş bir dizeye genişler.
 
-v1'de opencodex, yalnızca `max` veya `ultra` çaba düzeylerinde v2'nin önerilen ön ayarıyla aynı proaktif görev devri metnini enjekte eder.
+v1'de OpenRelay, yalnızca `max` veya `ultra` çaba düzeylerinde v2'nin önerilen ön ayarıyla aynı proaktif görev devri metnini enjekte eder.
 Yalnızca tetikleme koşulu değişir: ayrıca görev devri talep edilmesi gerekmez; kullanıcı talimatları, yetkiler, görev kapsamı ve iş birliği araçlarının kuralları geçerliliğini korur.
 v1'de tercih edilen bir model, kadro,
 geri dönüş listesi veya özel istem eklemez.
 
 Varsayılan olarak kapalı olan `syncCodexSubagentDefaults` seçeneği rehberlikten
-ayrıdır. opencodex aktif Codex yönlendirmesine sahip olduğunda senkronizasyon
+ayrıdır. OpenRelay aktif Codex yönlendirmesine sahip olduğunda senkronizasyon
 veya yeniden başlatma, seçilen değerleri Codex TOML'a işaretçi sahipliğindeki
 `[agents] default_subagent_model` ve `default_subagent_reasoning_effort`
-girdileri olarak yazabilir. opencodex yalnızca kendi işaretçilerini taşıyan
+girdileri olarak yazabilir. OpenRelay yalnızca kendi işaretçilerini taşıyan
 alanları günceller veya kaldırır. Hedef alanlardan biri kullanıcıya aitse çift
 kısmen yazılmak yerine değiştirilmeden bırakılır; belirsiz TOML yazılmadan
 reddedilir. Harici sağlayıcı yöneticileri ve kullanıcıya ait kök yönlendirmesi
@@ -111,22 +111,22 @@ de yetkili kalır.
 
 ## Geri dönüş zincirleri (Fallback chains)
 
-Oluşturulan bir çalışan için opencodex şu öncelik sırasını oluşturur:
+Oluşturulan bir çalışan için OpenRelay şu öncelik sırasını oluşturur:
 
 1. İstenen birincil model.
-2. opencodex yapılandırmasındaki `subagentModelFallbackByModel`'dan, istenen
+2. OpenRelay yapılandırmasındaki `subagentModelFallbackByModel`'dan, istenen
    birincil modelle anahtarlanan model başına bir zincir.
-3. opencodex yapılandırmasındaki genel `subagentModelFallback` listesi.
+3. OpenRelay yapılandırmasındaki genel `subagentModelFallback` listesi.
 
 Rol başına geri dönüş zincirleri `$CODEX_HOME/agents/*.toml` içinde değil,
-opencodex yapılandırmasında yer alır. Codex 0.146+ ajan rol dosyalarını katı bir
+OpenRelay yapılandırmasında yer alır. Codex 0.146+ ajan rol dosyalarını katı bir
 şekilde serileştirir ve `model_fallback`'i bilinmeyen bir alan olarak reddeder,
-bu da tüm rol tanımını atlar (#1190). opencodex geriye dönük uyumluluk için
+bu da tüm rol tanımını atlar (#1190). OpenRelay geriye dönük uyumluluk için
 TOML'dan eski bir `model_fallback` satırını yine de okuyabilir, ancak `ocx
 doctor` bu konuda uyarır ve Codex'in kendisi etkilenen rolü yok sayar.
 
 İlk oluşum korunurken yinelenen model kimlikleri kaldırılır. Seçim sırasında
-opencodex devre dışı bırakılmış, yönlendirilemez, devre dışı bırakılmış bir
+OpenRelay devre dışı bırakılmış, yönlendirilemez, devre dışı bırakılmış bir
 sağlayıcı tarafından desteklenen, sağlıksız olarak işaretlenmiş, bir soğuma
 süresi içinde olan, kullanılabilir bir havuzlanmış Codex hesabı eksik olan veya
 yapılandırılmış kota eşiğinin ötesinde olan adayları atlar. Kullanılabilirlik
@@ -146,7 +146,7 @@ Codex, bir v2 yerelden yönlendirilen çocuk görevini yalnızca arka uçta
 ucu tarafından okunabilir, ancak harici bir sağlayıcı tarafından okunamaz. Bu,
 bilinen [#92 sınırlamasıdır](https://github.com/lidge-jun/opencodex/issues/92).
 
-opencodex boş veya okunamayan bir görevi iletmek yerine güvenli bir şekilde
+OpenRelay boş veya okunamayan bir görevi iletmek yerine güvenli bir şekilde
 başarısız olur:
 
 - Uygun olmayan doğrudan yerel olmayan bir rota `error.code =
@@ -197,28 +197,28 @@ için yalnızca kurallı yerel ChatGPT hedeflerini değerlendirmeye devam eder.
 
 ### CLI
 
-İşbirliği arayüzü ve yerel özellik ayarları için `ocx v2` kullanın:
+İşbirliği arayüzü ve yerel özellik ayarları için `orl v2` kullanın:
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
-ocx v2 mode default
-ocx v2 mode v2
-ocx v2 threads 8
+orl v2 status
+orl v2 mode v1
+orl v2 mode default
+orl v2 mode v2
+orl v2 threads 8
 ```
 
-Yetkilendirme, kadro, çaba sınırı ve geri dönüş ayarları için `ocx agent`
+Yetkilendirme, kadro, çaba sınırı ve geri dönüş ayarları için `orl agent`
 kullanın:
 
 ```bash
-ocx agent status
-ocx agent injection set --model anthropic/claude-sonnet-5 --effort xhigh
-ocx agent subagents set gpt-5.6-sol,anthropic/claude-sonnet-5
-ocx agent fallback set gpt-5.6-luna,xai/grok-4.5 --poll-ms 60000
-ocx agent effort set --subagent max
+orl agent status
+orl agent injection set --model anthropic/claude-sonnet-5 --effort xhigh
+orl agent subagents set gpt-5.6-sol,anthropic/claude-sonnet-5
+orl agent fallback set gpt-5.6-luna,xai/grok-4.5 --poll-ms 60000
+orl agent effort set --subagent max
 ```
 
-Boş bırakılabilir bir `ocx agent injection` değerini temizlemek için `-` iletin
+Boş bırakılabilir bir `orl agent injection` değerini temizlemek için `-` iletin
 veya bir kadro veya geri dönüş listesi için ilgili `clear` eylemini kullanın.
 Tüm komut aileleri için [CLI referansına](/tr/reference/cli/) bakın.
 
@@ -272,19 +272,19 @@ Hayır. Modu değiştirdikten sonra yeni bir Codex oturumu başlatın. Uzun sür
 çalışan bir App ana bilgisayarı hala eski katalog durumunu gösteriyorsa `ocx
 sync` çalıştırın ve bu Codex arayüzünü yeniden başlatın.
 
-### opencodex kataloğa güvenemediğinde ne olur?
+### OpenRelay kataloğa güvenemediğinde ne olur?
 
-opencodex, diskteki model kataloğunu geçerli kullanıcıya ait her Codex
+OpenRelay, diskteki model kataloğunu geçerli kullanıcıya ait her Codex
 app-server'ının başlangıç zamanıyla karşılaştırarak dört durumdan birini üretir:
 
 | Durum | Anlamı | v2 rehberliği |
 |---|---|---|
 | `fresh` | Her app-server katalog yazıldıktan sonra başladı | Tam rehberlik: tercih edilen model, kadro, geri dönüşler |
 | `not_running` | Hiçbir app-server algılanmadı | Tam rehberlik |
-| `stale` | En az bir app-server katalogdan önceye dayanıyor | **opencodex kaynaklı model rehberliği yok** |
-| `unknown` | Karşılaştırma yapılamadı | **opencodex kaynaklı model rehberliği yok** |
+| `stale` | En az bir app-server katalogdan önceye dayanıyor | **OpenRelay kaynaklı model rehberliği yok** |
+| `unknown` | Karşılaştırma yapılamadı | **OpenRelay kaynaklı model rehberliği yok** |
 
-`stale` ve `unknown` için opencodex diskten türetilen kendi iddialarını — tercih
+`stale` ve `unknown` için OpenRelay diskten türetilen kendi iddialarını — tercih
 edilen model, kadro, geri dönüş ve özel rehberlik — alıkoyar çünkü çalışan Codex
 disk kataloğunun tanıttığı şeyi spawn edemeyebilir.
 
@@ -312,7 +312,7 @@ etmek çalışan bir Codex'in eski görünmesine neden olmaz.
 `injectionEffort` yalnızca yetkilendirilmiş çalışan rehberliğini ve açıkça
 etkinleştirildiğinde yerel Codex alt ajan varsayılanlarını etkiler. Üst oturumun
 çabasını değiştirmez. `ultra`, Codex'in `max`'a dönüştürdüğü istemciye yönelik
-bir üst katmandır; opencodex daha sonra seçilen sağlayıcı için değeri eşler veya
+bir üst katmandır; OpenRelay daha sonra seçilen sağlayıcı için değeri eşler veya
 sabitler.
 
 ### Bağlam sınırı

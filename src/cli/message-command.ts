@@ -8,7 +8,7 @@ import { terminalSafeText } from "./runtime-api";
 export async function runMessageCommand(argv: readonly string[], env: NodeJS.ProcessEnv = process.env): Promise<number> {
   const args = parseMessageArgs(argv);
   if (!args) {
-    console.error("Usage: ocx message sessions [--json] | send (--thread <uuid> | --name <exact-name>) --stdin [--kind request|response|notification] [--in-reply-to <uuid>] [--json]");
+    console.error("Usage: orl message sessions [--json] | send (--thread <uuid> | --name <exact-name>) --stdin [--kind request|response|notification] [--in-reply-to <uuid>] [--json]");
     return 64;
   }
   const controller = new AbortController();

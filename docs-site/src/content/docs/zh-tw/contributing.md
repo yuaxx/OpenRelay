@@ -1,6 +1,6 @@
 ---
 title: 貢獻指南
-description: opencodex 的開發環境、結構、約定，以及新增 provider 或 adapter 的方法。
+description: OpenRelay 的開發環境、結構、約定，以及新增 provider 或 adapter 的方法。
 ---
 
 ## 環境搭建
@@ -72,7 +72,7 @@ GitHub Actions 有意只保留必要步驟：
 - **Cross-platform CI**（`.github/workflows/ci.yml`）會在改動 runtime、test、package、script、
   TypeScript 或 workflow 檔案的 pull request 與 `main` push 上執行。Bun matrix 覆蓋 Linux、
   Windows 和 macOS，執行 install、typecheck、test、privacy scan、release-helper build smoke、GUI
-  build 和 `ocx help`。另一個三系統 lane 使用 package 內建 runtime，驗證無需單獨安裝 Bun 也能
+  build 和 `orl help`。另一個三系統 lane 使用 package 內建 runtime，驗證無需單獨安裝 Bun 也能
   完成 npm global install。
 - **Release**（`.github/workflows/release.yml`）只能手動執行。它不是第二套完整 CI；dry-run 或
   publish 前，精確的 release commit（`GITHUB_SHA`）必須已有成功的 Cross-platform CI run。
@@ -158,14 +158,14 @@ bun run release:watch               # 觀察最新的 Release workflow run
 },
 ```
 
-`src/providers/derive.ts` 會把該條目提供給 `ocx init`、`ocx provider`、儀表板 preset、API-key
+`src/providers/derive.ts` 會把該條目提供給 `orl init`、`orl provider`、儀表板 preset、API-key
 登入和 OAuth config seed。`enrichProviderFromCatalog()` 會把模型 metadata 與 capability 分類複製到
 儲存的 provider 設定。OAuth protocol 實作仍位於 `src/oauth/`；只有 registry metadata 並不會
 自動形成 OAuth flow。
 
 ### 權威 preset 所需的證據
 
-registry 條目是一項被維護的承諾：opencodex 會把使用者的 API key 送到這個目的地。因此 preset
+registry 條目是一項被維護的承諾：OpenRelay 會把使用者的 API key 送到這個目的地。因此 preset
 需要一手來源證據，而不只是可運作的程式碼路徑。新增或提升 provider 的 pull request 必須在描述中
 提供以下全部內容：
 
@@ -186,7 +186,7 @@ reviewer 可以衡量；有關聯不代表會被拒絕，也不會降低證據�
 
 當證據不完整時，誠實的歸屬是 `src/providers/free-directory.ts` 的 reference row，而不是
 canonical registry。Directory row 帶有明確的 `verification` 等級（`official`、`primary`、
-`unverified`）且是惰性的：使用者仍可透過自訂 OpenAI-compatible flow 使用該服務，而 opencodex
+`unverified`）且是惰性的：使用者仍可透過自訂 OpenAI-compatible flow 使用該服務，而 OpenRelay
 不會宣傳一個無法背書的 preset。證據齊全後再把該 row 提升到 registry。
 
 ## 新增 adapter

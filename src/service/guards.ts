@@ -259,7 +259,7 @@ export function writeServiceApiTokenFile(): ProvisionedServiceApiToken | null {
     if (existing.kind === "unsafe") throw new Error(`${existing.reason}: ${serviceApiTokenFilePath()}`);
     const path = persistServiceApiToken(randomBytes(32).toString("hex"));
     console.log(`🔐 Provisioned an owner-only data-plane token at ${path}; nothing needs to be exported by hand.`);
-    console.log("   Remote machines get their own per-client key — run 'ocx hub invite' instead of copying this file.");
+    console.log("   Remote machines get their own per-client key — run 'orl hub invite' instead of copying this file.");
     return { path, origin: "generated" };
   });
 }

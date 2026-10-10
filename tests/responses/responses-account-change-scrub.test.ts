@@ -179,7 +179,7 @@ describe("Codex pool account-change conversation-state scrub", () => {
       expect(JSON.stringify(body.input[0])).toContain("hello from the user");
       expect(logCtx.conversationStateScrub).toBe("account-change");
       expect(warn).toHaveBeenCalledWith(
-        "[opencodex] dropped continuation state after a Codex pool account change; continuing fresh",
+        "[openrelay] dropped continuation state after a Codex pool account change; continuing fresh",
       );
     } finally {
       warn.mockRestore();

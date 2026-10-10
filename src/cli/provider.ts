@@ -89,7 +89,7 @@ function validateAndSave(config: ReturnType<typeof loadConfig>): void {
     if (result.error.includes("set allowPrivateNetwork:true")) {
       console.error("For an intentionally local provider, add --allow-private-network.");
     } else {
-      console.error("Nothing was saved. Fix the setting named above; if this command did not set it, run ocx config validate and repair it with ocx config set/unset.");
+      console.error("Nothing was saved. Fix the setting named above; if this command did not set it, run orl config validate and repair it with orl config set/unset.");
     }
     process.exit(1);
   }
@@ -103,7 +103,7 @@ function validateAndSave(config: ReturnType<typeof loadConfig>): void {
 function handleList(args: string[]): void {
   const wantsJson = consumeFlag(args, "--json");
   const wantsJsonl = consumeFlag(args, "--jsonl");
-  rejectUnknownArgs(args, "Usage: ocx provider list [--json|--jsonl]");
+  rejectUnknownArgs(args, "Usage: orl provider list [--json|--jsonl]");
 
   if (wantsJson && wantsJsonl) {
     console.error("Use only one of --json or --jsonl.");
@@ -154,7 +154,7 @@ function handleList(args: string[]): void {
       const auth = entry.authKind === "forward" ? "chatgpt-login" : entry.authKind;
       console.log(`  ${entry.id.padEnd(24)} ${entry.label}  (${auth})`);
     }
-    console.log(`\nAdd with: ocx provider add <name> [--api-key <key>]`);
+    console.log(`\nAdd with: orl provider add <name> [--api-key <key>]`);
   }
 }
 
@@ -162,7 +162,7 @@ function handleList(args: string[]): void {
 // provider add
 // ---------------------------------------------------------------------------
 
-const ADD_USAGE = "Usage: ocx provider add <name> [--adapter <adapter>] [--base-url <url>] [--responses-path <path>] [--auth-mode <key|forward|oauth|local>] [--api-key <key>] [--api-key-transport <x-api-key|bearer>] [--default-model <model>] [--model <id> --text-only] [--google-tool-schema-policy <compatible|reject-lossy>] [--allow-private-network] [--set-default] [--force] [--json] [--sync | --live]";
+const ADD_USAGE = "Usage: orl provider add <name> [--adapter <adapter>] [--base-url <url>] [--responses-path <path>] [--auth-mode <key|forward|oauth|local>] [--api-key <key>] [--api-key-transport <x-api-key|bearer>] [--default-model <model>] [--model <id> --text-only] [--google-tool-schema-policy <compatible|reject-lossy>] [--allow-private-network] [--set-default] [--force] [--json] [--sync | --live]";
 
 async function handleAdd(args: string[], deps: ProviderCommandDeps): Promise<void> {
   const name = args[0];
@@ -226,7 +226,7 @@ async function handleAdd(args: string[], deps: ProviderCommandDeps): Promise<voi
       if ((authMode ?? registryEntry.authKind) === "forward") {
         console.warn(`Warning: provider "${name}" uses ChatGPT login (forward auth); --api-key is ignored.`);
       } else if ((authMode ?? registryEntry.authKind) === "oauth") {
-        console.warn(`Warning: provider "${name}" uses OAuth auth; --api-key is ignored. Run: ocx login ${name}`);
+        console.warn(`Warning: provider "${name}" uses OAuth auth; --api-key is ignored. Run: orl login ${name}`);
       } else {
         provConfig.apiKey = apiKey;
       }
@@ -237,7 +237,7 @@ async function handleAdd(args: string[], deps: ProviderCommandDeps): Promise<voi
   } else {
     if (!adapter || !baseUrl) {
       console.error(`Provider "${name}" is not in the registry. --adapter and --base-url are required.`);
-      console.error("Usage: ocx provider add <name> --adapter <adapter> --base-url <url> [--api-key <key>]");
+      console.error("Usage: orl provider add <name> --adapter <adapter> --base-url <url> [--api-key <key>]");
       process.exit(1);
     }
     provConfig = {
@@ -382,11 +382,11 @@ async function handleAdd(args: string[], deps: ProviderCommandDeps): Promise<voi
   for (const line of modelSelectionGuidance(name)) console.log(line);
   if (setDefault) console.log(`   Set as default provider.`);
   if (registryEntry?.authKind === "oauth") {
-    console.log(`   Authenticate with: ocx login ${name}`);
+    console.log(`   Authenticate with: orl login ${name}`);
   }
   if (registryEntry?.authKind === "key" && !apiKey) {
     const envKey = `${name.toUpperCase().replace(/[^A-Z0-9]+/g, "_")}_API_KEY`;
-    console.log(`   Set API key with: ocx provider add ${name} --api-key <key> --force`);
+    console.log(`   Set API key with: orl provider add ${name} --api-key <key> --force`);
     console.log(`   Or set env var: ${envKey}`);
   }
   if (synced) console.log("   Models synced to Codex.");
@@ -397,7 +397,7 @@ async function handleAdd(args: string[], deps: ProviderCommandDeps): Promise<voi
         : `   Provider saved; client sync outcome: ${sync.status}.`);
       if (sync.catalog && !sync.catalog.converged) console.log("   Model catalog did not converge; inspect the target before retrying.");
     }
-    console.log("   Apply to Codex: ocx sync");
+    console.log("   Apply to Codex: orl sync");
   }
 }
 
@@ -410,10 +410,10 @@ function handleRemove(args: string[]): void {
   const wantsJson = consumeFlag(restArgs, "--json");
   const name = restArgs[0];
   if (!name || name.startsWith("-")) {
-    console.error("Usage: ocx provider remove <name> [--json]");
+    console.error("Usage: orl provider remove <name> [--json]");
     process.exit(1);
   }
-  rejectUnknownArgs(restArgs.slice(1), "Usage: ocx provider remove <name> [--json]");
+  rejectUnknownArgs(restArgs.slice(1), "Usage: orl provider remove <name> [--json]");
 
   const config = loadConfig();
   if (!hasOwnProvider(config.providers, name)) {
@@ -422,7 +422,7 @@ function handleRemove(args: string[]): void {
   }
 
   if (name === config.defaultProvider) {
-    console.error(`Cannot remove "${name}" — it is the default provider. Change the default first: ocx provider set-default <other>`);
+    console.error(`Cannot remove "${name}" — it is the default provider. Change the default first: orl provider set-default <other>`);
     process.exit(1);
   }
 
@@ -473,10 +473,10 @@ function handleShow(args: string[]): void {
   const wantsJson = consumeFlag(restArgs, "--json");
   const name = restArgs[0];
   if (!name || name.startsWith("-")) {
-    console.error("Usage: ocx provider show <name> [--json]");
+    console.error("Usage: orl provider show <name> [--json]");
     process.exit(1);
   }
-  rejectUnknownArgs(restArgs.slice(1), "Usage: ocx provider show <name> [--json]");
+  rejectUnknownArgs(restArgs.slice(1), "Usage: orl provider show <name> [--json]");
 
   const config = loadConfig();
   if (!hasOwnProvider(config.providers, name)) {
@@ -515,14 +515,14 @@ function handleSetDefault(args: string[]): void {
   const wantsJson = consumeFlag(restArgs, "--json");
   const name = restArgs[0];
   if (!name || name.startsWith("-")) {
-    console.error("Usage: ocx provider set-default <name> [--json]");
+    console.error("Usage: orl provider set-default <name> [--json]");
     process.exit(1);
   }
-  rejectUnknownArgs(restArgs.slice(1), "Usage: ocx provider set-default <name> [--json]");
+  rejectUnknownArgs(restArgs.slice(1), "Usage: orl provider set-default <name> [--json]");
 
   const config = loadConfig();
   if (!hasOwnProvider(config.providers, name)) {
-    console.error(`Provider "${name}" is not configured. Add it first: ocx provider add ${name}`);
+    console.error(`Provider "${name}" is not configured. Add it first: orl provider add ${name}`);
     process.exit(1);
   }
 

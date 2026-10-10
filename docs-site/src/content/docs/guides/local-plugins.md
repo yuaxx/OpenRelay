@@ -3,16 +3,16 @@ title: Local Plugins
 description: Load your own code into the proxy at startup to rewrite provider sends, for example to put a local compression proxy in front of providers.
 ---
 
-A local plugin is a TypeScript or JavaScript file that `ocx start` loads before the proxy begins
+A local plugin is a TypeScript or JavaScript file that `orl start` loads before the proxy begins
 serving. It can see every provider send just before it leaves the process and redirect it or add
 headers — enough to place a local sidecar (a compression proxy, a recorder) in front of providers
-without changing opencodex itself.
+without changing OpenRelay itself.
 
-Plugins are local to one install. opencodex does not download, update or sign them.
+Plugins are local to one install. OpenRelay does not download, update or sign them.
 
 ## Where plugins live
 
-Put plugin files in `plugins/` inside the opencodex home (`~/.opencodex/plugins/`, or
+Put plugin files in `plugins/` inside the OpenRelay home (`~/.opencodex/plugins/`, or
 `$OPENCODEX_HOME/plugins/` when that variable is set):
 
 ```text
@@ -24,7 +24,7 @@ Put plugin files in `plugins/` inside the opencodex home (`~/.opencodex/plugins/
 - Names starting with `.` or `_`, and `*.d.ts`, are ignored — rename a plugin to `_my-sidecar.ts`
   to switch it off.
 - The directory is optional. Without it nothing is loaded.
-- A plugin runs inside the proxy with your credentials, so opencodex refuses a plugin file or a
+- A plugin runs inside the proxy with your credentials, so OpenRelay refuses a plugin file or a
   `plugins/` directory that is owned by another user or writable by group or others, and refuses
   symbolic links. Every directory above `plugins/`, up to `/`, must also be owned by you or root and
   not writable by group or others, unless it is sticky like `/tmp`. Fix permissions with
@@ -37,8 +37,8 @@ Put plugin files in `plugins/` inside the opencodex home (`~/.opencodex/plugins/
   ACLs are checked when `getfacl` is installed. Without it, only owner and mode bits are verified.
 - On Windows automatic plugin loading is disabled until an ACL trust check is available.
 
-Restart the proxy after adding, changing or removing a plugin (`ocx service restart`, or stop and
-start `ocx start`). Each loaded plugin prints a `Plugin loaded: <name>` line at startup; a skipped
+Restart the proxy after adding, changing or removing a plugin (`orl service restart`, or stop and
+start `orl start`). Each loaded plugin prints a `Plugin loaded: <name>` line at startup; a skipped
 plugin prints a bounded reason category. Raw plugin exception text is never printed automatically.
 
 To start once without plugins, set `OCX_PLUGINS=0`.
@@ -75,15 +75,15 @@ export default {
 };
 ```
 
-The context also carries `name`, `configDir` (the opencodex home) and `pluginDir`.
+The context also carries `name`, `configDir` (the OpenRelay home) and `pluginDir`.
 
-Plugins cannot import opencodex modules — in the packaged binary they are not on disk. Declare the
+Plugins cannot import OpenRelay modules — in the packaged binary they are not on disk. Declare the
 small interfaces you need locally, as above.
 
 ## How rewrites behave
 
 - The rewriter runs synchronously on every provider send over HTTP and on the Codex WebSocket
-  connection, after opencodex has picked the transport. Keep it fast; do network checks (health
+  connection, after OpenRelay has picked the transport. Keep it fast; do network checks (health
   probes) in the background and read a cached result in the rewriter.
 - A send redirected to a loopback address (`127.0.0.1`, `::1`, `localhost`) connects directly, over
   HTTP and over the Codex WebSocket, ignoring provider proxies and `HTTP_PROXY`: a proxy elsewhere
@@ -95,11 +95,11 @@ small interfaces you need locally, as above.
   request frame and may differ between exchanges on one socket; changes a rewriter makes to them
   are discarded. A plugin that starts or stops redirecting takes
   effect on the next turn.
-- It runs after opencodex has chosen the provider, account and route, so it does not change routing,
+- It runs after OpenRelay has chosen the provider, account and route, so it does not change routing,
   account selection, retries or request logs.
 - A redirected send goes to the host you chose. That host sees the request exactly as the provider
   would, credentials included.
-- If a rewriter throws, opencodex undoes that rewriter's edits to the send and disables it for the
+- If a rewriter throws, OpenRelay undoes that rewriter's edits to the send and disables it for the
   rest of the process. Edits made by rewriters that ran before it are kept, so the send goes out as
   those left it (unmodified when it is the only plugin). If `setup` throws or times out, the plugin is skipped,
   anything it registered is removed, and later registration attempts from it are ignored; other

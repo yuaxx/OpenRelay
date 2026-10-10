@@ -1,9 +1,9 @@
 ---
 title: Integrations
-description: Connect opencodex to OpenCode, Pi, OMP, Hermes, OpenClaw, Kimi Code, gjc, DeepSeek Harness, MiniMax Code, ZCode, Prime Agent, Aside, Raycast, omo, Cline CLI, Kilo, Command Code and Factory Droid from the dashboard — one switch per client, with a backup taken before every write.
+description: Connect OpenRelay to OpenCode, Pi, OMP, Hermes, OpenClaw, Kimi Code, gjc, DeepSeek Harness, MiniMax Code, ZCode, Prime Agent, Aside, Raycast, omo, Cline CLI, Kilo, Command Code and Factory Droid from the dashboard — one switch per client, with a backup taken before every write.
 ---
 
-The **Connect** page writes opencodex's provider block into a client's own config
+The **Connect** page writes OpenRelay's provider block into a client's own config
 file, and removes it again. Eighteen clients work this way, each with a switch:
 
 | Client | Config file | Format | When the change takes effect | Credential |
@@ -31,14 +31,14 @@ file, and removes it again. Eighteen clients work this way, each with a switch:
 (the senpi engine) through `~/.omo/agent/models.json`, as in the table above. Codex-based omo
 (LazyCodex) gets its own section on the same tab, shown only when LazyCodex is detected, described in
 [omo (Codex / LazyCodex) role models](#omo-codex--lazycodex-role-models). OpenCode-based omo
-(oh-my-opencode) keeps its own config under OpenCode; opencodex does not read or write it.
+(oh-my-opencode) keeps its own config under OpenCode; OpenRelay does not read or write it.
 
 Generated catalogs include only enabled models from each provider selection. This applies to both
 downloads and managed integrations, including Pi and Aside. The management model list still shows
 the full roster so you can enable additional models.
 
-`ocx uninstall` disables recorded integrations, including all owned Aside profiles, before deleting
-OpenCodex's recovery state. Unreadable ownership, missing profile registration or a conflicting edit
+`orl uninstall` disables recorded integrations, including all owned Aside profiles, before deleting
+OpenRelay's recovery state. Unreadable ownership, missing profile registration or a conflicting edit
 stops that deletion. Cleanup is sequential: earlier successful disables are not undone when a later
 one fails. If compensation also fails, a client file may be left in an intermediate state. Inspect
 the reported client files and retained recovery snapshots before retrying; retained state does not
@@ -65,7 +65,7 @@ provider entry. Apply, Refresh, Disable, and Restore act on both fragments, and 
 providers, agents, keybinds, and MCP entries stay untouched.
 
 Both fragments are built from the effective canonical model metadata — as are the Kilo export and
-the `ocx opencode` launcher. An explicit custom override always wins, and a ladder you cleared to
+the `orl opencode` launcher. An explicit custom override always wins, and a ladder you cleared to
 empty stays empty; a reasoning ladder or default is never invented for a model that declares none.
 An authoritative context limit is carried with an output budget beside it: a known output value —
 explicit or from catalog metadata — wins, otherwise the schema-required 32000 fallback clamped to
@@ -85,11 +85,11 @@ leaves it.
 
 Managed DSH support has a compatibility floor of **DSH 0.1.0-rc.6**. DSH 0.1.7+ reads provider
 routes from `[id=llm-pi-ai].config.providers.opencodex` in the Desktop profile patch,
-`$DSH_HOME/profiles/desktop/cordis.patch.yml`, which DSH hot reloads. OpenCodex writes that row when the Desktop profile and its patch exist. If
+`$DSH_HOME/profiles/desktop/cordis.patch.yml`, which DSH hot reloads. OpenRelay writes that row when the Desktop profile and its patch exist. If
 `$DSH_HOME/profiles/desktop/package.json` exists but `cordis.patch.yml` is missing, Apply refuses:
 create `cordis.patch.yml` containing `[]` (the empty patch DSH writes for a new profile), then
-enable the integration again. Only when there is no Desktop profile does OpenCodex use
-`llm-pi-ai.providers.opencodex` in `$DSH_HOME/settings.yaml`. OpenCodex owns only that provider
+enable the integration again. Only when there is no Desktop profile does OpenRelay use
+`llm-pi-ai.providers.opencodex` in `$DSH_HOME/settings.yaml`. OpenRelay owns only that provider
 fragment: Apply and Refresh replace it, Disable removes it, and Restore puts back a recorded
 snapshot. These operations do not change the user's default model or the native
 `deepseek-official` provider.
@@ -110,7 +110,7 @@ disagree about which file is meant. Its managed block owns only
 stay untouched. Prime Agent reads `models.json` when a session starts, so start
 a new session after connecting it.
 
-Aside keeps a separate model catalog for each registered profile, including local profiles. OpenCodex lists
+Aside keeps a separate model catalog for each registered profile, including local profiles. OpenRelay lists
 all registered profiles, including local profiles, and can synchronize them together or control
 one profile at a time. Switching an integration never changes Aside's active account. A prior
 Aside connection enables all profiles by default; individual exclusions survive later syncs.
@@ -121,10 +121,10 @@ restart. Aside's block is loopback-only and never carries a real credential.
 
 The managed Raycast integration supports **macOS and Windows**. Custom Providers
 is a **Raycast Pro** feature: on a free plan the file is still written, but
-`ocx integration client status --client raycast` and the **Connect** page report
+`orl integration client status --client raycast` and the **Connect** page report
 a warning, because Raycast will not read it. On macOS or Windows, open Raycast →
 Settings → AI → **Reveal Providers Config** once so the `ai` folder exists.
-On these supported platforms, opencodex uses that folder as its install signal
+On these supported platforms, OpenRelay uses that folder as its install signal
 and reports the client as not installed until it exists. Linux is unsupported,
 even if the folder exists.
 
@@ -142,11 +142,11 @@ routed model with its `abilities` — the exporter sets `tools` and `system_mess
 `true` as a client-export convention, `vision` follows the catalog's input modalities, `reasoning_effort`
 is set when the model has an effort ladder, and `temperature` is turned off for
 reasoning models. Other providers in the file are preserved, and disable removes
-only the OpenCodex element. Raycast picks up the change as soon as the file is
+only the OpenRelay element. Raycast picks up the change as soon as the file is
 saved, no restart needed; the models appear in Raycast's model picker grouped
-under **OpenCodex**. Raycast supports optional `api_keys`, but OpenCodex intentionally
+under **OpenRelay**. Raycast supports optional `api_keys`, but OpenRelay intentionally
 omits them and refuses non-loopback or admission-authenticated targets; this integration
-cannot supply OpenCodex's required admission header.
+cannot supply OpenRelay's required admission header.
 
 The macOS private preference is only an advisory Pro hint; Windows never reads it and
 reports the plan as unknown. Plan detection does not authorize or block a write.
@@ -158,7 +158,7 @@ The format is documented at
 [manual.raycast.com/ai/custom-providers](https://manual.raycast.com/ai/custom-providers).
 
 Raycast CLI exports and dashboard downloads use the running server's destination and
-admission policy, including a configured unauthenticated loopback listener. `ocx ensure`
+admission policy, including a configured unauthenticated loopback listener. `orl ensure`
 does not refresh Raycast from its saved configuration snapshot: that can differ from the
 running server. Server startup and explicit sync remain the catalog refresh paths.
 
@@ -194,14 +194,14 @@ than resolved, because it would mean whatever directory each process happened to
 start in — and that path is stored with the backup, so it has to name the same file
 tomorrow as it did today.
 
-opencodex reads these from its own environment. If your gateway runs with a profile
-or a relocated home, start opencodex with the same variables set, or it will
+OpenRelay reads these from its own environment. If your gateway runs with a profile
+or a relocated home, start OpenRelay with the same variables set, or it will
 correctly follow a different installation.
 
 ## The other five surfaces are not switches
 
-**API Keys** manages opencodex's own credentials and is not a client at all. **Codex
-CLI** is wired by the proxy service itself — starting opencodex applies it, stopping it
+**API Keys** manages OpenRelay's own credentials and is not a client at all. **Codex
+CLI** is wired by the proxy service itself — starting OpenRelay applies it, stopping it
 restores native routing — so there is nothing to toggle per-file. **Claude** keeps its
 own enable flag and Desktop's Save/Apply flow, and **Grok Build** keeps its
 select-then-apply model fence. Those semantics predate this feature and are unchanged.
@@ -220,7 +220,7 @@ always recoverable:
 - Ten backups are kept per client. Beyond that, the oldest snapshot files are removed
   and their history rows read **Backup expired**.
 
-Disable removes only the entries opencodex recorded as its own. If your file changed
+Disable removes only the entries OpenRelay recorded as its own. If your file changed
 after we wrote it, what happens depends on whether our own entries are still intact
 and on the file's format. For strict-JSON configs (OpenCode, Pi), an edit **next to**
 our block — adding an MCP server, a provider of your own — shows as **Update needed**:
@@ -239,7 +239,7 @@ than guessing which edits were yours.
 
 That lock is no longer a dead end. A conflicted client shows **Replace** next to its
 switch, on both the overview card and the client's own page. It replaces whatever
-holds our settings with the block opencodex would write, and it asks first: the
+holds our settings with the block OpenRelay would write, and it asks first: the
 dialog names the file, says what is lost, and points at the snapshot that makes it
 undoable. The switch itself stays locked, because the switch cannot know which edits
 you meant to keep — only you can say so. Nothing else is relaxed: a file we cannot
@@ -248,7 +248,7 @@ parse, or one whose structure we cannot reason about, still refuses.
 ## Hermes session affinity
 
 The generated `providers.opencodex` block includes `session_affinity_header: session-id` for all
-models. This names a header; Hermes supplies its dynamic conversation identifier. OpenCodex does
+models. This names a header; Hermes supplies its dynamic conversation identifier. OpenRelay does
 not write a shared static identifier or change `api_mode` to enable affinity.
 
 Use a Hermes version supporting [per-provider request options](https://hermes-agent.nousresearch.com/docs/user-guide/configuring-models#per-provider-request-options).
@@ -325,7 +325,7 @@ managed integration for now.
 `opencodex-loopback` placeholder rather than a key. No real credential is ever written
 into any client config.
 
-**For `ocx opencode`, the launcher's provider blocks win.** That launcher injects
+**For `orl opencode`, the launcher's provider blocks win.** That launcher injects
 `provider.opencodex` and `providers.opencodex` through `OPENCODE_CONFIG_CONTENT`, which
 outranks the same entries on disk — the rest of your opencode config still applies as
 usual. Those blocks are built from the same effective canonical model metadata as the
@@ -337,11 +337,11 @@ reasoning choices. The switch here is what matters when you launch `opencode` di
 The same operations are available headlessly:
 
 ```bash
-ocx integration client status
-ocx integration client enable --client hermes
-ocx integration client disable --client hermes
-ocx integration client history --client hermes
-ocx integration client restore --op <opId> [--confirm-drift]
+orl integration client status
+orl integration client enable --client hermes
+orl integration client disable --client hermes
+orl integration client history --client hermes
+orl integration client restore --op <opId> [--confirm-drift]
 ```
 
 ### Preview and bind a terminal write
@@ -350,9 +350,9 @@ The existing direct commands remain supported. To bind a write to a reviewed
 observation, inspect status and save a preview first:
 
 ```bash
-ocx integration client preview --help
-ocx integration client status --client hermes --json
-ocx integration client preview --client hermes --operation apply --json > hermes-preview.json
+orl integration client preview --help
+orl integration client status --client hermes --json
+orl integration client preview --client hermes --operation apply --json > hermes-preview.json
 ```
 
 Review `state`, `foreignEdit`, structural `changes`, `canApply` and `willChange`.
@@ -365,8 +365,8 @@ Only after reviewing an applicable plan and choosing the write:
 
 ```bash
 PLAN_FINGERPRINT="$(jq -er 'select(.canApply == true) | .fingerprint' hermes-preview.json)"
-ocx integration client enable --client hermes --plan-fingerprint "$PLAN_FINGERPRINT" --json
-ocx integration client status --client hermes --json
+orl integration client enable --client hermes --plan-fingerprint "$PLAN_FINGERPRINT" --json
+orl integration client status --client hermes --json
 ```
 
 Fingerprint is concurrency evidence, not authorization. Commit accepts `pN:`
@@ -382,23 +382,23 @@ runtime/malformed 1, with safe stderr rather than a JSON error envelope.
 Use a real history opId; `op-example` below is fictional:
 
 ```bash
-ocx integration client history --client aside --profile 1 --json
-ocx integration client restore --op op-example --client aside --profile 1 --preview --json
+orl integration client history --client aside --profile 1 --json
+orl integration client restore --op op-example --client aside --profile 1 --preview --json
 ```
 
 If drift is refused, inspect the edits. When replacing them is explicitly intended,
 preview with `--confirm-drift`, review, then bind that same intent:
 
 ```bash
-ocx integration client restore --op op-example --client aside --profile 1 --preview --confirm-drift --json > restore-preview.json
+orl integration client restore --op op-example --client aside --profile 1 --preview --confirm-drift --json > restore-preview.json
 ```
 
 After review:
 
 ```bash
 RESTORE_FINGERPRINT="$(jq -er 'select(.canApply == true) | .fingerprint' restore-preview.json)"
-ocx integration client restore --op op-example --client aside --profile 1 --confirm-drift --plan-fingerprint "$RESTORE_FINGERPRINT" --json
-ocx integration client status --client aside --profile 1 --json
+orl integration client restore --op op-example --client aside --profile 1 --confirm-drift --plan-fingerprint "$RESTORE_FINGERPRINT" --json
+orl integration client status --client aside --profile 1 --json
 ```
 
 Aside preview/bound writes require one profile, not an aggregate target. Generic
@@ -412,8 +412,8 @@ This permanently retires the record and backup; it does not restore or disable
 the integration. After inspecting history and choosing to lose that recovery point:
 
 ```bash
-ocx integration client history remove --op op-example --client aside --profile 1 --yes --json
-ocx integration client history --client aside --profile 1 --json
+orl integration client history remove --op op-example --client aside --profile 1 --yes --json
+orl integration client history --client aside --profile 1 --json
 ```
 
 Use the actual selected opId. No selector addresses the global journal; `--client aside`
@@ -425,7 +425,7 @@ it is not rollback and must not trigger repeated deletion. `journal remove` is a
 `--overwrite-conflict` is the terminal form of **Replace**:
 
 ```bash
-ocx integration client enable --client zcode --overwrite-conflict
+orl integration client enable --client zcode --overwrite-conflict
 ```
 
 Like `--confirm-drift`, it is never assumed — without it a conflict is still refused.
@@ -435,11 +435,11 @@ we never wrote, so that combination is rejected.
 For MiniMax Code, connect the provider once and launch through the checked wrapper:
 
 ```bash
-ocx integration client enable --client mcode
-ocx mcode
+orl integration client enable --client mcode
+orl mcode
 ```
 
-Once connected, `ocx sync` and `POST /api/sync` refresh owned MCode, Pi, Aside,
+Once connected, `orl sync` and `POST /api/sync` refresh owned MCode, Pi, Aside,
 Raycast, omo, OpenCode, and Kilo catalogs with the current model selection, context windows, and
 reasoning-effort ladders. Proxy startup refreshes an owned Raycast catalog. Changes to
 model visibility, provider selection, or presets also refresh connected Pi, Aside,
@@ -458,17 +458,17 @@ If Models reports **“Model selection saved”** together with a client-refresh
 selection is already saved; one or more client files could not be updated. The warning names
 the affected client and Aside profile, when applicable, and explains the refusal. Open
 **Connect** to inspect that client or profile before starting a new session. Resolve the
-reported issue, then retry `ocx sync`; an overlapping operation must finish first. If the
+reported issue, then retry `orl sync`; an overlapping operation must finish first. If the
 warning includes a backup path or says recovery did not finish, inspect that recovery state
 before retrying. A successful selection save alone does not confirm client-file recovery.
 
 The separate MiniMax platform CLI (`mmx`) is not a file-toggle integration. Its text
-commands use MiniMax's Anthropic-compatible endpoint, so OpenCodex provides a
+commands use MiniMax's Anthropic-compatible endpoint, so OpenRelay provides a
 credential-isolated, loopback-only launcher:
 
 ```bash
-ocx mmx text chat --model anthropic/claude-opus-5 --message "Hello"
-ocx mmx text repl --model openai/gpt-5.6-sol
+orl mmx text chat --model anthropic/claude-opus-5 --message "Hello"
+orl mmx text repl --model openai/gpt-5.6-sol
 ```
 
 Only `mmx text chat` and `mmx text repl` are proxied. Run plain `mmx` for
@@ -488,21 +488,21 @@ for what was checked and when.
 
 ## Aside profile controls
 
-Aside profile controls and the Aside refresh performed by `ocx sync` require a running
+Aside profile controls and the Aside refresh performed by `orl sync` require a running
 ocx proxy that supports the Aside profile APIs. Updating the CLI alone does not update an
 already-running proxy. If the proxy is unavailable or too old, the Aside operation cannot
 complete; the CLI never falls back to writing Aside profile files locally.
 
 Upgrade the ocx installation used by the proxy, then restart the proxy (or start it if it
-is stopped). Retry `ocx sync` or the profile command. After the profile files update
+is stopped). Retry `orl sync` or the profile command. After the profile files update
 successfully, fully quit and reopen Aside so it loads the new catalogs.
 
 ```bash
-ocx integration client status --client aside --json
-ocx integration client enable --client aside
-ocx integration client disable --client aside --profile 1
-ocx integration client history --client aside --profile 1
-ocx integration client restore --client aside --profile 1 --op <opId>
+orl integration client status --client aside --json
+orl integration client enable --client aside
+orl integration client disable --client aside --profile 1
+orl integration client history --client aside --profile 1
+orl integration client restore --client aside --profile 1 --op <opId>
 ```
 
 The profile number is the account ID shown by the status command. Omitting `--profile` on an
@@ -521,8 +521,8 @@ the entire change failed. If saving those settings fails, no profile files are c
 For a targeted refresh of eligible Aside profiles, rather than broad catalog sync:
 
 ```bash
-ocx integration client sync --client aside --json
-ocx integration client status --client aside --json
+orl integration client sync --client aside --json
+orl integration client status --client aside --json
 ```
 
 This uses the existing attested Aside owner and has no profile selector or local
@@ -533,7 +533,7 @@ inspect the affected profile before retrying. This refresh is separate from each
 profile's preview/bound mutation workflow.
 
 Sync refreshes only profiles whose sync preference is on, so an empty result is not a failure.
-If `ocx integration client status --client aside` shows a profile as `off (stale)`, status
+If `orl integration client status --client aside` shows a profile as `off (stale)`, status
 prints the commands to reconnect it: review `ocx integration client preview --client aside
 --operation apply --profile N`, and run `ocx integration client enable --client aside --profile N`
 only if the preview permits the change and you accept it. Nothing is re-enabled automatically.
@@ -552,25 +552,25 @@ ZCode 3.14 moved its custom providers to `~/.zcode/v2/provider_config.json` and 
 missing. ZCode creates the new file the first time it runs, so on any install that has ever been
 launched the import is already spent and a write to `config.json` reaches nothing.
 
-opencodex writes `provider_config.json` directly where it can. Enabling the integration adds the
+OpenRelay writes `provider_config.json` directly where it can. Enabling the integration adds the
 `opencodex` provider rule to that file, a catalog refresh updates it, and disabling removes exactly
-what opencodex put there. Every other rule in the file is left alone, including a rule another
+what OpenRelay put there. Every other rule in the file is left alone, including a rule another
 provider keeps for a model id that also appears under ours. A rule carrying the `opencodex` id that
-opencodex did not write is a conflict rather than something to take over; resolve it in ZCode, or
+OpenRelay did not write is a conflict rather than something to take over; resolve it in ZCode, or
 use the explicit overwrite.
 
 An unreadable or non-file provider store also refuses writes; it is not treated as an absent store that permits the legacy import.
 
-Two other situations still refuse rather than write. A block opencodex applied before ZCode moved its
+Two other situations still refuse rather than write. A block OpenRelay applied before ZCode moved its
 store keeps the integration on `config.json`: disable it there first, then enable it again to write
-the new store. And a `provider_config.json` whose `schemaVersion` is not one opencodex has observed
+the new store. And a `provider_config.json` whose `schemaVersion` is not one OpenRelay has observed
 is reported rather than merged into, because that file holds every provider ZCode has and asserting
 a shape into it would trade a silent no-op for a silent loss. Status names the file ZCode reads
 whenever the integration is not writing it.
 
 In that second case, add the provider in ZCode's own settings: base URL
 `http://127.0.0.1:10100/v1` (adjust the port to your bind), any non-empty key, and the model ids
-from `ocx export --client zcode`. Deleting `provider_config.json` to re-trigger ZCode's import is
+from `orl export --client zcode`. Deleting `provider_config.json` to re-trigger ZCode's import is
 not supported — it discards every provider ZCode keeps there.
 
 ## Cline CLI
@@ -579,23 +579,23 @@ This integration targets Cline's current CLI/shared SDK provider store, whose na
 `version: 1`. Legacy VS Code extension `globalState`/secret storage is not migrated or detected
 as this integration. Run Cline once to initialize its settings directory.
 
-**Stop Cline before enabling, syncing, disabling or restoring the integration.** OpenCodex writes
+**Stop Cline before enabling, syncing, disabling or restoring the integration.** OpenRelay writes
 `providers.opencodex` into both `providers.json` and sibling `models.json`. The first file holds
 the OpenAI Responses connection with a non-secret loopback placeholder; the second holds the
 filtered routed model catalog, including available context and image metadata. Existing provider
 entries and the default provider selection remain unchanged.
 
 ```bash
-ocx integration client list --json
-ocx integration client enable --client cline
-ocx integration client history --client cline
-ocx integration client restore --op <operation-id>
+orl integration client list --json
+orl integration client enable --client cline
+orl integration client history --client cline
+orl integration client restore --op <operation-id>
 ```
 
-After enabling, restart Cline and select OpenCodex, or launch with
+After enabling, restart Cline and select OpenRelay, or launch with
 `cline --provider opencodex --model <provider/model>`. External catalog changes are read when
 Cline restarts. Cline is excluded from unattended catalog refresh; after changing the routed
-model selection, stop Cline and run `ocx sync` or enable the integration again to refresh it.
+model selection, stop Cline and run `orl sync` or enable the integration again to refresh it.
 A selected model is preserved while still routed and cleared if removed from the exported catalog.
 
 `CLINE_PROVIDER_SETTINGS_PATH` overrides the primary file. Otherwise `CLINE_DATA_DIR` selects the
@@ -613,7 +613,7 @@ reported by the operation; resolve the conflict before retrying.
 
 Undo restores **both original byte strings**, including a file that originally did not exist.
 Edits after the operation require the existing explicit `--confirm-drift`; the edited pair is
-backed up first. An occupied OpenCodex entry requires the existing `--overwrite-conflict` opt-in.
+backed up first. An occupied OpenRelay entry requires the existing `--overwrite-conflict` opt-in.
 Disable removes the two managed entries; it does not restore a prior foreign entry. Use Undo
 for that. Snapshot retention and expiration follow the same rules as other integrations.
 
@@ -624,11 +624,11 @@ supported by this generated integration; it requires unauthenticated loopback ac
 
 ## GitHub Copilot App
 
-The GitHub Copilot desktop app can use opencodex as an OpenAI-compatible model provider. This is a
+The GitHub Copilot desktop app can use OpenRelay as an OpenAI-compatible model provider. This is a
 manual client setup with no switch on **Connect**, and it is separate from the upstream
 `github-copilot` provider, which uses a Copilot subscription as a backend for opencodex.
 
-1. Start opencodex and confirm it answers:
+1. Start OpenRelay and confirm it answers:
 
    ```bash
    curl http://127.0.0.1:10100/healthz
@@ -646,12 +646,12 @@ manual client setup with no switch on **Connect**, and it is separate from the u
 3. Sync models from the endpoint, or add one by its `provider/model` id, and select it.
 
 The app uses `GET /v1/models` for discovery and `POST /v1/chat/completions` for turns. Those turns
-go through opencodex's normal model routing, so provider credentials, OAuth accounts and combos apply
+go through OpenRelay's normal model routing, so provider credentials, OAuth accounts and combos apply
 as they do for any other client. The accepted request fields are listed in the
 [proxy formats reference](/reference/proxy-formats/).
 
 If the app reports no models, check that the base URL ends in `/v1` rather than
-`/v1/chat/completions` and that `/v1/models` returns a non-empty `data` array. When opencodex
+`/v1/chat/completions` and that `/v1/models` returns a non-empty `data` array. When OpenRelay
 listens on a non-loopback address, put a data-admission key (the token described under
 [remote access](/reference/configuration/server/#remote-access), or a dashboard-generated `ocx_…`
 key) in the app's API key field. The app sends it as `Authorization: Bearer`, which
@@ -670,7 +670,7 @@ folder on its own does not count, because Pi-based omo creates it too. Without L
 section is hidden and the command line reports it as not installed. Pick a model on a row and
 press Save:
 
-- opencodex rewrites only the root `model = "..."` line of that role's file. The role's
+- OpenRelay rewrites only the root `model = "..."` line of that role's file. The role's
   instructions, comments, and other keys are left exactly as they were. A role with no pin gets
   one added near the top of the file.
 - The same value is written to `[codex].agents.<role>.model` in `~/.omo/omo.jsonc`, which
@@ -679,15 +679,15 @@ press Save:
   set the value there by hand. Symlinks and non-regular files are rejected; on macOS and Linux,
   a FIFO is rejected without waiting for a writer. A skipped mirror does not undo the role-file save.
 
-Nothing happens until you press Save; syncing or restarting opencodex never changes a role file.
+Nothing happens until you press Save; syncing or restarting OpenRelay never changes a role file.
 New Codex sessions pick up the change. The same controls exist on the command line:
 
 ```bash
-ocx agent roles
-ocx agent roles set explorer xai/grok-4.5
+orl agent roles
+orl agent roles set explorer xai/grok-4.5
 ```
 
-`ocx agent roles set <role> <model> --effort <level>` also sets the role's reasoning effort: it
+`orl agent roles set <role> <model> --effort <level>` also sets the role's reasoning effort: it
 rewrites the role file's `model_reasoning_effort` line and writes `[codex].agents.<role>.reasoning`
 in omo.jsonc when LazyCodex has that level (`ultra` stays in the role file only, and an older
 `reasoning` is removed). A Save that changes only the model leaves both effort values as they were.
@@ -696,15 +696,15 @@ in omo.jsonc when LazyCodex has that level (`ultra` stays in the role file only,
 
 Auto-assign is part of omo (Codex / LazyCodex): it sits above the role table in that section and
 exists only while LazyCodex is detected. Without it the dashboard shows neither, the API answers
-409 `lazycodex_not_detected`, and `ocx agent roles suggest` is refused.
+409 `lazycodex_not_detected`, and `orl agent roles suggest` is refused.
 
-Auto-assign proposes a model for every role at once. opencodex asks your
+Auto-assign proposes a model for every role at once. OpenRelay asks your
 default Codex model (the root `model` in Codex `config.toml`) one question: for each role, given its
 description and the start of its instructions, which capability tier (fast, standard or frontier)
 and how much reasoning (glance, measured, thorough or exhaustive) does it need? That model never
-picks a model. opencodex then picks the cheapest model from your picker list that reaches the tier:
+picks a model. OpenRelay then picks the cheapest model from your picker list that reaches the tier:
 
-- Models listed under `codexRoleTiers` in the opencodex config (`{ "fast": [...], "standard": [...], "frontier": [...] }`)
+- Models listed under `codexRoleTiers` in the OpenRelay config (`{ "fast": [...], "standard": [...], "frontier": [...] }`)
   have that tier.
 - Other models with a known price are ranked by price and split evenly across the three tiers. With only
   one or two priced models, the dearest is frontier and the other, if any, is standard.
@@ -718,8 +718,8 @@ one. The effort is placed on the chosen model's own levels: its lowest, its defa
 default, or its highest.
 
 ```bash
-ocx agent roles suggest
-ocx agent roles suggest --model xai/grok-4.5 --apply
+orl agent roles suggest
+orl agent roles suggest --model xai/grok-4.5 --apply
 ```
 
 ## Kilo
@@ -751,8 +751,8 @@ block under the same safe owned-only rules as every other client, and a new Kilo
 loads the updated file.
 
 ```bash
-ocx integration client enable --client kilo
-ocx export --client kilo --out ./kilo.jsonc
+orl integration client enable --client kilo
+orl export --client kilo --out ./kilo.jsonc
 ```
 
 ## Command Code
@@ -786,26 +786,26 @@ Paste the key yourself if you later move the provider off loopback: Command Code
 stores keys in `~/.commandcode/auth.json` (via `/connect`), not in `providers.json`.
 
 ```bash
-ocx integration client enable --client commandcode
-ocx export --client commandcode --out ./providers.json
+orl integration client enable --client commandcode
+orl export --client commandcode --out ./providers.json
 ```
 
-`ocx commandcode restore --op <opId>` accepts only Command Code operations, including
+`orl commandcode restore --op <opId>` accepts only Command Code operations, including
 `--preview` and `--plan-fingerprint` requests. It rejects client/profile overrides.
 The running proxy must support client-scoped restore; older proxies return an error
 without falling back to the generic restore endpoint.
-Use `ocx integration client restore` for the generic journal and the explicit Aside
+Use `orl integration client restore` for the generic journal and the explicit Aside
 profile commands above for Aside operations.
 
 ## Factory Droid
 
 Run Droid once to create `~/.factory`, then explicitly enable this integration with
-`ocx integration client enable --client droid`. OpenCodex adds only documented
+`orl integration client enable --client droid`. OpenRelay adds only documented
 `customModels` entries to your personal `settings.json`, using a keyless local
 Chat Completions endpoint. Choose a row from Droid's `/model` picker. Disable
 removes the managed rows; Undo restores the exact saved file. Other settings and
 custom models remain yours.
-If Droid normalizes a `customModels` row by adding `id` or `index`, OpenCodex ignores those two
+If Droid normalizes a `customModels` row by adding `id` or `index`, OpenRelay ignores those two
 client fields when checking ownership so saved reasoning defaults remain available.
 
 Open **Connect → Factory Droid** (`/#integrations/droid`) to set a reasoning
@@ -818,15 +818,15 @@ The CLI supports the same defaults in Droid apply/overwrite. For example, replac
 the fictional model below with an exact connected ID and supported effort:
 
 ```bash
-ocx integration client preview --client droid --operation apply --reasoning-default example/model-a=high --json > droid-preview.json
+orl integration client preview --client droid --operation apply --reasoning-default example/model-a=high --json > droid-preview.json
 ```
 
 After reviewing the applicable plan and choosing the write:
 
 ```bash
 DROID_FINGERPRINT="$(jq -er 'select(.canApply == true) | .fingerprint' droid-preview.json)"
-ocx integration client enable --client droid --reasoning-default example/model-a=high --plan-fingerprint "$DROID_FINGERPRINT" --json
-ocx integration client status --client droid --json
+orl integration client enable --client droid --reasoning-default example/model-a=high --plan-fingerprint "$DROID_FINGERPRINT" --json
+orl integration client status --client droid --json
 ```
 
 Repeat `--reasoning-default MODEL=EFFORT` to submit the complete replacement map.
@@ -841,19 +841,19 @@ and refuses stale binding rather than silently accepting a changed map.
 For an intended complete clear, preview that separate action:
 
 ```bash
-ocx integration client preview --client droid --operation apply --clear-reasoning-defaults --json > droid-clear-preview.json
+orl integration client preview --client droid --operation apply --clear-reasoning-defaults --json > droid-clear-preview.json
 ```
 
 After reviewing and choosing it:
 
 ```bash
 DROID_CLEAR_FINGERPRINT="$(jq -er 'select(.canApply == true) | .fingerprint' droid-clear-preview.json)"
-ocx integration client enable --client droid --clear-reasoning-defaults --plan-fingerprint "$DROID_CLEAR_FINGERPRINT" --json
+orl integration client enable --client droid --clear-reasoning-defaults --plan-fingerprint "$DROID_CLEAR_FINGERPRINT" --json
 ```
 
 The default applies only when Droid omits an effort from its request. An explicit
-request effort takes precedence over this default; existing OpenCodex pins and
-caps still apply. Droid may continue to display **Dynamic** even when OpenCodex
+request effort takes precedence over this default; existing OpenRelay pins and
+caps still apply. Droid may continue to display **Dynamic** even when OpenRelay
 applies the configured default. Requests without the Droid default header are
 unaffected; the header is a request preference, not proof of client identity.
 For combos and routing policies, each concrete target checks the preference
@@ -863,7 +863,7 @@ from a compatible fallback.
 A saved default that the routed model no longer supports is ignored for requests.
 If the connected model's declared effort list no longer includes the saved value,
 it is omitted from the panel's defaults and removed from the managed row on refresh.
-Reviewing without editing lets OpenCodex preserve the remaining supported defaults.
+Reviewing without editing lets OpenRelay preserve the remaining supported defaults.
 
 Refresh preserves defaults while the exact `provider/model` selector remains
 connected and declares the saved effort. Renaming a provider, model, or combo alias replaces that managed row
@@ -876,9 +876,9 @@ managed selector cannot address them safely; export and managed settings show
 the same rows. A nonempty catalog with no addressable models is refused.
 
 Droid also reads legacy `config.json` and local `settings.local.json`. Resolve
-legacy rows that use the OpenCodex endpoint, a generated model ID, or an
+legacy rows that use the OpenRelay endpoint, a generated model ID, or an
 `OpenCodex:` display name, and any local `customModels` override, before enabling;
-OpenCodex refuses those ambiguous settings. It also refuses an
+OpenRelay refuses those ambiguous settings. It also refuses an
 unsafe target or a row edited since apply. The integration is loopback only and
 never copies provider credentials. Factory documents the [BYOK schema](https://docs.factory.ai/model-independence/byok)
 and [personal settings path](https://docs.factory.ai/droid-cli/settings).

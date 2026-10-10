@@ -417,10 +417,10 @@ export async function runUpdate(): Promise<void> {
   if (installer === "mise") {
     const command = miseUpdateCommand(ownership);
     if (command) {
-      console.error(`OpenCodex is externally managed by mise. Update it with: ${command}`);
+      console.error(`OpenRelay is externally managed by mise. Update it with: ${command}`);
     } else {
       console.error(
-        "OpenCodex appears to be managed by mise, but its ownership metadata is unreadable or inconsistent. Repair the mise installation metadata before updating.",
+        "OpenRelay appears to be managed by mise, but its ownership metadata is unreadable or inconsistent. Repair the mise installation metadata before updating.",
       );
     }
     process.exitCode = 1;
@@ -557,7 +557,7 @@ export async function runUpdate(): Promise<void> {
     const plan = planUpdateRuntimeHandling({ ...ownership, serviceInstalled: false, supervision });
     if (!plan.mayStopRuntime) {
       console.warn(supervision
-        ? "OpenCodex Desktop supervises the proxy; no CLI runtime was restored."
+        ? "OpenRelay Desktop supervises the proxy; no CLI runtime was restored."
         : plan.notice);
       return false;
     }
@@ -579,7 +579,7 @@ export async function runUpdate(): Promise<void> {
           { timeoutMs: 1500, deadlineAt: deadline, attempts: 1 })) return true;
       await Bun.sleep(Math.min(100, Math.max(0, deadline - Date.now())));
     }
-    console.warn("⚠️  Recovery did not report a healthy proxy before its deadline; run 'ocx service repair' or 'ocx start'.");
+    console.warn("⚠️  Recovery did not report a healthy proxy before its deadline; run 'orl service repair' or 'orl start'.");
     return false;
   };
   const recoverStoppedRuntime = async (reason: string): Promise<void> => {
@@ -602,7 +602,7 @@ export async function runUpdate(): Promise<void> {
         recovery = await planRecovery();
       }
       if (recovery.reason === "desktop-supervised") {
-        console.log("OpenCodex Desktop supervises the proxy; no CLI runtime was restored.");
+        console.log("OpenRelay Desktop supervises the proxy; no CLI runtime was restored.");
       } else if (recovery.action === "manual") {
         console.warn(`⚠️  ${reason}; runtime recovery requires manual review (${recovery.reason}).`);
       } else if (recovery.action === "service") {
@@ -635,7 +635,7 @@ export async function runUpdate(): Promise<void> {
         await startProxyDirectly();
       }
     } catch {
-      console.warn("⚠️  Runtime recovery could not be verified; run 'ocx service repair' or 'ocx start' after checking ownership.");
+      console.warn("⚠️  Runtime recovery could not be verified; run 'orl service repair' or 'orl start' after checking ownership.");
     }
   };
 
@@ -695,11 +695,11 @@ export async function runUpdate(): Promise<void> {
       }
       if (decision.reason === "teardown-outstanding") {
         console.error("⚠️  A shared teardown from an earlier stop is still outstanding and needs manual review; aborting the update.");
-        console.error("    Confirm no proxy is running, run 'ocx restore', then remove the pending-teardown file in your opencodex home.");
+        console.error("    Confirm no proxy is running, run 'orl restore', then remove the pending-teardown file in your OpenRelay home.");
       } else {
         console.error(decision.reason === "proxy-unknown"
-          ? `⚠️  Could not confirm the proxy on ${capturedListen.hostname}:${capturedListen.port} is stopped; aborting the update. Run 'ocx stop' and retry.`
-          : "⚠️  Could not stop the running proxy; aborting the update. Run 'ocx stop' and retry.");
+          ? `⚠️  Could not confirm the proxy on ${capturedListen.hostname}:${capturedListen.port} is stopped; aborting the update. Run 'orl stop' and retry.`
+          : "⚠️  Could not stop the running proxy; aborting the update. Run 'orl stop' and retry.");
       }
       return 1;
     }
@@ -707,7 +707,7 @@ export async function runUpdate(): Promise<void> {
       console.warn(
         "⚠️  Codex resume-history metadata restore is incomplete (a backup manifest remains).\n" +
         "    The DB may be busy or the manifest/target may need review; untracked routed history is intentionally unchanged.\n" +
-        "    After the update: close the Codex app, run 'ocx doctor', then run 'ocx stop' once to retry.",
+        "    After the update: close the Codex app, run 'orl doctor', then run 'orl stop' once to retry.",
       );
     }
     if (decision.reason === "history-deferred") {
@@ -717,7 +717,7 @@ export async function runUpdate(): Promise<void> {
       console.warn(
         "⚠️  The shared teardown was refused by the Codex history preflight and restored nothing.\n" +
         "    Config, catalog, history and provenance were preserved, and the teardown receipt was kept.\n" +
-        "    The proxy is down, so the update continues; close the Codex app and run 'ocx stop' once afterwards to finish the restore.",
+        "    The proxy is down, so the update continues; close the Codex app and run 'orl stop' once afterwards to finish the restore.",
       );
     }
   }
@@ -832,10 +832,10 @@ export async function runUpdate(): Promise<void> {
           windowsHide: true,
           env: mutation.unprivilegedEnvironment(),
         });
-        if (shim.status !== 0) console.warn("⚠️  Shim repair skipped: run 'ocx codex-shim install'.");
+        if (shim.status !== 0) console.warn("⚠️  Shim repair skipped: run 'orl codex-shim install'.");
       }
     } catch {
-      console.warn("⚠️  Shim repair skipped; run 'ocx codex-shim install'.");
+      console.warn("⚠️  Shim repair skipped; run 'orl codex-shim install'.");
     }
     if (trayWasInstalled) {
       const trayArgs = planWindowsTrayUpdate({ installed: trayWasInstalled, running: trayWasRunning }).installArgs;
@@ -843,7 +843,7 @@ export async function runUpdate(): Promise<void> {
       if (tray.status === 0) {
         console.log("🔧 Refreshed Windows tray startup paths.");
       } else {
-        console.warn("⚠️  Windows tray refresh failed. Run 'ocx tray install'.");
+        console.warn("⚠️  Windows tray refresh failed. Run 'orl tray install'.");
         if (trayWasRunning) spawnSync(process.execPath, [postUpdateLauncher, "tray", "start"], { stdio: "ignore", windowsHide: true, env: mutation.unprivilegedEnvironment() });
       }
     }
@@ -856,7 +856,7 @@ export async function runUpdate(): Promise<void> {
         const supervision = observeSupervision();
         const plan = planUpdateRuntimeHandling({ ...ownership, serviceInstalled: true, supervision });
         if (!plan.mayRestoreService) console.warn(supervision
-          ? "OpenCodex Desktop supervises the proxy; CLI recovery was skipped. Use the app's updater (tray → Check for Updates)."
+          ? "OpenRelay Desktop supervises the proxy; CLI recovery was skipped. Use the app's updater (tray → Check for Updates)."
           : plan.notice);
         return plan.mayRestoreService;
       };
@@ -914,8 +914,8 @@ export async function runUpdate(): Promise<void> {
                 : "⚠️  Service refresh failed and the captured port is still busy; not starting on another port.",
             );
             console.warn(process.platform === "win32"
-              ? `   Run 'ocx service repair', then 'ocx start --port ${capturedListen.port}'.`
-              : `   Run 'ocx service repair' to see the reason, then 'ocx start --port ${capturedListen.port}'.`);
+              ? `   Run 'orl service repair', then 'orl start --port ${capturedListen.port}'.`
+              : `   Run 'orl service repair' to see the reason, then 'orl start --port ${capturedListen.port}'.`);
           } else {
             // Re-read rather than reuse the plan from before the package install: the app can
             // claim the runtime during an update that takes minutes, and the refusal the
@@ -929,7 +929,7 @@ export async function runUpdate(): Promise<void> {
               mutation.reacquire();
             } catch {
               console.warn("⚠️  Updated, but another process kept the runtime ownership lease claimed, so no proxy was started.");
-              console.warn(`   Run 'ocx service repair', then 'ocx start --port ${capturedListen.port}'.`);
+              console.warn(`   Run 'orl service repair', then 'orl start --port ${capturedListen.port}'.`);
               return 1;
             }
             const fallbackOwnership = await resolvedRuntimeOwnership();
@@ -941,7 +941,7 @@ export async function runUpdate(): Promise<void> {
             });
             if (!nowOwned.mayStopRuntime) {
               console.warn(supervision
-                ? "OpenCodex Desktop supervises the proxy; CLI recovery was skipped. Use the app's updater (tray → Check for Updates)."
+                ? "OpenRelay Desktop supervises the proxy; CLI recovery was skipped. Use the app's updater (tray → Check for Updates)."
                 : nowOwned.notice ?? "⚠️  The background runtime is owned elsewhere; not starting a second proxy.");
               return;
             }
@@ -954,8 +954,8 @@ export async function runUpdate(): Promise<void> {
             // reasons `ocx service repair` reports directly (since it now verifies
             // the service actually serves).
             console.warn(process.platform === "win32"
-              ? "   Run 'ocx service repair' to refresh the background service."
-              : "   Run 'ocx service repair' to refresh the background service and see why it failed.");
+              ? "   Run 'orl service repair' to refresh the background service."
+              : "   Run 'orl service repair' to refresh the background service and see why it failed.");
             if (await startProxyDirectly()) console.log(`✅ Proxy is healthy on port ${capturedListen.port}.`);
           }
         }

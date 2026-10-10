@@ -3,7 +3,7 @@ title: Конфигурация агентов
 description: Multi-agent surface, guidance при делегировании, preferred model'и, fallback chain'ы, sync native default'ов и effort cap'ы.
 ---
 
-Настройки агентов управляют тем, какая collaboration surface Codex рекламируется и как opencodex
+Настройки агентов управляют тем, какая collaboration surface Codex рекламируется и как OpenRelay
 подсказывает, маршрутизирует и ограничивает делегированную работу.
 
 ## Поля агентов
@@ -11,11 +11,11 @@ description: Multi-agent surface, guidance при делегировании, pr
 | Поле | Тип | По умолчанию | Значение |
 | --- | --- | --- | --- |
 | `multiAgentMode?` | `"v1" \| "default" \| "v2"` | `"default"` | `v1` штампует все модели как v1; `v2` штампует все модели как v2. `default` восстанавливает upstream pin'ы (Sol/Terra — v2, Luna — v1) и для остальных следует native flag `multi_agent_v2`. Применяется к новым сессиям. |
-| `subagentModels?` | `string[]` | `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna` | До пяти bare native-id, account-qualified id `<selector>/<native-openai-model>` или routed-id `provider/model`, которые показываются первыми в picker'е подагентов. Страница Subagents предлагает только bare native- и routed-id и при сохранении исключает точные account-qualified варианты; для точного выбора используйте `ocx agent subagents set` или отредактируйте конфигурацию. После [однократного обновления Astra](/reference/configuration/agents/#astra-roster-upgrade) явный пустой список сохраняется. |
+| `subagentModels?` | `string[]` | `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna` | До пяти bare native-id, account-qualified id `<selector>/<native-openai-model>` или routed-id `provider/model`, которые показываются первыми в picker'е подагентов. Страница Subagents предлагает только bare native- и routed-id и при сохранении исключает точные account-qualified варианты; для точного выбора используйте `orl agent subagents set` или отредактируйте конфигурацию. После [однократного обновления Astra](/reference/configuration/agents/#astra-roster-upgrade) явный пустой список сохраняется. |
 | `injectionModel?` | `string` | — | Предпочитаемая native- или routed-модель подагента, которую proxy использует в собственном guidance v2. |
 | `injectionEffort?` | `string` | — | Предпочитаемый effort (`low`–`ultra`), имеющий смысл только вместе с `injectionModel`. |
 | `injectionPrompt?` | `string` | — | Заменяет встроенное тело guidance для v2. Поддерживает `{{model}}`, `{{effort}}`, `{{roster}}` и `{{fallback}}`. Настроенного `injectionModel` достаточно, чтобы отобразить пользовательский prompt. |
-| `multiAgentGuidanceEnabled?` | `boolean` | `true` | Управляет только developer-guidance, написанным самим opencodex, для v1/v2; не меняет native default'ы агентов, tools, routing, roster'ы и effort cap'ы. |
+| `multiAgentGuidanceEnabled?` | `boolean` | `true` | Управляет только developer-guidance, написанным самим OpenRelay, для v1/v2; не меняет native default'ы агентов, tools, routing, roster'ы и effort cap'ы. |
 | `syncCodexSubagentDefaults?` | `boolean` | `false` | Разрешает записывать `injectionModel` и, при наличии, `injectionEffort` как native default'ы Codex при sync/restart. Требует `injectionModel`. |
 | `subagentModelFallback?` | `string[]` | `[]` | Глобальные fallback-модели для порождённых child-turn'ов в порядке приоритета. |
 | `subagentModelFallbackByModel?` | `Record<string, string[]>` | `{}` | Модельные цепочки fallback по ключу запрошенной основной модели. Это поддерживаемое место для per-role метаданных fallback; поле `model_fallback` в `$CODEX_HOME/agents/*.toml` поддерживается только как legacy и заставляет Codex 0.146+ пропустить роль (#1190). |
@@ -23,9 +23,9 @@ description: Multi-agent surface, guidance при делегировании, pr
 | `effortCap?` | `string` | — | Жёсткий потолок effort для qualifying v2 main-turn'ов и помеченных spawned-child turn'ов. Принимает `low`–`ultra`. |
 | `subagentEffortCap?` | `string` | — | Дополнительный потолок только для spawned-child turn'ов. Если применимы оба cap'а, выигрывает более низкий. |
 
-Управляйте surface через дашборд или `ocx v2 status|on|off|mode <v1|default|v2>|threads <n>`.
+Управляйте surface через дашборд или `orl v2 status|on|off|mode <v1|default|v2>|threads <n>`.
 Смена режима применяется к новым сессиям. `maxConcurrentThreadsPerSession` — это поле
-`PUT /api/v2`, а не ключ `config.json`; `ocx v2 threads <n>` записывает
+`PUT /api/v2`, а не ключ `config.json`; `orl v2 threads <n>` записывает
 `max_concurrent_threads_per_session` в `[features.multi_agent_v2]` файла
 `$CODEX_HOME/config.toml` после включения v2.
 
@@ -39,7 +39,7 @@ custom prompt на этом API передаётся полем `prompt`.
 
 `GET` и `PUT /api/v2` дополнительно возвращают `multiAgentModeHintRecommendation: { text, revision }`. При включении или восстановлении preset дашборд использует текст сервера без встроенного запасного варианта. Если старый сервер не возвращает рекомендацию или возвращает некорректное значение, применение и восстановление preset недоступны; существующий custom hint по-прежнему можно редактировать или удалять. Восстановление preset меняет только локальный черновик; действие сохранения записывает его.
 
-Чтение настроек, несвязанные изменения и обновление версии не мигрируют сохранённый hint. Только явное обновление hint, текст которого побайтово совпадает с одним из двух известных старых preset OpenCodex, заменяет его текущей рекомендацией. Остальной допустимый custom text, включая варианты с отличиями в пробельных символах, сохраняется побайтово. Существующие правила включения v2, проверки поддержки и удаления hint не меняются; изменения применяются к новым сессиям Codex.
+Чтение настроек, несвязанные изменения и обновление версии не мигрируют сохранённый hint. Только явное обновление hint, текст которого побайтово совпадает с одним из двух известных старых preset OpenRelay, заменяет его текущей рекомендацией. Остальной допустимый custom text, включая варианты с отличиями в пробельных символах, сохраняется побайтово. Существующие правила включения v2, проверки поддержки и удаления hint не меняются; изменения применяются к новым сессиям Codex.
 
 ## Roster и guidance
 
@@ -96,9 +96,9 @@ user-owned target field'ы считаются конфликтом и сохра
 Модельные цепочки fallback для ролей должны храниться в конфигурации opencodex. Запись
 `model_fallback` в `$CODEX_HOME/agents/*.toml` заставляет Codex 0.146+ отклонить весь файл
 роли как неизвестное поле и пропустить роль (#1190). Устаревшая строка `model_fallback` в TOML
-по-прежнему читается для обратной совместимости, но `ocx doctor` помечает её.
+по-прежнему читается для обратной совместимости, но `orl doctor` помечает её.
 
-opencodex пропускает кандидатов, которые отключены, не маршрутизируются, unhealthy, находятся в
+OpenRelay пропускает кандидатов, которые отключены, не маршрутизируются, unhealthy, находятся в
 cooldown либо уже достигли порога quota. Availability-снимок кэшируется на
 `subagentModelFallbackPollMs`. Для шифрованных child-task'ов цепочка ограничена каноническими
 native ChatGPT-target'ами и прямыми key-auth Responses-маршрутами, явно доверенными через
@@ -133,7 +133,7 @@ surface v2, а child-turn — когда он помечен точными mark
 
 Cap'ы умеют только понижать effort. Они опускают значение до самой высокой объявленной ступени,
 которая не выше cap'а. Если у модели нет управления effort или ни одна поддерживаемая ступень не
-помещается под cap, opencodex убирает поле effort и позволяет провайдеру применить собственный
+помещается под cap, OpenRelay убирает поле effort и позволяет провайдеру применить собственный
 дефолт. `max` и `ultra` принимаются, хотя дашборд предлагает только `low`–`xhigh`.
 
 Настроенные потолки применяются и к подходящим нативным запросам Chat Completions без закреплённого effort модели. Преобразование в значение провайдера выполняется, когда применяется закрепление или потолок меняет значение; иначе значение нативного вызывающего клиента сохраняет исходное написание.

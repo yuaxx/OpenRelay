@@ -1,13 +1,13 @@
 ---
 title: Codex App 模型选择器
-description: opencodex 中的模型如何通过共享 Codex 目录出现在 Codex App、Codex CLI 和 Codex TUI 中。
+description: OpenRelay 中的模型如何通过共享 Codex 目录出现在 Codex App、Codex CLI 和 Codex TUI 中。
 ---
 
-opencodex 不会修改 Codex App。它会写入 Codex CLI/TUI 使用的同一套 Codex 配置和模型目录。
+OpenRelay 不会修改 Codex App。它会写入 Codex CLI/TUI 使用的同一套 Codex 配置和模型目录。
 app-server 会读取这份共享状态，但部分 Codex Desktop 版本还会在 renderer 中应用第二层远程
 allowlist，因此仍可能从选择器里删掉路由模型。
 
-OpenAI 条目有两种凭据通道：原生 Codex 登录，以及命名空间化的 `openai-apikey/<model>` API key 通道。仅在 Pool 与 Direct 之间切换 `codexAccountMode` 不会改变选择器 id。但当 `codexAccountPickerEnabled` 启用了账户限定的选择器行，且 `codexAccountNamespaces` 中有目标账户存在的 selector 时，opencodex 会为映射账户添加独立的 `<selector>/<native-openai-model>` 行，并在选择器中隐藏裸原生行。Selector 名称是用户自定义的公开标签，没有内置的账户角色含义。选择带 `selector` 的行只会使用映射账户，不会更改当前 Pool 账户；目标不可用时，请求会直接失败，不会切换到其他账户。详情请参阅[精确 Codex 账户选择器](/reference/configuration/routing/#exact-codex-account-selectors)。
+OpenAI 条目有两种凭据通道：原生 Codex 登录，以及命名空间化的 `openai-apikey/<model>` API key 通道。仅在 Pool 与 Direct 之间切换 `codexAccountMode` 不会改变选择器 id。但当 `codexAccountPickerEnabled` 启用了账户限定的选择器行，且 `codexAccountNamespaces` 中有目标账户存在的 selector 时，OpenRelay 会为映射账户添加独立的 `<selector>/<native-openai-model>` 行，并在选择器中隐藏裸原生行。Selector 名称是用户自定义的公开标签，没有内置的账户角色含义。选择带 `selector` 的行只会使用映射账户，不会更改当前 Pool 账户；目标不可用时，请求会直接失败，不会切换到其他账户。详情请参阅[精确 Codex 账户选择器](/reference/configuration/routing/#exact-codex-account-selectors)。
 
 `codexAccountNamespaces` 映射为空时，账户限定的选择器行处于关闭状态。非空映射中省略 `codexAccountPickerEnabled` 时，为保持向后兼容会视为已启用。设为 `false` 会隐藏生成的账户限定行并恢复选择器中的裸原生行，但不会删除映射，也不会禁用精确的 `<selector>/<native-openai-model>` 路由。
 
@@ -38,18 +38,18 @@ cp ~/.opencodex/config.json.pre-openai-tiers-v2.bak ~/.opencodex/config.json
 重新显示 catalog 中已标记为 `hide` 的原生行。单纯刷新 catalog 或重启代理无法改变 renderer
 策略。
 
-对于等价的路由模型，opencodex 提供默认关闭的 native-alias combo 兼容模式：用明确的显示标签
+对于等价的路由模型，OpenRelay 提供默认关闭的 native-alias combo 兼容模式：用明确的显示标签
 发布 allowlist 接受的裸 slug，并让该 slug 在规范 OpenAI 路由之前进入指定 combo。只要配置了
 native alias，已禁用的裸原生行就会从有效 catalog 中移除，避免 Desktop 无视隐藏状态将其复活。
 命令、禁用键语义和安全限制见 [Codex Desktop 原生 allowlist 兼容模式](/zh-cn/guides/combos/#codex-desktop-原生-allowlist-兼容模式)。
 
 ## 集成路径
 
-`ocx init`、`ocx start` 和 `ocx sync` 会把共享的 Codex 配置和目录接入代理；有关配置注入、目录同步、shim、WebSocket fallback 和恢复机制，请参见 [Codex Integration](/guides/codex-integration/)。
+`orl init`、`orl start` 和 `orl sync` 会把共享的 Codex 配置和目录接入代理；有关配置注入、目录同步、shim、WebSocket fallback 和恢复机制，请参见 [Codex Integration](/guides/codex-integration/)。
 
 ## 为什么路由模型会显示
 
-Codex 的模型选择器需要 Codex 形状的目录条目。opencodex 会克隆一个原生 Codex 模型模板，然后替换路由模型的身份：
+Codex 的模型选择器需要 Codex 形状的目录条目。OpenRelay 会克隆一个原生 Codex 模型模板，然后替换路由模型的身份：
 
 ```text
 slug = "anthropic/claude-sonnet-..."
@@ -57,11 +57,11 @@ display_name = "anthropic/claude-sonnet-..."
 visibility = "list"
 ```
 
-克隆会保留严格解析器字段，例如 reasoning 档位、shell 类型、API 支持标志和 base instructions。随后，opencodex 会移除该路由无法兑现的仅原生能力，包括 OpenAI service-tier 元数据。
+克隆会保留严格解析器字段，例如 reasoning 档位、shell 类型、API 支持标志和 base instructions。随后，OpenRelay 会移除该路由无法兑现的仅原生能力，包括 OpenAI service-tier 元数据。
 
 ## 当前稳定模型覆盖
 
-原生回退集合包含 `gpt-5.5` 以及 GPT-5.6 Sol/Terra/Luna。对于 GPT-5.5 家族，opencodex 会保留已安装 Codex 目录中更丰富的实时条目，只在缺失时才合成条目。内置的上游快照只用于 GPT-5.6，因为它提供的是每个模型真实的身份和元数据，而不是较旧模板的近似版本。
+原生回退集合包含 `gpt-5.5` 以及 GPT-5.6 Sol/Terra/Luna。对于 GPT-5.5 家族，OpenRelay 会保留已安装 Codex 目录中更丰富的实时条目，只在缺失时才合成条目。内置的上游快照只用于 GPT-5.6，因为它提供的是每个模型真实的身份和元数据，而不是较旧模板的近似版本。
 
 | 路由 | 选择器 id 与目录元数据 |
 | --- | --- |
@@ -113,17 +113,17 @@ service_tier = "fast"
 fast_mode = true
 ```
 
-但模型目录和运行时请求里的 tier id 使用的是 `priority`。opencodex 保留了这个拆分。原生 OpenAI 透传模型保留 fast 支持；路由的提供商会按能力门控——只有当提供商声明 `supportsServiceTier: false` 时才会剥离 `service_tier`（注册表已将官方 OpenAI 分类为 `true`，DeepSeek 和 Volcengine Ark 分类为 `false`）；未分类的自定义网关会原样保留调用方提供的值且绝不注入，因此无法兑现的 fast 选项不会被展示，自定义网关也可以用 `true` 显式启用。
+但模型目录和运行时请求里的 tier id 使用的是 `priority`。OpenRelay 保留了这个拆分。原生 OpenAI 透传模型保留 fast 支持；路由的提供商会按能力门控——只有当提供商声明 `supportsServiceTier: false` 时才会剥离 `service_tier`（注册表已将官方 OpenAI 分类为 `true`，DeepSeek 和 Volcengine Ark 分类为 `false`）；未分类的自定义网关会原样保留调用方提供的值且绝不注入，因此无法兑现的 fast 选项不会被展示，自定义网关也可以用 `true` 显式启用。
 
 ## 子代理选择
 
-Codex 会按 `priority` 升序对选择器可见的目录条目排序，并把前五个作为 `spawn_agent` 模型 override 暴露出来。仪表盘 Subagents 页面最多可以选择并保存五个裸原生 id 或路由 `provider/model` id。手动设置的 `subagentModels` 也支持账户限定的 `<selector>/<native-openai-model>` id，但仪表盘不会提供这些精确 id；保存该页面会用仪表盘中可见的选项替换整个列表。opencodex 会按所选顺序分配较低的目录 priority；启用账户限定的选择器行时，裸原生选择会展开为 selector-qualified 分组。其他模型仍然可以通过精确 id 调用。
+Codex 会按 `priority` 升序对选择器可见的目录条目排序，并把前五个作为 `spawn_agent` 模型 override 暴露出来。仪表盘 Subagents 页面最多可以选择并保存五个裸原生 id 或路由 `provider/model` id。手动设置的 `subagentModels` 也支持账户限定的 `<selector>/<native-openai-model>` id，但仪表盘不会提供这些精确 id；保存该页面会用仪表盘中可见的选项替换整个列表。OpenRelay 会按所选顺序分配较低的目录 priority；启用账户限定的选择器行时，裸原生选择会展开为 selector-qualified 分组。其他模型仍然可以通过精确 id 调用。
 
 精选模型列表与 Dashboard 的 **Sub-agent delegation** 选择彼此独立。它只决定 Codex 先提供哪些 override；它不会自己选择模型，也不会触发委派。
 
 ## Desktop 远程服务器
 
-Codex Desktop 的远程服务器模式会针对客户端自己的 `available_models` 白名单过滤模型选择器（当远程 `use_hidden_models` 设置启用时生效）。路由目录条目仍然会被加载并对外提供——`model/list` 会返回它们，内置 CLI 也能读取——但 Desktop 渲染层在显示前会丢弃任何不在这个仅包含原生模型的白名单中的条目。opencodex 无法影响这份白名单；上游问题在 [openai/codex#19694](https://github.com/openai/codex/issues/19694) 跟踪中。
+Codex Desktop 的远程服务器模式会针对客户端自己的 `available_models` 白名单过滤模型选择器（当远程 `use_hidden_models` 设置启用时生效）。路由目录条目仍然会被加载并对外提供——`model/list` 会返回它们，内置 CLI 也能读取——但 Desktop 渲染层在显示前会丢弃任何不在这个仅包含原生模型的白名单中的条目。OpenRelay 无法影响这份白名单；上游问题在 [openai/codex#19694](https://github.com/openai/codex/issues/19694) 跟踪中。
 
 在 Desktop 提供白名单控制之前：
 
@@ -133,9 +133,9 @@ Codex Desktop 的远程服务器模式会针对客户端自己的 `available_mod
 ## 刷新模型状态
 ## 原生配额回退限制
 
-Codex 应用用完原生的五小时配额后，可能切换到预备回退模型，并把选择器里其他行置灰。正如 [#2813](https://github.com/lidge-jun/opencodex/issues/2813) 所报告的，这个限制同样会隐藏 opencodex 路由的行，而那些行使用的是无关的提供方凭据，不消耗任何 ChatGPT 配额。
+Codex 应用用完原生的五小时配额后，可能切换到预备回退模型，并把选择器里其他行置灰。正如 [#2813](https://github.com/lidge-jun/opencodex/issues/2813) 所报告的，这个限制同样会隐藏 OpenRelay 路由的行，而那些行使用的是无关的提供方凭据，不消耗任何 ChatGPT 配额。
 
-这个限制由客户端在请求到达代理之前施加，因此 opencodex 无法解除。路由行写入时带 `visibility: "list"`，目录过滤只读取 `disabledModels` 和各提供方的 `selectedModels`，任何配额值都不参与路由行的可见性。
+这个限制由客户端在请求到达代理之前施加，因此 OpenRelay 无法解除。路由行写入时带 `visibility: "list"`，目录过滤只读取 `disabledModels` 和各提供方的 `selectedModels`，任何配额值都不参与路由行的可见性。
 
 显式选择路由模型不经过选择器。在 `config.toml` 中设置模型：
 
@@ -146,16 +146,16 @@ model = "anthropic/claude-sonnet-5"
 或者直接发送：
 
 ```bash
-ocx access test anthropic/claude-sonnet-5 --protocol responses
+orl access test anthropic/claude-sonnet-5 --protocol responses
 ```
 
-**请求到达代理之后**，两条路径都能正确路由，这一点有测试覆盖。但预备模式生效时，Codex 桌面应用不会发送已配置的模型：它根据自己的 `wham/usage` 轮询（`luna_reserve` 升级提示加上仍被允许的 `gpt-reserve` 附加限额）判定预备状态，并在请求发出前把模型设置强制改为 `gpt-reserve`，所以 `config.toml` 这条路会在应用内被覆盖。在窗口重置之前，请使用 `ocx access test`、经代理的 Claude Code（`ocx claude`）或任意直连 `/v1` 的客户端。参见[Codex 预备模式下的路由模型](/guides/codex-integration/#routed-models-during-codex-reserve-mode)。
+**请求到达代理之后**，两条路径都能正确路由，这一点有测试覆盖。但预备模式生效时，Codex 桌面应用不会发送已配置的模型：它根据自己的 `wham/usage` 轮询（`luna_reserve` 升级提示加上仍被允许的 `gpt-reserve` 附加限额）判定预备状态，并在请求发出前把模型设置强制改为 `gpt-reserve`，所以 `config.toml` 这条路会在应用内被覆盖。在窗口重置之前，请使用 `orl access test`、经代理的 Claude Code（`orl claude`）或任意直连 `/v1` 的客户端。参见[Codex 预备模式下的路由模型](/guides/codex-integration/#routed-models-during-codex-reserve-mode)。
 
 
 如果选择器里仍然显示旧条目，请刷新目录并重启目标 Codex 界面：
 
 ```bash
-ocx sync
+orl sync
 ```
 
-每当目录可见性、priority 或元数据发生变化时，opencodex 都会用一个刻意标记为过期的缓存 wrapper 重写 `models_cache.json`，这样 Codex 下次刷新模型时就会读取新目录。
+每当目录可见性、priority 或元数据发生变化时，OpenRelay 都会用一个刻意标记为过期的缓存 wrapper 重写 `models_cache.json`，这样 Codex 下次刷新模型时就会读取新目录。

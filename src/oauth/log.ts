@@ -41,7 +41,7 @@ export function logOAuthEvent(
   event: string,
   fields: { provider: string; accountId?: string; [key: string]: unknown },
 ): void {
-  const parts = [`[opencodex] ${event}`, `provider=${fields.provider}`];
+  const parts = [`[openrelay] ${event}`, `provider=${fields.provider}`];
   if (fields.accountId) parts.push(`account=${maskAccountId(fields.accountId)}`);
   for (const [key, value] of Object.entries(fields)) {
     if (key === "provider" || key === "accountId") continue;

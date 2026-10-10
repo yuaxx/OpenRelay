@@ -48,6 +48,7 @@ export interface HealthData { status: string; version: string; uptime: number }
 export interface ProviderInfo { name: string; adapter: string; baseUrl: string; defaultModel?: string; hasApiKey: boolean }
 export interface ModelInfo { id: string; provider: string; namespaced: string; owned_by?: string; reasoningEfforts?: string[] }
 export interface SettingsData {
+  rtk?: import("./dashboard-rtk").RtkSettings;
   codexAutoStart: boolean;
   codexDesktopAuthless?: boolean;
   codexClientCompaction?: boolean;

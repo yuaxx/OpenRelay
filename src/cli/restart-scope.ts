@@ -161,7 +161,7 @@ export async function handleDesktopAppRestart(
       log.error(
         "Refusing to restart the desktop app because this command is running inside it, "
         + "and the restart could not be handed off to a detached helper. "
-        + "Run 'ocx sync --restart-codex' from a terminal outside the app instead.",
+        + "Run 'orl sync --restart-codex' from a terminal outside the app instead.",
       );
       return result;
     case "process_probe_failed":

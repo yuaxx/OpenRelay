@@ -5,7 +5,7 @@ description: Держите Codex, Claude Code, Pi и их входы на од�
 
 О связях машин по SSH см. [Удалённая связь](/ru/guides/remote-link/).
 
-Remote Workspace позволяет запустить агентов разработки на одном OpenCodex Hub, а файлы
+Remote Workspace позволяет запустить агентов разработки на одном OpenRelay Hub, а файлы
 проекта, команды, тесты и вычисления для сборки предоставить с другого компьютера.
 Телефон или третий компьютер могут управлять сессией через дашборд Hub.
 
@@ -32,12 +32,12 @@ Linux предоставляет файловые инструменты и вы
 ## Настройка Hub
 
 На компьютере 1 находятся все входы агентов разработки и сессии моделей. Установите
-нужных агентов, войдите в них и запустите OpenCodex в роли Hub:
+нужных агентов, войдите в них и запустите OpenRelay в роли Hub:
 
 ```bash
-ocx config set runtimeRole hub
-OCX_REMOTE_WORKSPACE_ENABLED=1 ocx start
-ocx gui
+orl config set runtimeRole hub
+OCX_REMOTE_WORKSPACE_ENABLED=1 orl start
+orl gui
 ```
 
 Задайте `OCX_REMOTE_WORKSPACE_ENABLED=1` именно процессу Hub: установка только для
@@ -63,24 +63,24 @@ Codex на новую схему; не задавайте одновременн
 3. На компьютере 2 перейдите в каталог проекта, который хотите открыть.
 4. Скопируйте команду **Linux / macOS terminal** или **Windows PowerShell** для этого
    компьютера. Она свяжет текущий каталог и будет держать
-   `ocx remote-workspace agent` подключённым в этом терминале.
+   `orl remote-workspace agent` подключённым в этом терминале.
 
 Эквивалентная ручная последовательность:
 
 ```bash
 cd /path/to/project
-printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.example' \
+printf '%s\n' 'ONE-TIME-CODE' | orl remote-workspace pair 'https://your-hub.example' \
   --pairing-code-stdin --root "$PWD"
-ocx remote-workspace agent
+orl remote-workspace agent
 ```
 
 На Windows PowerShell используйте команду из дашборда. Её ручной эквивалент:
 
 ```powershell
 $pairingCode = 'ONE-TIME-CODE'
-$pairingCode | ocx remote-workspace pair 'https://your-hub.example' `
+$pairingCode | orl remote-workspace pair 'https://your-hub.example' `
   --pairing-code-stdin --root (Get-Location).Path
-if ($LASTEXITCODE -eq 0) { ocx remote-workspace agent }
+if ($LASTEXITCODE -eq 0) { orl remote-workspace agent }
 ```
 
 Текущий исполняемый файл OCX Bun автоматически добавляется в песочницу Linux как
@@ -89,7 +89,7 @@ if ($LASTEXITCODE -eq 0) { ocx remote-workspace agent }
 не открывая весь домашний каталог:
 
 ```bash
-printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.example' \
+printf '%s\n' 'ONE-TIME-CODE' | orl remote-workspace pair 'https://your-hub.example' \
   --pairing-code-stdin --root "$PWD" \
   --toolchain-root "$HOME/.nvm/versions/node/v24/bin"
 ```
@@ -108,7 +108,7 @@ printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.exam
 Проверьте локальную регистрацию, не выводя секреты:
 
 ```bash
-ocx remote-workspace status
+orl remote-workspace status
 ```
 
 ## Запуск удалённой сессии разработки

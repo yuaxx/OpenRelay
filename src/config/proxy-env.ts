@@ -245,7 +245,7 @@ export function applyProxyEnvWith(
       // variables. Combining it with system exceptions would change that route.
       if (["HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy", "ALL_PROXY", "all_proxy"]
         .some(key => process.env[key]?.trim())) {
-        console.log('[opencodex] proxy "auto": existing proxy environment wins; macOS system proxy not consulted');
+        console.log('[openrelay] proxy "auto": existing proxy environment wins; macOS system proxy not consulted');
         configureSocks5Fetch();
         return;
       }
@@ -258,22 +258,22 @@ export function applyProxyEnvWith(
             : found.kind === "disabled"
               ? "macOS system proxy is disabled"
               : "macOS proxy settings could not be read";
-        console.log(`[opencodex] proxy "auto": ${reason}; proxy environment unchanged`);
+        console.log(`[openrelay] proxy "auto": ${reason}; proxy environment unchanged`);
         return;
       }
       const configured = configuredNoProxyEntries(config);
       const inheritedLowercase = process.env.no_proxy?.trim();
       if (inheritedLowercase && configured.some(host => /^localhost\.?$/i.test(host))) {
-        console.log('[opencodex] proxy "auto": configured noProxy "localhost" cannot be represented exactly for Bun while an inherited no_proxy is set; discovery refused');
+        console.log('[openrelay] proxy "auto": configured noProxy "localhost" cannot be represented exactly for Bun while an inherited no_proxy is set; discovery refused');
         return;
       }
       const origins = [
         found.httpUrl && `HTTP ${describeProxyForLog(found.httpUrl)}`,
         found.httpsUrl && `HTTPS ${describeProxyForLog(found.httpsUrl)}`,
       ].filter(Boolean).join(", ");
-      console.log(`[opencodex] proxy "auto": using macOS system proxy ${origins}`);
+      console.log(`[openrelay] proxy "auto": using macOS system proxy ${origins}`);
       if (found.droppedLinkLocal) {
-        console.log('[opencodex] proxy "auto": link-local IP literals use the proxy; macOS link-local range exceptions are not expressible');
+        console.log('[openrelay] proxy "auto": link-local IP literals use the proxy; macOS link-local range exceptions are not expressible');
       }
       if (found.httpUrl) process.env.HTTP_PROXY = found.httpUrl;
       if (found.httpsUrl) process.env.HTTPS_PROXY = found.httpsUrl;
@@ -292,7 +292,7 @@ export function applyProxyEnvWith(
     // "auto" into HTTP_PROXY; every non-proxy outcome leaves outbound routing as it was.
     if (process.env.HTTP_PROXY?.trim() || process.env.http_proxy?.trim()
       || process.env.HTTPS_PROXY?.trim() || process.env.https_proxy?.trim()) {
-      console.log("[opencodex] proxy \"auto\": existing HTTP_PROXY/HTTPS_PROXY environment wins; system proxy not consulted");
+      console.log("[openrelay] proxy \"auto\": existing HTTP_PROXY/HTTPS_PROXY environment wins; system proxy not consulted");
       proxy = undefined;
     } else {
       const found = readWindowsSystemProxy(auto.reader, auto.platform);
@@ -301,7 +301,7 @@ export function applyProxyEnvWith(
           found.httpUrl && `HTTP ${describeProxyForLog(found.httpUrl)}`,
           found.httpsUrl && `HTTPS ${describeProxyForLog(found.httpsUrl)}`,
         ].filter(Boolean).join(", ");
-        console.log(`[opencodex] proxy "auto": using Windows system proxy ${origins}`);
+        console.log(`[openrelay] proxy "auto": using Windows system proxy ${origins}`);
         if (found.httpUrl) process.env.HTTP_PROXY = found.httpUrl;
         if (found.httpsUrl) process.env.HTTPS_PROXY = found.httpsUrl;
         proxy = undefined;
@@ -313,7 +313,7 @@ export function applyProxyEnvWith(
             : found.kind === "socks-only"
               ? "Windows system proxy is SOCKS-only, which HTTP_PROXY cannot express; using direct egress"
               : "Windows proxy settings could not be read; using direct egress";
-        console.log(`[opencodex] proxy "auto": ${reason}`);
+        console.log(`[openrelay] proxy "auto": ${reason}`);
         proxy = undefined;
       }
     }

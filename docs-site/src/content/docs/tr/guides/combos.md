@@ -4,7 +4,7 @@ description: Yük devretme veya ağırlıklı yük dengeleme için tek bir sanal
 ---
 
 Bir **kombo (combo)**, gerçek sağlayıcı/model hedeflerinin sıralı bir listesini
-sunan tek bir sanal modeldir. İstemciniz `combo/<kimlik>` ister; opencodex bir
+sunan tek bir sanal modeldir. İstemciniz `combo/<kimlik>` ister; OpenRelay bir
 hedef seçer, isteği o somut `sağlayıcı/model`'e yeniden yazar ve ilk hedefte
 yeniden denenebilir bir arıza olduğunda başka bir hedefi deneyebilir.
 
@@ -25,12 +25,12 @@ Bu örnek, birinci olarak Anthropic ve ikinci olarak OpenAI ile `combo/main`
 oluşturur. Her iki sağlayıcı da zaten var olmalı ve etkinleştirilmelidir.
 
 ```bash
-ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
+orl combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 ```
 
 Varsayılan strateji yük devretmedir, bu nedenle normal bir istek
 `anthropic/claude-opus-4-8`'e gider. Bu denemede yeniden denenebilir bir hata
-olursa opencodex `openai/gpt-5.6-sol`'a geçebilir.
+olursa OpenRelay `openai/gpt-5.6-sol`'a geçebilir.
 
 Sanal modeli normalde bir model kimliği sağlayacağınız her yerde kullanın:
 
@@ -44,7 +44,7 @@ Sanal modeli normalde bir model kimliği sağlayacağınız her yerde kullanın:
 Kaydedilen tanımı onaylayın:
 
 ```bash
-ocx combo show main
+orl combo show main
 ```
 
 :::tip
@@ -55,7 +55,7 @@ olmadığında ağırlık ekleyin.
 
 ## Kombo adları nasıl çalışır?
 
-`ocx combo set <kimlik>` komutundaki kombo kimliği bir harf veya rakamla
+`orl combo set <kimlik>` komutundaki kombo kimliği bir harf veya rakamla
 başlamalıdır. Daha sonra toplamda 64 karaktere kadar harfler, rakamlar, `.`, `_`
 veya `-` içerebilir. Kurallı model kimliği her zaman `combo/<kimlik>` olur;
 örneğin `main` kimliği `combo/main` haline gelir.
@@ -91,7 +91,7 @@ Bazı Codex Desktop sürümleri, uygulama sunucusu `model_catalog_json`'ı zaten
 yükledikten sonra uzak bir yalnızca yerel `available_models` izin listesi
 uygular. `Nova1/codex-gpt-5.6-sol` gibi normal yönlendirilen kimlikler daha
 sonra CLI tarafından kullanılabilir ancak Desktop seçicisinde bulunmaz. Bu,
-[opencodex #241](https://github.com/lidge-jun/opencodex/issues/241) tarafından
+[OpenRelay #241](https://github.com/lidge-jun/opencodex/issues/241) tarafından
 izlenen yukarı akış [Codex Desktop
 hatasıdır](https://github.com/openai/codex/issues/19694).
 
@@ -99,7 +99,7 @@ Eşdeğer bir yönlendirilmiş hedefi denetlediğinizde, bir kombo açıkça bir
 slug'ı devralabilir:
 
 ```bash
-ocx combo set nova-sol \
+orl combo set nova-sol \
   --targets Nova1/codex/gpt-5.6-sol \
   --alias gpt-5.6-sol \
   --native-alias \
@@ -107,7 +107,7 @@ ocx combo set nova-sol \
 ```
 
 Bu mod kasıtlı olarak isteğe bağlıdır ve hem `--native-alias` hem de boş olmayan
-bir görüntüleme etiketi gerektirir. Takma ad, bu opencodex sürümü tarafından
+bir görüntüleme etiketi gerektirir. Takma ad, bu OpenRelay sürümü tarafından
 desteklenen yerel model kimliklerinden biri olmalıdır; yalnızca yerel aile öneki
 kabul edilmez çünkü kaldırma işlemi yetkili meta verileri geri
 yükleyebilmelidir. Yönlendirilen hedefin keşif yanıtı yalnızca bir model kimliği
@@ -172,7 +172,7 @@ içinde daha büyük bir pay verir. `stickyLimit`, bir sonraki ağırlıklı se�
 İki başarılı istekten oluşan gruplarla 2:1 oranında bir kombo oluşturun:
 
 ```bash
-ocx combo set balanced \
+orl combo set balanced \
   --targets anthropic/claude-opus-4-8:2,openai/gpt-5.6-sol:1 \
   --strategy round-robin \
   --sticky 2
@@ -204,7 +204,7 @@ hedeflere dağılır. `stickyLimit` bu stratejiyi etkilemez.
 
 ### `least-used`: en az başarılı isteğe sahip hedefi tercih et
 
-`least-used`, her isteği bu opencodex sürecinin kaydettiği en az başarılı istek
+`least-used`, her isteği bu OpenRelay sürecinin kaydettiği en az başarılı istek
 sayısına sahip uygun hedefe yönlendirir. Sayaçlar yeniden başlatmada sıfırdan
 başlar ve eşitliklerde yapılandırma sırası korunur. `weight` değerleri ve
 `stickyLimit` bu stratejiyi etkilemez.
@@ -235,7 +235,7 @@ ikiye ayrılır.
 | Diğer sınıflandırılmamış hatalar | Durun ve hatayı döndürün. |
 
 Atlanan bir hedef, yapılandırılmış bir `cooldownMs` yoksa şu varsayılan soğuma sürelerine girer: istek hızı sınırı kodları `1302`/`1305` için 5 saniye, tükenmiş bir kullanım penceresi (HTTP durumu ne olursa olsun, 502 dahil) veya kimlik bilgisi/faturalandırma hatası için 10 dakika, diğer tüm durumlarda 60 saniye.
-Yukarı akış yanıtı geçerli bir `Retry-After` değeri içeriyorsa opencodex bunun
+Yukarı akış yanıtı geçerli bir `Retry-After` değeri içeriyorsa OpenRelay bunun
 yerine onu kullanır; Codex sıfırlama başlıkları ve yapılandırılmış `cooldownMs` bu geri dönüşlerden önce gelir. Sayısal saniyeler ve HTTP tarihi değerleri kabul edilir ve
 açık `Retry-After` gecikmesi en fazla 24 saat, sıfırlama kaynaklı, yapılandırılmış ve varsayılan soğuma süreleri en fazla 10 dakika ile sınırlandırılır.
 
@@ -273,7 +273,7 @@ okuyamaz.
 
 Böyle bir istek için bir kombo, yeniden denenebilir bir arızadan sonra da dahil
 olmak üzere uygun hedeflerini kurallı yerel ChatGPT rotalarına filtreler.
-Kombonun şifre çözme yeteneğine sahip hiçbir hedefi yoksa opencodex göndermeden
+Kombonun şifre çözme yeteneğine sahip hiçbir hedefi yoksa OpenRelay göndermeden
 önce durur ve HTTP 400 döndürür:
 
 ```json
@@ -316,10 +316,10 @@ Düzenleyici, kota nedeniyle Kaydet ve Oluştur işlemlerini yalnızca kullanıl
 Birincil komutlar şunlardır:
 
 ```bash
-ocx combo list
-ocx combo show <kimlik>
-ocx combo set <kimlik> --targets saglayici/model[:agirlik],...
-ocx combo remove <kimlik> --yes
+orl combo list
+orl combo show <kimlik>
+orl combo set <kimlik> --targets saglayici/model[:agirlik],...
+orl combo remove <kimlik> --yes
 ```
 
 `set` ayrıca `--strategy`, `--sticky`, `--effort`, `--alias`, `--native-alias`,
@@ -380,8 +380,8 @@ saklanır:
 ### `combo/<kimlik>` neden 404 döndürüyor?
 
 Kombo kimliği bilinmiyor. Yanıt, `invalid_request_error` türünde HTTP 404'tür.
-`ocx combo list` çalıştırın, yazımı ve büyük/küçük harf durumunu kontrol edin ve
-yönetim komutunuzun model isteklerini alan çalışan aynı opencodex örneğine
+`orl combo list` çalıştırın, yazımı ve büyük/küçük harf durumunu kontrol edin ve
+yönetim komutunuzun model isteklerini alan çalışan aynı OpenRelay örneğine
 yazdığını onaylayın.
 
 ### Neden `combo_unavailable` alıyorum?

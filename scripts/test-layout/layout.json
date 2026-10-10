@@ -1,7 +1,7 @@
 {
   "version": 1,
   "root": "tests",
-  "explicit": {
+  "explicit": { "openrelay-branding.test.ts": "cli", "rtk-native.test.ts": "responses", "rtk-settings.test.ts": "server", "rtk-compression.test.ts": "responses", "rtk-transport.test.ts": "responses",
     "messages-request-id-headers.test.ts": "claude-integration",
     "messages-request-id-endpoint.test.ts": "claude-integration",
     "anthropic-revoked-token.test.ts": "adapters/anthropic",

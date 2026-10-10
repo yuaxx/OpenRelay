@@ -98,7 +98,7 @@ export function warnIfLiveReloadSkipped(result: LocalProviderReloadResult | null
   console.warn(
     `\n⚠️  A proxy is running but could not reload this provider (${result.reason}).`
     + `\n   The credential is saved to disk; the running proxy keeps using the previous one.`
-    + `\n   Restart it to pick this up: ocx restart`,
+    + `\n   Restart it to pick this up: orl restart`,
   );
 }
 
@@ -164,7 +164,7 @@ export async function handleOAuthLogin(name: string, deps: LoginCliDeps = {}): P
   // still owed an answer before this claims the login worked.
   await browser.settled();
   const reload = await notifyRunningProxyAfterOAuthLogin(name);
-  console.log(`\n✅ Logged in to ${name}. Try: ocx sync`);
+  console.log(`\n✅ Logged in to ${name}. Try: orl sync`);
   for (const line of modelSelectionGuidance(name)) console.log(line);
   warnIfLiveReloadSkipped(reload);
 }
@@ -290,7 +290,7 @@ export async function handleKeyLogin(name: string, deps: LoginCliDeps = {}): Pro
   }
   let reload: LocalProviderReloadResult | null = null;
   await commitKeyLoginProvider(config, name, provider, result => { reload = result; });
-  console.log(`✅ ${def.label} added. Try: ocx sync`);
+  console.log(`✅ ${def.label} added. Try: orl sync`);
   for (const line of modelSelectionGuidance(name)) console.log(line);
   warnIfLiveReloadSkipped(reload);
 }

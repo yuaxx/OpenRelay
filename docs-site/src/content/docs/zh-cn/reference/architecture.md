@@ -1,9 +1,9 @@
 ---
 title: 架构
-description: opencodex 内部机制 —— 模块图、请求解析器、AdapterEvent 桥接与缓存。
+description: OpenRelay 内部机制 —— 模块图、请求解析器、AdapterEvent 桥接与缓存。
 ---
 
-opencodex 运行在单个 Bun 进程中。请求以 OpenAI Responses 格式进入，规范化为内部模型后完成
+OpenRelay 运行在单个 Bun 进程中。请求以 OpenAI Responses 格式进入，规范化为内部模型后完成
 路由，再由 adapter 发送到 provider，最后桥接回 Responses SSE。端到端流程参见
 [工作原理](/zh-cn/getting-started/how-it-works/)。
 
@@ -11,7 +11,7 @@ opencodex 运行在单个 Bun 进程中。请求以 OpenAI Responses 格式进�
 
 ```
 src/
-├── cli/                # ocx command dispatch, init, status, provider commands
+├── cli/                # orl command dispatch, init, status, provider commands
 ├── server/             # Bun.serve, /v1/* proxy, /api/* management API, WS bridge
 ├── codex/              # Codex config injection, catalog sync, auth/account integration
 ├── providers/          # provider metadata, API-key pool, quota and labels
@@ -133,7 +133,7 @@ thread affinity 位于 `codex/` 下，不会出现在管理 API 响应中。请�
 ## 传输与 compaction
 
 `server/index/serve-options.ts` 默认在 `/v1/responses` 上提供 HTTP/SSE。当 `websockets` 为 `false` 而 Codex
-尝试 Responses WebSocket upgrade 时，opencodex 会返回 `426 upgrade_required`，Codex 随后在该
+尝试 Responses WebSocket upgrade 时，OpenRelay 会返回 `426 upgrade_required`，Codex 随后在该
 session 中回退到 HTTP。设置 `"websockets": true` 后，同一 endpoint 会接受 upgrade 并使用
 WebSocket bridge。
 

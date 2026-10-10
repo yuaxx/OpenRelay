@@ -53,7 +53,7 @@ describe("provider/model discovery follows existing handlers", () => {
     expect(new Set(keys).size).toBe(keys.length);
     for (const row of PROVIDER_MODEL_CAPABILITIES) {
       expect(BASE.some(base => base.command.join(" ") === row.command.join(" "))).toBe(false);
-      expect(row.usage?.startsWith(`ocx ${row.command.join(" ")}`)).toBe(true);
+      expect(row.usage?.startsWith(`orl ${row.command.join(" ")}`)).toBe(true);
       expect(row.flags.some(flag => flag.name === "--live")).toBe(["provider add", "provider remove", "provider set-default", "models add", "models remove"].includes(row.command.join(" ")));
     }
   });
@@ -198,7 +198,7 @@ describe("provider/model discovery follows existing handlers", () => {
   test("invalid grammar is refused without contacting any provider", async () => {
     const calls: Request[] = [];
     const deps = fake(calls);
-    expect(capability("models context provider").usage).toBe("ocx models context provider <provider> <on|off> [--value <tokens>] [--json]");
+    expect(capability("models context provider").usage).toBe("orl models context provider <provider> <on|off> [--value <tokens>] [--json]");
     expect(await handleModelsRuntimeCommand("context", ["provider", "fixture", "off", "--value", "64000"], deps)).not.toBe(0);
     expect(await handleModelsRuntimeCommand("selected", ["fixture", "--set", "m", "--clear"], deps)).not.toBe(0);
     expect(await handleModelsRuntimeCommand("edit", ["id", "--context-window", "-"], deps)).not.toBe(0);

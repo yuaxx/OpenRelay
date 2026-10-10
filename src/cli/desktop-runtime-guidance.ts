@@ -18,16 +18,16 @@ export function duplicateRuntimeMessage(
   const evidence = evidenceForTarget(inspect({ targetPid: pid ?? undefined }), pid);
   if (pid != null && latch.observe(evidence)) {
     const supervisor = evidence.kind === "desktop" ? `, ${evidence.app}` : "";
-    return `OpenCodex Desktop supervises the running proxy (pid ${pid}${supervisor}, port ${port}). `
-      + "Use the running proxy, or quit OpenCodex before starting it from this CLI.";
+    return `OpenRelay Desktop supervises the running proxy (pid ${pid}${supervisor}, port ${port}). `
+      + "Use the running proxy, or quit OpenRelay before starting it from this CLI.";
   }
-  return `⚠️  Proxy already running (PID ${pid ?? "unknown"}, port ${port}). Use 'ocx stop' first.`;
+  return `⚠️  Proxy already running (PID ${pid ?? "unknown"}, port ${port}). Use 'orl stop' first.`;
 }
 
 export function desktopStopNotice(evidence: DesktopSupervision): string | null {
   const latch = createSupervisionLatch();
   return latch.observe(evidence)
-    ? "OpenCodex Desktop may start this proxy again after a short backoff. Use Stop Proxy or Quit in the OpenCodex menu to keep it stopped."
+    ? "OpenRelay Desktop may start this proxy again after a short backoff. Use Stop Proxy or Quit in the OpenRelay menu to keep it stopped."
     : null;
 }
 
@@ -47,10 +47,10 @@ export function runDesktopAwareProxyRestart(
       supervisedRequest = latch.observe(evidence);
       const result = await io.requestInPlaceRestart(previous);
       if (evidence.kind === "desktop" && result.accepted) {
-        info("Restart requested; OpenCodex Desktop starts the replacement.");
+        info("Restart requested; OpenRelay Desktop starts the replacement.");
       }
       if (supervisedRequest && !result.accepted && !result.uncertain && result.error instanceof UpdateRestartRequired) {
-        info("OpenCodex Desktop supervises this proxy. Use the app's updater (tray → Check for Updates), or quit OpenCodex before updating and restarting from this CLI.");
+        info("OpenRelay Desktop supervises this proxy. Use the app's updater (tray → Check for Updates), or quit OpenRelay before updating and restarting from this CLI.");
         return { accepted: false as const, uncertain: false, error: new Error("restart_desktop_update_required") };
       }
       return result;

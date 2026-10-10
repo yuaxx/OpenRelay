@@ -354,7 +354,7 @@ export async function executeComboResponses(
   const body = expandPreviousResponseInput(rawBody, inboundClientThreadId);
   const replayFailure = previousResponseReplayFailure(body);
   if (replayFailure?.reason === "scope_mismatch") {
-    console.warn("[opencodex] refusing continuation because the client task scope does not match replay state");
+    console.warn("[openrelay] refusing continuation because the client task scope does not match replay state");
   }
   // Local replay failures require full client replay.
   if (replayFailure) {

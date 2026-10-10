@@ -3,7 +3,7 @@ title: "コンボ: フェイルオーバーとロードバランシング"
 description: フェイルオーバーまたは加重負荷分散のために、1 つの仮想モデルを複数のプロバイダーにルーティングします。
 ---
 
-**コンボ** は、実際のプロバイダー/モデル ターゲットの順序付きリストの先頭にある 1 つの仮想モデルです。クライアントは `combo/<id>` をリクエストします。 opencodex はターゲットを選択し、リクエストをその具体的な `provider/model` に書き換えます。最初のターゲットで再試行可能な障害が発生した場合は、別のターゲットを試行できます。
+**コンボ** は、実際のプロバイダー/モデル ターゲットの順序付きリストの先頭にある 1 つの仮想モデルです。クライアントは `combo/<id>` をリクエストします。 OpenRelay はターゲットを選択し、リクエストをその具体的な `provider/model` に書き換えます。最初のターゲットで再試行可能な障害が発生した場合は、別のターゲットを試行できます。
 
 これは、次のいずれかが必要な場合に便利です。
 
@@ -17,10 +17,10 @@ description: フェイルオーバーまたは加重負荷分散のために、1
 この例では、最初に Anthropic、2 番目に OpenAI を使用して `combo/main` を作成します。両方のプロバイダーがすでに存在し、有効になっている必要があります。
 
 ```bash
-ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
+orl combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 ```
 
-デフォルトの戦略はフェイルオーバーであるため、通常のリクエストは `anthropic/claude-opus-4-8` に送信されます。その試行に再試行可能な失敗があった場合、opencodex は `openai/gpt-5.6-sol` にホップできます。
+デフォルトの戦略はフェイルオーバーであるため、通常のリクエストは `anthropic/claude-opus-4-8` に送信されます。その試行に再試行可能な失敗があった場合、OpenRelay は `openai/gpt-5.6-sol` にホップできます。
 
 通常モデル ID を指定する場所であればどこでも仮想モデルを使用します。
 
@@ -34,7 +34,7 @@ ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 保存された定義を確認します。
 
 ```bash
-ocx combo show main
+orl combo show main
 ```
 
 :::tip
@@ -43,7 +43,7 @@ ocx combo show main
 
 ## コンボ名の仕組み
 
-`ocx combo set <id>` のコンボ ID は文字または数字で始まる必要があります。文字、数字、`.`、`_`、または `-` を合計 64 文字まで含めることができます。その正規モデル ID は常に `combo/<id>` です。たとえば、ID `main` は `combo/main` になります。
+`orl combo set <id>` のコンボ ID は文字または数字で始まる必要があります。文字、数字、`.`、`_`、または `-` を合計 64 文字まで含めることができます。その正規モデル ID は常に `combo/<id>` です。たとえば、ID `main` は `combo/main` になります。
 
 `combo/` 名前空間は、コンボの構成中に予約されます。 `combo` という名前のプロバイダーはそれを占有することはできず、コンボ ID は構成されたプロバイダー名を複製することはできません。
 
@@ -83,7 +83,7 @@ ocx combo show main
 成功した 2 つのリクエストのバッチを含む 2:1 コンボを作成します。
 
 ```bash
-ocx combo set balanced \
+orl combo set balanced \
   --targets anthropic/claude-opus-4-8:2,openai/gpt-5.6-sol:1 \
   --strategy round-robin \
   --sticky 2
@@ -107,7 +107,7 @@ ocx combo set balanced \
 
 ### `least-used`: 成功数が最も少ないターゲットを優先
 
-`least-used` は、この opencodex プロセスに記録された成功リクエスト数が最も少ない適格なターゲットへ、各リクエストをルーティングします。再起動時にカウントはゼロから始まり、同数の場合は構成順序が維持されます。`weight` と `stickyLimit` はこの戦略に影響しません。
+`least-used` は、この OpenRelay プロセスに記録された成功リクエスト数が最も少ない適格なターゲットへ、各リクエストをルーティングします。再起動時にカウントはゼロから始まり、同数の場合は構成順序が維持されます。`weight` と `stickyLimit` はこの戦略に影響しません。
 
 ### `reset-window`: 最も早いクォータリセットに従う
 
@@ -139,7 +139,7 @@ ocx combo set balanced \
 コンボではない Responses リクエストでは、allowlist された xAI ポリシー 403 が Codex の転送失敗再試行の前に HTTP 200 `incomplete/content_filter` へ書き換えられます。[xAI policy refusals](/reference/proxy-formats/#xai-policy-refusals) を参照してください。コンボのホップは元の HTTP 403 をホップとして分類します。
 :::
 
-ストリーミング リクエストでは、アップストリームの HTTP ステータスだけで最終判断しません。OpenCodex は、選択した子ターゲットの Responses SSE を出力開始前の上限付き範囲だけバッファします。テキスト、推論、ツール呼び出し、またはその他の出力イベントが始まる前に再試行可能な `response.failed` ターミナルを受け取った場合、その子を失敗として記録し、次の適格なターゲットを試せます。出力が始まるかバッファ上限に達した時点で現在のターゲットにコミットし、その後のストリーム失敗を別プロバイダーへ再送しません。これによりテキストやツール実行の重複を防ぎます。
+ストリーミング リクエストでは、アップストリームの HTTP ステータスだけで最終判断しません。OpenRelay は、選択した子ターゲットの Responses SSE を出力開始前の上限付き範囲だけバッファします。テキスト、推論、ツール呼び出し、またはその他の出力イベントが始まる前に再試行可能な `response.failed` ターミナルを受け取った場合、その子を失敗として記録し、次の適格なターゲットを試せます。出力が始まるかバッファ上限に達した時点で現在のターゲットにコミットし、その後のストリーム失敗を別プロバイダーへ再送しません。これによりテキストやツール実行の重複を防ぎます。
 
 ## デフォルトの推論負荷
 
@@ -158,7 +158,7 @@ ocx combo set balanced \
 
 Codex v2 サブエージェントには重要な制限が 1 つあります ([第92号](https://github.com/lidge-jun/opencodex/issues/92))。ネイティブの親は、新しく生成されたワーカーのタスクを、ネイティブ ChatGPT バックエンド用に作成された暗号文としてのみ送信できます。外部プロバイダーはそのペイロードを読み取ることができません。
 
-このようなリクエストの場合、コンボは、再試行可能な失敗後も含め、対象となるターゲットを正規のネイティブ ChatGPT ルートにフィルタリングします。コンボに復号化可能なターゲットがない場合、opencodex はディスパッチ前に停止し、HTTP 400 を返します。
+このようなリクエストの場合、コンボは、再試行可能な失敗後も含め、対象となるターゲットを正規のネイティブ ChatGPT ルートにフィルタリングします。コンボに復号化可能なターゲットがない場合、OpenRelay はディスパッチ前に停止し、HTTP 400 を返します。
 
 ```json
 {
@@ -194,17 +194,17 @@ v1/base/v2 モードと完全な暗号化タスクのワークフローについ
 主なコマンドは次のとおりです。
 
 ```bash
-ocx combo list
-ocx combo show <id>
-ocx combo set <id> --targets provider/model[:weight],...
-ocx combo remove <id> --yes
+orl combo list
+orl combo show <id>
+orl combo set <id> --targets provider/model[:weight],...
+orl combo remove <id> --yes
 ```
 
 `set` は、`--strategy`、`--sticky`、`--effort`、`--alias`、`--native-alias`、
 `--display-name`、および `--rename-from` も受け入れます。`--native-alias` には現在
 サポートされている bare native alias と空でない display name が必要です。`--effort`、`--alias`、
 `--display-name` に `-` を指定すると、その値をクリアできます。`create` および `update` は `set` の
-エイリアス、`delete` は `remove` のエイリアスです。すべてのコンボ サブコマンドは `ocx route combo ...` からも利用できます。
+エイリアス、`delete` は `remove` のエイリアスです。すべてのコンボ サブコマンドは `orl route combo ...` からも利用できます。
 
 ### 管理 API
 
@@ -253,7 +253,7 @@ ocx combo remove <id> --yes
 
 ### `combo/<id>` が 404 を返すのはなぜですか?
 
-コンボIDは不明です。応答はタイプ `invalid_request_error` の HTTP 404 です。 `ocx combo list` を実行し、スペルと大文字小文字を確認して、モデル要求を受信する同じ実行中の opencodex インスタンスに管理コマンドが書き込まれたことを確認します。
+コンボIDは不明です。応答はタイプ `invalid_request_error` の HTTP 404 です。 `orl combo list` を実行し、スペルと大文字小文字を確認して、モデル要求を受信する同じ実行中の OpenRelay インスタンスに管理コマンドが書き込まれたことを確認します。
 
 ### `combo_unavailable` が発生するのはなぜですか?
 

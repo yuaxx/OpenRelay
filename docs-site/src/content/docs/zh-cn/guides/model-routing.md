@@ -1,6 +1,6 @@
 ---
 title: 模型路由
-description: opencodex 如何决定由哪个提供商来服务给定的模型 id。
+description: OpenRelay 如何决定由哪个提供商来服务给定的模型 id。
 ---
 
 当 Codex 请求某个模型时，`router.ts` 会将其解析为唯一一个已配置的提供商。规则**按顺序**检查；第一个匹配者胜出。
@@ -76,8 +76,8 @@ transport；这些凭证路径互不 fallback。
   模型会加入 `disabledModels`。此策略会在通过 `/v1/models`、仪表盘、客户端配置导出或
   Codex 目录同步（包括服务启动）发布新模型之前生效。手动启用的模型在后续刷新和导出中仍保持
   启用。新安装默认使用 `"off"`，已有安装在主动更改前保持 `"on"`。使用
-  `ocx models new-policy off` 设置全局策略，添加 `--provider <name>` 覆盖单个提供商的设置；
-  使用 `ocx models new-arrivals [--json]` 查看新增模型。失败或降级的发现不会改变基准。
+  `orl models new-policy off` 设置全局策略，添加 `--provider <name>` 覆盖单个提供商的设置；
+  使用 `orl models new-arrivals [--json]` 查看新增模型。失败或降级的发现不会改变基准。
   非空 `selectedModels` 已经限定了提供商的模型列表，因此此策略不会再自动禁用模型。
 - `provider.disabled: true` 会把该提供商排除在目录发现之外。显式 `provider/model` 请求会失败，
   `defaultModel` / `models[]` 扫描也会跳过它。

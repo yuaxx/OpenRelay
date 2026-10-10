@@ -38,10 +38,10 @@ describe("CLI subcommand help", () => {
   test("version commands print a single script-friendly line", () => {
     for (const args of [["--version"], ["-v"], ["version"]]) {
       const result = runCli(args);
-      expectSpawnFinished(result, `ocx ${args.join(" ")}`);
+      expectSpawnFinished(result, `orl ${args.join(" ")}`);
       expect(result.status).toBe(0);
       expect(result.stderr).toBe("");
-      expect(result.stdout.trim()).toMatch(/^opencodex \d+\.\d+\.\d+/);
+      expect(result.stdout.trim()).toMatch(/^OpenRelay \d+\.\d+\.\d+/);
       expect(result.stdout.trim().split("\n")).toHaveLength(1);
     }
 
@@ -53,33 +53,33 @@ describe("CLI subcommand help", () => {
     });
     expectSpawnFinished(binResult, "bin/ocx.mjs --version");
     expect(binResult.status).toBe(0);
-    expect(binResult.stdout.trim()).toMatch(/^opencodex \d+\.\d+\.\d+/);
+    expect(binResult.stdout.trim()).toMatch(/^OpenRelay \d+\.\d+\.\d+/);
     expect(binResult.stdout.trim().split("\n")).toHaveLength(1);
   });
 
   test("help command routes to subcommand help", () => {
     const result = runCli(["help", "start"]);
-    expectSpawnFinished(result, "ocx help start");
+    expectSpawnFinished(result, "orl help start");
     expect(result.status).toBe(0);
     expect(result.stderr).toBe("");
-    expect(result.stdout).toContain("Usage: ocx start [--port <port>] [--socks5 [host:port] | --socks5-off]");
+    expect(result.stdout).toContain("Usage: orl start [--port <port>] [--socks5 [host:port] | --socks5-off]");
     expect(result.stdout).toContain("Start the proxy server and sync models to Codex.");
   });
 
   test("full help counts every export client and export help names them", () => {
     const full = runCli(["help", "--all"]);
-    expectSpawnFinished(full, "ocx help --all");
+    expectSpawnFinished(full, "orl help --all");
     expect(full.status).toBe(0);
     // Derived, not frozen: a hard-coded literal here agreed with a stale
     // literal in help.ts, so the pair stayed self-consistent and wrong
     // while the registry grew. help.ts keeps its literal on purpose —
     // importing the export registry there would load node:os/node:path
-    // machinery on the `ocx --help` path — so this assertion is what
+    // machinery on the `orl --help` path — so this assertion is what
     // holds the two in lockstep.
     expect(full.stdout).toContain(`(${EXPORT_CLIENT_IDS.length} clients)`);
 
     const exportHelp = runCli(["help", "export"]);
-    expectSpawnFinished(exportHelp, "ocx help export");
+    expectSpawnFinished(exportHelp, "orl help export");
     expect(exportHelp.status).toBe(0);
     expect(exportHelp.stdout).toContain("opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh");
     expect(exportHelp.stdout).toContain("DeepSeek Harness");
@@ -108,9 +108,9 @@ describe("CLI subcommand help", () => {
 
       for (const args of [[], ["help"], ["--help"], ["-h"]]) {
         const result = runCli(args, { OPENCODEX_HOME: opencodexHome, PATH: binDir });
-        expectSpawnFinished(result, `ocx ${args.join(" ") || "(no args)"}`);
+        expectSpawnFinished(result, `orl ${args.join(" ") || "(no args)"}`);
         expect(result.status).toBe(0);
-        expect(result.stdout).toContain("opencodex (ocx)");
+        expect(result.stdout).toContain("OpenRelay (orl)");
         expect(readFileSync(wrapper, "utf8")).toBe(replacement);
         expect(readFileSync(backup)).toEqual(backupBefore);
         expect(readFileSync(statePath)).toEqual(stateBefore);
@@ -123,7 +123,7 @@ describe("CLI subcommand help", () => {
 
   test("tray help documents the install-only no-start flag", () => {
     const result = runCli(["help", "tray"]);
-    expectSpawnFinished(result, "ocx help tray");
+    expectSpawnFinished(result, "orl help tray");
     expect(result.status).toBe(0);
     expect(result.stderr).toBe("");
     expect(result.stdout).toContain("--no-start");
@@ -131,35 +131,35 @@ describe("CLI subcommand help", () => {
 
   test("GUI help documents explicit-origin pairing without making a live request", () => {
     const result = runCli(["help", "gui"]);
-    expectSpawnFinished(result, "ocx help gui");
+    expectSpawnFinished(result, "orl help gui");
     expect(result.status).toBe(0);
     expect(result.stderr).toBe("");
-    expect(result.stdout).toContain("Usage: ocx gui [pair --origin <browser-origin> [--json]]");
+    expect(result.stdout).toContain("Usage: orl gui [pair --origin <browser-origin> [--json]]");
     expect(result.stdout).toContain("single-use");
     expect(result.stdout).toContain("must not be persisted");
   });
 
   test("connect help exposes stdin-only credentials and offline disconnect", () => {
     const connect = runCli(["help", "connect"]);
-    expectSpawnFinished(connect, "ocx help connect");
+    expectSpawnFinished(connect, "orl help connect");
     expect(connect.status).toBe(0);
     expect(connect.stdout).toContain("--pairing-code-stdin");
     expect(connect.stdout).toContain("--admin-token-stdin");
     expect(connect.stdout).not.toContain("--admin-token <");
 
     const disconnect = runCli(["help", "disconnect"]);
-    expectSpawnFinished(disconnect, "ocx help disconnect");
+    expectSpawnFinished(disconnect, "orl help disconnect");
     expect(disconnect.status).toBe(0);
     expect(disconnect.stdout).toContain("--keep-catalog");
   });
 
   test("unknown command with help flag remains an error", () => {
     const result = runCli(["foobar", "--help"]);
-    expectSpawnFinished(result, "ocx foobar --help");
+    expectSpawnFinished(result, "orl foobar --help");
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("Unknown command: foobar");
     expect(result.stdout).toBe("");
-    expect(result.stderr).toContain("ocx help --all");
+    expect(result.stderr).toContain("orl help --all");
     expect(result.stderr.trim().split("\n").length).toBeLessThan(10);
   });
 
@@ -187,7 +187,7 @@ describe("CLI subcommand help", () => {
         timeout: SPAWN_TIMEOUT_MS,
       });
 
-      expectSpawnFinished(result, "ocx status");
+      expectSpawnFinished(result, "orl status");
       expect(result.status).toBe(0);
       expect(result.stdout).toContain("Proxy:");
       expect(result.stdout).toContain("Health: http://127.0.0.1:9/healthz");
@@ -232,9 +232,9 @@ describe("CLI subcommand help", () => {
         timeout: SPAWN_TIMEOUT_MS,
       });
 
-      expectSpawnFinished(result, "ocx restore --help");
+      expectSpawnFinished(result, "orl restore --help");
       expect(result.status).toBe(0);
-      expect(result.stdout).toContain("Usage: ocx restore");
+      expect(result.stdout).toContain("Usage: orl restore");
       expect(result.stdout).not.toContain("Plain `codex` now runs natively");
       expect(readFileSync(configPath, "utf8")).toBe(before);
     } finally {
@@ -253,10 +253,10 @@ describe("CLI subcommand help", () => {
       writeFileSync(markerPath, '{"installed":true}', "utf8");
 
       const cases = [
-        { args: ["stop", "--help"], expected: "Usage: ocx stop" },
-        { args: ["uninstall", "--help"], expected: "Usage: ocx uninstall" },
-        { args: ["service", "uninstall", "--help"], expected: "Usage: ocx service" },
-        { args: ["codex-shim", "uninstall", "--help"], expected: "Usage: ocx codex-shim" },
+        { args: ["stop", "--help"], expected: "Usage: orl stop" },
+        { args: ["uninstall", "--help"], expected: "Usage: orl uninstall" },
+        { args: ["service", "uninstall", "--help"], expected: "Usage: orl service" },
+        { args: ["codex-shim", "uninstall", "--help"], expected: "Usage: orl codex-shim" },
       ];
 
       for (const testCase of cases) {
@@ -264,7 +264,7 @@ describe("CLI subcommand help", () => {
           CODEX_HOME: codexHome,
           OPENCODEX_HOME: opencodexHome,
         });
-        expectSpawnFinished(result, `ocx ${testCase.args.join(" ")}`);
+        expectSpawnFinished(result, `orl ${testCase.args.join(" ")}`);
         expect(result.status).toBe(0);
         expect(result.stdout).toContain(testCase.expected);
         expect(readFileSync(configPath, "utf8")).toBe(before);
@@ -288,9 +288,9 @@ describe("CLI subcommand help", () => {
         timeout: SPAWN_TIMEOUT_MS,
       });
 
-      expectSpawnFinished(result, "ocx recover-history --help");
+      expectSpawnFinished(result, "orl recover-history --help");
       expect(result.status).toBe(0);
-      expect(result.stdout).toContain("Usage: ocx recover-history (--legacy-openai | --ocx-compaction <thread-id>) --yes");
+      expect(result.stdout).toContain("Usage: orl recover-history (--legacy-openai | --ocx-compaction <thread-id>) --yes");
       expect(result.stdout).toContain("Recover legacy provider metadata or one OpenCodeX-compacted thread");
       expect(result.stdout).not.toContain("Recovered");
       expect(result.stderr).toBe("");
@@ -326,7 +326,7 @@ describe("CLI subcommand help", () => {
         ["recover-history", "--legacy-openai", "--yes", "--extra"],
       ]) {
         const refused = runCli(command, env);
-        expectSpawnFinished(refused, `ocx ${command.join(" ")}`);
+        expectSpawnFinished(refused, `orl ${command.join(" ")}`);
         expect(refused.status).toBe(1);
         expect(refused.stderr).toContain("--legacy-openai --yes");
         expect(readFileSync(statePath).equals(databaseBefore)).toBe(true);
@@ -334,7 +334,7 @@ describe("CLI subcommand help", () => {
       }
 
       const confirmed = runCli(["recover-history", "--legacy-openai", "--yes"], env);
-      expectSpawnFinished(confirmed, "ocx recover-history --legacy-openai --yes");
+      expectSpawnFinished(confirmed, "orl recover-history --legacy-openai --yes");
       expect(confirmed.status).toBe(0);
       expect(confirmed.stdout).toContain("Recovered 1 legacy thread(s)");
       const restored = new Database(statePath, { readonly: true });
@@ -374,7 +374,7 @@ describe("CLI subcommand help", () => {
         { CODEX_HOME: codexHome, OPENCODEX_HOME: opencodexHome, CI: "1" },
       );
 
-      expectSpawnFinished(result, "ocx recover-history --ocx-compaction");
+      expectSpawnFinished(result, "orl recover-history --ocx-compaction");
       expect(result.status).toBe(0);
       expect(result.stdout).toContain("Recovered 1 ocx1 compaction item(s)");
       expect(readFileSync(rollout, "utf8")).toContain("portable summary");
@@ -392,13 +392,13 @@ describe("CLI subcommand help", () => {
   test("start rejects unknown and partially numeric port arguments", () => {
     const cases = [
       { args: ["start", "--port", "123abc"], expected: "Invalid port number" },
-      { args: ["start", "--bad"], expected: "Usage: ocx start [--port <port>] [--socks5 [host:port] | --socks5-off]" },
-      { args: ["start", "--port", "1234", "--extra"], expected: "Usage: ocx start [--port <port>] [--socks5 [host:port] | --socks5-off]" },
+      { args: ["start", "--bad"], expected: "Usage: orl start [--port <port>] [--socks5 [host:port] | --socks5-off]" },
+      { args: ["start", "--port", "1234", "--extra"], expected: "Usage: orl start [--port <port>] [--socks5 [host:port] | --socks5-off]" },
     ];
 
     for (const testCase of cases) {
       const result = runCli(testCase.args);
-      expectSpawnFinished(result, `ocx ${testCase.args.join(" ")}`);
+      expectSpawnFinished(result, `orl ${testCase.args.join(" ")}`);
       expect(result.status).toBe(1);
       expect(result.stderr).toContain(testCase.expected);
       expect(result.stdout).not.toContain("Plain `codex`");
@@ -407,21 +407,21 @@ describe("CLI subcommand help", () => {
 
   test("start help wins before port validation", () => {
     const result = runCli(["start", "--port", "123abc", "--help"]);
-    expectSpawnFinished(result, "ocx start --port 123abc --help");
+    expectSpawnFinished(result, "orl start --port 123abc --help");
     expect(result.status).toBe(0);
     expect(result.stderr).toBe("");
-    expect(result.stdout).toContain("Usage: ocx start [--port <port>] [--socks5 [host:port] | --socks5-off]");
+    expect(result.stdout).toContain("Usage: orl start [--port <port>] [--socks5 [host:port] | --socks5-off]");
   });
 
   test("invalid service and codex-shim usage include remove alias", () => {
     const cases = [
-      { args: ["service", "nope"], expected: "Usage: ocx service [install|repair|restart|start|stop|status|uninstall|remove|claim]" },
-      { args: ["codex-shim", "nope"], expected: "Usage: ocx codex-shim <install|status|uninstall|remove>" },
+      { args: ["service", "nope"], expected: "Usage: orl service [install|repair|restart|start|stop|status|uninstall|remove|claim]" },
+      { args: ["codex-shim", "nope"], expected: "Usage: orl codex-shim <install|status|uninstall|remove>" },
     ];
 
     for (const testCase of cases) {
       const result = runCli(testCase.args);
-      expectSpawnFinished(result, `ocx ${testCase.args.join(" ")}`);
+      expectSpawnFinished(result, `orl ${testCase.args.join(" ")}`);
       expect(result.status).toBe(1);
       expect(result.stderr).toContain(testCase.expected);
       expect(result.stdout).toBe("");

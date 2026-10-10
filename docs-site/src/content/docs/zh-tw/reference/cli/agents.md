@@ -3,26 +3,26 @@ title: CLI 代理、路由與整合
 description: 多代理、組合、可觀測性、存取、整合、系統與設定指令。
 ---
 
-這些指令控制代理政策與路由、檢查即時代理，並將支援的客戶端連接至 opencodex。
+這些指令控制代理政策與路由、檢查即時代理，並將支援的客戶端連接至 OpenRelay。
 
 ## 代理政策
 
-### `ocx agent <status|injection|effort|subagents|fallback|sidecar> ...`
+### `orl agent <status|injection|effort|subagents|fallback|sidecar> ...`
 
 管理無頭多代理名冊、effort 上限、prompt 注入、fallback 與 sidecar 設定。使用 `status` 查看目前政策。關於介面模式、委派、effort 與 fallback 行為如何搭配運作，請見[子代理介面](/zh-tw/guides/sub-agent-surface/)。
 
 ```bash
-ocx agent subagents set ark/model-a,openai/gpt-5.5
-ocx agent sidecar web --enabled off
+orl agent subagents set ark/model-a,openai/gpt-5.5
+orl agent sidecar web --enabled off
 ```
 
-`--enabled off` 與儀表板中的 **關閉 (Off)** 列是同一個開關：OpenCodex 不再執行該 sidecar，
+`--enabled off` 與儀表板中的 **關閉 (Off)** 列是同一個開關：OpenRelay 不再執行該 sidecar，
 Codex 整合會把 `web_search = "disabled"` 寫入 `~/.codex/config.toml`，這正是讓 MCP
 搜尋伺服器成為唯一搜尋路徑的前提。`--enabled on` 會再次移除該行。當儲存確實改變開關狀態時，
 指令會回報由此觸發的 Codex 端寫入（`--json` 中的 `codexWebSearch`，否則為結尾的
-`Codex config:` 行），並在無法寫入時提示 `ocx sync`。該旗標對 `vision` 同樣有效。
+`Codex config:` 行），並在無法寫入時提示 `orl sync`。該旗標對 `vision` 同樣有效。
 
-### `ocx v2 <status|on|off|mode <v1|default|v2>|threads <n>>`
+### `orl v2 <status|on|off|mode <v1|default|v2>|threads <n>>`
 
 管理 Codex 的 `multi_agent_v2` 功能旗標與三態多代理介面模式。
 
@@ -37,82 +37,82 @@ Codex 整合會把 `web_search = "disabled"` 寫入 `~/.codex/config.toml`，這
 | `threads <n>` | 將現用 v1/v2 執行緒上限設為不小於 1 的整數。 |
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
-ocx v2 mode default
-ocx v2 on
-ocx v2 threads 16
+orl v2 status
+orl v2 mode v1
+orl v2 mode default
+orl v2 on
+orl v2 threads 16
 ```
 
-`mode` 子指令將 `multiAgentMode` 寫入 opencodex 設定並重新同步 Codex 目錄。模式與旗標轉換會在有效的 v1/v2 Codex key 之間移動目前的數值執行緒上限；失敗的轉換會還原原始的 `config.toml`。變更套用於新的 Codex session，執行中的 session 則保留其 pin 的介面。
+`mode` 子指令將 `multiAgentMode` 寫入 OpenRelay 設定並重新同步 Codex 目錄。模式與旗標轉換會在有效的 v1/v2 Codex key 之間移動目前的數值執行緒上限；失敗的轉換會還原原始的 `config.toml`。變更套用於新的 Codex session，執行中的 session 則保留其 pin 的介面。
 
 ## 組合路由
 
-### `ocx combo <list|show|set|remove> ...` · `ocx route combo ...`
+### `orl combo <list|show|set|remove> ...` · `orl route combo ...`
 
-管理組合 failover 與 round-robin 虛擬模型。`ocx route combo` 是階層式別名；組合是目前支援的路由資源。目標使用
+管理組合 failover 與 round-robin 虛擬模型。`orl route combo` 是階層式別名；組合是目前支援的路由資源。目標使用
 `provider/model[:weight],provider/model[:weight]`。
 
 ```bash
-ocx combo list
-ocx route combo set reliable --targets ark/model-a:2,openai/gpt-5.5
+orl combo list
+orl route combo set reliable --targets ark/model-a:2,openai/gpt-5.5
 ```
 
 關於路由行為與設定指引，請見[組合](/zh-tw/guides/combos/)。
 
 ## 可觀測性與除錯
 
-### `ocx observe <logs|usage|storage|memory|debug|claude-inbound|injection> ...`
+### `orl observe <logs|usage|storage|memory|debug|claude-inbound|injection> ...`
 
 檢查代理請求、用量、儲存、記憶體與除錯資料。直接別名如下：
 
 | 別名 | 等效資源 |
 | --- | --- |
-| `ocx logs [filters] [--follow] [--json|--jsonl]` | `ocx observe logs` |
-| `ocx usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--provider <name>] [--model <id>] [--json]` | `ocx observe usage` |
-| `ocx storage [--json]` | `ocx observe storage` |
-| `ocx memory [--json]` | `ocx observe memory` |
+| `orl logs [filters] [--follow] [--json|--jsonl]` | `orl observe logs` |
+| `orl usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--provider <name>] [--model <id>] [--json]` | `orl observe usage` |
+| `orl storage [--json]` | `orl observe storage` |
+| `orl memory [--json]` | `orl observe memory` |
 
 ```bash
-ocx observe usage --range 30d --json
+orl observe usage --range 30d --json
 ```
 
 部分用量記錄無法納入時，人類可讀輸出會顯示警告，即使沒有可讀取的記錄也是如此。顯示的總數僅反映可讀取的記錄。如果篩選條件沒有符合的可讀取記錄，輸出將顯示警告和提示，而不顯示總數列；被略過的記錄可能包含符合項目。`--json` 原樣保留回應中的 `usageIncomplete` 診斷及原因。
 
-### `ocx debug <provider|usage|injection|claude> <on|off|status|reset|logs [-f]>`
+### `orl debug <provider|usage|injection|claude> <on|off|status|reset|logs [-f]>`
 
 透過執行中代理的管理 API 讀取或變更執行階段除錯覆寫。
 
 ```bash
-ocx debug provider on|off|status|reset
-ocx debug provider logs [-f|--follow]
-ocx debug usage on|off|status|reset
-ocx debug usage logs [-f|--follow]
+orl debug provider on|off|status|reset
+orl debug provider logs [-f|--follow]
+orl debug usage on|off|status|reset
+orl debug usage logs [-f|--follow]
 ```
 
-無 scope 時，`ocx debug` 印出用量，並在代理停止時印出下次啟動的環境預設值。供應商除錯預設來自 `OCX_DEBUG=1`（舊版 `OCX_DEBUG_FRAMES=1` 亦可）；用量除錯預設來自 `OPENCODEX_USAGE_DEBUG=1`。
+無 scope 時，`orl debug` 印出用量，並在代理停止時印出下次啟動的環境預設值。供應商除錯預設來自 `OCX_DEBUG=1`（舊版 `OCX_DEBUG_FRAMES=1` 亦可）；用量除錯預設來自 `OPENCODEX_USAGE_DEBUG=1`。
 
 ## API 存取
 
-### `ocx access <key|endpoints|models|test> ...`
+### `orl access <key|endpoints|models|test> ...`
 
-檢視 OpenCodex 存取用 API 金鑰清單、外部端點與模型。`ocx api-key` 是 `ocx access key` 指令群組的別名。
+檢視 OpenRelay 存取用 API 金鑰清單、外部端點與模型。`orl api-key` 是 `orl access key` 指令群組的別名。
 
 建立金鑰與開始輪替時，無論使用文字或 JSON 輸出，都會傳回僅顯示一次的明文憑證。代理應將這些步驟交由人在代理工作階段之外直接操作的終端機完成。不要索取金鑰本身，也不要請使用者貼到聊天中；只接收設定與連線驗證的確認，以及非機密的金鑰 ID 和輪替 ID。
 
 ```bash
-ocx access key list --json
+orl access key list --json
 ```
 
 確認新金鑰已設定並通過連線驗證，不等於核准撤銷舊金鑰。確認輪替或刪除舊金鑰前，必須另行取得撤銷該金鑰的明確授權。執行獲准的操作後，請再次檢視清單。不要透過直接呼叫 API 繞過此流程。
 
 ## 客戶端整合
 
-### `ocx integration <claude|grok> ...`
+### `orl integration <claude|grok> ...`
 
 管理支援的 Claude 與 Grok 整合。下方的直接指令家族暴露其客戶端專屬控制。
 
-### `ocx claude [claude args...]`
+### `orl claude [claude args...]`
 
 確保代理正在執行，然後以 `ANTHROPIC_BASE_URL`、
 `ANTHROPIC_AUTH_TOKEN`、`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`，以及來自
@@ -121,28 +121,28 @@ ocx access key list --json
 Claude Desktop 設定檔指令如下：
 
 ```text
-ocx claude desktop [apply]                         儲存並套用四家族設定檔
-ocx claude desktop show [--json]                   顯示路由、家族與預設值
-ocx claude desktop move <route> <family> [--default]
-ocx claude desktop default <family> <route|none>
-ocx claude desktop export <path|->                 匯出版本化 JSON（`-` = stdout）
-ocx claude desktop import <path> [--apply]         驗證並匯入 JSON
+orl claude desktop [apply]                         儲存並套用四家族設定檔
+orl claude desktop show [--json]                   顯示路由、家族與預設值
+orl claude desktop move <route> <family> [--default]
+orl claude desktop default <family> <route|none>
+orl claude desktop export <path|->                 匯出版本化 JSON（`-` = stdout）
+orl claude desktop import <path> [--apply]         驗證並匯入 JSON
 ```
 
-家族為 `opus`、`fable`、`sonnet` 與 `haiku`；新路由從 `opus` 開始。`none` 僅在該家族為空時有效。舊版套用旗標 `--static`、`--hybrid` 與 `--discovery-only` 仍受支援。請用 `ocx claude config <status|set> ...` 管理 Claude Code 設定。
+家族為 `opus`、`fable`、`sonnet` 與 `haiku`；新路由從 `opus` 開始。`none` 僅在該家族為空時有效。舊版套用旗標 `--static`、`--hybrid` 與 `--discovery-only` 仍受支援。請用 `orl claude config <status|set> ...` 管理 Claude Code 設定。
 
-### `ocx opencode [opencode args...]`
+### `orl opencode [opencode args...]`
 
 確保代理正在執行，然後在 OpenCode 的內嵌執行階段層（`OPENCODE_CONFIG_CONTENT`）中以生成的 `provider.opencodex` 與 `providers.opencodex` 區塊啟動 opencode。既有的內嵌設定會被保留，本次啟動僅替換這兩個鍵。全域或專案的 `opencode.json` 檔案可能被讀取以警告既有的覆寫，但磁碟上的檔案永不修改。路由模型以
 `opencodex/<provider>/<model>` 出現。之後啟動普通 `opencode` 的行為與之前完全相同。
 
-### `ocx grok <status|exclude|include|set|clear|apply> ...`
+### `orl grok <status|exclude|include|set|clear|apply> ...`
 
 管理並套用 Grok Build 模型圍欄。
 
 ## 客戶端設定匯出
 
-### `ocx export --client <opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh|mcode|zcode|prime|aside|raycast|omo|cline|kilo|commandcode|droid>`
+### `orl export --client <opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh|mcode|zcode|prime|aside|raycast|omo|cline|kilo|commandcode|droid>`
 
 印出連接到執行中代理的客戶端設定。此指令會用所選客戶端的原生格式，序列化含有 base URL、模型清單，以及適用的環境變數參考或 loopback 佔位符的 `opencodex` provider 區塊。
 
@@ -156,10 +156,10 @@ ocx claude desktop import <path> [--apply]         驗證並匯入 JSON
 | `--force` | 允許 `--out` 覆寫既有檔案。 |
 
 ```bash
-ocx export --client opencode                     # 設定加上目的地、合併警告與計數
-ocx export --client pi --json > pi-models.json   # 供 pipe 或 diff 用的逐位元組 JSON
-ocx export --client omp --out ./omp-models.yml    # 原生 OMP YAML
-ocx export --client opencode --out ~/opencodex-opencode.json
+orl export --client opencode                     # 設定加上目的地、合併警告與計數
+orl export --client pi --json > pi-models.json   # 供 pipe 或 diff 用的逐位元組 JSON
+orl export --client omp --out ./omp-models.yml    # 原生 OMP YAML
+orl export --client opencode --out ~/opencodex-opencode.json
 ```
 
 未指定 `--json` 時，會先輸出客戶端的原生設定格式，接著是標準目的地路徑、合併警告、客戶端專屬提示，以及附帶有多少列省略 context limit 的模型計數（客戶端會對那些套用自身預設值）。
@@ -192,7 +192,7 @@ opencode 會插值 `{env:OPENCODEX_OPENCODE_API_KEY}`。Pi 與 OMP 的匯出不�
 `deepseek-official` 維持不變。這項匯出僅支援 loopback，且不含真實憑證。
 
 :::caution[合併，而非取代]
-`ocx export` 永不寫入你的真實客戶端設定。目的地僅印出供你手動合併，而 `--out` 在沒有 `--force` 時拒絕覆寫既有檔案，因為取代設定檔會毀掉其中已有的其他供應商、代理與 MCP 項目。
+`orl export` 永不寫入你的真實客戶端設定。目的地僅印出供你手動合併，而 `--out` 在沒有 `--force` 時拒絕覆寫既有檔案，因為取代設定檔會毀掉其中已有的其他供應商、代理與 MCP 項目。
 :::
 
 金鑰永不被序列化。設定只帶有文件化的環境變數參考，或非秘密的 loopback 佔位符。僅憑 loopback 位址（`127.0.0.1`）不能認定不需金鑰；應確認目標的驗證政策與端點。使用所選金鑰的模型及音訊 CLI 即使在 loopback 上也需要明確提供金鑰。只有客戶端 schema 支援、且代理綁定超出 loopback 時，才設定被引用的變數；關於准入金鑰的簽發方式，請見[遠端存取](/zh-tw/reference/configuration/server/#遠端存取)。上游 provider 本身的金鑰是完全不同的事，依[供應商](/zh-tw/guides/providers/)個別設定。
@@ -203,20 +203,20 @@ opencode 會插值 `{env:OPENCODEX_OPENCODE_API_KEY}`。Pi 與 OMP 的匯出不�
 
 ## 執行階段與設定
 
-### `ocx system <status|settings|startup|diagnostics|sync|codex-app-server|codex-restart|update|codex-cli-update> ...`
+### `orl system <status|settings|startup|diagnostics|sync|codex-app-server|codex-restart|update|codex-cli-update> ...`
 
 管理無頭執行階段設定、啟動、同步、診斷與更新。
 
-`ocx system codex-restart --yes` 透過與 `ocx sync --restart-codex` 相同的模組重啟 Codex app-server，並完全結束再重新啟動 Codex 桌面應用程式。若代理本身在 Codex 應用程式內部執行，此命令會給出可執行提示並拒絕，而不是承諾無法完成的移交。
+`orl system codex-restart --yes` 透過與 `orl sync --restart-codex` 相同的模組重啟 Codex app-server，並完全結束再重新啟動 Codex 桌面應用程式。若代理本身在 Codex 應用程式內部執行，此命令會給出可執行提示並拒絕，而不是承諾無法完成的移交。
 
 ```bash
-ocx system settings --stream-mode eager-relay
+orl system settings --stream-mode eager-relay
 ```
 
-`ocx system update` 更新 OpenCodex 本身。Codex CLI 使用以下獨立唯讀檢查指令：
+`orl system update` 更新 OpenRelay 本身。Codex CLI 使用以下獨立唯讀檢查指令：
 
 ```bash
-ocx system codex-cli-update check --json
+orl system codex-cli-update check --json
 ```
 
 `check` 不會向套件 registry 發出請求，只會在限定範圍內檢查設定中的安裝候選項來源證據，包括經過遮罩的可執行檔位置與所有權證據。正式發布的 launcher 所提供的可信內容只會驗證該候選項快照，並不證明 Codex 已成功執行。由於這個單次命令絕不會執行 Codex，來自環境變數與持久化記錄的候選項只供報告（`managed: false`，通常為 `selection_unattested`）；JSON 輸出包含 `candidateAvailable`、`candidateVersion` 與 `candidateSource`，而 `selectionAttested` 維持 `false`。檢查設定中的安裝候選項時，必須有正式發布的 launcher 所提供的可信內容；直接使用 Bun 啟動或從原始碼執行時不具備這項證明，因此會忽略來自環境與持久化記錄的候選項狀態，並可能在 POSIX 系統上報告 `candidate_unavailable`。在 Windows 上，這個首個切片不會對候選路徑或設定路徑執行任何檔案系統 I/O。只有由可信 launcher 擷取的絕對環境候選項可以取得應用程式封裝或版本管理工具的純詞彙標籤；其他所有 Windows 候選項都會以失敗關閉方式處理。由於這個切片完全不會讀取持久化的選擇狀態，在未擷取任何環境候選項的 Windows 執行中會報告 `windows_inspection_deferred` 而非 `candidate_unavailable`：該命令無法觀測 Codex CLI 是否已安裝，因此會報告檢查被延後，而不是斷言候選項不存在。此命令不會執行 Codex 或套件管理工具、不會修復 shim、不會寫入設定或快取、不會停止程序，也不會安裝任何內容。隨應用程式封裝的候選項、位於已識別版本管理工具路徑中的候選項、未經驗證的獨立候選項，以及 shim 狀態不明確的候選項，都會報告為 `unmanaged` 或 `unknown`，絕不會歸類為 `managed`。
@@ -226,27 +226,27 @@ ocx system codex-cli-update check --json
 #### 明確觀測 Windows x64 安裝
 
 ```text
-ocx system codex-cli-update attest [--json]
-ocx system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
+orl system codex-cli-update attest [--json]
+orl system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
 ```
 
-`attest` 是選用的唯讀操作，用於觀測所選或明確指定的 Windows x64 npm 安裝。不帶任何選項時，指令會觀測由可信 launcher 快照識別的所選候選項（已設定的 `CODEX_CLI_PATH` 或所擷取 PATH 中的第一個 `codex`），其中 opencodex 包裝腳本會解析到其重新命名的 `codex.opencodex-real.cmd` npm 備份。提供全部四個絕對路徑可覆寫自動識別；自動識別僅提出路徑，持有控制代碼的觀測才是最終依據。`--candidate` 必須是標準 npm `<prefix>/codex.cmd` 或 `<prefix>/node_modules/@openai/codex/bin/codex.js`。`--npm-cli` 必須以 `node_modules/npm/bin/npm-cli.js` 結尾，`--node` 明確指定 `node.exe`。應用程式封裝、已識別的版本管理工具配置、缺少 npm 備份的 opencodex 自有 shim 與自訂包裝腳本皆會被拒絕。
+`attest` 是選用的唯讀操作，用於觀測所選或明確指定的 Windows x64 npm 安裝。不帶任何選項時，指令會觀測由可信 launcher 快照識別的所選候選項（已設定的 `CODEX_CLI_PATH` 或所擷取 PATH 中的第一個 `codex`），其中 OpenRelay 包裝腳本會解析到其重新命名的 `codex.opencodex-real.cmd` npm 備份。提供全部四個絕對路徑可覆寫自動識別；自動識別僅提出路徑，持有控制代碼的觀測才是最終依據。`--candidate` 必須是標準 npm `<prefix>/codex.cmd` 或 `<prefix>/node_modules/@openai/codex/bin/codex.js`。`--npm-cli` 必須以 `node_modules/npm/bin/npm-cli.js` 結尾，`--node` 明確指定 `node.exe`。應用程式封裝、已識別的版本管理工具配置、缺少 npm 備份的 OpenRelay 自有 shim 與自訂包裝腳本皆會被拒絕。
 
 在有限讀取期間，原生控制代碼保持上層目錄與檔案開啟。未支援的平台、重新剖析點/junction、衝突的寫入者、不安全的路徑及超過大小限制的檔案皆會被拒絕。固定格式報告不含路徑：`status` 為 `observed` 或 `refused`，並提供 `installationIdentityObserved`；`selectionAttested`、`managed` 與 `applyAllowed` 一律為 `false`。回報拒絕時也可能回傳結束代碼 0，因此應檢查 `status`。
 
 識別值或摘要僅描述觀測當下的檔案，不是持續有效的更新許可，也不證明選用的執行階段、過去的安裝程式、實際 npm 設定或工具真實性。明確指定的 Node 也只是被觀測，不能證明啟動器會選用它。命令不會執行目標、請求套件 registry、安裝、寫入設定或控制程序。現有 Windows `check` 仍不執行候選項或設定的檔案系統 I/O。
 
-### `ocx config [show|get|set|unset|validate|export|import] ...`
+### `orl config [show|get|set|unset|validate|export|import] ...`
 
-`ocx config [show] [--json] [--source]` 無需執行代理即可顯示本機設定。省略 `show` 時，可使用任一旗標或依任意順序組合使用。`--source` 包含診斷來源、錯誤和警告，僅適用於顯示操作。`--json` 可放在明確指定的操作之前，不會改變執行的操作。重複的 `--json` 或 `--source` 旗標及未知引數會遭到拒絕。
+`orl config [show] [--json] [--source]` 無需執行代理即可顯示本機設定。省略 `show` 時，可使用任一旗標或依任意順序組合使用。`--source` 包含診斷來源、錯誤和警告，僅適用於顯示操作。`--json` 可放在明確指定的操作之前，不會改變執行的操作。重複的 `--json` 或 `--source` 旗標及未知引數會遭到拒絕。
 
-檢查並安全地修改已驗證的 OpenCodex 設定。`show` 與 `get` 會遮罩秘密。匯入在寫入前驗證且需要 `--yes`。
+檢查並安全地修改已驗證的 OpenRelay 設定。`show` 與 `get` 會遮罩秘密。匯入在寫入前驗證且需要 `--yes`。
 
 ### Forced Claude Code subagent model
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

@@ -3,7 +3,7 @@ title: Proxy API 格式
 description: 面向 Responses、Chat Completions、Anthropic Messages、模型目录、WebSocket、realtime 和 compaction 各表面的传输层参考。
 ---
 
-opencodex 以多种客户端方言提供一个本地代理。Codex 客户端可以使用
+OpenRelay 以多种客户端方言提供一个本地代理。Codex 客户端可以使用
 Responses API，兼容 OpenAI 的应用可以使用 Chat Completions，而 Claude Code 可以使用
 Anthropic Messages，而不需要每个上游提供方都实现每一种格式。
 
@@ -27,7 +27,7 @@ Responses 表示是这座桥的中心。原生兼容的路由可以跳过部分�
 
 部分 xAI Chat Completions 拒绝会以 HTTP 403 加上 `I can't help with that request.` 这类拒绝句返回，而不是 HTTP 200 加 `finish_reason: content_filter`。Codex 把 403 当作传输失败，因此用户回合不会被记录，同一请求会被重试。
 
-在非 combo 的 Responses 请求上，OpenCodex 会把该 allowlist 中的 403 改写为 HTTP 200 Responses，`status: "incomplete"`，`incomplete_details.reason: "content_filter"`。openai-chat 适配器路径和 openai-responses passthrough（grok-4.6 / grok-4.5 OAuth）都会改写。流式响应使用同一 incomplete 边界。空正文 403 仍是错误。订阅、额度、权限以及 `not allowed to use this model` 的 403 仍是错误。combo 故障切换仍会看到原始 HTTP 403。
+在非 combo 的 Responses 请求上，OpenRelay 会把该 allowlist 中的 403 改写为 HTTP 200 Responses，`status: "incomplete"`，`incomplete_details.reason: "content_filter"`。openai-chat 适配器路径和 openai-responses passthrough（grok-4.6 / grok-4.5 OAuth）都会改写。流式响应使用同一 incomplete 边界。空正文 403 仍是错误。订阅、额度、权限以及 `not allowed to use this model` 的 403 仍是错误。combo 故障切换仍会看到原始 HTTP 403。
 
 ## 端点总览
 
@@ -43,7 +43,7 @@ Responses 表示是这座桥的中心。原生兼容的路由可以跳过部分�
 
 ## `POST /v1/responses`
 
-这是 opencodex 原生的数据平面形状。请求体必须是一个包含非空 `model` 的 JSON 对象。`input` 可以是字符串，也可以是 Responses 项目数组。
+这是 OpenRelay 原生的数据平面形状。请求体必须是一个包含非空 `model` 的 JSON 对象。`input` 可以是字符串，也可以是 Responses 项目数组。
 
 ### 接受的请求字段
 
@@ -73,7 +73,7 @@ Responses 表示是这座桥的中心。原生兼容的路由可以跳过部分�
 对象。两种形式都会保留所选模型、输出项、终止状态和 usage。
 
 canonical ChatGPT Codex 路由的上游只接受 SSE，因此仅对上游请求使用 `stream: true`。
-OpenCodex 会在有界限制内验证终止流，再将其折叠为客户端请求的 JSON 形式；显式 `store` 值不会
+OpenRelay 会在有界限制内验证终止流，再将其折叠为客户端请求的 JSON 形式；显式 `store` 值不会
 改变。验证失败时会返回错误，而不会以 HTTP 200 返回部分 JSON。限制为：每帧 4 MiB、transcript
 和重建源各 32 MiB、100,000 个 SSE 帧，以及 10,000 个重建输出项。`stallTimeoutSec` 同时控制
 首个 body byte 和后续静默间隔；当其为 `0`，或因本地上游默认禁用时，不会立即超时，只保留独立的
@@ -231,7 +231,7 @@ thinking 重放与提示缓存仍由独立的 [#3719](https://github.com/lidge-j
 Connections > API keys 包含独立的听写和实时语音区域。数据密钥仅保留在表单内存中。听写会上传所选文件；语音连接检查不使用麦克风，而是等待会话确认。已配置不代表连接成功。
 
 `POST /v1/live` 接受 ChatGPT/Codex App 的 Frameless call-creation 表面。
-`POST /v1/realtime/calls` 接受 OpenAI Realtime 的 call-creation 表面。opencodex 会选择
+`POST /v1/realtime/calls` 接受 OpenAI Realtime 的 call-creation 表面。OpenRelay 会选择
 一个符合条件的 OpenAI 家族路由，将 call-creation 请求规范化为上游认证模式，并转发有界响应。
 
 完成调用创建后，客户端可以使用任一受支持的入站形式加入 sideband WebSocket：
@@ -305,13 +305,13 @@ Anthropic 来源的失败会以 Anthropic 的错误封装呈现，因此该方�
 
 ## 加密内容卫生
 
-代理把真正的后端密文视为不透明数据。结构有效的密文会逐字节保留：opencodex 不会对其解密、翻译其内容，或为另一个提供方重新加密。
+代理把真正的后端密文视为不透明数据。结构有效的密文会逐字节保留：OpenRelay 不会对其解密、翻译其内容，或为另一个提供方重新加密。
 
-某些 agent hook 历史上会把明文控制文本放进 `encrypted_content` 槽。为兼容起见，代理会把那部分明文拆分为文本片段，同时保持任何结构有效的 Fernet 片段不变。如果一个 `agent_message` 在该修复过程中失去了所有加密部分，它就会变成普通的 user message。如果当前的 v2 task 仍然真的是加密的，但所选路由目标无法读取原生 ChatGPT 密文，opencodex 会以
+某些 agent hook 历史上会把明文控制文本放进 `encrypted_content` 槽。为兼容起见，代理会把那部分明文拆分为文本片段，同时保持任何结构有效的 Fernet 片段不变。如果一个 `agent_message` 在该修复过程中失去了所有加密部分，它就会变成普通的 user message。如果当前的 v2 task 仍然真的是加密的，但所选路由目标无法读取原生 ChatGPT 密文，OpenRelay 会以
 `unreadable_encrypted_agent_task` 失败，而不是把不可读字节发送给该提供方。有关 worker task 周边的客户端行为，请参见 [Sub-agent Surface](/guides/sub-agent-surface/)。
 
 ### 在已有对话中切换 provider
 
-重放的推理项携带的 `encrypted_content` 只有生成它的 provider 和凭据才能读取。如果 opencodex 知道该对话上一次由另一个 provider 处理，它会在发送前移除这个 blob，并保留该项的摘要。如果那个 provider 还使用了不同的 endpoint 或凭据，该项的 `rs_…` id 也会被移除，因为它指向新目标无法查到的项。如果 opencodex 无从得知，例如代理重启之后，新目标会拒绝这个 blob：OpenAI 和 Azure OpenAI 返回 `400 invalid_encrypted_content`。此时 opencodex 会去掉上一个 provider 的推理状态（blob 和 `rs_…` id）后只重发一次请求；保留 id 会导致 `Item with id 'rs_…' not found`。
+重放的推理项携带的 `encrypted_content` 只有生成它的 provider 和凭据才能读取。如果 OpenRelay 知道该对话上一次由另一个 provider 处理，它会在发送前移除这个 blob，并保留该项的摘要。如果那个 provider 还使用了不同的 endpoint 或凭据，该项的 `rs_…` id 也会被移除，因为它指向新目标无法查到的项。如果 OpenRelay 无从得知，例如代理重启之后，新目标会拒绝这个 blob：OpenAI 和 Azure OpenAI 返回 `400 invalid_encrypted_content`。此时 OpenRelay 会去掉上一个 provider 的推理状态（blob 和 `rs_…` id）后只重发一次请求；保留 id 会导致 `Item with id 'rs_…' not found`。
 
 这项恢复适用于所有使用 Responses 协议的 adapter，因此 `openai-responses` 和 `azure-openai` 的行为相同。恢复成功后，该对话在同一目标上的后续轮次会在接下来五分钟内于首次发送前移除这些状态。重发计入请求的常规发送预算。普通的 400 和 429 不会以这种方式重发，5xx 也不会，只有一个狭窄的例外：对于携带加密工具输出的请求，响应体恰好是该解密拒绝的 502 会得到同样的一次重发。第二次拒绝会原样返回给客户端。遇到这种情况，请在目标 provider 上开始新的对话。

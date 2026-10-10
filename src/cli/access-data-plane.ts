@@ -13,7 +13,7 @@ interface ProbeReport {
   request: { outcome: "not_run" | "succeeded" | "failed" | "unsupported_response"; status?: number };
   response?: SafeModelResponse;
 }
-const USAGE = "Usage: ocx access test <model> [--protocol chat|responses|messages] --api-key-stdin [--json]";
+const USAGE = "Usage: orl access test <model> [--protocol chat|responses|messages] --api-key-stdin [--json]";
 function parse(argv: string[]) {
   const args = [...argv];
   try {

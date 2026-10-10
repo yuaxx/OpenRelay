@@ -1,18 +1,18 @@
 name: Feature proposal
-description: Propose a new capability or workflow improvement for OpenCodex.
+description: Propose a new capability or workflow improvement for OpenRelay.
 labels:
   - enhancement
 body:
   - type: markdown
     attributes:
       value: |
-        Describe the workflow you need and what OpenCodex should do. Concrete examples help us evaluate and implement your proposal faster.
+        Describe the workflow you need and what OpenRelay should do. Concrete examples help evaluate and implement your proposal faster.
 
   - type: dropdown
     id: area
     attributes:
       label: Area
-      description: Which part of OpenCodex does this proposal affect?
+      description: Which part of OpenRelay does this proposal affect?
       options:
         - CLI
         - Proxy and routing
@@ -20,6 +20,7 @@ body:
         - Provider adapters
         - Authentication and account pool
         - Catalog / models
+        - RTK output compression
         - Streaming
         - Tools / MCP / web search
         - Installation or packaging
@@ -52,7 +53,7 @@ body:
   - type: textarea
     id: behaviour
     attributes:
-      label: What should OpenCodex do?
+      label: What should OpenRelay do?
       description: Describe the observable behaviour you expect, not internal implementation details.
       placeholder: When I send ... the proxy should ...
     validations:
@@ -66,7 +67,7 @@ body:
         Provide at least one concrete example: a CLI command, configuration fragment, API exchange, UI workflow, or before/after comparison.
       placeholder: |
         ```bash
-        ocx config set routing.fallback_provider anthropic
+        orl config set routing.fallback_provider anthropic
         ```
     validations:
       required: true
@@ -90,7 +91,7 @@ body:
       options:
         - label: I searched existing issues and documentation.
           required: true
-        - label: This request describes a concrete OpenCodex workflow rather than merely naming a desired technology.
+        - label: This request describes a concrete OpenRelay workflow rather than merely naming a desired technology.
           required: true
         - label: I removed secrets and personal data.
           required: true

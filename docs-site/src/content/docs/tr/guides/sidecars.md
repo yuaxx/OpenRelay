@@ -4,7 +4,7 @@ description: Yerel ChatGPT sidecar'ları aracılığıyla yönlendirilen modelle
 ---
 
 Yönlendirilen modellerin tümü barındırılan **web araması** veya yerel **görsel
-girişi** sunmaz. opencodex bu yetenekleri iki sidecar ile doldurur. Her biri bir
+girişi** sunmaz. OpenRelay bu yetenekleri iki sidecar ile doldurur. Her biri bir
 ChatGPT girişi (`forward`) sağlayıcısı veya saklanan bir Anthropic OAuth
 sağlayıcısı aracılığıyla çalışabilir; web araması açık `xai` arka ucuyla saklanan Grok OAuth'ı da kullanabilir. Sidecar hataları tüm turu başarısız kılmak
 yerine sınırlı araç sonuçları veya görsel işaretçileri haline gelir.
@@ -20,13 +20,13 @@ etkinleştirilmiş bir `forward` sağlayıcısını gerektirir.
 ## Web arama sidecar'ı
 
 Codex, doğrudan geçiş olmayan bir yönlendirilmiş model için barındırılan
-`web_search` istediğinde opencodex:
+`web_search` istediğinde OpenRelay:
 
 1. Barındırılan `web_search` aracını **bırakır** ve bunun yerine yönlendirilen
    modele sentetik bir `web_search(query)` fonksiyon aracını sunar. Orijinal
    barındırılan araç seçenekleri sidecar çağrısı için tutulur.
 2. Yönlendirilen modeli küçük bir **ajan döngüsünde** çalıştırır. Model
-   `web_search`'i çağırdığında opencodex seçilen sidecar arka ucunu kullanır:
+   `web_search`'i çağırdığında OpenRelay seçilen sidecar arka ucunu kullanır:
    OpenAI varsayılan olarak `gpt-5.6-luna` ile barındırılan `web_search`'i
    çalıştırır; Anthropic varsayılan olarak `claude-sonnet-5` ile
    `web_search_20250305`'i çalıştırır. xAI varsayılan olarak `grok-4.6` ile hosted
@@ -38,7 +38,7 @@ Codex, doğrudan geçiş olmayan bir yönlendirilmiş model için barındırıla
    istemci araçları turu sonlandırır, böylece bu çağrılar Codex'e ulaşır.
 
 Her yönlendirilen model yinelemesi yukarı akışta `stream: true` ister, ancak
-varsayılan olarak opencodex arama yapmaya veya nihai yanıtı döndürmeye karar
+varsayılan olarak OpenRelay arama yapmaya veya nihai yanıtı döndürmeye karar
 vermeden önce anlamsal olayları dahili olarak tamamen arabelleğe alır. Yalnızca
 ilk yinelemenin nihai başlıkları/durumu ve 429 anahtar rotasyonları hevesli bir
 şekilde alınır. Böylece sentetik arama çağrıları ve ön çıktılar asla istemci
@@ -105,7 +105,7 @@ durma, toplam bir üretim zaman aşımı değildir. SSE başlamadan önceki arı
 
 Yönlendirilen model sağlayıcısının `noVisionModels` listesinde yer aldığında ya da
 bu model için `modelInputModalities` ile salt metin olarak bildirildiğinde ve bir
-istek görsel taşıdığında, opencodex kullanılabilir bir vision sidecar planı varsa
+istek görsel taşıdığında, OpenRelay kullanılabilir bir vision sidecar planı varsa
 ana çağrıdan **önce** her görseli açıklar ve onu metinle değiştirir. Kullanılabilir
 bir plan yoksa ham görsel salt metin arka ucuna iletilmek yerine kaldırılır. Model
 kataloğu sidecar kapsamında olan her model için görsel girdisini bildirir. Kombolar,
@@ -197,13 +197,13 @@ atlanan anahtarları değiştirmeden bırakır. `timeoutMs` çalışma zamanı t
 sınırlarını kullanır (1–2147483647 ms).
 
 Web arama sidecar kartı aynı denetim yapısını taşır: model seçicisinin ilk satırı **Kapalı (Off)**'dır.
-Kapatmak OpenCodex'in `web_search` yakalamasını durdurur ve Codex entegrasyonu
+Kapatmak OpenRelay'in `web_search` yakalamasını durdurur ve Codex entegrasyonu
 `~/.codex/config.toml` dosyasına `web_search = "disabled"` yazar; çünkü Codex kendi
 modu aksini söyleyene kadar yerleşik barındırılan `web_search` aracını bildirmeye devam eder ve
 tek arama yolu bir MCP arama sunucusu olacaksa bu gerekir. Yeniden açmak bu satırı kaldırır ve Codex
 günlüğüne kaydedilmiş operatörün kendi kök `web_search` satırını geri getirir. Yazma işlemi
-yönetilen bir `~/.codex/config.toml` (`ocx sync`) gerektirir; gerçekleşmezse kontrol
-paneli kartı uyarır ve `ocx agent sidecar web --enabled off` sonucu bildirir.
+yönetilen bir `~/.codex/config.toml` (`orl sync`) gerektirir; gerçekleşmezse kontrol
+paneli kartı uyarır ve `orl agent sidecar web --enabled off` sonucu bildirir.
 
 Dosyayı doğrudan düzenlemeyi tercih ediyorsanız `config.json` içinde yine de
 `enabled: false` ayarlayabilirsiniz. Anthropic-OAuth araması ve görsel

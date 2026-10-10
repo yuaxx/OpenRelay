@@ -12,7 +12,7 @@ runs helper features around provider requests.
 | --- | --- | --- | --- |
 | `port` | `number` | `10100` | Proxy listen port. |
 | `hostname?` | `string` | `"127.0.0.1"` | Bind address. A non-loopback bind requires a data-admission token, resolved from `OPENCODEX_API_AUTH_TOKEN`, then `OCX_API_TOKEN_FILE`, then the installed owner-only `service-api-token` — nothing has to be exported by hand. See [Remote access](#remote-access). |
-| `proxy?` | `string` | — | Outbound HTTP(S) or SOCKS5 proxy URL (`socks5://host:port`), `${ENV_VAR}`, or `"auto"`. HTTP URLs apply to `HTTP_PROXY` / `HTTPS_PROXY` when those are unset. SOCKS5 URLs use OpenCodex's real SOCKS5 transport and are also exposed through `ALL_PROXY` (`ocx start --socks5`); inherited `HTTP(S)_PROXY` is cleared in this process. Loopback stays in `NO_PROXY`. `"auto"` reads Windows WinINET or macOS static HTTP/HTTPS settings once at startup. Inherited HTTP(S) proxy variables skip discovery; on macOS, inherited `ALL_PROXY`/`all_proxy` also skips it. Windows keeps separate `http=` and `https=` entries; a bare `ProxyServer` applies to both. macOS translates IP literals, `*`, and a valid `*.<domain>` glob to Bun's `.<domain>` bypass. That glob also bypasses the bare apex `<domain>`. The exact link-local ranges `169.254/16`, `169.254.0.0/16`, and `fe80::/10` are omitted with a diagnostic: link-local IP literals use the proxy. Other CIDRs, globs, and simple-host exceptions refuse discovery without changing the proxy environment. Disabled, malformed, PAC/WPAD, SOCKS-only, and live changes are not followed. Restart after changing system settings. |
+| `proxy?` | `string` | — | Outbound HTTP(S) or SOCKS5 proxy URL (`socks5://host:port`), `${ENV_VAR}`, or `"auto"`. HTTP URLs apply to `HTTP_PROXY` / `HTTPS_PROXY` when those are unset. SOCKS5 URLs use OpenRelay's real SOCKS5 transport and are also exposed through `ALL_PROXY` (`orl start --socks5`); inherited `HTTP(S)_PROXY` is cleared in this process. Loopback stays in `NO_PROXY`. `"auto"` reads Windows WinINET or macOS static HTTP/HTTPS settings once at startup. Inherited HTTP(S) proxy variables skip discovery; on macOS, inherited `ALL_PROXY`/`all_proxy` also skips it. Windows keeps separate `http=` and `https=` entries; a bare `ProxyServer` applies to both. macOS translates IP literals, `*`, and a valid `*.<domain>` glob to Bun's `.<domain>` bypass. That glob also bypasses the bare apex `<domain>`. The exact link-local ranges `169.254/16`, `169.254.0.0/16`, and `fe80::/10` are omitted with a diagnostic: link-local IP literals use the proxy. Other CIDRs, globs, and simple-host exceptions refuse discovery without changing the proxy environment. Disabled, malformed, PAC/WPAD, SOCKS-only, and live changes are not followed. Restart after changing system settings. |
 | `noProxy?` | `string \| string[]` | — | Hosts that bypass `proxy`, merged with inherited `NO_PROXY` and loopback entries. A string may use comma-separated `NO_PROXY` syntax or `${ENV_VAR}`. |
 | `emptyCompletionRetry?` | `boolean` | `false` | Opt in to one identical Responses retry when a turn has no text or tool call, including a stream that ends before a terminal event. The retry may be billable. `OCX_EMPTY_COMPLETION_RETRY=0` disables it without changing config; combo and routed-compaction turns remain excluded. |
 | `dropCodexSafetyBuffering?` | `boolean` | `false` | Remove optional client-facing hints from canonical Codex Responses passthrough: the two `x-codex-safety-buffering-enabled` / `x-codex-safety-buffering-faster-model` response headers, `response.metadata` events whose metadata type is `safety_buffering`, and top-level `safety_buffering` fields. Other headers, response data, policy refusals and failures are preserved. This does not disable provider safety enforcement or upstream buffering. Native `codex.response.metadata.headers` WebSocket metadata and `/responses/compact` are outside this filter. |
@@ -31,17 +31,17 @@ runs helper features around provider requests.
 | `metricsExport.enabled?` | `boolean` | `false` | Enable process-local aggregate request metrics at authenticated `GET /api/metrics`. Restart required; disabled mode returns 404 and starts no exporter activity. |
 | `spend?` | `{ root?: { maxTokens?: number }; identity?: { maxTokens?: number }; pool?: { maxTokens?: number }; retentionDays?: number }` | unset | Durable token ceilings, off unless you write one. Each scope bounds settled spend plus in-flight reservations plus unresolved spend: `root` is one task including its whole fan-out, `identity` is one account across every task it serves, and `pool` is one provider pool. They intersect, so a request is admitted only when all three have room — which is what holds a ceiling against a client that mints a new task id per request. A reservation is the request's whole input plus its enforceable output ceiling, counted as if every cached prefix misses. Observe-only mode still journals, so every server owns the state directory's single-writer lease; an explicit sibling must use a separate `OPENCODEX_HOME`. Spend survives an ordinary process restart when its writes reached the filesystem, but the journal does not promise survival across host power loss because each append is not fsynced. Raising or removing a ceiling changes the allowance for requests started afterward; requests already running keep their starting policy. `maxTokens` must be a positive integer (0 would refuse everything), `retentionDays` is 1–365 and defaults to 7, and an unknown key in this section is rejected rather than ignored. A refusal is a local HTTP 429 carrying `x-opencodex-local-refusal: workflow_spend_exhausted`, and its message names the scope and the ceiling; no provider is contacted. With an applicable ceiling, dispatch is also refused if its token reservation cannot be booked, including full tracking capacity. Requests without an applicable ceiling remain observe-only. |
 
-| `codexAutoStart?` | `boolean` | `true` | Let the Codex shim run `ocx ensure` before launching Codex. False makes ensure a no-op. |
+| `codexAutoStart?` | `boolean` | `true` | Let the Codex shim run `orl ensure` before launching Codex. False makes ensure a no-op. |
 | `codexShimAutoRestore?` | `boolean` | `true` | Restore an installed shim after a completed external Codex update replaces it. Environment opt-out: `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0`. |
-| `codexDesktopAuthless?` | `boolean` | `false` | Opt-in authless Codex Desktop routing on a loopback bind: inject the dedicated `opencodex` provider with `requires_openai_auth = false` so Desktop opens without a ChatGPT login. Ignored on non-loopback binds. `ocx system settings --desktop-authless on`. See [Codex integration](/guides/codex-integration/#authless-codex-desktop-opt-in). |
+| `codexDesktopAuthless?` | `boolean` | `false` | Opt-in authless Codex Desktop routing on a loopback bind: inject the dedicated `opencodex` provider with `requires_openai_auth = false` so Desktop opens without a ChatGPT login. Ignored on non-loopback binds. `orl system settings --desktop-authless on`. See [Codex integration](/guides/codex-integration/#authless-codex-desktop-opt-in). |
 | `codexAccountPickerEnabled?` | `boolean` | unset | Whether generated account-qualified catalog rows (`<selector>/<model>`) are advertised. Enabling it once fills an absent or empty `codexAccountNamespaces` with default selectors; `false` hides the generated rows without deleting exact routing bindings. An omitted flag keeps a non-empty hand-written selector map enabled. The Luna Reserve row is account-qualified, so it is written only when a selector targets the main Codex account; when it is suppressed, catalog sync logs the reason and the action that restores it. |
 | `codexAccountNamespaces?` | `Record<string, string>` | unset | Public selector to Codex account mapping. The main login maps to the config-only sentinel `@main`; added accounts map to their account id. Normally generated by enabling `codexAccountPickerEnabled` rather than hand-authored. An empty map means no account-qualified rows exist, including the Luna Reserve row. |
-| `codexClientCompaction?` | `boolean` | `false` | Opt into Codex client-side compaction on an authenticated loopback bind. Uses the dedicated `opencodex` provider identity with `requires_openai_auth = true`, preventing new routed compactions from storing OpenCodeX-owned `ocx1:` state. `codexDesktopAuthless` takes precedence when both are enabled and keeps `requires_openai_auth = false`. V2 sub-agent routing is unchanged. `ocx system settings --client-compaction on`. See [Codex integration](/guides/codex-integration/#client-side-compaction-opt-in). |
+| `codexClientCompaction?` | `boolean` | `false` | Opt into Codex client-side compaction on an authenticated loopback bind. Uses the dedicated `opencodex` provider identity with `requires_openai_auth = true`, preventing new routed compactions from storing OpenCodeX-owned `ocx1:` state. `codexDesktopAuthless` takes precedence when both are enabled and keeps `requires_openai_auth = false`. V2 sub-agent routing is unchanged. `orl system settings --client-compaction on`. See [Codex integration](/guides/codex-integration/#client-side-compaction-opt-in). |
 | `codexProviderDisplayName?` | `string` | `"OpenCodex Proxy"` | Label Codex shows for the injected `opencodex` provider, written as its `name` field in `config.toml` and the reference profile. Presentation only: routing resolves through the provider id `opencodex`, so a rename never moves `model_provider = "opencodex"` or the `[model_providers.opencodex]` header and cannot orphan threads already tagged with that id. Codex refuses to load a provider with no name, so there is no way to omit the field — choose a neutral label instead. A blank, over-128-character, or control-character value is ignored and the default label is written. |
 | `codexMainAccountHardLock?` | `boolean` | `true` | Block new identity-matched main-account requests at their per-window threshold. Only explicit `false` opts out. See [main-account protection](/reference/cli/providers-accounts/#main-account-quota-protection). |
 | `codexMainAccountHardLockThresholds?` | `{ short?: number; long?: number }` | `{ short: 90, long: 98 }` | Independent 5h and weekly/monthly thresholds. Integers 80–100, with `short <= long`. Invalid persisted fields fall back to defaults; the settings API rejects invalid writes before mutation. |
 | `resetCreditAutoRedeem?` | `{ enabled?: boolean; leadTimeMinutes?: number }` | off | Opt-in: redeem the main Codex account's soonest-expiring reset credit `leadTimeMinutes` (1–60, default 10) before it expires. Every attempt re-reads the upstream credit list first and skips when the credit is gone (for example, redeemed by hand); the `redeem_request_id` is journaled in `$OPENCODEX_HOME/reset-credit-auto-redeem.json` before the call so a crash replays the same idempotent request instead of spending a second credit. Servers sharing this configuration directory coordinate reservations and settlements so one process does not replace another's request record. Logs carry a hashed account key only. |
-| `syncResumeHistory?` | `boolean` | `true` | Reversible Codex App history compatibility. Original metadata is backed up and restored by `ocx stop` / `ocx restore`. |
+| `syncResumeHistory?` | `boolean` | `true` | Reversible Codex App history compatibility. Original metadata is backed up and restored by `orl stop` / `orl restore`. |
 | `spendPoolAliases?` | `Record<string, string>` | unset | Explicit historical salted pool-alias to canonical provider mappings. Keep this key at the top level, outside `spend`. See [Historical pool continuity](#historical-pool-continuity). |
 | `shadowCallIntercept?` | `{ enabled?: boolean; model?: string; sourceModels?: string[] }` | off | Redirect recognized Codex helper/shadow calls to a chosen model while preserving the request's configured reasoning effort. The default source prefixes are `gpt-6-luna` and `gpt-5.6-luna`; older clients through 0.144.x used `gpt-5.4-mini`, which `sourceModels` can restore. |
 | `memoryModels?` | `{ extract?: { model: string; reasoningEffort?: string }; consolidation?: { model: string; reasoningEffort?: string } }` | off | Route Codex's two memory phases to a chosen model, with an optional reasoning effort per phase. See [Memory routing](#memory-routing). |
@@ -122,10 +122,10 @@ SOCKS5 (Clash mixed-port listeners included) belongs on `ALL_PROXY`, not `HTTP_P
 { "proxy": "socks5://127.0.0.1:10808" }
 ```
 
-`ocx start --socks5` writes that value; `ocx start --socks5-off` clears it.
+`orl start --socks5` writes that value; `orl start --socks5-off` clears it.
 
 If an older development build changed resume-history metadata before backup support existed, run
-`ocx recover-history --legacy-openai --yes` to force native-provider recovery.
+`orl recover-history --legacy-openai --yes` to force native-provider recovery.
 It force-relabels every user-message `opencodex` row, including legitimate dedicated-provider
 history; review the full-scope warning in the lifecycle reference before running it.
 
@@ -143,7 +143,7 @@ does not mean success. A `null` quota value means unavailable, not zero quota.
 To request fresh data and display only the diagnostic in PowerShell:
 
 ```powershell
-$quotaReport = ocx account list openai --quota --refresh --json | ConvertFrom-Json
+$quotaReport = orl account list openai --quota --refresh --json | ConvertFrom-Json
 $quotaReport.accounts |
     ForEach-Object { if ($_.quotaRefresh) { $_.quotaRefresh } } |
     ConvertTo-Json -Depth 3
@@ -178,7 +178,7 @@ retryable and do not retire the grant. Credentials supplied by the caller remain
 ### Which proxy path is used?
 
 The running proxy service fetches quota. It uses its own environment, not the
-interactive shell that later runs `ocx account list`. Configure the service's
+interactive shell that later runs `orl account list`. Configure the service's
 proxy setting or environment, then restart it; changing variables in another
 terminal does not update an already running service.
 
@@ -207,7 +207,7 @@ hosts that should never reuse a pooled connection, as an environment variable ra
 field, so it can be applied to one machine without editing shared configuration:
 
 ```bash
-OCX_FRESH_CONNECTION_HOSTS="api.example.com, relay.example.net" ocx start
+OCX_FRESH_CONNECTION_HOSTS="api.example.com, relay.example.net" orl start
 ```
 
 The value is a comma-separated list of hostnames. Matching is case-insensitive, covers each named
@@ -226,26 +226,26 @@ need it.
 The default `127.0.0.1` bind is loopback-only. A non-loopback address such as `0.0.0.0` or a tailnet
 IP requires token authentication on both `/api/*` and the data plane.
 
-You do not have to produce that token. `ocx service install` provisions one on a non-loopback bind,
+You do not have to produce that token. `orl service install` provisions one on a non-loopback bind,
 in this order: `OPENCODEX_API_AUTH_TOKEN` from the installing shell, then an existing owner-only
 `service-api-token` file, then 32 fresh random bytes. The result is written `0600` and the launch
 wrapper (launchd plist, systemd unit, Windows wrapper) reads the file at start, so the value never
-enters a service definition or argv. A foreground `ocx start` applies the same precedence —
+enters a service definition or argv. A foreground `orl start` applies the same precedence —
 environment, then `OCX_API_TOKEN_FILE`, then the installed `service-api-token` — so it binds a
 non-loopback hostname without an exported token too.
 
 A **management admin token** is refused in either place it can appear — the environment variable or
 a reused `service-api-token` file — and the message names the remedy for that place: unset the
-variable, or delete the file and run `ocx service repair`. Both checks run before the loopback
+variable, or delete the file and run `orl service repair`. Both checks run before the loopback
 short-circuit, because the launch wrapper reads the file into `OPENCODEX_API_AUTH_TOKEN` whatever
 the hostname, so an admin-token file fences the management API closed even on a loopback bind.
-`ocx status` reports that state as `admin-collision (file)` on a hub.
+`orl status` reports that state as `admin-collision (file)` on a hub.
 
 Setting the variable yourself is still supported for an operator who wants to own the value:
 
 ```bash
 export OPENCODEX_API_AUTH_TOKEN="your-secret-token"
-ocx start
+orl start
 ```
 
 Clients should send:
@@ -295,7 +295,7 @@ credential. The main listener is untouched — remote callers still need the tok
 }
 ```
 
-`ocx sync` then writes `base_url = "http://127.0.0.1:10200/v1"` into the managed Codex provider block
+`orl sync` then writes `base_url = "http://127.0.0.1:10200/v1"` into the managed Codex provider block
 and omits the auth header, so a directly spawned app-server works without any credential plumbing.
 
 When you set `port`, it must differ from the proxy port. It is never OS-assigned: an ephemeral port
@@ -313,16 +313,16 @@ Omitting `port` selects the **companion** form — the listener binds the proxy 
 
 Remote clients dial `100.76.170.81:10100` with a credential; local processes dial
 `127.0.0.1:10100` without one. That is the address every local integration already writes, so
-`ocx claude`, Claude Desktop, Cursor and the system-env injection keep working on a host whose
+`orl claude`, Claude Desktop, Cursor and the system-env injection keep working on a host whose
 public bind they cannot reach. The companion form is accepted only when `hostname` is a specific
 non-loopback, non-wildcard address: on `127.0.0.1`, `localhost` or `0.0.0.0` the public listener
-already holds that loopback address, so OpenCodex refuses the pair at write time and at startup
+already holds that loopback address, so OpenRelay refuses the pair at write time and at startup
 rather than failing the second bind. On those binds you do not need the listener at all — a
 loopback bind already admits local callers.
 
-With a `port` set, the local integrations follow the listener: `ocx claude`, the `system-env`
+With a `port` set, the local integrations follow the listener: `orl claude`, the `system-env`
 injection, the Claude Desktop profile, the Cursor gateway value and the routed vision helper all
-write `http://127.0.0.1:<listener port>`, the same port `ocx sync` writes into Codex. In the
+write `http://127.0.0.1:<listener port>`, the same port `orl sync` writes into Codex. In the
 companion form those same integrations keep writing the proxy port, which is where the companion
 socket is.
 
@@ -332,7 +332,7 @@ its previous answer — on a ported listener that is the difference between a se
 `404` from the listener.
 
 On a `runtimeRole: "hub"`, this field is also the gate on whether the hub rewrites **its own** local
-client configuration. With the listener off, `ocx sync`, `ocx ensure` and `ocx restore back` skip the
+client configuration. With the listener off, `orl sync`, `orl ensure` and `orl restore back` skip the
 hub's own Codex/Grok/Claude writes and say so, naming
 `unauthenticatedLoopbackListener` rather than the `clientIntegrations` toggle.
 
@@ -344,7 +344,7 @@ voice surface: the standalone WebSocket upgrades, WebRTC call creation (`POST /v
 `POST /v1/realtime/calls`), and the keyed sideband join upgrades (`/v1/live/{callId}`,
 `/v1/realtime/calls/{callId}`, `/v1/realtime?call_id=`). Everything else, including `/api/*`,
 `/healthz`, `/readyz` and the dashboard, returns `404` — local management reads such as
-`ocx claude`'s discovery call go to the authenticated management surface with a management
+`orl claude`'s discovery call go to the authenticated management surface with a management
 credential, never here.
 
 :::danger[This is an unauthenticated surface]
@@ -376,7 +376,7 @@ port too:
 ssh -L 20100:localhost:10100 -L 1455:localhost:1455 you@remote
 ```
 
-If a registered callback port is already in use and the login surface offers manual input, OpenCodex
+If a registered callback port is already in use and the login surface offers manual input, OpenRelay
 keeps the registered redirect URI and still returns the provider authorization URL. Complete the
 provider login, then paste the final redirect URL from the browser address bar or the authorization
 code into OpenCodex. The pending flow preserves state and PKCE validation. Callers without manual
@@ -391,7 +391,7 @@ use `ssh -g -L`, broad container publishing, or forwarding modes that expose the
 ## Account email masking (`privacy`)
 
 Stored account emails are masked everywhere they leave the proxy — the dashboard account lists,
-`GET /api/codex-auth/accounts`, `GET /api/oauth/status`, and the `ocx status` logins section all
+`GET /api/codex-auth/accounts`, `GET /api/oauth/status`, and the `orl status` logins section all
 show `p***n@example.com` rather than the address on file.
 
 | Field | Type | Default | Meaning |
@@ -409,9 +409,9 @@ way.
 { "privacy": { "maskEmails": false } }
 ```
 
-`ocx config set privacy.maskEmails false` fails with `config parent path not found` until the
+`orl config set privacy.maskEmails false` fails with `config parent path not found` until the
 block exists, because `config set` walks into existing objects and never creates them. Write the
-whole object instead — `ocx config set privacy '{"maskEmails":false}'` — or add the block to
+whole object instead — `orl config set privacy '{"maskEmails":false}'` — or add the block to
 `config.json` by hand.
 
 ## Storage cleanup
@@ -441,11 +441,11 @@ never lost; the next append tries again. Trimming also refreshes what the dashbo
 `/api/logs` stops serving rows the ledger no longer has.
 
 There is no dashboard control for this yet; set it in `config.json` or with
-`ocx config set usageLedgerMaxBytes <bytes>`.
+`orl config set usageLedgerMaxBytes <bytes>`.
 
 ## Catalog auto-refresh (`catalogAutoRefresh`)
 
-Enabled by default when OpenCodex manages your local Codex client: the section or `enabled`
+Enabled by default when OpenRelay manages your local Codex client: the section or `enabled`
 may be absent. The proxy refreshes its model catalog every 60 minutes, with one initial refresh
 about three minutes after startup. When the Codex integration is turned off, or the instance
 runs as a hub or beside another live proxy, background refresh runs only with an explicit
@@ -466,24 +466,24 @@ Each refresh observes the selected Codex runtime's bundled catalog, then warms a
 Codex model rosters before converging the served list. Source failures use existing evidence
 and retry on a later tick. Cadence and enablement edits take effect on a subsequent tick.
 
-A native OpenAI model that your ChatGPT account's Codex roster lists, but that this OpenCodex
+A native OpenAI model that your ChatGPT account's Codex roster lists, but that this OpenRelay
 release does not know yet, is added with the metadata upstream publishes for it (name,
-reasoning levels, context window). OpenCodex remembers such models in
+reasoning levels, context window). OpenRelay remembers such models in
 `discovered-native-models.json` in its home directory and forgets one that has not been seen
 for 14 days. A later release that ships the model takes over its row.
 
 Running Codex sessions retain an in-memory model list. When the served set changes while
 Codex app-servers are running, the proxy logs a restart hint and records `reloadRequired`
-in its auto-refresh status. Run `ocx sync --restart-codex` when ready to restart those sessions.
+in its auto-refresh status. Run `orl sync --restart-codex` when ready to restart those sessions.
 Automatic refresh never restarts them.
 
-When a background refresh changes the served set, OpenCodex also updates client integrations
+When a background refresh changes the served set, OpenRelay also updates client integrations
 it has already written: an existing Grok Build block, the Claude Desktop gateway profile it
 applied (only while that profile is still selected and unedited, keeping its static, hybrid or
 discovery mode), and the owned blocks of file integrations such as OpenCode, Kilo, Pi, omo and
 Aside. It never connects a client for the first time, never refreshes Cline (stop Cline and
-run `ocx sync` instead), and skips local clients on a hub without the loopback listener. A
-client it could not refresh is counted in the proxy log; `ocx sync` retries it.
+run `orl sync` instead), and skips local clients on a hub without the loopback listener. A
+client it could not refresh is counted in the proxy log; `orl sync` retries it.
 
 ## Quota-reset notifications (`quotaResetNotify`)
 
@@ -553,7 +553,7 @@ be bracketed between two observations.
 ### Security notes
 
 `webhookUrl` is a credential — for Slack and Discord, holding the URL is sufficient to post —
-so it is redacted by `ocx config show` and excluded from `ocx config export`.
+so it is redacted by `orl config show` and excluded from `orl config export`.
 
 A webhook target that resolves to a private or loopback address is refused unless you set
 `allowPrivateNetwork: true`. The proxy can reach hosts your browser cannot, including cloud
@@ -571,7 +571,7 @@ directly; a redirected delivery reports `blocked-destination`.
 `command` is an argv array and is never passed through a shell, so its values cannot become a
 shell-injection surface. Delivery is attempted once; there is no retry.
 
-Read recent detections with `ocx provider resets` or `GET /api/quota-resets`.
+Read recent detections with `orl provider resets` or `GET /api/quota-resets`.
 
 ## API surfaces (`apiSurfaces`)
 
@@ -622,14 +622,14 @@ flags stay off. Validated writes reject malformed input.
 }
 ```
 
-`ocx api policy` shows the resolved values and changes them through the running proxy
+`orl api policy` shows the resolved values and changes them through the running proxy
 (`--unrepresentable <legacy|reject>`, `--rollout <switch>=<on|off>`, `--messages <on|off>` for
 [`apiSurfaces`](#api-surfaces-apisurfaces)). It writes only when a setting flag is given. The
 dashboard's API page and `PATCH /api/protocols/settings` use the same validation.
 
 ## Claude Code (`claudeCode`)
 
-These settings govern `/v1/messages`, `/v1/messages/count_tokens`, the `ocx claude` launcher, and the Claude dashboard page. Whether the Messages API is served at all is decided by [`apiSurfaces`](#api-surfaces-apisurfaces), which inherits `claudeCode.enabled` while unset.
+These settings govern `/v1/messages`, `/v1/messages/count_tokens`, the `orl claude` launcher, and the Claude dashboard page. Whether the Messages API is served at all is decided by [`apiSurfaces`](#api-surfaces-apisurfaces), which inherits `claudeCode.enabled` while unset.
 
 | Key | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -640,7 +640,7 @@ These settings govern `/v1/messages`, `/v1/messages/count_tokens`, the `ocx clau
 | `claudeCode.authModeMigratedAt?` | `string` | unset | Internal one-time upgrade marker. Do not set manually. |
 | `claudeCode.classifierModel?` | `string` | unset | Explicit target for Claude Code Auto Mode classifier turns, as a qualified `provider/model` (for example `RelayA/claude-opus-5`). Auto Mode sends bare safety checks such as `claude-opus-5` with no provider, so without this they fall through to `defaultProvider` — which may not speak Anthropic at all. Nothing is inferred automatically: only a target you declare here is used. |
 | `claudeCode.classifierFallbacks?` | `string[]` | unset | Ordered classifier targets used when `classifierModel` is not set. Same qualified `provider/model` form; the first usable entry wins. An explicit `modelMap` entry for the classifier model still outranks both. |
-| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` | inherit | Effort written to generated `~/.claude/agents/ocx-*.md`; separate from Codex guidance and proxy caps. Restart through `ocx claude` to regenerate. |
+| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` | inherit | Effort written to generated `~/.claude/agents/ocx-*.md`; separate from Codex guidance and proxy caps. Restart through `orl claude` to regenerate. |
 
 The compatibility policy applies to Claude Code, Desktop and other clients using translated
 Messages, including `?beta=true` and non-streaming requests. Every translated target uses the
@@ -673,7 +673,7 @@ sources. For selected sources, check individual models or provider-wide `provide
 then click **Save**. Select **Use conversation model** and save to remove the override. Changes
 apply to the next compaction request without restarting the proxy.
 
-Set `compactionRouting` in OpenCodex `config.json` to override the model Codex's compaction
+Set `compactionRouting` in OpenRelay `config.json` to override the model Codex's compaction
 requests use. The setting is disabled when omitted.
 
 ```json
@@ -711,14 +711,14 @@ routes today. Use `["auto"]` or `["manual", "auto"]` to route automatic compacti
 
 Routing automatic compaction is what lets a long thread on a routed provider keep going when
 the canonical OpenAI quota is exhausted. Codex picks a bare native model for the compaction
-turn, and OpenCodex reserves that for an enabled canonical `openai` provider whenever one
+turn, and OpenRelay reserves that for an enabled canonical `openai` provider whenever one
 exists, so the compaction fails with a quota error before the routed turn begins even though
 the thread itself runs elsewhere. Naming `"auto"` here points the compaction at a
 provider-qualified model with its own credentials and quota only when `sourceModels` is omitted
 or matches the incoming model. A list containing only `provider/*` entries does not cover a bare
 native compaction model.
 
-OpenCodex changes only requests with explicit `request_kind: "compaction"` metadata whose
+OpenRelay changes only requests with explicit `request_kind: "compaction"` metadata whose
 `compaction.trigger` is one of the values you listed, sent to `/v1/responses/compact` or to
 `/v1/responses` with a `compaction_trigger` input item. Later conversation turns keep their
 original routing and settings. Missing, malformed, or conflicting metadata does not activate the
@@ -736,7 +736,7 @@ The override reuses the existing compaction handlers and summary formats. When t
 model shares the conversation model's provider and account-routing identity (provider name,
 Codex account mode, and account namespace), the request keeps the caller's credential and may
 use that backend's native compact endpoint. Otherwise, including when either side is a combo or
-the conversation model is remembered as a combo target, OpenCodex runs the portable summarizer
+the conversation model is remembered as a combo target, OpenRelay runs the portable summarizer
 instead, so the summary stays readable when the conversation resumes on its own model, and the
 caller's credential does not cross to the other provider. The selected model must support the
 input size and content. For portable Responses summaries, hosted `web_search_call` history items
@@ -756,7 +756,7 @@ In **Dashboard → Overview → Memory routing**, choose a model and an optional
 each of Codex's two memory phases, then click **Save**. Select **Off** and save to
 remove the override. Changes apply to the next memory request without restarting the proxy.
 
-Set `memoryModels` in OpenCodex `config.json` to route those requests. With the block omitted,
+Set `memoryModels` in OpenRelay `config.json` to route those requests. With the block omitted,
 both phases keep their existing route. The phases are independent: configuring one leaves the
 other alone.
 
@@ -776,7 +776,7 @@ single agent run that merges those raw memories into the files under `$CODEX_HOM
 `none`, `minimal`, `low`, `medium`, `high`, `xhigh`, `max`, and `ultra`. Codex hard-codes `low` for
 extract and `medium` for consolidation, so a configured effort replaces that value.
 
-OpenCodex recognizes these requests from Codex's own turn metadata: `request_kind: "memory"` in
+OpenRelay recognizes these requests from Codex's own turn metadata: `request_kind: "memory"` in
 the `x-codex-turn-metadata` header marks an extract pass, and `thread_source:
 "memory_consolidation"` marks the consolidation thread. On HTTP, a request whose
 `x-openai-subagent` header names `memory_consolidation` counts as a consolidation pass only when
@@ -861,7 +861,7 @@ RunTurn adapters also use the configured search sidecar. Search turns preserve p
 
 | Field | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `enabled?` | `boolean` | on when usable | Master switch. When false, OpenCodex stops intercepting `web_search` AND the Codex integration writes `web_search = "disabled"` into `~/.codex/config.toml`. |
+| `enabled?` | `boolean` | on when usable | Master switch. When false, OpenRelay stops intercepting `web_search` AND the Codex integration writes `web_search = "disabled"` into `~/.codex/config.toml`. |
 | `backend?` | `"openai" \| "anthropic" \| "xai" \| "gemini" \| "exa"` | `openai` | Explicit wins; unset always resolves to `openai`. `anthropic` and `xai` run only when explicitly configured; `gemini` and `exa` remain reserved until their executors ship. |
 | `model?` | `string` | backend-dependent | `gpt-5.6-luna` for OpenAI, `claude-sonnet-5` for Anthropic, or `grok-4.6` for xAI. Legacy explicit `gpt-5.4-mini` migrates on start. |
 | `exaApiKey?` | `string` | none | Operator key for the `exa` backend. Write-only: management reads never return the stored value. |
@@ -901,7 +901,7 @@ credential. Successful `data:` descriptions use a bounded cache keyed by backend
 image bytes, and normalized message context. Hits and same-turn duplicates do not consume the limit.
 Remote `https:` images and failed or empty descriptions are not cached.
 
-Anthropic OAuth sidecars reuse opencodex's existing Claude Code OAuth fingerprint. Soak-test the
+Anthropic OAuth sidecars reuse OpenRelay's existing Claude Code OAuth fingerprint. Soak-test the
 intended account and workload.
 
 ## Remote Hub keys and defaults
@@ -911,7 +911,7 @@ intended account and workload.
 | Key | Type | Default when absent | What it does |
 | --- | --- | --- | --- |
 | `hub.managementPublicOrigin` | string | unset | The canonical browser-reachable management origin a hub advertises, for example the HTTPS origin Tailscale Serve prints. It is what `/readyz` reports as `managementUrl` while `runtimeRole` is `hub`; with it unset the hub falls back to whatever origin each request arrived on, so a client behind a different frontend can be handed an address it cannot reach. |
-| `hub.dataPublicOrigin` | string | unset | The canonical origin a remote client should dial for the **data** plane, for example the HTTPS origin a TLS frontend publishes in front of the tailnet bind. Advisory only: it is never a bind address and changing it moves no socket. `ocx hub invite` prints it as the positional URL of the `ocx connect` line, falling back to `http://<hostname>:<port>` — which is a LAN/tailnet address a remote machine may not be able to reach over TLS, so set this on any hub with a frontend. Unlike most optional keys it is **not** silently dropped when malformed: a typo is rejected at write time, because falling back to the bind address is exactly what the field exists to avoid. |
+| `hub.dataPublicOrigin` | string | unset | The canonical origin a remote client should dial for the **data** plane, for example the HTTPS origin a TLS frontend publishes in front of the tailnet bind. Advisory only: it is never a bind address and changing it moves no socket. `orl hub invite` prints it as the positional URL of the `orl connect` line, falling back to `http://<hostname>:<port>` — which is a LAN/tailnet address a remote machine may not be able to reach over TLS, so set this on any hub with a frontend. Unlike most optional keys it is **not** silently dropped when malformed: a typo is rejected at write time, because falling back to the bind address is exactly what the field exists to avoid. |
 | `hub.managementIngress` | `{enabled:false}` or `{enabled:true, port}` | `{enabled:false}` | An extra management-only listener for a local HTTPS frontend. The hostname is not configurable: when enabled the socket always binds `127.0.0.1`, and only GUI, session-bootstrap, and management API routes are admitted. Data-plane routes are rejected before dispatch. |
 | `remoteGui.allowedTailscaleUsers` | string[] | `[]` (empty — nobody) | Exact Tailscale login identities allowed to be issued an automatic remote GUI session. The `Tailscale-User-Login` header is trusted **only** on the separate management ingress; an empty list means no remote identity can mint a session, which is the safe default rather than an oversight. Identities are compared exactly, so a typo silently denies access. |
 | `remoteGui.allowInsecureHttp` | boolean | unset | **Retired — has no effect.** It once permitted a one-time pairing exchange over non-loopback plaintext HTTP. A pairing grant now crosses loopback or authenticated HTTPS only. The key is still parsed so an existing `config.json` keeps loading (the schema is strict, and dropping the key outright would make an older config fail to load entirely); a persisted `true` is reported once and then ignored. Remove it from your config. |
@@ -924,9 +924,9 @@ origin produces sessions pointed at whichever origin the request happened to use
 `dataPublicOrigin` and `managementPublicOrigin` are two independent advertisements, and on a real
 deployment they are two different sockets: management is the loopback-only ingress published on 443,
 data is the tailnet bind published on its own HTTPS port. They are the two halves of what
-`ocx hub invite` prints, and `managementPublicOrigin` is the stricter of the two — a pairing grant
+`orl hub invite` prints, and `managementPublicOrigin` is the stricter of the two — a pairing grant
 records it as the grant's own server origin and the exchange compares against it, which is why
-`ocx hub invite --management-url` can only *confirm* the configured value and refuses one that
+`orl hub invite --management-url` can only *confirm* the configured value and refuses one that
 differs. `--data-url` really is an override, because nothing is bound to it. With neither
 `dataPublicOrigin` nor `--data-url` set, `invite` falls back to the bind address — and on a
 loopback or wildcard bind, where that would resolve to this machine's own loopback, it refuses
@@ -950,7 +950,7 @@ and [confirmation deadlines and retained context](/guides/codex-integration/#ste
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 
@@ -961,7 +961,7 @@ The dashboard warns about old or unknown CLI versions, unavailable targets, and 
 ## Historical pool continuity
 
 Provider-pool ceilings use the canonical routed provider. For every currently configured provider
-`P`, OpenCodex automatically binds its salted pool alias, `h(pool, P)`, to `P` when reading
+`P`, OpenRelay automatically binds its salted pool alias, `h(pool, P)`, to `P` when reading
 balances. No manual self-mapping or salt calculation is needed for independent
 provider ceilings. This rule also applies to retained historical balances with that exact alias.
 
@@ -1044,3 +1044,9 @@ Compaction can still preserve valid accounting in a clean checkpoint; the live r
 a clean restart replays it. A torn, unparseable final line keeps the existing recovery behavior.
 Storage/corruption denials use `workflow_spend_undurable`; unsafe files and ownership failures remain
 storage errors. Alias validation failures use `workflow_pool_history_unresolved`.
+
+## Terminal-result compression (OpenRelay)
+
+`rtk: { "enabled": true }` opts into bounded compression of unambiguously paired terminal results in HTTP and WebSocket Responses, Chat Completions and Messages requests. The default is off; malformed values also disable it. Enable it in Dashboard / Overview / RTK terminal output compression. The setting is saved to OpenRelay configuration only; Claude/Codex configuration is not synchronized. It requires no RTK executable and runs no commands. It never writes results to disk.
+
+Only recognized git status, successful test and build output is eligible. Warnings, failures, cache-control-marked requests, mixed-media results, compound commands and unknown formats pass through unchanged. Native Responses WebSocket turns and retained-socket result injection/continuations are supported when the proxy sees a unique recognized call and result. Transparent live/realtime relay traffic, compaction, internal decision calls and runTurn remain excluded. Native local shell requires direct supported argv; shell wrappers, custom tools and unsupported result schemas remain unchanged. Replay history stays original; only the outbound copy is shortened. Routing, accounts, quota, replay state and client configuration are unchanged. Dashboard counters describe checked, compressed, skipped and fallback requests, bytes before/after, elapsed milliseconds and aggregate reasons since process start. They reset on restart and contain no tool content or metadata. No extra polling, token estimates or cost savings are claimed.

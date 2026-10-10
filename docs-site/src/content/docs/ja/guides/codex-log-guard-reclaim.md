@@ -9,7 +9,7 @@ description: 回数を制限したインクリメンタル VACUUM により、Co
 
 ## 容量回収の処理
 
-OpenCodex は範囲を限定したオフライン保守を次の順序で実行します。
+OpenRelay は範囲を限定したオフライン保守を次の順序で実行します。
 
 1. Codex の有効な `sqlite_home` から正規の `logs_2.sqlite` を特定する。
 2. ファイルの同一性と既知の Codex ログスキーマを確認する。
@@ -42,29 +42,29 @@ OpenCodex は範囲を限定したオフライン保守を次の順序で実行�
 - 将来の未知のログスキーマでの続行。
 - SQLite の整合性チェックが失敗した後の続行。
 
-Log Guard ロック、SQLite 書き込みロック、初回チェックポイントのいずれかがビジーなら、バックグラウンドで再試行せず明示的に拒否します。インクリメンタル VACUUM のバッチが既にコミットされた後でのみチェックポイントが競合した場合、OpenCodex は変更がなかったとせず、完了済みの作業を `stopReason: "busy"` を伴う成功の部分結果として報告します。
+Log Guard ロック、SQLite 書き込みロック、初回チェックポイントのいずれかがビジーなら、バックグラウンドで再試行せず明示的に拒否します。インクリメンタル VACUUM のバッチが既にコミットされた後でのみチェックポイントが競合した場合、OpenRelay は変更がなかったとせず、完了済みの作業を `stopReason: "busy"` を伴う成功の部分結果として報告します。
 
 ## CLI
 
 まず回収可能な領域を確認します。
 
 ```bash
-ocx storage codex-logs status
+orl storage codex-logs status
 ```
 
 範囲を限定した保守を 1 回実行します。
 
 ```bash
-ocx storage codex-logs compact
+orl storage codex-logs compact
 ```
 
 機械可読な前後の指標を取得します。
 
 ```bash
-ocx storage codex-logs compact --json
+orl storage codex-logs compact --json
 ```
 
-結果に回収可能な領域が残っていると表示されても、さらにもう 1 回実行する明確な意図がなければそこで止めてください。OpenCodex は無制限にループせず、後続の実行も自動予約しません。
+結果に回収可能な領域が残っていると表示されても、さらにもう 1 回実行する明確な意図がなければそこで止めてください。OpenRelay は無制限にループせず、後続の実行も自動予約しません。
 
 ## 管理 API
 

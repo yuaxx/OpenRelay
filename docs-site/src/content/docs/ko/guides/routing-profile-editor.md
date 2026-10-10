@@ -1,9 +1,9 @@
 ---
 title: 라우팅 프로필 편집기
-description: opencodex 대시보드에서 라우팅 정책 프로필을 만들고, 편집하고, 검증하고, 시험 평가하고, 삭제합니다.
+description: OpenRelay 대시보드에서 라우팅 정책 프로필을 만들고, 편집하고, 검증하고, 시험 평가하고, 삭제합니다.
 ---
 
-opencodex 대시보드의 **Models → Routing** 탭에서 `config.json`을 직접 편집하지 않고 `config.routingProfiles`를 관리할 수 있습니다.
+OpenRelay 대시보드의 **Models → Routing** 탭에서 `config.json`을 직접 편집하지 않고 `config.routingProfiles`를 관리할 수 있습니다.
 
 ## 프로필 만들기
 

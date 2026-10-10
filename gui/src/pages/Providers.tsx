@@ -29,6 +29,7 @@ import { canCreateJevAutoFrom } from "../jev-decision-service";
 import { useProviderSettingsDeepLink } from "./providers-deep-link";
 import { subscribeKiroDeviceFinal } from "../kiro-device-login-finalizer";
 import type { BrowserLaunch } from "../oauth-browser-launch";
+import { codexQuotaOverviewAccounts, type QuotaOverviewAccount } from "../provider-workspace/quota-overview";
 
 /** The page's real refresh tickets: only the captured report epoch and account read can settle them. */
 // oxlint-disable-next-line react/only-export-components -- keep the page-owned coordinator and its direct race tests in the authorized owner.
@@ -392,6 +393,25 @@ export default function Providers({ apiBase }: { apiBase: string }) {
     switchAccount, pauseAccount, setAccountPoolThreshold, setAccountThreshold, switchApiKey, removeApiKey, addApiKeyValue, editCredentialAlias,
     removeAccount, activeAccountNeedsReauth,
   } = pools;
+  const quotaOverviewAccounts = useMemo(() => {
+    const result: Record<string, QuotaOverviewAccount[]> = {};
+    for (const [provider, set] of Object.entries(accountSets)) {
+      result[provider] = set.accounts.map(account => ({
+        id: account.id,
+        label: account.alias || account.email || account.id,
+        reading: account,
+      }));
+    }
+    for (const [provider, keys] of Object.entries(keyPools)) {
+      result[provider] = keys.map(key => ({
+        id: key.id,
+        label: key.label || key.masked,
+        reading: key,
+      }));
+    }
+    result.openai = codexQuotaOverviewAccounts(codexPool.accounts, codexPool.refreshing, codexPool.refreshFailed);
+    return result;
+  }, [accountSets, keyPools, codexPool.accounts, codexPool.refreshing, codexPool.refreshFailed]);
   const refreshSelection = useCallback((target?: AccountSelectionTarget) => {
     if (target && !(target.kind === "oauth" ? oauthCardProviders : keyCardProviders).includes(target.provider)) return Promise.resolve(true);
     return refreshAccountRosters(target);
@@ -635,6 +655,8 @@ export default function Providers({ apiBase }: { apiBase: string }) {
         quotaForceRefresh={quotaRefresh.force}
         onQuotaRefreshSettled={settleQuotaRefresh}
         onRefreshAllQuotas={refreshAllProviderQuotas}
+        quotaOverviewAccounts={quotaOverviewAccounts}
+        accountQuotaReadFailed={{ openai: codexPool.refreshFailed }}
         detail={(item, data) => {
           const loginStatus = accountLoginStatus[item.name] ?? oauthStatus[item.name];
           return (

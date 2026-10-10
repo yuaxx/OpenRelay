@@ -77,6 +77,7 @@ import { clientWireOf } from "./inference/client-wire";
 import { directEncodersApply } from "./inference/client-encoder-delivery";
 import type { ClientEncoderOption } from "./responses/core-options";
 import { handleResponses } from "./responses";
+import { createRtkTransport, registerRtkSource } from "../compression/rtk/transport";
 import { previewXaiOauthWireModel } from "./responses/core-normalize";
 import { upstreamWireForAdapter } from "../protocols/contract";
 import { createProtocolEnvelope, type ProtocolEnvelope } from "../protocols/envelope";
@@ -587,6 +588,7 @@ async function anthropicNativePassthrough(
   logIds: { requestId: string; start: number } | undefined,
   body: Rec,
   pathname: string,
+  translatorBudget?: TranslatorBudget,
 ): Promise<Response> {
   const model = typeof body.model === "string" ? body.model : "unknown";
   logCtx.model = model;
@@ -622,7 +624,7 @@ async function anthropicNativePassthrough(
 
   const result = await fetchWithHeaderDeadline(
     `${base}${pathname}${search}`,
-    { method: "POST", headers, body: JSON.stringify(body) },
+    { method: "POST", headers, body: JSON.stringify(pathname === "/v1/messages" ? createRtkTransport(config.rtk?.enabled === true, translatorBudget, false, { signal: req.signal }).prepareBody(body, "messages") : body) },
     config.connectTimeoutMs ?? 200_000,
     req.signal,
   );
@@ -979,7 +981,7 @@ async function handleClaudeMessagesWithBudget(
         if (logIds) addFinalRequestLog(logIds.requestId, logIds.start, logCtx, 413, { closeReason: "non_stream" });
         return anthropicErrorResponse(413, "request translation buffer exceeded the safe limit", "request_too_large", "translation_buffer_limit");
       }
-      return await anthropicNativePassthrough(req, config, logCtx, logIds, projectedBody, "/v1/messages");
+      return await anthropicNativePassthrough(req, config, logCtx, logIds, projectedBody, "/v1/messages", translatorBudget);
     }
     if (isRec(anthropicBody) && typeof anthropicBody.model === "string"
       && messagesSecondaryInstanceUnavailable(config, anthropicBody.model, cc)) {
@@ -1337,6 +1339,7 @@ async function handleClaudeMessagesWithBudget(
   // BEFORE translation (the translated Anthropic stream has no response.completed
   // frame, so tapping it records a bogus 502 with no usage/cache detail).
   const finalizeNativeLog = createFinalRequestLog(logIds, logCtx).finish;
+  if (config.rtk?.enabled === true) registerRtkSource(internalReq, anthropicBody, "messages");
   const upstream = await handleResponses(internalReq, buildClaudeReplayConfig(config), logCtx, {
     // Routing keeps Claude-only sidecar overrides; admission policy must follow the live owner.
     codexAuthPolicy: config,

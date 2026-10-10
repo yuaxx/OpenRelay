@@ -1,9 +1,9 @@
 ---
 title: Codex App model seçicisi
-description: opencodex modellerinin paylaşılan Codex kataloğu aracılığıyla Codex App, Codex CLI ve Codex TUI içinde nasıl göründüğü.
+description: OpenRelay modellerinin paylaşılan Codex kataloğu aracılığıyla Codex App, Codex CLI ve Codex TUI içinde nasıl göründüğü.
 ---
 
-opencodex, Codex App'i yamalamaz. Codex CLI/TUI'nin kullandığı aynı Codex
+OpenRelay, Codex App'i yamalamaz. Codex CLI/TUI'nin kullandığı aynı Codex
 yapılandırmasını ve model kataloğunu yazar. Uygulama sunucusu (app-server) bu
 paylaşılan durumu okur, ancak bazı Codex Desktop sürümleri oluşturucuda
 (renderer) ikinci bir uzak model izin listesi uygular ve yönlendirilen satırları
@@ -14,13 +14,13 @@ alanlı `openai-apikey/<model>` API anahtarı aktarımı. `codexAccountMode`'u P
 ve Direct arasında değiştirmek tek başına seçici kimliklerini değiştirmez.
 Bununla birlikte, hesap nitelikli seçici satırları `codexAccountPickerEnabled`
 tarafından etkinleştirildiğinde ve `codexAccountNamespaces`, eşlenen hesapları
-hala mevcut olan uygun seçicilere sahip olduğunda, opencodex eşlenen hesaplar
+hala mevcut olan uygun seçicilere sahip olduğunda, OpenRelay eşlenen hesaplar
 için ayrı `<seçici>/<yerel-openai-modeli>` satırları ekler ve yalın yerel
 satırları Codex seçicisinden gizler. Seçici etiketleri, yerleşik bir hesap rolü
 anlamı olmayan, kullanıcı tarafından seçilen genel adlardır. Nitelikli bir
 satırı seçmek yalnızca eşlenen hesabını kullanır, aktif Havuz hesabını
 değiştirmez ve hedef kullanılamadığında hesap değiştirmek yerine kapalı olarak
-başarısız olur. Codex'in hesap kapsamlı kataloğu henüz opencodex'in statik
+başarısız olur. Codex'in hesap kapsamlı kataloğu henüz OpenRelay'in statik
 kümesinde olmayan görünür, API destekli bir OpenAI ailesi kimliği içeriyorsa,
 tam kimlik uygun ana hesap seçicileri için seçici nitelikli bir satır olarak
 korunur; ilgisiz bir hesaba kopyalanmaz ve yalın veya API anahtarı model
@@ -50,7 +50,7 @@ aynı hat kimliğini `openai/gpt-daybreak-blue-latest` olarak ortaya çıkarabil
 Yalnızca bu tam sağlayıcı, uç nokta ve model kimliği sabitlenmiş Sol yetenek
 anlık görüntüsünü alır: 922.000 bağlam, 829.800 otomatik sıkıştırma, yerel akıl
 yürütme merdiveni ve yerel Codex araç meta verileri. İstek yine de
-`gpt-daybreak-blue-latest` gönderir; opencodex bunu Sol'a yeniden yazmaz, yalın
+`gpt-daybreak-blue-latest` gönderir; OpenRelay bunu Sol'a yeniden yazmaz, yalın
 bir satır oluşturmaz ve hesap yetkisi vermez. Ayrı olarak faturalandırılan
 `openai-apikey/daybreak-blue-latest` API satırı farklı bir rotadır ve 922.000
 / 922.000 sınırları asla Codex girişi satırına kopyalanmaz.
@@ -107,7 +107,7 @@ Uzak `use_hidden_models` politikası etkinken, Desktop yalnızca yerel
 `hide` olan yerel satırları da görüntüleyebilir. Yalnızca katalog yenilemeleri
 ve proxy yeniden başlatmaları bu oluşturucu politikasını değiştiremez.
 
-Eşdeğer bir yönlendirilmiş model için opencodex açık, varsayılan olarak kapalı
+Eşdeğer bir yönlendirilmiş model için OpenRelay açık, varsayılan olarak kapalı
 bir yerel takma ad kombo modu sağlar. Dürüst bir özel görüntüleme etiketiyle
 izin listesine alınmış yalın bir slug yayınlar ve kurallı OpenAI
 yönlendirmesinden önce bu tam slug'ı yapılandırılmış kombo üzerinden
@@ -120,14 +120,14 @@ bölümüne bakın.
 
 ## Entegrasyon yolu
 
-`ocx init`, `ocx start` ve `ocx sync` paylaşılan Codex yapılandırmasını ve
+`orl init`, `orl start` ve `orl sync` paylaşılan Codex yapılandırmasını ve
 kataloğunu proxy'ye bağlar; yapılandırma enjeksiyonu, katalog senkronizasyonu,
 dolgular (shims), WebSocket geri dönüşü ve geri yükleme mekanikleri için [Codex
 Entegrasyonu](/tr/guides/codex-integration/) sayfasına bakın.
 
 ## Yönlendirilen modeller neden görünür?
 
-Codex'in model seçicisi Codex biçimli katalog girdileri bekler. opencodex,
+Codex'in model seçicisi Codex biçimli katalog girdileri bekler. OpenRelay,
 yönlendirilen girdileri yerel bir Codex model şablonunu klonlayarak ve ardından
 yönlendirilen model kimliğini değiştirerek oluşturur:
 
@@ -138,14 +138,14 @@ visibility = "list"
 ```
 
 Klon akıl yürütme seviyeleri, kabuk türü, API destek bayrakları ve temel
-talimatlar gibi katı ayrıştırıcı alanlarını korur. opencodex daha sonra OpenAI
+talimatlar gibi katı ayrıştırıcı alanlarını korur. OpenRelay daha sonra OpenAI
 hizmet katmanı meta verileri de dahil olmak üzere rotanın yerine getiremeyeceği
 yerel yetenekleri kaldırır.
 
 ## Mevcut kararlı model kapsamı
 
 Yerel geri dönüş kümesi `gpt-5.5` ve GPT-5.6 Sol/Terra/Luna modellerini içerir. GPT-5.5
-ailesi için opencodex, kurulu Codex kataloğunun daha zengin canlı girdilerini
+ailesi için OpenRelay, kurulu Codex kataloğunun daha zengin canlı girdilerini
 korur ve yalnızca eksik bir girdiyi sentezler. Paketlenmiş yukarı akış anlık
 görüntüsü yalnızca eski şablon yaklaşımı yerine gerçek model başına kimliği ve
 meta verileri sağladığı GPT-5.6 için kullanılır.
@@ -235,7 +235,7 @@ fast_mode = true
 ```
 
 Ancak model kataloğu ve çalışma zamanı istek katmanı kimliği `priority`
-kullanır. opencodex bu ayrımı korur. Yerel OpenAI doğrudan geçiş modelleri hızlı
+kullanır. OpenRelay bu ayrımı korur. Yerel OpenAI doğrudan geçiş modelleri hızlı
 desteği korur; yönlendirilen sağlayıcılar yetenek geçişlidir — `service_tier`
 yalnızca sağlayıcı `supportsServiceTier: false` bildirdiğinde kaldırılır (kayıt
 defteri kurallı OpenAI'yi `true`, DeepSeek ve Volcengine Ark'ı `false` olarak
@@ -253,7 +253,7 @@ yönlendirilen `provider/model` kimliğini seçip kaydedebilir. Manuel olarak
 yapılandırılan `subagentModels` ayrıca hesap nitelikli
 `<seçici>/<yerel-openai-modeli>` kimliklerini de kabul eder, ancak kontrol
 paneli bu tam kimlikleri sunmaz; sayfayı kaydetmek listenin yerine kontrol
-panelinde görünen seçenekleri koyar. opencodex seçilen sırada düşük katalog
+panelinde görünen seçenekleri koyar. OpenRelay seçilen sırada düşük katalog
 öncelikleri atar; hesap nitelikli seçici satırları etkinleştirildiğinde yalın
 yerel seçimler seçici nitelikli gruplara genişler. Diğer modeller tam kimlikle
 çağrılabilir durumda kalır.
@@ -269,7 +269,7 @@ izin listesine göre filtreler (uzak `use_hidden_models` ayarı açıkken etkind
 Yönlendirilen katalog girdileri hala yüklenir ve sunulur — `model/list` bunları
 döndürür ve paketlenmiş CLI bunları okur — ancak Desktop oluşturucusu
 oluşturmadan önce bu yalnızca yerel izin listesinde olmayan her şeyi bırakır.
-opencodex'in bu listeye hiçbir kancası yoktur; yukarı akış hatası
+OpenRelay'in bu listeye hiçbir kancası yoktur; yukarı akış hatası
 [openai/codex#19694](https://github.com/openai/codex/issues/19694) adresinde
 izlenmektedir.
 
@@ -284,9 +284,9 @@ Desktop izin listesi için bir denetim sunana kadar:
 ## Model durumunu yenileme
 ## Yerel kota geri dönüş kısıtı
 
-Codex uygulaması yerel beş saatlik kotasını tükettiğinde bir rezerv yedek modeline geçip seçicideki diğer satırları soluklaştırabilir. [#2813](https://github.com/lidge-jun/opencodex/issues/2813) numaralı raporda görüldüğü gibi bu kısıtlama, ilgisiz sağlayıcı kimlik bilgileri kullanan ve ChatGPT kotasından hiç tüketmeyen opencodex yönlendirmeli satırları da gizliyor.
+Codex uygulaması yerel beş saatlik kotasını tükettiğinde bir rezerv yedek modeline geçip seçicideki diğer satırları soluklaştırabilir. [#2813](https://github.com/lidge-jun/opencodex/issues/2813) numaralı raporda görüldüğü gibi bu kısıtlama, ilgisiz sağlayıcı kimlik bilgileri kullanan ve ChatGPT kotasından hiç tüketmeyen OpenRelay yönlendirmeli satırları da gizliyor.
 
-Bu kısıt istek proxy'ye ulaşmadan önce istemci tarafında uygulanır, dolayısıyla opencodex onu kaldıramaz. Yönlendirilen satırlar `visibility: "list"` ile yazılır, katalog filtrelemesi yalnızca `disabledModels` ve her sağlayıcının `selectedModels` değerine bakar ve hiçbir kota değeri yönlendirilen görünürlüğe katılmaz.
+Bu kısıt istek proxy'ye ulaşmadan önce istemci tarafında uygulanır, dolayısıyla OpenRelay onu kaldıramaz. Yönlendirilen satırlar `visibility: "list"` ile yazılır, katalog filtrelemesi yalnızca `disabledModels` ve her sağlayıcının `selectedModels` değerine bakar ve hiçbir kota değeri yönlendirilen görünürlüğe katılmaz.
 
 Yönlendirilen bir modeli açıkça seçmek seçiciden geçmez. Modeli `config.toml` içinde ayarlayın:
 
@@ -297,20 +297,20 @@ model = "anthropic/claude-sonnet-5"
 ya da doğrudan gönderin:
 
 ```bash
-ocx access test anthropic/claude-sonnet-5 --protocol responses
+orl access test anthropic/claude-sonnet-5 --protocol responses
 ```
 
-Her iki yol da **istek proxy'ye ulaştıktan sonra** doğru yönlendirilir; bu testlerle kapsanıyor. Ancak Codex masaüstü uygulaması rezerv modu etkinken yapılandırılan modeli göndermez: rezerv durumunu kendi `wham/usage` sorgusundan (`luna_reserve` upsell'i ve hâlâ izinli bir `gpt-reserve` ek limiti) belirler ve istek çıkmadan önce model ayarını `gpt-reserve` olarak zorlar; bu yüzden `config.toml` yolu uygulama içinde ezilir. Pencere sıfırlanana kadar `ocx access test`, proxy üzerinden Claude Code (`ocx claude`) ya da doğrudan bir `/v1` istemcisi kullanın. Bkz. [Codex rezerv modunda yönlendirilmiş modeller](/guides/codex-integration/#routed-models-during-codex-reserve-mode).
+Her iki yol da **istek proxy'ye ulaştıktan sonra** doğru yönlendirilir; bu testlerle kapsanıyor. Ancak Codex masaüstü uygulaması rezerv modu etkinken yapılandırılan modeli göndermez: rezerv durumunu kendi `wham/usage` sorgusundan (`luna_reserve` upsell'i ve hâlâ izinli bir `gpt-reserve` ek limiti) belirler ve istek çıkmadan önce model ayarını `gpt-reserve` olarak zorlar; bu yüzden `config.toml` yolu uygulama içinde ezilir. Pencere sıfırlanana kadar `orl access test`, proxy üzerinden Claude Code (`orl claude`) ya da doğrudan bir `/v1` istemcisi kullanın. Bkz. [Codex rezerv modunda yönlendirilmiş modeller](/guides/codex-integration/#routed-models-during-codex-reserve-mode).
 
 
 Seçici hala eski girdileri gösteriyorsa kataloğu yenileyin ve hedef Codex
 yüzeyini yeniden başlatın:
 
 ```bash
-ocx sync
+orl sync
 ```
 
-opencodex, katalog görünürlüğü, önceliği veya meta verileri her değiştiğinde
+OpenRelay, katalog görünürlüğü, önceliği veya meta verileri her değiştiğinde
 `models_cache.json` dosyasını kasıtlı olarak eski bir önbellek sarmalayıcısıyla
 yeniden yazar, böylece bir sonraki Codex model yenilemesi yeni kataloğu okur.
 

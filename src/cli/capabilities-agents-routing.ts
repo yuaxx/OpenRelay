@@ -6,7 +6,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
     summary: "Discover already-loaded local Codex sessions without reading conversation history.",
     routes: [], flags: [{ name: "--json", value: "boolean", summary: "Emit a versioned local session directory." }],
     mutates: false, json: "envelope",
-    bannerLines: ["ocx message <sub>           Loaded local Codex sessions and queued peer messages (sessions|send)"],
+    bannerLines: ["orl message <sub>           Loaded local Codex sessions and queued peer messages (sessions|send)"],
     details: ["Linux/macOS Unix socket only. Uses effective CODEX_HOME; starts no daemon and returns no partial directory."],
   },
   {
@@ -27,7 +27,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent", "status"],
-    usage: "ocx agent status [--json]",
+    usage: "orl agent status [--json]",
     summary: "Read agent mode, delegation, effort caps, roster, fallback and sidecars.",
     routes: [{"method": "GET", "path": "/api/v2"}, {"method": "GET", "path": "/api/injection-model"}, {"method": "GET", "path": "/api/effort-caps"}, {"method": "GET", "path": "/api/subagent-models"}, {"method": "GET", "path": "/api/subagent-model-fallback"}, {"method": "GET", "path": "/api/sidecar-settings"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -37,7 +37,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent", "effort"],
-    usage: "ocx agent effort status [--json]",
+    usage: "orl agent effort status [--json]",
     summary: "Read or set main and subagent effort caps.",
     routes: [{"method": "GET", "path": "/api/effort-caps"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -47,7 +47,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent", "effort", "set"],
-    usage: "ocx agent effort set [--main <level|->] [--subagent <level|->] [--json]",
+    usage: "orl agent effort set [--main <level|->] [--subagent <level|->] [--json]",
     summary: "Read or set main and subagent effort caps.",
     routes: [{"method": "PUT", "path": "/api/effort-caps"}],
     flags: [{"name": "--main", "value": "string", "summary": "Main effort cap; - clears."}, {"name": "--subagent", "value": "string", "summary": "Subagent effort cap; - clears."}, {"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -57,7 +57,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent", "subagents"],
-    usage: "ocx agent subagents status [--json]",
+    usage: "orl agent subagents status [--json]",
     summary: "Read, replace or clear the ordered featured subagent roster.",
     routes: [{"method": "GET", "path": "/api/subagent-models"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -67,7 +67,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent", "subagents", "set"],
-    usage: "ocx agent subagents set <model,model...> [--json]",
+    usage: "orl agent subagents set <model,model...> [--json]",
     summary: "Read, replace or clear the ordered featured subagent roster.",
     routes: [{"method": "PUT", "path": "/api/subagent-models"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -77,7 +77,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent", "subagents", "clear"],
-    usage: "ocx agent subagents clear [--json]",
+    usage: "orl agent subagents clear [--json]",
     summary: "Clear the saved subagents models.",
     routes: [{"method": "PUT", "path": "/api/subagent-models"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -87,7 +87,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent", "fallback"],
-    usage: "ocx agent fallback status [--json]",
+    usage: "orl agent fallback status [--json]",
     summary: "Read, replace or clear fallback models and polling interval.",
     routes: [{"method": "GET", "path": "/api/subagent-model-fallback"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -97,7 +97,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent", "fallback", "set"],
-    usage: "ocx agent fallback set [model,model...] [--poll-ms <5000-600000>] [--json]",
+    usage: "orl agent fallback set [model,model...] [--poll-ms <5000-600000>] [--json]",
     summary: "Read, replace or clear fallback models and polling interval.",
     routes: [{"method": "PUT", "path": "/api/subagent-model-fallback"}],
     flags: [{"name": "--poll-ms", "value": "number", "summary": "Polling interval, 5000-600000 milliseconds."}, {"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -107,7 +107,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent", "fallback", "clear"],
-    usage: "ocx agent fallback clear [--poll-ms <5000-600000>] [--json]",
+    usage: "orl agent fallback clear [--poll-ms <5000-600000>] [--json]",
     summary: "Clear the saved fallback models.",
     routes: [{"method": "PUT", "path": "/api/subagent-model-fallback"}],
     flags: [{"name": "--poll-ms", "value": "number", "summary": "Polling interval, 5000-600000 milliseconds."}, {"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -117,7 +117,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent", "sidecar"],
-    usage: "ocx agent sidecar status [--json]",
+    usage: "orl agent sidecar status [--json]",
     summary: "Read configured sidecars and candidate models.",
     routes: [{"method": "GET", "path": "/api/sidecar-settings"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -127,7 +127,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent","sidecar","web"],
-    usage: "ocx agent sidecar web (--list | [--model <id|->] [--backend <openai|anthropic|xai|gemini|exa|->] [--reasoning <level>] [--enabled <on|off>] [--stream-routed-output <on|off>]) [--json]",
+    usage: "orl agent sidecar web (--list | [--model <id|->] [--backend <openai|anthropic|xai|gemini|exa|->] [--reasoning <level>] [--enabled <on|off>] [--stream-routed-output <on|off>]) [--json]",
     summary: "List web candidates or change the web sidecar.",
     routes: [{"method":"GET","path":"/api/sidecar-settings"},{"method":"PUT","path":"/api/sidecar-settings"}],
     flags: [{"name":"--list","value":"boolean","summary":"Read candidates only; cannot combine with setting flags."},{"name":"--model","value":"string","summary":"Model selector; - clears."},{"name":"--backend","value":"string","summary":"Backend selector; - clears."},{"name":"--reasoning","value":"string","summary":"Reasoning level."},{"name":"--enabled","value":"string","summary":"on or off."},{"name":"--json","value":"boolean","summary":"Emit structured JSON."},{"name":"--stream-routed-output","value":"string","summary":"Stream routed web-search model output; web only."}],
@@ -137,7 +137,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent","sidecar","vision"],
-    usage: "ocx agent sidecar vision (--list | [--model <id|->] [--backend <openai|anthropic|routed|->] [--reasoning <level>] [--max-descriptions <n>] [--enabled <on|off>] [--timeout-ms <1-2147483647>]) [--json]",
+    usage: "orl agent sidecar vision (--list | [--model <id|->] [--backend <openai|anthropic|routed|->] [--reasoning <level>] [--max-descriptions <n>] [--enabled <on|off>] [--timeout-ms <1-2147483647>]) [--json]",
     summary: "List vision candidates or change the vision sidecar.",
     routes: [{"method":"GET","path":"/api/sidecar-settings"},{"method":"PUT","path":"/api/sidecar-settings"}],
     flags: [{"name":"--list","value":"boolean","summary":"Read candidates only; cannot combine with setting flags."},{"name":"--model","value":"string","summary":"Model selector; - clears."},{"name":"--backend","value":"string","summary":"Backend selector; - clears."},{"name":"--reasoning","value":"string","summary":"Reasoning level."},{"name":"--max-descriptions","value":"number","summary":"Positive description limit."},{"name":"--enabled","value":"string","summary":"on or off."},{"name":"--json","value":"boolean","summary":"Emit structured JSON."},{"name":"--timeout-ms","value":"number","summary":"Vision request timeout, integer1–2147483647 milliseconds."}],
@@ -147,17 +147,17 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["effort"],
-    usage: "ocx effort [status|low|medium|high|xhigh|max|ultra|->] [--json]",
+    usage: "orl effort [status|low|medium|high|xhigh|max|ultra|->] [--json]",
     summary: "Read effort settings or set the main cap with a shorthand level.",
     routes: [{"method": "GET", "path": "/api/effort-caps"}, {"method": "GET", "path": "/api/injection-model"}, {"method": "PUT", "path": "/api/effort-caps"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
     mutates: true,
     json: "envelope",
-    details: ["Uses the live proxy when available, otherwise local config. Once live is selected, errors never fall back to local writes; set reads back live status and can report partial application.", "The shorthand ocx effort <low|medium|high|xhigh|max|ultra|-> changes only the main cap; unset aliases clear."],
+    details: ["Uses the live proxy when available, otherwise local config. Once live is selected, errors never fall back to local writes; set reads back live status and can report partial application.", "The shorthand orl effort <low|medium|high|xhigh|max|ultra|-> changes only the main cap; unset aliases clear."],
   },
   {
     command: ["effort", "set"],
-    usage: "ocx effort set [--main <level|->] [--subagent <level|->] [--injection <level|->] [--json]",
+    usage: "orl effort set [--main <level|->] [--subagent <level|->] [--injection <level|->] [--json]",
     summary: "Set one or more effort fields.",
     routes: [{"method": "PUT", "path": "/api/effort-caps"}, {"method": "PUT", "path": "/api/injection-model"}, {"method": "GET", "path": "/api/effort-caps"}, {"method": "GET", "path": "/api/injection-model"}],
     flags: [{"name": "--main", "value": "string", "summary": "Main cap; - clears."}, {"name": "--subagent", "value": "string", "summary": "Subagent cap; - clears."}, {"name": "--injection", "value": "string", "summary": "Delegation effort; - clears; also accepts none/minimal."}, {"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -167,7 +167,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["effort", "clear"],
-    usage: "ocx effort clear [--json]",
+    usage: "orl effort clear [--json]",
     summary: "Clear both caps while retaining delegation effort.",
     routes: [{"method": "PUT", "path": "/api/effort-caps"}, {"method": "GET", "path": "/api/effort-caps"}, {"method": "GET", "path": "/api/injection-model"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -177,7 +177,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["effort", "model"],
-    usage: "ocx effort model <provider/model|model> [--json]",
+    usage: "orl effort model <provider/model|model> [--json]",
     summary: "Inspect a model effort ladder and wire mappings from local configuration.",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -187,7 +187,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["v2","status"],
-    usage: "ocx v2 [status] [--live] [--json]",
+    usage: "orl v2 [status] [--live] [--json]",
     summary: "Report local multi-agent mode and Codex feature settings.",
     routes: [{"method":"GET","path":"/api/v2"}],
     flags: [{"name":"--live","value":"boolean","summary":"Use the selected runtime; otherwise preserve the local native/config operation."},{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."}],
@@ -197,7 +197,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["v2","on"],
-    usage: "ocx v2 on [--live] [--json]",
+    usage: "orl v2 on [--live] [--json]",
     summary: "Enable the local Codex multi_agent_v2 feature.",
     routes: [{"method":"PUT","path":"/api/v2"}],
     flags: [{"name":"--live","value":"boolean","summary":"Use the selected runtime; otherwise preserve the local native/config operation."},{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."}],
@@ -207,7 +207,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["v2","off"],
-    usage: "ocx v2 off [--live] [--json]",
+    usage: "orl v2 off [--live] [--json]",
     summary: "Disable the local Codex multi_agent_v2 feature.",
     routes: [{"method":"PUT","path":"/api/v2"}],
     flags: [{"name":"--live","value":"boolean","summary":"Use the selected runtime; otherwise preserve the local native/config operation."},{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."}],
@@ -217,7 +217,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["v2","mode"],
-    usage: "ocx v2 mode <v1|default|v2> [--live] [--json] [--acknowledge-surface-advisory]",
+    usage: "orl v2 mode <v1|default|v2> [--live] [--json] [--acknowledge-surface-advisory]",
     summary: "Set local model-catalog multi-agent mode.",
     routes: [{"method":"PUT","path":"/api/v2"}],
     flags: [{"name":"--live","value":"boolean","summary":"Use the selected runtime; otherwise preserve the local native/config operation."},{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."},{"name":"--acknowledge-surface-advisory","value":"boolean","summary":"Explicit live mode only; never implicitly acknowledged."}],
@@ -227,7 +227,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["v2","keep-native-v1"],
-    usage: "ocx v2 keep-native-v1 <on|off> [--live] [--json]",
+    usage: "orl v2 keep-native-v1 <on|off> [--live] [--json]",
     summary: "Keep native ChatGPT on v1 while routed models use v2.",
     routes: [{"method":"PUT","path":"/api/v2"}],
     flags: [{"name":"--live","value":"boolean","summary":"Use the selected runtime; otherwise preserve the local native/config operation."},{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."}],
@@ -237,7 +237,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["v2","threads"],
-    usage: "ocx v2 threads <n> [--live] [--json]",
+    usage: "orl v2 threads <n> [--live] [--json]",
     summary: "Set the local active-mode thread limit (integer at least 1).",
     routes: [{"method":"PUT","path":"/api/v2"}],
     flags: [{"name":"--live","value":"boolean","summary":"Use the selected runtime; otherwise preserve the local native/config operation."},{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."}],
@@ -247,7 +247,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["v2","mode-hint"],
-    usage: "ocx v2 mode-hint <text|--clear> [--live] [--json]; ocx v2 mode-hint [--live] [--json] -- <literal-text>",
+    usage: "orl v2 mode-hint <text|--clear> [--live] [--json]; orl v2 mode-hint [--live] [--json] -- <literal-text>",
     summary: "Set nonblank local delegation hint text or restore effort-derived policy.",
     routes: [{"method":"PUT","path":"/api/v2"}],
     flags: [{"name":"--clear","value":"boolean","summary":"Unset the hint."},{"name":"--live","value":"boolean","summary":"Use the selected runtime; otherwise preserve the local native/config operation."},{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."}],
@@ -257,7 +257,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["combo", "list"],
-    usage: "ocx combo list [--json]",
+    usage: "orl combo list [--json]",
     summary: "List saved combos.",
     routes: [{"method": "GET", "path": "/api/combos"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -267,7 +267,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["combo", "show"],
-    usage: "ocx combo show <id> [--json]",
+    usage: "orl combo show <id> [--json]",
     summary: "Read one saved combo from the collection.",
     routes: [{"method": "GET", "path": "/api/combos"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -277,7 +277,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["combo","set"],
-    usage: "ocx combo set <id> [--targets <provider/model[:weight],...> | --targets-file <FILE|->] [--strategy <failover|round-robin|random|least-used|reset-window|jev>] [--sticky <1-100|->] [--effort <low|medium|high|xhigh|max|ultra|->] [--effort-mode <fallback|force|->] [--alias <name|->] [--native-alias [on|off]] [--display-name <label|->] [--decision-provider <provider|-> | --decision-model <route|->] [--decision-timeout <ms|->] [--rename-from <id>] [--image-input <auto|disabled>] [--reasoning-effort-mode <strict|adaptive>] [--json]",
+    usage: "orl combo set <id> [--targets <provider/model[:weight],...> | --targets-file <FILE|->] [--strategy <failover|round-robin|random|least-used|reset-window|jev>] [--sticky <1-100|->] [--effort <low|medium|high|xhigh|max|ultra|->] [--effort-mode <fallback|force|->] [--alias <name|->] [--native-alias [on|off]] [--display-name <label|->] [--decision-provider <provider|-> | --decision-model <route|->] [--decision-timeout <ms|->] [--rename-from <id>] [--image-input <auto|disabled>] [--reasoning-effort-mode <strict|adaptive>] [--json]",
     summary: "Create, update or rename a combo.",
     routes: [{"method":"GET","path":"/api/combos"},{"method":"PUT","path":"/api/combos"}],
     flags: [{"name":"--targets","value":"string","summary":"Ordered provider/model[:weight] list; required for creation."},{"name":"--strategy","value":"string","summary":"Routing strategy."},{"name":"--sticky","value":"string","summary":"Round-robin limit 1-100; - resets."},{"name":"--effort","value":"string","summary":"Default effort; - clears."},{"name":"--effort-mode","value":"string","summary":"fallback or force; - resets to fallback."},{"name":"--alias","value":"string","summary":"Alias; - clears."},{"name":"--display-name","value":"string","summary":"Label; - clears."},{"name":"--decision-provider","value":"string","summary":"JEV provider; - clears."},{"name":"--decision-model","value":"string","summary":"JEV route; - clears; exclusive with provider."},{"name":"--decision-timeout","value":"string","summary":"JEV deadline 1000-120000 ms; - clears."},{"name":"--rename-from","value":"string","summary":"Existing combo ID to rename."},{"name":"--json","value":"boolean","summary":"Emit structured JSON."},{"name":"--native-alias","value":"string","summary":"Bare legacy flag means on; explicit on/off preserves presence, including false."},{"name":"--targets-file","value":"string","summary":"Bounded ordered target JSON array, exclusive with --targets; preserves effort/profile/last-resort metadata."},{"name":"--image-input","value":"string","summary":"auto or disabled; explicit auto clears the previous disabled choice."},{"name":"--reasoning-effort-mode","value":"string","summary":"strict or adaptive, distinct from --effort-mode fallback/force."}],
@@ -287,7 +287,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["combo", "remove"],
-    usage: "ocx combo remove <id> --yes [--json]",
+    usage: "orl combo remove <id> --yes [--json]",
     summary: "Remove a saved combo after explicit confirmation.",
     routes: [{"method": "DELETE", "path": "/api/combos"}],
     flags: [{"name": "--yes", "value": "boolean", "summary": "Confirm deletion.", "required": true}, {"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -297,7 +297,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["route", "policy", "list"],
-    usage: "ocx route policy list [--json]",
+    usage: "orl route policy list [--json]",
     summary: "List saved routing profiles and revisions.",
     routes: [{"method": "GET", "path": "/api/routing-profiles"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -307,7 +307,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["route", "policy", "show"],
-    usage: "ocx route policy show <id> [--json]",
+    usage: "orl route policy show <id> [--json]",
     summary: "Read one saved routing profile.",
     routes: [{"method": "GET", "path": "/api/routing-profiles"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -317,7 +317,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["route", "policy", "dry-run"],
-    usage: "ocx route policy dry-run <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]",
+    usage: "orl route policy dry-run <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]",
     summary: "Evaluate a saved profile against explicit requirements without changing it.",
     routes: [{"method": "POST", "path": "/api/routing-profiles/dry-run"}],
     flags: [{"name": "--model-context", "value": "number", "summary": "Positive context window requirement."}, {"name": "--tools", "value": "boolean", "summary": "Require tools."}, {"name": "--image", "value": "boolean", "summary": "Require image input."}, {"name": "--structured-output", "value": "boolean", "summary": "Require structured output."}, {"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -327,7 +327,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["route", "policy", "evaluate"],
-    usage: "ocx route policy evaluate <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]",
+    usage: "orl route policy evaluate <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]",
     summary: "Evaluate a saved profile against explicit requirements without changing it.",
     routes: [{"method": "POST", "path": "/api/routing-profiles/dry-run"}],
     flags: [{"name": "--model-context", "value": "number", "summary": "Positive context window requirement."}, {"name": "--tools", "value": "boolean", "summary": "Require tools."}, {"name": "--image", "value": "boolean", "summary": "Require image input."}, {"name": "--structured-output", "value": "boolean", "summary": "Require structured output."}, {"name": "--json", "value": "boolean", "summary": "Emit structured JSON."}],
@@ -337,7 +337,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["route","policy","create"],
-    usage: "ocx route policy create <id> --file <FILE|-> [--json]",
+    usage: "orl route policy create <id> --file <FILE|-> [--json]",
     summary: "Create a routing profile from an editable-only document.",
     routes: [{"method":"PUT","path":"/api/routing-profiles"}],
     flags: [{"name":"--file","value":"string","summary":"Bounded editable profile JSON; omit show DTO id/model/revision fields.","required":true},{"name":"--json","value":"boolean","summary":"Emit the validated command result as JSON."}],
@@ -347,7 +347,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["route","policy","update"],
-    usage: "ocx route policy update <id> --file <FILE|-> --expected-revision <revision> [--json]",
+    usage: "orl route policy update <id> --file <FILE|-> --expected-revision <revision> [--json]",
     summary: "Update a routing profile from an editable-only document.",
     routes: [{"method":"PUT","path":"/api/routing-profiles"}],
     flags: [{"name":"--file","value":"string","summary":"Bounded editable profile JSON; omit show DTO id/model/revision fields.","required":true},{"name":"--expected-revision","value":"string","summary":"Exact nonblank revision observed by the caller; never automatically refreshed.","required":true},{"name":"--json","value":"boolean","summary":"Emit the validated command result as JSON."}],
@@ -357,7 +357,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["route","policy","remove"],
-    usage: "ocx route policy remove <id> --yes [--json]",
+    usage: "orl route policy remove <id> --yes [--json]",
     summary: "Remove one exact routing profile ID.",
     routes: [{"method":"DELETE","path":"/api/routing-profiles"}],
     flags: [{"name":"--yes","value":"boolean","summary":"Explicitly confirm removal.","required":true},{"name":"--json","value":"boolean","summary":"Emit the validated command result as JSON."}],
@@ -367,7 +367,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["combo","stats"],
-    usage: "ocx combo stats <id> [--range <7d|30d|all>] [--json]",
+    usage: "orl combo stats <id> [--range <7d|30d|all>] [--json]",
     summary: "Read JEV decision and token coverage for an exact combo ID.",
     routes: [{"method":"GET","path":"/api/usage"}],
     flags: [{"name":"--range","value":"string","summary":"7d,30d or all; default30d."},{"name":"--json","value":"boolean","summary":"Emit the validated command result as JSON."}],
@@ -377,7 +377,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent","memory-models","show"],
-    usage: "ocx agent memory-models show [--json]",
+    usage: "orl agent memory-models show [--json]",
     summary: "Read the memory model override block.",
     routes: [{"method":"GET","path":"/api/settings"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."}],
@@ -387,7 +387,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent","memory-models","set"],
-    usage: "ocx agent memory-models set (--file <FILE|-> | [--extract-model <model> [--extract-effort <effort>]] [--consolidation-model <model> [--consolidation-effort <effort>]]) [--json]",
+    usage: "orl agent memory-models set (--file <FILE|-> | [--extract-model <model> [--extract-effort <effort>]] [--consolidation-model <model> [--consolidation-effort <effort>]]) [--json]",
     summary: "Replace the memory model override block.",
     routes: [{"method":"PUT","path":"/api/settings"}],
     flags: [{"name":"--file","value":"string","summary":"Bounded strict block JSON or explicit stdin; exclusive with all scalar fields."},{"name":"--extract-model","value":"string","summary":"Extraction override model."},{"name":"--extract-effort","value":"string","summary":"Requires an extraction model."},{"name":"--consolidation-model","value":"string","summary":"Consolidation override model."},{"name":"--consolidation-effort","value":"string","summary":"Requires a consolidation model."},{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."}],
@@ -397,7 +397,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent","memory-models","clear"],
-    usage: "ocx agent memory-models clear [--json]",
+    usage: "orl agent memory-models clear [--json]",
     summary: "Clear the memory model override block.",
     routes: [{"method":"PUT","path":"/api/settings"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."}],
@@ -407,7 +407,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent","compaction-routing","show"],
-    usage: "ocx agent compaction-routing show [--json]",
+    usage: "orl agent compaction-routing show [--json]",
     summary: "Read the compaction routing override block.",
     routes: [{"method":"GET","path":"/api/settings"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."}],
@@ -417,7 +417,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent","compaction-routing","set"],
-    usage: "ocx agent compaction-routing set (--file <FILE|-> | --model <model> [--effort <effort>] [--triggers <manual,auto>] [--sources <selector,...>]) [--json]",
+    usage: "orl agent compaction-routing set (--file <FILE|-> | --model <model> [--effort <effort>] [--triggers <manual,auto>] [--sources <selector,...>]) [--json]",
     summary: "Replace the compaction routing override block.",
     routes: [{"method":"PUT","path":"/api/settings"}],
     flags: [{"name":"--file","value":"string","summary":"Bounded strict block JSON or explicit stdin; exclusive with all scalar fields."},{"name":"--model","value":"string","summary":"Required routing override model in scalar mode."},{"name":"--effort","value":"string","summary":"Optional canonical pinned effort."},{"name":"--triggers","value":"string","summary":"Unique nonempty manual/auto values; no lossy filtering."},{"name":"--sources","value":"string","summary":"Unique exact selectors or provider/* patterns; omitted means all/default scope."},{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."}],
@@ -427,7 +427,7 @@ export const AGENT_ROUTING_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["agent","compaction-routing","clear"],
-    usage: "ocx agent compaction-routing clear [--json]",
+    usage: "orl agent compaction-routing clear [--json]",
     summary: "Clear the compaction routing override block.",
     routes: [{"method":"PUT","path":"/api/settings"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit the validated task result as one JSON document."}],

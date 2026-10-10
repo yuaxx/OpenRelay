@@ -1,6 +1,6 @@
 ---
 title: Profils de connexion principale native
-description: Gérez les profils de connexion Codex native enregistrés séparément du routage OpenCodex Pool.
+description: Gérez les profils de connexion Codex native enregistrés séparément du routage OpenRelay Pool.
 ---
 
 ## La connexion native ne sélectionne pas le Pool
@@ -15,7 +15,7 @@ Le **Effective CODEX_HOME** affiché appartient au serveur OpenCodex. Avec un
 tableau de bord distant, il peut s'agir d'un autre ordinateur que celui du
 navigateur. **Registered active profile** désigne le propriétaire enregistré
 dans le magasin chiffré des profils ; le serveur vérifie la connexion physique
-avant de basculer. Une connexion modifiée hors d'OpenCodex peut ainsi produire
+avant de basculer. Une connexion modifiée hors d'OpenRelay peut ainsi produire
 une erreur de propriétaire non concordant, au lieu d'être écrasée en silence.
 
 ## Enregistrer et basculer
@@ -69,7 +69,7 @@ Une erreur réseau ne prouve pas qu'une écriture a échoué ou été annulée. 
 une mutation envoyée, même si la réponse se perd, le panneau relit l'état du
 serveur et ne réessaie jamais automatiquement. Si l'actualisation échoue, un
 changement réussi n'est pas annoncé comme annulé. Actualisez et consultez les
-diagnostics avant toute autre opération. La commande `ocx account main doctor`
+diagnostics avant toute autre opération. La commande `orl account main doctor`
 fournit des diagnostics côté serveur.
 
 ## Périmètre de cette phase
@@ -77,7 +77,7 @@ fournit des diagnostics côté serveur.
 Ce panneau liste, enregistre, active et récupère les profils existants via la
 frontière `/api/native-main-profiles`. Il ne lance aucun processus de connexion
 et n'expose aucun jeton d'écriture de préparation. L'ajout d'une autre connexion
-native reste du ressort de la commande CLI `ocx account main add` ; l'inscription
+native reste du ressort de la commande CLI `orl account main add` ; l'inscription
 depuis le navigateur est un suivi distinct de l'issue #3417. La
 réauthentification de l'emplacement principal actuel suit un autre parcours,
 que ce panneau ne remplace pas.

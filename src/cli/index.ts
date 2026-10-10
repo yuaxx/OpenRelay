@@ -335,13 +335,13 @@ async function chooseListenPort(
         throw new StartCommandExit(1);
       }
       if (decision === "refuse-unidentified-holder") {
-        console.error(`❌ Port ${preferred} is busy and its holder did not identify as opencodex.`);
+        console.error(`❌ Port ${preferred} is busy and its holder did not identify as OpenRelay.`);
         console.error("   Starting on another port would leave Codex pointed at a proxy you did not ask for.");
-        console.error("   Stop whatever holds that port, or start on a free one with 'ocx start --port <port>'.");
+        console.error("   Stop whatever holds that port, or start on a free one with 'orl start --port <port>'.");
         throw new StartCommandExit(1);
       }
       if (preferred > 0) {
-        console.log(`⚠️  Port ${preferred} is busy; starting opencodex on ${selected}.`);
+        console.log(`⚠️  Port ${preferred} is busy; starting OpenRelay on ${selected}.`);
       }
     }
     if (shouldPersistSelectedPort(config.port, selected, preferred, options)) {
@@ -540,7 +540,7 @@ async function handleStart(options: { block?: boolean } = {}) {
             throw new StartCommandExit(serviceStayOutExitCode());
           }
           if (decision === "refuse" || decision === "await-parent") {
-            console.error(`⚠️  Proxy appeared before bind (PID ${fencedLive.pid ?? "unknown"}, port ${fencedLive.port}). Use 'ocx stop' first.`);
+            console.error(`⚠️  Proxy appeared before bind (PID ${fencedLive.pid ?? "unknown"}, port ${fencedLive.port}). Use 'orl stop' first.`);
             throw new StartCommandExit(1);
           }
           siblingStart = true;
@@ -696,7 +696,7 @@ async function handleStart(options: { block?: boolean } = {}) {
     shuttingDown = true;
     shutdownStartedAt = now;
     noteExplicitShutdownRequested(); // an automatic package restart must not hand off after this
-    console.log("\n🛑 Shutting down opencodex proxy...");
+    console.log("\n🛑 Shutting down OpenRelay proxy...");
     void (async () => {
       let shutdownSucceeded = false;
       try {
@@ -1197,7 +1197,7 @@ async function handleStopUnlocked(snapshot?: GuardedStopSnapshot) {
       // the same case with service_state_unknown.
       stopFailed = true;
       console.error("❌ The Windows Task Scheduler state could not be read, so this stop cannot tell whether a wrapper would respawn the proxy.");
-      console.error("   Run 'ocx service status' to see the query error, repair Task Scheduler access, then retry.");
+      console.error("   Run 'orl service status' to see the query error, repair Task Scheduler access, then retry.");
     }
   } catch (err) {
     record.service = "error";
@@ -1314,7 +1314,7 @@ async function handleStopUnlocked(snapshot?: GuardedStopSnapshot) {
       ownershipBlocked = true;
       console.error(`❌ A proxy is answering on port ${live.port}, but no process id could be resolved for it, so it cannot be stopped from here.`);
       console.error("   Skipping shared teardown: restoring client config while it serves would leave both pointing at each other.");
-      console.error("   Stop it from the home that started it, or end the process manually, then rerun 'ocx stop'.");
+      console.error("   Stop it from the home that started it, or end the process manually, then rerun 'orl stop'.");
     } else {
       record.proxy = "not-running";
       if (!stoppedService) console.log("No running proxy found.");
@@ -1380,7 +1380,7 @@ async function handleStopUnlocked(snapshot?: GuardedStopSnapshot) {
         record.inheritedTeardownBlocks = true;
         stopFailed = true;
         console.error(`❌ ${read.detail}, so this stop cannot tell whether a shared teardown is still owed.`);
-        console.error("   Skipping shared teardown. Fix access to the opencodex home, then rerun 'ocx stop'.");
+        console.error("   Skipping shared teardown. Fix access to the OpenRelay home, then rerun 'orl stop'.");
         continue;
       }
       if (read.state === "invalid") {
@@ -1390,7 +1390,7 @@ async function handleStopUnlocked(snapshot?: GuardedStopSnapshot) {
         stopFailed = true;
         console.error(`❌ A pending-teardown receipt could not be read (${read.detail}).`);
         console.error("   It names no endpoint, so this stop cannot prove the proxy it belonged to is down.");
-        console.error("   Confirm no proxy is running, then rerun 'ocx stop' to complete the teardown.");
+        console.error("   Confirm no proxy is running, then rerun 'orl stop' to complete the teardown.");
         continue;
       }
       if (read.receipt.endpointSource === "guessed") {
@@ -1402,7 +1402,7 @@ async function handleStopUnlocked(snapshot?: GuardedStopSnapshot) {
         stopFailed = true;
         console.error("❌ A shared teardown from an earlier stop is outstanding, but that stop could not record the address it was stopping.");
         console.error(`   Only the configured address (${read.receipt.endpoint.hostname}:${read.receipt.endpoint.port}) was recorded, which cannot prove the right proxy is down.`);
-        console.error(`   Confirm no proxy is running, then run 'ocx restore' and remove ${pendingTeardownPathFor(read.receipt.nonce)}.`);
+        console.error(`   Confirm no proxy is running, then run 'orl restore' and remove ${pendingTeardownPathFor(read.receipt.nonce)}.`);
         continue;
       }
       if (await abandonedTeardownIsSafeToFinish(read.receipt.endpoint)) {
@@ -1444,7 +1444,7 @@ async function handleStopUnlocked(snapshot?: GuardedStopSnapshot) {
     // saying so — which is the whole failure the receipt exists to prevent (#4718).
     if (restore.historyDeferred) {
       console.error("   The shared teardown was refused before it changed anything, so it is still owed.");
-      console.error("   Its receipt is preserved; run 'ocx stop' again once Codex is closed to retry the restore.");
+      console.error("   Its receipt is preserved; run 'orl stop' again once Codex is closed to retry the restore.");
     }
     if (!restore.other && !restore.historyDeferred) {
       const discharged = teardownNonce ? [teardownNonce, ...recoveredNonces] : recoveredNonces;
@@ -1472,10 +1472,10 @@ async function handleStopUnlocked(snapshot?: GuardedStopSnapshot) {
     for (const read of unreadable) {
       const moved = quarantinePendingTeardown(read.nonce);
       if (moved) {
-        console.error(`⚠️  That unreadable receipt was set aside at ${moved}. It still blocks 'ocx update', and 'ocx stop' has NOT restored on its behalf.`);
-        console.error("   To clear it: confirm no proxy is running, run 'ocx restore', then delete that file.");
+        console.error(`⚠️  That unreadable receipt was set aside at ${moved}. It still blocks 'orl update', and 'orl stop' has NOT restored on its behalf.`);
+        console.error("   To clear it: confirm no proxy is running, run 'orl restore', then delete that file.");
       } else {
-        console.error(`❌ It could not be set aside either: ${pendingTeardownPathFor(read.nonce)}. Remove it manually after running 'ocx restore'.`);
+        console.error(`❌ It could not be set aside either: ${pendingTeardownPathFor(read.nonce)}. Remove it manually after running 'orl restore'.`);
       }
     }
   }
@@ -1557,7 +1557,7 @@ async function handleUninstall() {
       throw new Error("the installed service manager did not stop; it may respawn the proxy");
     }
     if (outcome === "state-unknown") {
-      throw new Error("the Windows Task Scheduler state could not be read, so this uninstall cannot tell whether a manager is still running. Run 'ocx service status' to see the query error");
+      throw new Error("the Windows Task Scheduler state could not be read, so this uninstall cannot tell whether a manager is still running. Run 'orl service status' to see the query error");
     }
     return true;
   });
@@ -1650,8 +1650,8 @@ async function handleUninstall() {
   } else {
     failures.push("native Codex restored", "Grok Build config restored");
     console.error("⚠️  Skipping shared teardown (native Codex restore, Grok config): a service or proxy could not be proven stopped.");
-    console.error("   Resolve the failures above and rerun 'ocx uninstall' — service removal and local state cleanup are also unfinished.");
-    console.error("   'ocx restore' is an interim step if you need native routing back before then.");
+    console.error("   Resolve the failures above and rerun 'orl uninstall' — service removal and local state cleanup are also unfinished.");
+    console.error("   'orl restore' is an interim step if you need native routing back before then.");
   }
 
   await runStep("system env vars reverted", () => {
@@ -1674,7 +1674,7 @@ async function handleUninstall() {
   }
 
   if (failures.length === 0) {
-    await runStep("opencodex config removed", async () => {
+    await runStep("OpenRelay config removed", async () => {
       const result = await removeOwnedConfigAfterDesktopCleanup(observed);
       if (result.status === "absent") return false;
       if (result.status === "removed") return true;
@@ -1684,14 +1684,14 @@ async function handleUninstall() {
       throw new Error(`${result.status} uninstall: ${result.reason ?? "config state was not removed"}.${residual}`);
     });
   } else {
-    console.error("Leaving opencodex config/backups in place so the failed restore step can be retried.");
+    console.error("Leaving OpenRelay config/backups in place so the failed restore step can be retried.");
   }
 
   if (failures.length > 0) {
     console.error(`\nUninstall finished with ${failures.length} failed step(s): ${failures.join(", ")}`);
     process.exit(1);
   }
-  console.log("\n✅ opencodex local state removed. Remove the package with: npm uninstall -g @bitkyc08/opencodex");
+  console.log("\n✅ OpenRelay local state removed. Remove the package with: npm uninstall -g @bitkyc08/opencodex");
 }
 
 async function handleStatus() {
@@ -1702,7 +1702,7 @@ async function handleStatus() {
   // the strict unknown-argument behaviour rather than trading one defect for another.
   const wantsJson = takeFlag(statusArgs, "--json");
   if (statusArgs.length > 0) {
-    console.error("Usage: ocx status [--json]");
+    console.error("Usage: orl status [--json]");
     process.exit(1);
   }
 
@@ -1764,8 +1764,8 @@ async function handleStatus() {
       }
     }
     console.log(installed
-      ? "     Restart with 'ocx start', or refresh the installed service: 'ocx service repair'."
-      : "     Restart with 'ocx start', or install the persistent service: 'ocx service install'.");
+      ? "     Restart with 'orl start', or refresh the installed service: 'orl service repair'."
+      : "     Restart with 'orl start', or install the persistent service: 'orl service install'.");
     // Restarting is only half the choice. A user who cannot sign in to Codex at all needs the
     // way out that does not require this proxy to come back (#5261).
     for (const line of deadProxyRoutingAdviceLines({
@@ -1820,7 +1820,7 @@ async function handleStatus() {
       // turn this diagnostic command into a teardown failure.
     }
     if (retainedProviderTable) {
-      console.log(`   ⚠️  Codex provider table retained${local}: [model_providers.opencodex] remains while root routing is native. Remove with 'ocx restore --remove-codex-provider-table'; tagged conversations will stop opening.`);
+      console.log(`   ⚠️  Codex provider table retained${local}: [model_providers.opencodex] remains while root routing is native. Remove with 'orl restore --remove-codex-provider-table'; tagged conversations will stop opening.`);
     }
   }
   console.log(`   Service: ${status.json.service.summary}${local}`);
@@ -1879,7 +1879,7 @@ async function handleRecoverHistory() {
   if (args[1] === "--ocx-compaction") {
     const threadId = args[2];
     if (args.length !== 4 || !threadId || args[3] !== "--yes") {
-      console.error("Usage: ocx recover-history --ocx-compaction <thread-id> --yes");
+      console.error("Usage: orl recover-history --ocx-compaction <thread-id> --yes");
       console.error("This rewrites one rollout after saving a private byte-for-byte backup. Close that Codex thread before retrying.");
       process.exit(1);
     }
@@ -1900,13 +1900,13 @@ async function handleRecoverHistory() {
     }
   }
   if (args[1] !== "--legacy-openai") {
-    console.error("Usage: ocx recover-history (--legacy-openai | --ocx-compaction <thread-id>) --yes");
+    console.error("Usage: orl recover-history (--legacy-openai | --ocx-compaction <thread-id>) --yes");
     console.error("This force-relabels every user-message opencodex row to OpenAI, including legitimate dedicated-provider history. Back up first and use it only for pre-backup legacy recovery.");
     process.exit(1);
   }
   console.error("WARNING: this force-relabels every user-message opencodex row to OpenAI, normalizes exec to cli, and includes legitimate dedicated-provider history.");
   if (args.length !== 3 || args[2] !== "--yes") {
-    console.error("Re-run with explicit confirmation: ocx recover-history --legacy-openai --yes");
+    console.error("Re-run with explicit confirmation: orl recover-history --legacy-openai --yes");
     process.exit(1);
   }
   // Manifest-independent legacy ejection, serialized like every other history

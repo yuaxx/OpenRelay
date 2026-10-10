@@ -22,22 +22,22 @@ interface WebSearchModelOption {
 }
 
 const USAGE = `Usage:
-  ocx agent [status] [--json]
-  ocx agent injection <status|set> [--model <id|->] [--effort <level|->]
+  orl agent [status] [--json]
+  orl agent injection <status|set> [--model <id|->] [--effort <level|->]
       [--prompt <text|->] [--guidance <on|off>] [--sync-codex-defaults <on|off>] [--json]
-  ocx agent injection suggest <work description> [--model <id>] [--apply] [--json]
-  ocx agent effort <status|set> [--main <level|->] [--subagent <level|->] [--json]
-  ocx agent subagents <status|set|clear> [model,model...] [--json]
-  ocx agent subagents force <model|-> [--json]
-  ocx agent fallback <status|set|clear> [model,model...] [--poll-ms <5000-600000>] [--json]
-  ocx agent roles [status|set <role> <model> [--effort <level>]|suggest [--model <id>] [--apply]] [--json]
-  ocx agent sidecar <status|web|vision> [--list] [--model <id|->]
+  orl agent injection suggest <work description> [--model <id>] [--apply] [--json]
+  orl agent effort <status|set> [--main <level|->] [--subagent <level|->] [--json]
+  orl agent subagents <status|set|clear> [model,model...] [--json]
+  orl agent subagents force <model|-> [--json]
+  orl agent fallback <status|set|clear> [model,model...] [--poll-ms <5000-600000>] [--json]
+  orl agent roles [status|set <role> <model> [--effort <level>]|suggest [--model <id>] [--apply]] [--json]
+  orl agent sidecar <status|web|vision> [--list] [--model <id|->]
       [--backend web:<openai|anthropic|xai|gemini|exa|-> vision:<openai|anthropic|routed|->]
       [--reasoning <level>] [--max-descriptions <n> (vision)] [--enabled <on|off>]
       [--stream-routed-output <on|off> (web)] [--timeout-ms <1-2147483647> (vision)] [--json]
-  ocx agent memory-models <show|set|clear> [options] [--json]
-  ocx agent compaction-routing <show|set|clear> [options] [--json]
-  ocx agent request-user-input [on|off] [--json]`;
+  orl agent memory-models <show|set|clear> [options] [--json]
+  orl agent compaction-routing <show|set|clear> [options] [--json]
+  orl agent request-user-input [on|off] [--json]`;
 
 function clearable(value: string | undefined): string | null | undefined {
   return value === "-" ? null : value;
@@ -179,7 +179,7 @@ async function subagents(argv: string[], deps: RuntimeApiDeps): Promise<void> {
     rejectArgs(args, USAGE);
     const force = clearable(model);
     const result = await runtimeRequest("/api/subagent-models", { method: "PUT", body: JSON.stringify({ force }) }, deps);
-    printData(result, wantsJson, [force ? `Claude subagent force: ${force}. Applies on the next routed ocx claude launch.` : "Claude subagent force cleared."]);
+    printData(result, wantsJson, [force ? `Claude subagent force: ${force}. Applies on the next routed orl claude launch.` : "Claude subagent force cleared."]);
     return;
   }
   let models: string[];
@@ -297,10 +297,10 @@ async function sidecar(argv: string[], deps: RuntimeApiDeps): Promise<void> {
     const retry = apply.reason === "external_provider"
       ? ""
       : apply.reason === "ownership_undetermined"
-      ? " Resolve the reported config.toml read error, then inspect 'ocx system settings --json'."
+      ? " Resolve the reported config.toml read error, then inspect 'orl system settings --json'."
       : apply.reason === "integration_disabled"
       ? " Enable Codex integration before applying the stored settings."
-      : " Run 'ocx sync' to apply the stored settings.";
+      : " Run 'orl sync' to apply the stored settings.";
     lines.push(apply.applied === true
       ? "Codex config: ~/.codex/config.toml was rewritten."
       : `Codex config: ~/.codex/config.toml was not rewritten because ${desktopSwitchApplyReason(apply.reason)}.${detail}${retry}`);

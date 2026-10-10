@@ -3,7 +3,7 @@ title: "Sidecar：Web Search 與 Vision"
 description: 透過原生 ChatGPT sidecar，讓路由模型獲得真實 web search，並讓純文字模型理解圖像。
 ---
 
-不同路由模型對託管 **Web Search** 和原生**圖像輸入**的支援並不相同。opencodex 透過兩個
+不同路由模型對託管 **Web Search** 和原生**圖像輸入**的支援並不相同。OpenRelay 透過兩個
 sidecar 補齊這些能力；它們可以使用 ChatGPT 登入（`forward`）provider，也可以使用已儲存的
 Anthropic OAuth provider；web search 還可透過明確的 `xai` backend 使用已儲存的 Grok OAuth。Sidecar 錯誤會轉換成長度受限的工具結果或圖像提示，不會讓整個 turn
 失敗。
@@ -16,11 +16,11 @@ OAuth 帳號時使用 `anthropic`，否則使用 `openai`。明確選擇 `anthro
 
 ## Web-search sidecar
 
-當 Codex 為非透傳的路由模型請求託管 `web_search` 時，opencodex 會：
+當 Codex 為非透傳的路由模型請求託管 `web_search` 時，OpenRelay 會：
 
 1. **移除**託管的 `web_search` 工具，改為向路由模型提供一個合成的
    `web_search(query)` function 工具。原託管工具的選項會保留並用於 sidecar 呼叫。
-2. 讓路由模型在一個小型 **agentic 迴圈**中執行。模型呼叫 `web_search` 時，opencodex 使用所選
+2. 讓路由模型在一個小型 **agentic 迴圈**中執行。模型呼叫 `web_search` 時，OpenRelay 使用所選
    後端：OpenAI 預設以 `gpt-5.6-luna` 執行託管 `web_search`；Anthropic 預設以
    `claude-sonnet-5` 執行 `web_search_20250305`。xAI 預設以 `grok-4.6` 執行託管 `web_search`，
    並在 `xSearch.enabled` 為 true 時將 `x_search` 加入同一請求。Streaming 答案及引用會解析為工具結果。
@@ -28,7 +28,7 @@ OAuth 帳號時使用 `anthropic`，否則使用 `openai`。明確選擇 `anthro
    search 工具並強制生成最終答案。如果模型呼叫 `apply_patch` 或 shell 等真實用戶端工具，目前
    turn 會結束，以便這些呼叫到達 Codex。
 
-路由模型的每次迭代都會向上遊請求 `stream: true`，但 opencodex 會在決定搜尋還是回傳最終答案前，
+路由模型的每次迭代都會向上遊請求 `stream: true`，但 OpenRelay 會在決定搜尋還是回傳最終答案前，
 在內部完整緩衝所有語義 event。只有第一次迭代的最終 header/status 和 429 key rotation 會被提前
 取得。因此，合成搜尋呼叫和中間輸出不會作為模型輸出暴露給用戶端。
 
@@ -65,7 +65,7 @@ OAuth 帳號時使用 `anthropic`，否則使用 `openai`。明確選擇 `anthro
 ## Vision sidecar
 
 當路由模型列在其 provider 的 `noVisionModels` 中，或該模型在 `modelInputModalities` 中被宣告為僅文字，
-且請求包含圖像時，只要有可用的 vision sidecar plan，opencodex 就會在主呼叫**之前**描述每張圖像並用文字替換圖像。
+且請求包含圖像時，只要有可用的 vision sidecar plan，OpenRelay 就會在主呼叫**之前**描述每張圖像並用文字替換圖像。
 若沒有可用 plan，原始圖像會被移除，不會繼續轉送給純文字後端。模型目錄會為每個由 sidecar 處理的模型宣告圖像輸入。
 只有當每個 combo 成員都能原生或透過 sidecar 接受圖像，且 combo 的 `imageInput` 設定未停用時，combo 才會宣告圖像輸入；
 如此 Codex 應用程式等用戶端會允許附件，而不會在 sidecar 執行前阻擋它們。Dashboard 和管理 API 目前顯示的預設值是
@@ -122,12 +122,12 @@ OAuth 帳號時使用 `anthropic`，否則使用 `openai`。明確選擇 `anthro
 `PUT /api/sidecar-settings` 接受相同欄位。部分更新會保留未提交的鍵。`timeoutMs` 使用執行時整數邊界（1–2147483647 毫秒）。
 
 Web 搜尋 sidecar 卡片採用相同的控制項形態：模型選擇器的第一列是 **關閉 (Off)**。關閉會停止
-OpenCodex 對 `web_search` 的攔截，同時 Codex 整合會把 `web_search = "disabled"`
+OpenRelay 對 `web_search` 的攔截，同時 Codex 整合會把 `web_search = "disabled"`
 寫入 `~/.codex/config.toml`；因為 Codex 在自身模式如此宣告前會一直宣告其原生託管的
 `web_search` 工具，而當 MCP 搜尋伺服器需要成為唯一搜尋路徑時，這正是必要的。重新開啟會
 移除該行，並還原 Codex 日誌中記錄、由操作者寫入的根層級 `web_search` 行。該寫入需要受管理的
-`~/.codex/config.toml`（`ocx sync`）；若未執行，儀表板卡片會提出警告，
-`ocx agent sidecar web --enabled off` 也會回報結果。
+`~/.codex/config.toml`（`orl sync`）；若未執行，儀表板卡片會提出警告，
+`orl agent sidecar web --enabled off` 也會回報結果。
 
 如果更想直接改檔案，仍可在 `config.json` 中把 `enabled` 設為 `false`。Anthropic OAuth 搜尋和圖像描述沿用現有 Claude Code OAuth fingerprint 先例，但仍應使用目標帳號和實際負載充分 soak test。所有欄位見
 [設定參考](/zh-tw/reference/configuration/server/#sidecar)。

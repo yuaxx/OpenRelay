@@ -11,7 +11,7 @@ description: リスナー、リモート アクセス、アドミッション �
 | --- | --- | --- | --- |
 | `port` | `number` | `10100` |プロキシリッスンポート。 |
 | `hostname?` | `string` | `"127.0.0.1"` |バインドアドレス。非ループバック バインドには `OPENCODEX_API_AUTH_TOKEN` が必要です。 |
-| `proxy?` | `string` | — |送信 HTTP(S) または SOCKS5 プロキシ URL（`socks5://host:port`）または `${ENV_VAR}`。HTTP URL は未設定時のみ `HTTP_PROXY` / `HTTPS_PROXY` に適用されます。SOCKS5 URL は組み込みの SOCKS5 トンネルを使用し、`ALL_PROXY` にも適用されます（`ocx start --socks5`）。このプロセスで継承した `HTTP(S)_PROXY` はクリアされます。ループバックは `NO_PROXY` に残ります。 |
+| `proxy?` | `string` | — |送信 HTTP(S) または SOCKS5 プロキシ URL（`socks5://host:port`）または `${ENV_VAR}`。HTTP URL は未設定時のみ `HTTP_PROXY` / `HTTPS_PROXY` に適用されます。SOCKS5 URL は組み込みの SOCKS5 トンネルを使用し、`ALL_PROXY` にも適用されます（`orl start --socks5`）。このプロセスで継承した `HTTP(S)_PROXY` はクリアされます。ループバックは `NO_PROXY` に残ります。 |
 | `emptyCompletionRetry?` | `boolean` | `false` | テキストもツール呼び出しもない Responses ターンを、ターミナルイベント前にストリームが終了した場合も含め、同一リクエストで 1 回再試行するよう明示的に有効化します。再試行は課金対象になる場合があります。`OCX_EMPTY_COMPLETION_RETRY=0` で設定を変更せず無効化できます。combo と routed-compaction turn は対象外です。 |
 | `dropCodexSafetyBuffering?` | `boolean` | `false` | Codex Responses パススルーから Codex の safety-buffering ヒントを除去します。対象は `x-codex-safety-buffering-enabled` / `x-codex-safety-buffering-faster-model` 応答ヘッダー、`safety_buffering` 型の `response.metadata` SSE イベント、およびその他の SSE イベントにある `safety_buffering` フィールドです。Codex TUI はこれらを、既定の操作でセッションをより弱いモデルに切り替える「より高速なモデルで再試行」プロンプトとして表示します。その他の `x-codex-*` ヘッダーと SSE イベントの内容は、そのフィールドの除去を除いて変更せずに転送されます。既定ではオフです。 |
 | `stallTimeoutSec?` | `number` | `300`（public）/ 無効（local） | ストリームが遮断されるまでの、有効な上流進捗がない秒数（Responses とネイティブ Chat）。未設定では**ローカル**上流（loopback・プライベート・`.local`/`.lan` 名）は無効が既定、public 上流は 300 秒。正の値は両方に適用（最小 1 秒）、`0` で無通信 watchdog を全面無効化。canonical ChatGPT SSE を非ストリーミング JSON にまとめる Responses リクエストには、watchdog が無効でも独立した 15 分の全体上限が残る。`/v1/responses/compact` の保留ボディ読み取りもこの予算を共有するが、ローカル上流でも既定は 300 秒。明示値（`0` を含む）が優先される。 |
@@ -23,15 +23,15 @@ description: リスナー、リモート アクセス、アドミッション �
 | `storageCleanupPolicy?` | `StorageCleanupPolicy` |無効 |アーカイブされたセッションのクリーンアップ ポリシーをオプトインします。暗黙的に有効になることはありません。 |
 | `appOwnedMemoryBudgetMb?` | `number` | `256` |排除可能なアプリ所有のログ、キャッシュ、BLOB、および継続ペイロードの MiB の上限。範囲は 64 ～ 4096。 RSSキャップではありません。 |
 | `metricsExport.enabled?` | `boolean` | `false` | 認証済み `GET /api/metrics` でプロセスローカルの集約リクエストメトリクスを有効にします。再起動が必要です。無効時は 404 となり、エクスポーター処理は開始されません。 |
-| `codexAutoStart?` | `boolean` | `true` | Codex を起動する前に、Codex シムで `ocx ensure` を実行させます。 False を指定すると、操作が行われないことが保証されます。 |
+| `codexAutoStart?` | `boolean` | `true` | Codex を起動する前に、Codex シムで `orl ensure` を実行させます。 False を指定すると、操作が行われないことが保証されます。 |
 | `codexShimAutoRestore?` | `boolean` | `true` |完了した外部 Codex アップデートによってインストールされたシムが置き換えられた後、インストールされているシムを復元します。環境オプトアウト: `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0`。 |
-| `syncResumeHistory?` | `boolean` | `true` | Codex App 履歴の互換性を元に戻すことができます。元のメタデータは `ocx stop` / `ocx restore` によってバックアップおよび復元されます。 |
+| `syncResumeHistory?` | `boolean` | `true` | Codex App 履歴の互換性を元に戻すことができます。元のメタデータは `orl stop` / `orl restore` によってバックアップおよび復元されます。 |
 | `shadowCallIntercept?` | `{ enabled?: boolean; model?: string; sourceModels?: string[] }` |オフ |認識された Codex ヘルパー/シャドウ呼び出しを、リクエストに設定された推論エフォートを維持したまま選択したモデルにリダイレクトします。デフォルトのソースプレフィックスは `gpt-6-luna`, `gpt-5.6-luna` です。0.144.x 以前のクライアントでは `gpt-5.4-mini` が使われており、`sourceModels` で復元できます。 |
 | `webSearchSidecar?` | `OcxWebSearchSidecarConfig` |使用可能な場合はオン | Web 検索サイドカー オプション。 |
 | `visionSidecar?` | `OcxVisionSidecarConfig` |使用可能な場合はオン |画像説明サイドカー オプション。 |
 | `images?` | `OcxImagesConfig` | OpenAI の自動選択 | Codex `image_gen` のスタンドアロン イメージ リレー オプション。 |
 
-バックアップ サポートが存在する前に古い開発ビルドで再開履歴メタデータが変更された場合は、`ocx recover-history --legacy-openai --yes` を実行してネイティブ プロバイダーの回復を強制します。
+バックアップ サポートが存在する前に古い開発ビルドで再開履歴メタデータが変更された場合は、`orl recover-history --legacy-openai --yes` を実行してネイティブ プロバイダーの回復を強制します。
 このコマンドは、正当な専用プロバイダー履歴を含む、ユーザーメッセージを持つすべての `opencodex` 行を再ラベル付けします。実行前にライフサイクル リファレンスの全範囲に関する警告を確認してください。
 
 ### ネイティブ Chat のタイムアウトと完了
@@ -44,10 +44,10 @@ description: リスナー、リモート アクセス、アドミッション �
 
 ```bash
 export OPENCODEX_API_AUTH_TOKEN="your-secret-token"
-ocx start
+orl start
 ```
 
-プロキシは、この変数がないとリモート バインドを拒否します。バックグラウンド サービスの場合は、`ocx service install` の前にエクスポートして、launchd、systemd、またはタスク スケジューラがそれを受信できるようにします。クライアントは以下を送信する必要があります:
+プロキシは、この変数がないとリモート バインドを拒否します。バックグラウンド サービスの場合は、`orl service install` の前にエクスポートして、launchd、systemd、またはタスク スケジューラがそれを受信できるようにします。クライアントは以下を送信する必要があります:
 
 ```text
 x-opencodex-api-key: your-secret-token
@@ -98,7 +98,7 @@ ssh -L 20100:localhost:10100 -L 1455:localhost:1455 you@remote
 
 ## Claude Code (`claudeCode`)
 
-これらの設定は、`/v1/messages`、`/v1/messages/count_tokens`、`ocx claude` ランチャー、および Claude ダッシュボード ページを制御します。
+これらの設定は、`/v1/messages`、`/v1/messages/count_tokens`、`orl claude` ランチャー、および Claude ダッシュボード ページを制御します。
 
 |キー |タイプ |デフォルト |説明 |
 | --- | --- | --- | --- |
@@ -106,7 +106,7 @@ ssh -L 20100:localhost:10100 -L 1455:localhost:1455 you@remote
 | `claudeCode.bodyMaxBytes?` | `number` | `67108864` |ストリーミングおよびバッファリングされた応答の累積的なネイティブ パススルー ボディ キャップ。まさに `0` が無効になります。 |
 | `claudeCode.authMode?` | `"proxy" \| "subscription"` |自動 |起動による `ANTHROPIC_AUTH_TOKEN` の処理方法。起動ごとに認証を自動検出します。明示的な値は決してオーバーライドされません。 |
 | `claudeCode.authModeMigratedAt?` | `string` |設定を解除する |内部のワンタイムアップグレードマーカー。手動で設定しないでください。 |
-| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` |継承 |生成された `~/.claude/agents/ocx-*.md` に書き込まれる作業量。 Codex のガイダンスおよびプロキシの上限とは別のものです。 `ocx claude` を通じて再起動して再生成します。 |
+| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` |継承 |生成された `~/.claude/agents/ocx-*.md` に書き込まれる作業量。 Codex のガイダンスおよびプロキシの上限とは別のものです。 `orl claude` を通じて再起動して再生成します。 |
 
 自動認証では、保存されているクロード認証が見つかった場合はサブスクリプションが選択され、見つからない場合はプロキシが選択され、検出が決定的でない場合は警告付きのサブスクリプションが選択されます。 [クロードコード認証モード](/guides/claude-code/#auth-mode)を参照してください。
 
@@ -147,7 +147,7 @@ Codex は、タイトルやコミット メッセージなどのタスクに小�
 
 |フィールド |タイプ |デフォルト |意味 |
 | --- | --- | --- | --- |
-| `enabled?` | `boolean` |使用可能な場合はオン |マスタースイッチ。`false` のとき OpenCodex は `web_search` への介入をやめ、Codex 統合は `~/.codex/config.toml` に `web_search = "disabled"` を書き込みます。 |
+| `enabled?` | `boolean` |使用可能な場合はオン |マスタースイッチ。`false` のとき OpenRelay は `web_search` への介入をやめ、Codex 統合は `~/.codex/config.toml` に `web_search = "disabled"` を書き込みます。 |
 | `backend?` | `"openai" \| "anthropic" \| "xai" \| "gemini" \| "exa"` | `openai` | 明示設定が優先され、未設定なら常に `openai` です。`anthropic` と `xai` は明示設定時のみ実行され、`gemini` と `exa` は executor が提供されるまで予約値です。 |
 | `model?` | `string` |バックエンド依存 | OpenAI は `gpt-5.6-luna`、Anthropic は `claude-sonnet-5`、xAI は `grok-4.6`。従来の明示的な `gpt-5.4-mini` は開始時に移行されます。 |
 | `exaApiKey?` | `string` | なし | `exa` バックエンドのオペレーターキー。書き込み専用で、管理 API の読み取りでは保存値を返しません。 |
@@ -174,7 +174,7 @@ OpenAI バックエンドには、ChatGPT ログインと有効な ChatGPT `forw
 
 対応するレベルは、上流プロバイダーの能力と選択したモデルが公表する推論ラダーによって制限されます。 Vision は、プロバイダーの `noVisionModels` のモデルに送信された画像に対してのみアクティブになります。 OpenAI には、検索と同じログイン/転送要件があります。明示的に選択された Anthropic は、使用可能な認証情報がないと失敗します。成功した `data:` 記述では、バックエンド、モデル、詳細、画像バイト、および正規化されたメッセージ コンテキストをキーとした境界付きキャッシュが使用されます。OpenAI のキーには推論負荷も含まれます（Anthropic のキーには含まれません）。ヒットと同じターンの重複は制限を消費しません。リモート `https:` イメージと失敗した説明、または空の説明はキャッシュされません。
 
-Anthropic OAuth サイドカーは、opencodex の既存のクロード コード OAuth フィンガープリントを再利用します。対象のアカウントとワークロードをソークテストします。
+Anthropic OAuth サイドカーは、OpenRelay の既存のクロード コード OAuth フィンガープリントを再利用します。対象のアカウントとワークロードをソークテストします。
 
 ## Remote Hub のキーと既定値
 
@@ -192,7 +192,7 @@ Anthropic OAuth サイドカーは、opencodex の既存のクロード コー�
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

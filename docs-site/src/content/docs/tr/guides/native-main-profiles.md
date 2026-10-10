@@ -1,6 +1,6 @@
 ---
 title: Yerel ana giriş profilleri
-description: Saklanan yerel Codex giriş profillerini OpenCodex Pool yönlendirmesinden ayrı yönetin.
+description: Saklanan yerel Codex giriş profillerini OpenRelay Pool yönlendirmesinden ayrı yönetin.
 ---
 
 ## Yerel giriş, Pool seçimi değildir
@@ -11,10 +11,10 @@ Providers hesap çalışma alanında ana kartın yanında da görünür. Sonraki
 isteği için seçilen hesabı değil, fiziksel Codex girişini yönetir. Integrations
 sekmesi eklemez veya mevcut Pool denetimlerinin yerini almaz.
 
-Gösterilen **Effective CODEX_HOME**, OpenCodex sunucusuna aittir. Uzak bir kontrol
+Gösterilen **Effective CODEX_HOME**, OpenRelay sunucusuna aittir. Uzak bir kontrol
 paneli kullanıldığında bu, tarayıcıdan farklı bir bilgisayar olabilir.
 **Registered active profile**, şifreli profil deposunda kayıtlı sahibi gösterir;
-sunucu geçişten önce fiziksel girişi doğrular. Bu yüzden OpenCodex dışında
+sunucu geçişten önce fiziksel girişi doğrular. Bu yüzden OpenRelay dışında
 değiştirilen bir giriş sessizce üzerine yazılmak yerine sahiplik uyuşmazlığı
 hatası üretebilir.
 
@@ -55,7 +55,7 @@ Bir ağ hatası, yazmanın başarısız olduğunu veya geri alındığını kan�
 Panel, yanıt kaybolsa bile gönderilmiş bir değişiklikten sonra sunucu durumunu
 yeniden okur ve işlemi otomatik olarak yeniden denemez. Yenileme başarısızsa
 başarılı bir değişiklik geri alınmış gibi bildirilmez. Başka işlemden önce
-yenileyip tanılamayı inceleyin. Mevcut `ocx account main doctor` komutu sunucu
+yenileyip tanılamayı inceleyin. Mevcut `orl account main doctor` komutu sunucu
 tarafı tanılama sağlar.
 
 ## Bu aşamanın kapsamı
@@ -63,7 +63,7 @@ tarafı tanılama sağlar.
 Bu panel, mevcut `/api/native-main-profiles` sınırını kullanarak profilleri
 listeler, kaydeder, değiştirir ve kurtarır. Giriş süreçleri başlatmaz veya
 hazırlık yazıcısı belirteçlerini açığa çıkarmaz. Başka bir yerel giriş eklemek,
-mevcut `ocx account main add` CLI iş akışında kalır; tarayıcıdan kayıt, #3417
+mevcut `orl account main add` CLI iş akışında kalır; tarayıcıdan kayıt, #3417
 numaralı konunun ayrı bir devam işidir. Geçerli ana yuvanın mevcut cihaz
 yeniden kimlik doğrulaması farklı bir iş akışıdır ve bu panel onun yerini almaz.
 

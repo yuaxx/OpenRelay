@@ -1,15 +1,15 @@
 ---
 title: Architecture
-description: Composants internes d’opencodex — carte des modules, pont AdapterEvent, analyseur de requêtes et mise en cache.
+description: Composants internes d’OpenRelay — carte des modules, pont AdapterEvent, analyseur de requêtes et mise en cache.
 ---
 
-opencodex s’exécute dans un seul processus Bun. Une requête arrive au format OpenAI Responses, est normalisée dans un modèle interne, routée, envoyée au fournisseur par un adaptateur, puis reconvertie en flux SSE Responses. Consultez [Fonctionnement](/fr/getting-started/how-it-works/) pour suivre le flux de bout en bout.
+OpenRelay s’exécute dans un seul processus Bun. Une requête arrive au format OpenAI Responses, est normalisée dans un modèle interne, routée, envoyée au fournisseur par un adaptateur, puis reconvertie en flux SSE Responses. Consultez [Fonctionnement](/fr/getting-started/how-it-works/) pour suivre le flux de bout en bout.
 
 ## Carte des modules
 
 ```text
 src/
-├── cli/                # ocx command dispatch, init, status, provider commands
+├── cli/                # orl command dispatch, init, status, provider commands
 ├── server/             # Bun.serve, /v1/* proxy, /api/* management API, WS bridge
 ├── codex/              # Codex config injection, catalog sync, auth/account integration
 ├── providers/          # provider metadata, API-key pool, quota and labels
@@ -82,11 +82,11 @@ Les appels d’outils sont répartis entre trois types d’éléments Responses 
 
 `server/management-api.ts` alimente le tableau de bord et répartit les requêtes entre des groupes de routes spécialisés dans `server/management/*.ts`. Ses routes `/api/*` couvrent la configuration et les paramètres sûrs, les opérations CRUD sur les fournisseurs et les groupes de clés, la sélection des modèles, les limites de contexte et les contrôles v2, la synchronisation du catalogue, les diagnostics et journaux de débogage, l’utilisation et les quotas, les paramètres des services auxiliaires, les mises à jour, les clés d’API clientes générées, la connexion/l’état/la déconnexion OAuth et la sélection du compte, la gestion des comptes Codex et l’arrêt progressif. Pour une liaison hors bouclage, `server/auth-cors.ts` protège le plan de données `/v1/*` avec `OPENCODEX_API_AUTH_TOKEN` ou une entrée `apiKeys` configurée. Les routes de gestion `/api/*` emploient un identifiant administrateur distinct, décrit dans la [référence de l’API de gestion](/fr/reference/management-api/), qui doit différer des identifiants du plan de données. Les entrées `corsAllowOrigins` configurées étendent la liste locale des origines autorisées.
 
-Les implémentations OAuth se trouvent dans `oauth/`. Les jetons d’accès sont chargés ou actualisés immédiatement avant un appel routé, tandis que `oauth/token-guardian.ts` ne peut les actualiser de manière proactive que pour les fournisseurs dont la politique l’autorise. L’actualisation est coordonnée par une opération unique en cours de processus, un verrou de fichier par compte et un CAS de génération, afin que des écritures concurrentes ne puissent pas écraser un identifiant plus récent. Une projection partagée de l’état de santé (`oauth/health.ts`) alimente `ocx status`, `ocx doctor`, l’API de gestion et le tableau de bord. Les identifiants des pools Codex/ChatGPT et l’affinité des fils propre au processus se trouvent dans `codex/` et ne figurent pas dans les réponses de gestion. L’affinité est supprimée en cas de `401` / `403` / `429` (elle n’est pas conservée au-delà des limites de débit) et ne persiste pas après un redémarrage. L’utilisation des requêtes est normalisée en `OcxUsage`, exposée dans les événements terminaux Responses et agrégée par `usage/` pour le tableau de bord et les diagnostics JSONL facultatifs.
+Les implémentations OAuth se trouvent dans `oauth/`. Les jetons d’accès sont chargés ou actualisés immédiatement avant un appel routé, tandis que `oauth/token-guardian.ts` ne peut les actualiser de manière proactive que pour les fournisseurs dont la politique l’autorise. L’actualisation est coordonnée par une opération unique en cours de processus, un verrou de fichier par compte et un CAS de génération, afin que des écritures concurrentes ne puissent pas écraser un identifiant plus récent. Une projection partagée de l’état de santé (`oauth/health.ts`) alimente `orl status`, `orl doctor`, l’API de gestion et le tableau de bord. Les identifiants des pools Codex/ChatGPT et l’affinité des fils propre au processus se trouvent dans `codex/` et ne figurent pas dans les réponses de gestion. L’affinité est supprimée en cas de `401` / `403` / `429` (elle n’est pas conservée au-delà des limites de débit) et ne persiste pas après un redémarrage. L’utilisation des requêtes est normalisée en `OcxUsage`, exposée dans les événements terminaux Responses et agrégée par `usage/` pour le tableau de bord et les diagnostics JSONL facultatifs.
 
 ## Transport et compactage
 
-Par défaut, `server/index/serve-options.ts` sert HTTP/SSE sur `/v1/responses`. Si Codex tente une mise à niveau WebSocket de Responses alors que `websockets` vaut `false`, opencodex renvoie `426 upgrade_required` ; Codex revient alors à HTTP pour cette session. Lorsque `"websockets": true` est défini, le même point de terminaison accepte la mise à niveau et utilise le pont WebSocket.
+Par défaut, `server/index/serve-options.ts` sert HTTP/SSE sur `/v1/responses`. Si Codex tente une mise à niveau WebSocket de Responses alors que `websockets` vaut `false`, OpenRelay renvoie `426 upgrade_required` ; Codex revient alors à HTTP pour cette session. Lorsque `"websockets": true` est défini, le même point de terminaison accepte la mise à niveau et utilise le pont WebSocket.
 
 Indépendamment de ce réglage côté client, les requêtes canoniques transmises à ChatGPT avec `stream: true` à la racine peuvent utiliser le transport WebSocket en amont de Codex avec une version stable de Bun 1.4.0 ou ultérieure. La version intégrée Bun 1.3.14, les préversions et les identités de runtime impossibles à vérifier utilisent HTTP/SSE. Les réponses WS en amont qui réussissent conservent le contrat SSE en aval et contournent `tee()` au moyen d’un relais borné à lecteur unique et avide (4 MiB par trame brute/enveloppée et une file de production de 8 MiB). Le dépassement de la file ferme la connexion en amont et émet en aval un événement terminal `response.failed`, suivi de `[DONE]`.
 

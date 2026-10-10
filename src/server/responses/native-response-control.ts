@@ -7,6 +7,7 @@ import { isInjectionRequest } from "./native-injection-protocol";
 
 /** Shared transport ownership, not a shared steer/inject protocol state machine. */
 export interface NativeResponseControl {
+  rtk?: { prepare(frame: Record<string, unknown>, source?: object): Record<string, unknown>; observe(frame: Record<string, unknown>): Record<string, unknown>; dispose(): void };
   readonly kind?: "steering" | "injection";
   relayActive: boolean;
   normalizeContinuation?: (frame: Record<string, unknown>) => Record<string, unknown>;

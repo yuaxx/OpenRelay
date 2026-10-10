@@ -75,7 +75,7 @@ describe("operation capability workflows use existing handlers", () => {
     expect(await handleObserveCommand(["logs", "--provider", "fixture", "--conversationId", "c/1", "--account", "main", "--limit", "3", "--json"], io.deps)).toBe(0);
     expect(io.requests).toEqual([{ method: "GET", path: "/api/logs?provider=fixture&conversationId=c%2F1&account=main&limit=3", body: null }]);
     const explain = transport();
-    expect(capability("logs explain").usage).toBe("ocx logs explain <request-id> [--json]");
+    expect(capability("logs explain").usage).toBe("orl logs explain <request-id> [--json]");
     expect(capability("logs explain").routes).toEqual([{ method: "GET", path: "/api/request-history/{id}/route-decision" }]);
     expect(await handleObserveCommand(["logs", "explain", "req/1", "--json"], explain.deps)).toBe(0);
     expect(explain.requests).toEqual([{ method: "GET", path: "/api/request-history/req%2F1/route-decision", body: null }]);
@@ -117,7 +117,7 @@ describe("operation capability workflows use existing handlers", () => {
     expect(JSON.parse(String(output.mock.calls[0]![0]))).toEqual({ settings: {}, startup: {}, memory: {} });
   });
   test("companion family requires show when JSON is requested", async () => {
-    expect(BASE.find(row => row.command.join(" ") === "companion")?.usage).toStartWith("ocx companion show [--json]");
+    expect(BASE.find(row => row.command.join(" ") === "companion")?.usage).toStartWith("orl companion show [--json]");
     const io = transport({ settings: {} });
     expect(await handleCompanionCommand(["--json"], io.deps)).toBe(2);
     expect(io.requests).toEqual([]);
@@ -208,7 +208,7 @@ describe("operation capability workflows use existing handlers", () => {
 test.each(["running", "restarting", "succeeded", "failed"])("human update reports job ID, %s state and exact progress command", async status => {
   const io = transport({ ok: true, job: { id: "123-fixture", status } });
   expect(await handleSystemCommand(["update", "run", "--yes"], io.deps)).toBe(0);
-  expect(output.mock.calls.flat().join("\n")).toBe(`Update job 123-fixture: ${status} (latest).\nCheck progress: ocx system update status 123-fixture`);
+  expect(output.mock.calls.flat().join("\n")).toBe(`Update job 123-fixture: ${status} (latest).\nCheck progress: orl system update status 123-fixture`);
   expect(io.requests).toEqual([{ path: "/api/update/run", method: "POST", body: { tag: "latest", restart: true } }]);
 });
 
@@ -222,5 +222,5 @@ test.each([{ ok: true, skipped: true }, { ok: true }, { ok: true, job: { id: "un
   expect(await handleSystemCommand(["update", "run", "--yes"], transport(body).deps)).toBe(0);
   const text = output.mock.calls.flat().join("\n");
   expect(text).not.toContain("Update started"); expect(text).not.toContain("unsafe;command");
-  expect(text).toContain("ocx system update check");
+  expect(text).toContain("orl system update check");
 });

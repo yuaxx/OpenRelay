@@ -1,11 +1,11 @@
 ---
 title: Remote Hub Deployment
-description: Run a one-port opencodex hub on Linux, macOS, or Docker with a loopback companion listener, a self-provisioned data token, ocx hub invite, a loopback-only management ingress, Tailscale Serve, and headless OAuth.
+description: Run a one-port OpenRelay hub on Linux, macOS, or Docker with a loopback companion listener, a self-provisioned data token, ocx hub invite, a loopback-only management ingress, Tailscale Serve, and headless OAuth.
 ---
 
 For SSH machine links, see [Remote Link](/guides/remote-link/).
 
-An opencodex hub keeps provider credentials and usage state on one host while authenticated clients
+An OpenRelay hub keeps provider credentials and usage state on one host while authenticated clients
 use its data plane remotely. The browser-facing management plane is separate: an optional listener
 binds only `127.0.0.1`, serves the dashboard and `/api/*`, and is intended to sit behind Tailscale
 Serve or another operator-owned HTTPS frontend.
@@ -13,7 +13,7 @@ Serve or another operator-owned HTTPS frontend.
 The data plane is **one port**. Remote machines dial `hostname:port` with their own per-client key;
 the hub's own processes dial `127.0.0.1:<the same port>` with no credential, through the loopback
 companion listener. Start from [the recipe below](#linux-systemd-or-macos-launchd), then hand a
-second machine a ready-made command with [`ocx hub invite`](#inviting-another-machine).
+second machine a ready-made command with [`orl hub invite`](#inviting-another-machine).
 
 The management ingress never serves `/v1/*`, `/healthz`, or `/readyz`. When explicitly enabled,
 Remote Workspace admits only its paired bearer-authenticated agent WebSocket and one-time pairing
@@ -55,38 +55,38 @@ Connect with exactly one transient authority source. The authority is read from 
 written to config or the token file:
 
 ```bash
-ocx connect https://hub-name.tailnet-name.ts.net --pairing-code-stdin
-ocx connect status
-ocx sync
+orl connect https://hub-name.tailnet-name.ts.net --pairing-code-stdin
+orl connect status
+orl sync
 ```
 
-Human-readable readiness diagnostics show control characters in catalog values as visible hexadecimal escapes, both when you first connect and when `ocx sync` refuses a refreshed hub catalog. Structured JSON status retains the original diagnostic value.
+Human-readable readiness diagnostics show control characters in catalog values as visible hexadecimal escapes, both when you first connect and when `orl sync` refuses a refreshed hub catalog. Structured JSON status retains the original diagnostic value.
 
-You do not have to assemble that line by hand. `ocx hub invite`, run on the hub, mints the code and
+You do not have to assemble that line by hand. `orl hub invite`, run on the hub, mints the code and
 prints the exact command — including both origins — for the machine that is joining. See
 [Inviting another machine](#inviting-another-machine).
 
 The hub automatically issues a per-client key. The client writes it to the existing owner-only
 `service-api-token` file, never `config.json`. While connected, usage comes from the hub usage store
 filtered to that client's stable `apiKeyId`. After disconnect, usage comes from the local store.
-OpenCodex does not mirror usage between the two stores.
-`ocx service uninstall` removes the local service but preserves an existing key when the client is
+OpenRelay does not mirror usage between the two stores.
+`orl service uninstall` removes the local service but preserves an existing key when the client is
 connected, its connection metadata is invalid or mismatched, or a pending connection marker matches
 the current key. A valid marker for an older key does not retain an unrelated service key.
 If a marker is unsafe, malformed, or unreadable, token cleanup cannot be verified;
-the command warns instead of claiming the key was kept. Use `ocx disconnect` to remove a connected
+the command warns instead of claiming the key was kept. Use `orl disconnect` to remove a connected
 client's local key and state.
 
 If a client saved a remote `http://` Hub URL before the secure transport rule, its Hub
-operations now return `insecure_http_refused`. Run `ocx disconnect` locally, then reconnect
+operations now return `insecure_http_refused`. Run `orl disconnect` locally, then reconnect
 to the Hub with `https://` (or use loopback HTTP when both sides are on the same machine).
 
 Rotate a connected client with a fresh transient authority:
 
 ```bash
-ocx connect rotate --pairing-code-stdin
+orl connect rotate --pairing-code-stdin
 # or, only over HTTPS:
-ocx connect rotate --admin-token-stdin
+orl connect rotate --admin-token-stdin
 ```
 
 Rotation keeps the old and new data keys valid for at most ten minutes under the same `apiKeyId`.
@@ -95,33 +95,33 @@ key, then commits. If a commit response is uncertain, rerun the rotate command w
 authority; recovery probes both files before committing or restoring. Never delete either file when
 recovery reports that both candidates were rejected.
 
-`ocx disconnect` is local and works while the hub is offline. It restores local client state and
+`orl disconnect` is local and works while the hub is offline. It restores local client state and
 does not revoke the hub key. After disconnect, revoke that key from **Connect → API Keys** on
-the hub. `ocx connect revoke --admin-token-stdin` is available only while still connected and uses
+the hub. `orl connect revoke --admin-token-stdin` is available only while still connected and uses
 the persisted `apiKeyId`; it accepts no id override. Browser session logout/expiry is separate from
 data-key rotation, revocation, and disconnect.
 
 ### What a connected client shows
 
-`ocx connect` and `ocx connect status` check catalog readiness against the first valid local
+`orl connect` and `orl connect status` check catalog readiness against the first valid local
 Codex runtime in selection order. Failed preferred candidates can fall back, but lower-priority
 alternatives are not probed after a valid runtime is selected. This check leaves the saved runtime
-selection unchanged. General `ocx status` still discovers alternatives for runtime diagnostics.
+selection unchanged. General `orl status` still discovers alternatives for runtime diagnostics.
 
 A client stores no provider credentials and no catalog of its own, so its local config and
 credential store are empty by design — and reading them as the truth produces a confident, wrong
-answer about what the hub can serve. On a connected client `ocx status` therefore leads with
+answer about what the hub can serve. On a connected client `orl status` therefore leads with
 `State from hub <origin>` and sources the OAuth-logins, providers and delegable-models lines from
 the hub over the data plane, tagging the lines that really describe this machine `(local)`: the
-proxy, the service, the Codex binary and shim, and the local ports. `ocx status --json` carries the
+proxy, the service, the Codex binary and shim, and the local ports. `orl status --json` carries the
 same answer as `runtimeRole` plus a `remoteHub` block whose `stateSource` is `hub`, `cache`, or
 `unavailable` — never the client's own state. An older hub that does not serve `/v1/hub-state`
 reports `unavailable` with an instruction to upgrade the hub rather than silently falling back to
-local login state, and `ocx config show` on a client prints a `_remoteHub` note saying the
+local login state, and `orl config show` on a client prints a `_remoteHub` note saying the
 credentials and model availability live on the hub. The hub read uses the per-client data key
 only; no admin token and no provider secret ever reaches a client.
 
-`ocx status` makes a live hub-state request only when the saved connection still matches the
+`orl status` makes a live hub-state request only when the saved connection still matches the
 status snapshot and the data-token file matches that connection. If either check fails, it skips
 the request and shows matching cached hub state, or `unavailable` if no matching cache exists.
 
@@ -144,35 +144,35 @@ same `Host` and `Origin` checks as an ordinary loopback bind.
 :::
 
 ```bash
-ocx config set runtimeRole hub
-ocx config set hostname 100.64.0.10
-ocx config set corsAllowOrigins '["http://localhost:10100"]'
+orl config set runtimeRole hub
+orl config set hostname 100.64.0.10
+orl config set corsAllowOrigins '["http://localhost:10100"]'
 
-# A fresh standalone config has no `hub` or `remoteGui` object, and `ocx config set` does not
+# A fresh standalone config has no `hub` or `remoteGui` object, and `orl config set` does not
 # create a missing parent: a nested set fails with `config parent path not found: hub`. Setting
 # `runtimeRole` does not create it either. Create each object first, then set its fields.
-ocx config set hub '{}'
-ocx config set remoteGui '{}'
-ocx config set hub.managementPublicOrigin '"https://hub-name.tailnet-name.ts.net"'
-ocx config set hub.dataPublicOrigin '"https://hub-name.tailnet-name.ts.net:8443"'
-ocx config set hub.managementIngress '{"enabled":true,"port":10101}'
-ocx config set remoteGui.allowedTailscaleUsers '["operator@example.com"]'
+orl config set hub '{}'
+orl config set remoteGui '{}'
+orl config set hub.managementPublicOrigin '"https://hub-name.tailnet-name.ts.net"'
+orl config set hub.dataPublicOrigin '"https://hub-name.tailnet-name.ts.net:8443"'
+orl config set hub.managementIngress '{"enabled":true,"port":10101}'
+orl config set remoteGui.allowedTailscaleUsers '["operator@example.com"]'
 
 # One port. Remote machines dial 100.64.0.10:10100 with their own key; the hub's own local
 # processes dial 127.0.0.1:10100 with no credential, on that same port.
-ocx config set unauthenticatedLoopbackListener '{"enabled":true}'
+orl config set unauthenticatedLoopbackListener '{"enabled":true}'
 
 # No token to export: install provisions the hub's own data-plane token. See below.
-ocx service install
-ocx service status
-ocx status                # the "Hub:" block summarizes every line above
+orl service install
+orl service status
+orl status                # the "Hub:" block summarizes every line above
 ```
 
 On a genuinely empty configuration you can set each object in one call instead:
 
 ```bash
-ocx config set hub '{"managementPublicOrigin":"https://hub-name.tailnet-name.ts.net","dataPublicOrigin":"https://hub-name.tailnet-name.ts.net:8443","managementIngress":{"enabled":true,"port":10101}}'
-ocx config set remoteGui '{"allowedTailscaleUsers":["operator@example.com"]}'
+orl config set hub '{"managementPublicOrigin":"https://hub-name.tailnet-name.ts.net","dataPublicOrigin":"https://hub-name.tailnet-name.ts.net:8443","managementIngress":{"enabled":true,"port":10101}}'
+orl config set remoteGui '{"allowedTailscaleUsers":["operator@example.com"]}'
 ```
 
 Use that form only when the object does not exist yet. A whole-object set **replaces** the object
@@ -190,43 +190,43 @@ query or fragment.
 
 ### The data-plane token provisions itself
 
-There is no `export OPENCODEX_API_AUTH_TOKEN=…` step before `ocx service install`. On a non-loopback
+There is no `export OPENCODEX_API_AUTH_TOKEN=…` step before `orl service install`. On a non-loopback
 bind the installer resolves the hub's data-admission token by precedence and writes the result to
 the owner-only `service-api-token` file, mode `0600`:
 
 1. **`OPENCODEX_API_AUTH_TOKEN`**, when the installing shell exports one. An operator who wants to
    own that value keeps owning it.
-2. **The existing `service-api-token` file.** Reusing it is what makes `ocx service install`,
-   `ocx service repair` and a restart idempotent; regenerating would silently invalidate every
+2. **The existing `service-api-token` file.** Reusing it is what makes `orl service install`,
+   `orl service repair` and a restart idempotent; regenerating would silently invalidate every
    per-client key already exchanged against the old value. A reused file is re-checked, not
    trusted — see the admin-token paragraph below.
 3. **32 fresh random bytes, hex.** This is the branch that removes the manual step.
 
 The command prints the **path**, never the value. The launchd plist and the systemd user unit read
 that protected file when the process starts; neither embeds the literal token. Do not paste the
-value into `ocx config show`, unit/plist output, screenshots, or support bundles. A foreground
-`ocx start` on the hub reads the same file, so it binds the non-loopback hostname without an
+value into `orl config show`, unit/plist output, screenshots, or support bundles. A foreground
+`orl start` on the hub reads the same file, so it binds the non-loopback hostname without an
 exported token either.
 
 A **management admin token** is refused wherever it turns up, and the refusal names the remedy for
 that place. In `OPENCODEX_API_AUTH_TOKEN`: `unset OPENCODEX_API_AUTH_TOKEN` and rerun. In the
 reused `service-api-token` file — the shape of the original incident, and still reachable on a
 machine where the admin token was once pasted there by hand — delete the file and run
-`ocx service repair`, because unsetting a variable says nothing about a file. Both checks run
+`orl service repair`, because unsetting a variable says nothing about a file. Both checks run
 ahead of the loopback short-circuit, so a loopback install is checked too: the launch wrapper
 reads that file into `OPENCODEX_API_AUTH_TOKEN` whatever the hostname, which is what fences the
 management API closed at boot.
 
 The two planes are different credentials — the data token admits `/v1/*` callers and administers
 nothing. Since the service provisions its own token, there is no reason to export either one.
-`ocx service repair` never demands the variable again once the file exists.
+`orl service repair` never demands the variable again once the file exists.
 
-`ocx status` reports the token's state without its value: `present (file)`, `unsafe (file)` (it
+`orl status` reports the token's state without its value: `present (file)`, `unsafe (file)` (it
 exists but is not owner-only — fix the permissions), `admin-collision (file)` (the incident shape;
 the block adds the consequence and the fix), or `missing`. The state is always about the **file**,
 because the launch wrapper overwrites the environment from it before exec — a separate sub-line
 reports `OPENCODEX_API_AUTH_TOKEN` being set in your shell, since that is what a foreground
-`ocx start` in that shell would use.
+`orl start` in that shell would use.
 
 ### One port, and the ported alternative
 
@@ -237,7 +237,7 @@ has to be taught a new port, and one port stays the whole remote data surface.
 
 The companion form is accepted only when `hostname` is a specific non-loopback, non-wildcard
 address. On `127.0.0.1`, `localhost`, `0.0.0.0` or `::` the public listener already holds that
-loopback address, so opencodex refuses the pair at write time and again at startup — naming the
+loopback address, so OpenRelay refuses the pair at write time and again at startup — naming the
 collision — rather than letting the second bind fail. On those binds you do not need the listener at
 all: a loopback bind already admits local callers.
 
@@ -245,7 +245,7 @@ The older *ported* form still works and is the alternative when you want the two
 separate ports:
 
 ```bash
-ocx config set unauthenticatedLoopbackListener '{"enabled":true,"port":10104}'
+orl config set unauthenticatedLoopbackListener '{"enabled":true,"port":10104}'
 ```
 
 The ported form is the same unauthenticated surface: the dedicated-host warning above applies to
@@ -257,21 +257,21 @@ change across restarts while already-running app-servers kept the previous `base
 
 **Restart the proxy after changing this field.** The sockets are bound once at startup and the local
 client files are written from the resolved value, so a running hub keeps its old answer. On a ported
-hub that is the difference between `ocx claude` reaching the listener and getting a `404` from it. On
-a background service the verb is `ocx service restart`, which always restarts — see
-[macOS service operations](#macos-service-operations). `ocx restart` is a different verb: it bounces
+hub that is the difference between `orl claude` reaching the listener and getting a `404` from it. On
+a background service the verb is `orl service restart`, which always restarts — see
+[macOS service operations](#macos-service-operations). `orl restart` is a different verb: it bounces
 the proxy process you started yourself, not the service the manager supervises.
 
 ### The hub's own local clients
 
-A hub used to be the one machine that could not use itself: `ocx claude`, Claude Desktop, Cursor,
+A hub used to be the one machine that could not use itself: `orl claude`, Claude Desktop, Cursor,
 the `system-env` injection and the routed vision helper all dial `http://127.0.0.1:<port>`, which
 does not exist when the listener is bound to a tailnet address. With the loopback listener enabled
 they work on the hub:
 
 ```bash
-ocx sync          # the hub now writes its own Codex/Grok blocks
-ocx claude        # Claude Code wired to the hub's own loopback address
+orl sync          # the hub now writes its own Codex/Grok blocks
+orl claude        # Claude Code wired to the hub's own loopback address
 ```
 
 The listener carries inference wires only: `POST /v1/responses` and its WebSocket upgrade,
@@ -279,7 +279,7 @@ The listener carries inference wires only: `POST /v1/responses` and its WebSocke
 `POST /v1/alpha/search`, `GET /v1/models`, and the realtime voice surface.
 `POST /v1/messages/count_tokens` is deliberately **not** admitted, so Claude Code falls back to
 local token estimation — a cosmetic loss, not a broken launch. `/api/*`, `/healthz`, `/readyz` and
-the dashboard all return `404` there: local management reads such as `ocx claude`'s discovery call go
+the dashboard all return `404` there: local management reads such as `orl claude`'s discovery call go
 to the authenticated management surface with a management credential, never to an unauthenticated
 socket. That is why the management ingress and this listener remain two different things.
 
@@ -291,9 +291,9 @@ This machine is a hub; it does not rewrite its own Codex/Grok/Claude configs unl
 unauthenticatedLoopbackListener is enabled.
 ```
 
-That sentence means the hub gate, not your `clientIntegrations` toggle. `ocx ensure` leaves an
+That sentence means the hub gate, not your `clientIntegrations` toggle. `orl ensure` leaves an
 existing managed Grok block in place when it is gated rather than stripping it, and
-`ocx restore back` reports the gate instead of blaming a competing writer.
+`orl restore back` reports the gate instead of blaming a competing writer.
 
 ### Acceptance on the data plane
 
@@ -339,7 +339,7 @@ frontend cannot provide trustworthy Tailscale identity.
 
 The Serve mapping above publishes the **management** ingress only. That ingress never serves
 `/v1/*`, `/healthz` or `/readyz`, so on its own it does not give a remote client a usable data
-plane. opencodex also terminates no TLS of its own: the listener is plain HTTP and HTTPS is always
+plane. OpenRelay also terminates no TLS of its own: the listener is plain HTTP and HTTPS is always
 an operator-owned frontend.
 
 Serve can be that frontend for the data plane too, on a second HTTPS port. On macOS it needs one
@@ -368,27 +368,27 @@ Serve accepts a limited set of HTTPS ports; confirm the mapping was actually cre
 
 Give the forwarder the same lifetime as the hub. A backgrounded shell job dies on reboot while the
 service comes back up, which leaves a hub that is running and unreachable over TLS; run it from
-launchd or systemd alongside `ocx service install`.
+launchd or systemd alongside `orl service install`.
 
 Then connect with the two origins stated separately. The positional URL is the **data** origin —
 it is where `/readyz` and `/v1/catalog` are fetched — and `--management-url` is the dashboard
 origin used for pairing and key issuance. They do not have to share a port:
 
 ```bash
-# This is exactly the line `ocx hub invite` prints, with the code filled in.
-echo '<pairing-code>' | ocx connect https://hub-name.tailnet-name.ts.net:8443 \
+# This is exactly the line `orl hub invite` prints, with the code filled in.
+echo '<pairing-code>' | orl connect https://hub-name.tailnet-name.ts.net:8443 \
   --management-url https://hub-name.tailnet-name.ts.net \
   --pairing-code-stdin
 ```
 
 Record those two origins on the hub as `hub.dataPublicOrigin` and `hub.managementPublicOrigin`, and
-`ocx hub invite` will print them for you instead of asking you to remember them.
+`orl hub invite` will print them for you instead of asking you to remember them.
 
 When `--management-url` is omitted it is taken from the `/readyz` response, which reports
 `hub.managementPublicOrigin`. Setting it explicitly is clearer when the two origins differ.
 
 **Do not shortcut this by binding the data listener to `127.0.0.1`.** A loopback bind is how
-opencodex recognizes a purely local deployment: it stops requiring a data credential, and it starts
+OpenRelay recognizes a purely local deployment: it stops requiring a data credential, and it starts
 requiring the request's `Host` header to be loopback as well. A TLS frontend forwards
 `Host: hub-name.tailnet-name.ts.net`, so `/v1/catalog` answers `403 origin_rejected` — while
 `/readyz`, which does not run that check, still returns `200`. The deployment looks healthy and
@@ -425,24 +425,24 @@ fabricate `Tailscale-User-*` headers; use the single-use, origin-bound pairing f
 
 ## Inviting another machine
 
-Run this on the hub rather than writing an `ocx connect` line by hand:
+Run this on the hub rather than writing an `orl connect` line by hand:
 
 ```bash
-ocx hub invite
+orl hub invite
 ```
 
 It mints a single-use, short-lived pairing code and prints the command to run on the other machine:
 
 ```text
 # Run on the other machine:
-echo '<code>' | ocx connect https://hub-name.tailnet-name.ts.net:8443 --management-url https://hub-name.tailnet-name.ts.net --pairing-code-stdin
+echo '<code>' | orl connect https://hub-name.tailnet-name.ts.net:8443 --management-url https://hub-name.tailnet-name.ts.net --pairing-code-stdin
 ```
 
 The data origin comes from `--data-url`, then `hub.dataPublicOrigin`, then the bind address. That
 last fallback only works when the bind **is** an address another machine can dial: on a loopback or
 wildcard bind it would resolve to `http://localhost:<port>`, which tells the other machine to dial
 itself and spends the single-use code for nothing, so `invite` refuses instead and prints the
-`ocx config set hub.dataPublicOrigin` line (plus the per-invite `--data-url` form). An explicit
+`orl config set hub.dataPublicOrigin` line (plus the per-invite `--data-url` form). An explicit
 `--data-url` or `hub.dataPublicOrigin` is never second-guessed — a loopback data origin is
 legitimate over an SSH tunnel.
 
@@ -452,7 +452,7 @@ exchange compares against it, so a value that differs is refused with both origi
 than printing a code the hub would then reject.
 
 Every successful invite also prints the **bound browser origin** on stderr. A grant is bound to one
-origin, and a remote `ocx connect` presents `Origin: http://localhost:<its own configured port>`,
+origin, and a remote `orl connect` presents `Origin: http://localhost:<its own configured port>`,
 so if the bound origin is not the default `http://localhost:10100` the other machine has to already
 be running on that port before it runs the line — otherwise the hub refuses the exchange and the
 code is spent. The note says which port, and offers admitting the default origin instead.
@@ -462,14 +462,14 @@ code is spent. The note says which port, and offers admitting the default origin
 malformed `--data-url`, a data origin that would be this machine's own loopback, or no running
 attested proxy. One precondition deserves its own paragraph.
 
-**`corsAllowOrigins` has to name the joining machine's local browser origin.** `ocx connect` sends
+**`corsAllowOrigins` has to name the joining machine's local browser origin.** `orl connect` sends
 `Origin: http://localhost:<its own proxy port>` when it exchanges the grant, and grants are
 origin-bound, so only `hub.managementPublicOrigin` itself or a loopback entry of `corsAllowOrigins`
 can ever match. With neither present, `invite` exits non-zero, mints nothing, and names the exact
 command:
 
 ```bash
-ocx config set corsAllowOrigins '["http://localhost:10100"]'
+orl config set corsAllowOrigins '["http://localhost:10100"]'
 ```
 
 Use the port the **joining** machine's proxy listens on; `10100` is the default. The setup block
@@ -477,56 +477,56 @@ above already sets it. A whole-array set replaces the array, so when the hub alr
 run the line `invite` prints — it carries the existing ones plus the new origin. `ocx config get
 corsAllowOrigins` shows what is there now.
 
-`ocx hub invite --json` emits `{ code, expiresAt, dataUrl, managementUrl, command }` with `expiresAt`
+`orl hub invite --json` emits `{ code, expiresAt, dataUrl, managementUrl, command }` with `expiresAt`
 as ISO 8601. The code is a secret: single-use, five-minute lifetime, rate-limited at the hub, and not
 to be persisted, logged, or pasted into an issue. `--clients codex,claude` picks which client configs
 the printed command will point at the hub.
 
 `invite` is a convenience over the existing pairing flow, not a second mechanism. It drives the same
-attested local route `ocx gui pair` uses, so it needs no admin token and nothing has to be exported
+attested local route `orl gui pair` uses, so it needs no admin token and nothing has to be exported
 into your shell. Everything in [Roles and direct data flow](#roles-and-direct-data-flow) about
 rotation, revocation and disconnect applies unchanged to a machine that joined this way.
 
 ## macOS service operations
 
-`ocx service install` and `ocx service repair` are safe to re-run against a live hub. A repair
+`orl service install` and `orl service repair` are safe to re-run against a live hub. A repair
 renders the plist first and compares it: when the rendered bytes equal the bytes on disk, the token
 file is unchanged, and `launchctl print` reports the job loaded from that plist, the repair re-asserts
 `0600`, refreshes its install state, prints `service is already loaded from the current plist;
 nothing to do.` and returns — launchd is never touched. Earlier builds evicted a healthy job
 unconditionally, which made a diagnostic command an outage.
 
-**`ocx service restart` is the verb that always restarts.** It is no longer an alias of `repair`. It
+**`orl service restart` is the verb that always restarts.** It is no longer an alias of `repair`. It
 runs the same refresh, and when that reloaded nothing — the healthy, unchanged case above — it
 restarts the already-loaded job in place with `launchctl kickstart -k`, re-reads `launchctl print` to
 confirm the job survived, and prints one line:
 
 ```bash
-ocx service restart
+orl service restart
 # ℹ️  service restarted (launchctl kickstart -k gui/501/com.opencodex.proxy).
 ```
 
 That is what to run after changing `unauthenticatedLoopbackListener`, `hostname` or `port`. The
 kickstart opens no eviction window, so it is not the outage the old unconditional repair was.
 
-A bare `ocx service` still selects `repair`, not `restart`: it is an idempotent "make it current",
-not a request to bounce a healthy hub. Use `ocx service repair` for the case it is actually for — a
+A bare `orl service` still selects `repair`, not `restart`: it is an idempotent "make it current",
+not a request to bounce a healthy hub. Use `orl service repair` for the case it is actually for — a
 job loaded from an older plist, or not loaded at all — and expect it to keep doing nothing on a
 healthy one.
 
-`launchctl kickstart -k gui/$(id -u)/com.opencodex.proxy` by hand, or `ocx service stop` followed by
-`ocx service start`, both still work and the error path names the first one as a fallback. Neither is
+`launchctl kickstart -k gui/$(id -u)/com.opencodex.proxy` by hand, or `orl service stop` followed by
+`orl service start`, both still work and the error path names the first one as a fallback. Neither is
 the recommended route any more.
 
-Linux and Windows never had this gap: `ocx service restart` there ends in `systemctl --user restart`
+Linux and Windows never had this gap: `orl service restart` there ends in `systemctl --user restart`
 and a stop-then-start of the scheduled task respectively, whichever verb asked.
 
-`ocx service status` distinguishes four launchd states, and the last one is the one people misread:
+`orl service status` distinguishes four launchd states, and the last one is the one people misread:
 
 | Summary | Meaning |
 | --- | --- |
 | `installed and loaded` | A domain answers and runs the command this plist bakes. Nominal. |
-| `installed and loaded from an OLDER plist` | The job is running, from a definition that no longer matches. This is what `ocx service repair` is for. |
+| `installed and loaded from an OLDER plist` | The job is running, from a definition that no longer matches. This is what `orl service repair` is for. |
 | `installed, not loaded` | Every domain answered "absent", which is proof the job is gone. Repair re-registers it. |
 | `installed; launchd state could not be verified` | `launchctl` could not be asked — for example from a context that cannot reach the `gui/<uid>` domain. This is **not** evidence the hub is down: nothing recommends a repair, and an unanswerable probe never marks a running proxy as dead. |
 
@@ -538,7 +538,7 @@ serving hub and let the updater start a competing proxy on the service's own por
 Disable browser launch on the hub:
 
 ```bash
-ocx config set oauthOpenBrowser false
+orl config set oauthOpenBrowser false
 ```
 
 1. From the authenticated remote dashboard or management client, start `POST /api/oauth/login` for
@@ -554,7 +554,7 @@ input checks.
 
 ## Docker Compose
 
-opencodex does not publish an official container image. The repository does maintain a source-build
+OpenRelay does not publish an official container image. The repository does maintain a source-build
 [`Dockerfile`](https://github.com/lidge-jun/opencodex/blob/main/Dockerfile),
 [`compose.yaml`](https://github.com/lidge-jun/opencodex/blob/main/compose.yaml), and a narrow
 `.dockerignore`. The build pins the multi-platform Bun 1.4.2 image index by digest, runs the proxy as
@@ -571,7 +571,7 @@ The helper accepts at most one 4096-byte line, never prints the token, refuses t
 token, and persists it as the canonical owner-only `service-api-token` in the `ocx-state` volume.
 
 The deployment persists two separate homes: `ocx-state` at `/home/bun/.opencodex` for
-OpenCodex configuration, provider credentials and usage, and `codex-state` at
+OpenRelay configuration, provider credentials and usage, and `codex-state` at
 `/home/bun/.codex` for Codex state and `opencodex-catalog.json`. The image and Compose
 explicitly set `CODEX_HOME=/home/bun/.codex`, so this catalog path remains writable
 with `read_only: true` and survives container recreation. The image creates both
@@ -728,8 +728,8 @@ on the node; use a narrower supported removal command when unrelated mappings ex
 ```bash
 tailscale serve status
 tailscale serve reset
-ocx config set hub.managementIngress '{"enabled":false}'
-ocx service repair
+orl config set hub.managementIngress '{"enabled":false}'
+orl service repair
 ```
 
 For a container rollback, retain both named state volumes and their mappings. An older image
@@ -740,22 +740,22 @@ For a service rollback, stop the branch service and repair the prior release aga
 
 ## Troubleshooting
 
-- **Hub down:** `ocx connect status` still shows the saved connection. `ocx disconnect` can restore
+- **Hub down:** `orl connect status` still shows the saved connection. `orl disconnect` can restore
   local state offline; it cannot revoke the remote key.
-- **Stale catalog:** `ocx sync` keeps a validated last-known-good catalog only for transient hub
+- **Stale catalog:** `orl sync` keeps a validated last-known-good catalog only for transient hub
   failures. Authentication, schema, size, and protocol failures are hard errors and never fall back
   to local providers.
-- **Rotated token or `.prev` recovery:** rerun `ocx connect rotate` with a pairing code or admin token.
+- **Rotated token or `.prev` recovery:** rerun `orl connect rotate` with a pairing code or admin token.
   Do not edit or remove either token candidate before the recovery probe finishes.
 - **Protocol mismatch:** upgrade the older side named by the `hub-too-new` or `hub-too-old` message.
   Negotiation fails before token, catalog, journal, or client-state writes.
-- **Lost or burned pairing code:** run `ocx hub invite` again. Grants are one-use and repeated
+- **Lost or burned pairing code:** run `orl hub invite` again. Grants are one-use and repeated
   failures are rate-limited without revealing whether a code exists.
-- **`ocx hub invite` says `No loopback browser origin is admitted for pairing`:** the hub admits no
+- **`orl hub invite` says `No loopback browser origin is admitted for pairing`:** the hub admits no
   loopback browser origin, so an origin-bound grant could never match. Nothing was minted. Run the
-  `ocx config set corsAllowOrigins` line the error prints, with the joining machine's proxy port.
+  `orl config set corsAllowOrigins` line the error prints, with the joining machine's proxy port.
   See [Inviting another machine](#inviting-another-machine).
-- **`ocx hub invite` says the advertised data origin would be this machine's own loopback:** the
+- **`orl hub invite` says the advertised data origin would be this machine's own loopback:** the
   bind is loopback-only or a wildcard and `hub.dataPublicOrigin` is unset, so there is no address
   to advertise and nothing guesses a tailnet or LAN one. Nothing was minted. Set
   `hub.dataPublicOrigin`, or pass `--data-url` for this invite only.
@@ -763,27 +763,27 @@ For a service rollback, stop the branch service and repair the prior release aga
   origin that machine does not present. Re-read the `Bound browser origin:` line from the invite —
   it names the port the other machine must be running on, or offers admitting
   `http://localhost:10100` on the hub instead.
-- **`ocx hub invite` refuses a `--management-url`:** on a hub that flag confirms
+- **`orl hub invite` refuses a `--management-url`:** on a hub that flag confirms
   `hub.managementPublicOrigin` rather than overriding it, because the grant is bound to the
   configured value. Change the config, or drop the flag.
-- **`ocx claude` on the hub launches native Codex/Claude, or the hub refuses to write its own client
+- **`orl claude` on the hub launches native Codex/Claude, or the hub refuses to write its own client
   configs:** `unauthenticatedLoopbackListener` is off. The skip message names the gate. Enable the
-  listener and restart the proxy (`ocx service restart` on a service install).
-- **`ocx claude` on the hub gets `404` from the listener:** the proxy is still the process that
+  listener and restart the proxy (`orl service restart` on a service install).
+- **`orl claude` on the hub gets `404` from the listener:** the proxy is still the process that
   started before the listener's wires existed, or before the port changed. Restart it with
-  `ocx service restart` — see [macOS service operations](#macos-service-operations).
-- **`ocx service repair` printed `nothing to do` and the process did not bounce (macOS):** expected.
+  `orl service restart` — see [macOS service operations](#macos-service-operations).
+- **`orl service repair` printed `nothing to do` and the process did not bounce (macOS):** expected.
   A repair of a healthy job is deliberately a no-op. When you wanted a new process, run
-  `ocx service restart`, which kickstarts the loaded job in place and reports
+  `orl service restart`, which kickstarts the loaded job in place and reports
   `service restarted (launchctl kickstart -k …)`. Only if that fails is
   `launchctl kickstart -k gui/$(id -u)/com.opencodex.proxy` the manual fallback — the failure
   message names it.
-- **`ocx service install` refuses `OPENCODEX_API_AUTH_TOKEN`:** that value is a management admin
+- **`orl service install` refuses `OPENCODEX_API_AUTH_TOKEN`:** that value is a management admin
   token. `unset OPENCODEX_API_AUTH_TOKEN` and rerun; the service provisions its own data-plane
   token. See [The data-plane token provisions itself](#the-data-plane-token-provisions-itself).
-- **The hub crash-loops at boot and `ocx status` shows `admin-collision (file)`:** the
+- **The hub crash-loops at boot and `orl status` shows `admin-collision (file)`:** the
   `service-api-token` file holds the management token, so the hub fences its management API closed.
-  Delete the file and run `ocx service repair` to provision a data-plane token. Unsetting the
+  Delete the file and run `orl service repair` to provision a data-plane token. Unsetting the
   environment variable does not help here — the file is the source.
 - **Plain HTTP refused:** pairing over non-loopback HTTP is refused outright, and there is no flag
   that opts out of it. Put the management origin behind HTTPS, or pair over loopback. Admin tokens
@@ -796,7 +796,7 @@ For a service rollback, stop the branch service and repair the prior release aga
   page. It is the sole post-disconnect revocation path.
 ### Usage from a connected client
 
-`ocx usage` reads the connected hub with this client's enrolled data key. Human output identifies the hub source and client-key scope; `--json` returns the same scoped data. Range, surface, provider/model filters and custom `--since`/`--until` bounds remain available. Account breakdowns and other clients' records are not shared. An old or unavailable hub produces an explicit error instead of substituting local usage; upgrade the hub if it does not support this read.
+`orl usage` reads the connected hub with this client's enrolled data key. Human output identifies the hub source and client-key scope; `--json` returns the same scoped data. Range, surface, provider/model filters and custom `--since`/`--until` bounds remain available. Account breakdowns and other clients' records are not shared. An old or unavailable hub produces an explicit error instead of substituting local usage; upgrade the hub if it does not support this read.
 
 The read-only data-plane endpoint is `GET /v1/usage`, using `x-opencodex-api-key` with a configured client key. Environment-wide and admin keys are refused. It accepts `range`, `surface`, `provider`, `model`, `since`, and `until`; unknown/repeated options and caller-selected key IDs are rejected. Oversized skipped rows retain the explicit incomplete-history warning.
 
@@ -804,7 +804,7 @@ Client usage credentials are sent only over HTTPS or loopback HTTP. Both the req
 
 ### Pairing this browser with a hub
 
-Machine enrollment and browser authentication are separate. The pairing panel names the hub and displays an `ocx gui pair --origin` command for the exact origin currently open in your browser. Run that command on the hub, or send it to the hub operator and request a one-time pairing code. Paste that code into the panel; a data API key or admin token is not a pairing code.
+Machine enrollment and browser authentication are separate. The pairing panel names the hub and displays an `orl gui pair --origin` command for the exact origin currently open in your browser. Run that command on the hub, or send it to the hub operator and request a one-time pairing code. Paste that code into the panel; a data API key or admin token is not a pairing code.
 
 While browser authentication is pending, the dashboard does not recommend restarting a healthy connected client. Completing pairing refreshes the dashboard data immediately, including a previously cached authentication failure. Session expiry returns to pairing; permission denial keeps its own access-settings guidance. Other failed refreshes may show the last received data with a stale-data notice and retry action.
 

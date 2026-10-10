@@ -1,6 +1,6 @@
 ---
 title: 模型路由
-description: opencodex 如何決定由哪個供應商來服務給定的模型 id。
+description: OpenRelay 如何決定由哪個供應商來服務給定的模型 id。
 ---
 
 當 Codex 請求某個模型時，`router.ts` 會將其解析為唯一一個已設定的供應商。規則**按順序**檢查；第一個匹配者勝出。

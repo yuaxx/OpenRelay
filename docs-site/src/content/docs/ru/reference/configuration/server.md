@@ -12,7 +12,7 @@ description: Listener, удалённый доступ, admission key, тайм�
 | --- | --- | --- | --- |
 | `port` | `number` | `10100` | Порт, который слушает прокси. |
 | `hostname?` | `string` | `"127.0.0.1"` | Адрес bind'а. Не-loopback bind требует `OPENCODEX_API_AUTH_TOKEN`. |
-| `proxy?` | `string` | — | URL исходящего HTTP(S) или SOCKS5-прокси (`socks5://host:port`) или `${ENV_VAR}`. HTTP URL пишутся в `HTTP_PROXY` / `HTTPS_PROXY`, если те не заданы. SOCKS5 используют встроенный SOCKS5-туннель и также пишутся в `ALL_PROXY` (`ocx start --socks5`); унаследованные `HTTP(S)_PROXY` сбрасываются в этом процессе. Loopback всегда остаётся в `NO_PROXY`. |
+| `proxy?` | `string` | — | URL исходящего HTTP(S) или SOCKS5-прокси (`socks5://host:port`) или `${ENV_VAR}`. HTTP URL пишутся в `HTTP_PROXY` / `HTTPS_PROXY`, если те не заданы. SOCKS5 используют встроенный SOCKS5-туннель и также пишутся в `ALL_PROXY` (`orl start --socks5`); унаследованные `HTTP(S)_PROXY` сбрасываются в этом процессе. Loopback всегда остаётся в `NO_PROXY`. |
 | `emptyCompletionRetry?` | `boolean` | `false` | Явно включает один идентичный повтор Responses, если в turn нет ни текста, ни tool call, включая случай, когда stream завершается до terminal event. Повтор может тарифицироваться. `OCX_EMPTY_COMPLETION_RETRY=0` отключает его без изменения config; combo и routed-compaction turn исключены. |
 | `dropCodexSafetyBuffering?` | `boolean` | `false` | Удаляет подсказки Codex safety-buffering из passthrough-ответов Codex Responses: заголовки `x-codex-safety-buffering-enabled` / `x-codex-safety-buffering-faster-model`, SSE-события `response.metadata` типа `safety_buffering` и поле `safety_buffering` в других SSE-событиях. Codex TUI отображает их как предложение повторить запрос с более быстрой моделью, действие по умолчанию в котором переключает сессию на более слабую модель. Остальные заголовки `x-codex-*` и содержимое других SSE-событий передаются без изменений, кроме удаления этого поля. По умолчанию выключено. |
 | `stallTimeoutSec?` | `number` | `300` (public) / выкл. (local) | Секунды без полезного прогресса upstream (Responses и нативный Chat) до обрыва потока. Без настройки **локальный** upstream (loopback, private, имя `.local`/`.lan`) по умолчанию выключен, публичный — 300 с; положительное значение действует на оба (минимум 1 с); `0` отключает watchdog тишины везде. Для Responses, которые сворачивают canonical ChatGPT SSE в непотоковый JSON, даже при выключенном watchdog остаётся отдельный общий предел 15 минут. Ожидающие чтения тела `/v1/responses/compact` используют этот же бюджет, но по умолчанию 300 с даже для локального upstream; явное значение, включая `0`, имеет приоритет. |
@@ -24,16 +24,16 @@ description: Listener, удалённый доступ, admission key, тайм�
 | `storageCleanupPolicy?` | `StorageCleanupPolicy` | disabled | Opt-in policy очистки архивированных сессий. Никогда не включается неявно. |
 | `appOwnedMemoryBudgetMb?` | `number` | `256` | Лимит в MiB для eviction-friendly app-owned log'ов, cache'ей, blob'ов и continuation payload'ов. Это не RSS-cap. Диапазон 64–4096. |
 | `metricsExport.enabled?` | `boolean` | `false` | Включает локальные для процесса агрегированные метрики запросов на аутентифицированном `GET /api/metrics`. Требуется перезапуск; в выключенном состоянии маршрут возвращает 404 и экспортёр не запускает никакой активности. |
-| `codexAutoStart?` | `boolean` | `true` | Разрешает shim'у Codex запускать `ocx ensure` перед стартом Codex. При false `ensure` становится no-op. |
+| `codexAutoStart?` | `boolean` | `true` | Разрешает shim'у Codex запускать `orl ensure` перед стартом Codex. При false `ensure` становится no-op. |
 | `codexShimAutoRestore?` | `boolean` | `true` | Восстанавливает установленный shim после завершённого внешнего обновления Codex, которое заменило его. Для отключения через окружение: `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0`. |
-| `syncResumeHistory?` | `boolean` | `true` | Обратимый режим совместимости истории Codex App. Исходные metadata резервируются и восстанавливаются через `ocx stop` / `ocx restore`. |
+| `syncResumeHistory?` | `boolean` | `true` | Обратимый режим совместимости истории Codex App. Исходные metadata резервируются и восстанавливаются через `orl stop` / `orl restore`. |
 | `shadowCallIntercept?` | `{ enabled?: boolean; model?: string; sourceModels?: string[] }` | off | Перенаправляет распознанные helper/shadow-call'ы Codex на выбранную модель с сохранением настроенного для запроса reasoning effort. Source-prefix по умолчанию: `gpt-6-luna`, `gpt-5.6-luna`; клиенты до 0.144.x включительно использовали `gpt-5.4-mini`, который можно восстановить через `sourceModels`. |
 | `webSearchSidecar?` | `OcxWebSearchSidecarConfig` | on when usable | Настройки sidecar'а web-search. |
 | `visionSidecar?` | `OcxVisionSidecarConfig` | on when usable | Настройки sidecar'а описания изображений. |
 | `images?` | `OcxImagesConfig` | automatic OpenAI selection | Настройки standalone Images relay для Codex `image_gen`. |
 
 Если более старая development-сборка изменила metadata resume-history до появления резервного
-backup'а, выполните `ocx recover-history --legacy-openai --yes`, чтобы принудительно вернуть
+backup'а, выполните `orl recover-history --legacy-openai --yes`, чтобы принудительно вернуть
 native-provider history.
 Команда переименовывает все строки `opencodex` с пользовательским сообщением, включая корректную историю выделенного провайдера; перед запуском прочитайте предупреждение о полном охвате в справочнике lifecycle.
 
@@ -48,11 +48,11 @@ native-provider history.
 
 ```bash
 export OPENCODEX_API_AUTH_TOKEN="your-secret-token"
-ocx start
+orl start
 ```
 
 Без этой переменной прокси откажется подниматься на удалённом bind'е. Для фоновой службы
-экспортируйте её до `ocx service install`, чтобы launchd, systemd или Task Scheduler получили
+экспортируйте её до `orl service install`, чтобы launchd, systemd или Task Scheduler получили
 значение. Затем клиенты должны отправлять:
 
 ```text
@@ -120,7 +120,7 @@ ssh -L 20100:localhost:10100 -L 1455:localhost:1455 you@remote
 
 ## Claude Code (`claudeCode`)
 
-Эти настройки управляют `/v1/messages`, `/v1/messages/count_tokens`, launcher'ом `ocx claude` и страницей Claude в дашборде.
+Эти настройки управляют `/v1/messages`, `/v1/messages/count_tokens`, launcher'ом `orl claude` и страницей Claude в дашборде.
 
 | Ключ | Тип | По умолчанию | Описание |
 | --- | --- | --- | --- |
@@ -128,7 +128,7 @@ ssh -L 20100:localhost:10100 -L 1455:localhost:1455 you@remote
 | `claudeCode.bodyMaxBytes?` | `number` | `67108864` | Совокупный лимит native-passthrough тела для stream- и buffered-ответов. Ровно `0` отключает. |
 | `claudeCode.authMode?` | `"proxy" \| "subscription"` | auto | Как launcher управляет `ANTHROPIC_AUTH_TOKEN`. Auto каждый запуск заново определяет auth; явно заданное значение не переопределяется. |
 | `claudeCode.authModeMigratedAt?` | `string` | unset | Внутренний одноразовый маркер миграции. Не задавайте вручную. |
-| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` | inherit | Effort, записываемый в сгенерированные `~/.claude/agents/ocx-*.md`; это отдельно от guidance Codex и proxy cap'ов. Чтобы перегенерировать файлы, перезапускайте через `ocx claude`. |
+| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` | inherit | Effort, записываемый в сгенерированные `~/.claude/agents/ocx-*.md`; это отдельно от guidance Codex и proxy cap'ов. Чтобы перегенерировать файлы, перезапускайте через `orl claude`. |
 
 Авто-режим аутентификации выбирает subscription, если найдена сохранённая auth Claude, proxy —
 если auth нет, и subscription с предупреждением, если детектировать однозначно не удалось. См.
@@ -176,7 +176,7 @@ Codex использует маленькие helper-model'и для задач 
 
 | Поле | Тип | По умолчанию | Значение |
 | --- | --- | --- | --- |
-| `enabled?` | `boolean` | on when usable | Главный переключатель. При `false` OpenCodex перестаёт перехватывать `web_search`, а интеграция Codex записывает `web_search = "disabled"` в `~/.codex/config.toml`. |
+| `enabled?` | `boolean` | on when usable | Главный переключатель. При `false` OpenRelay перестаёт перехватывать `web_search`, а интеграция Codex записывает `web_search = "disabled"` в `~/.codex/config.toml`. |
 | `backend?` | `"openai" \| "anthropic" \| "xai" \| "gemini" \| "exa"` | `openai` | Явный выбор выигрывает; отсутствие значения всегда означает `openai`. `anthropic` и `xai` запускаются только при явной настройке; `gemini` и `exa` зарезервированы до появления executor. |
 | `model?` | `string` | backend-dependent | `gpt-5.6-luna` для OpenAI, `claude-sonnet-5` для Anthropic или `grok-4.6` для xAI. Старый явный `gpt-5.4-mini` мигрирует при старте. |
 | `exaApiKey?` | `string` | отсутствует | Ключ оператора для backend `exa`. Только для записи: management-read никогда не возвращает сохранённое значение. |
@@ -240,7 +240,7 @@ opencodex. Перед использованием прогоните soak-test 
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

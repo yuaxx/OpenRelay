@@ -3,12 +3,12 @@ title: CLI Yaşam Döngüsü
 description: Kurulum, başlatma, durdurma, servis, tanılama, senkronizasyon ve güncelleme komutları.
 ---
 
-Bu komutlar, yerel opencodex proxy'sini ve Codex entegrasyonunu kurar,
+Bu komutlar, yerel OpenRelay proxy'sini ve Codex entegrasyonunu kurar,
 çalıştırır, inceler, onarır ve günceller.
 
 ## Kurulum
 
-### `ocx init` · `ocx setup`
+### `orl init` · `orl setup`
 
 Etkileşimli kurulum sihirbazı (`setup`, `init`'in bir takma adıdır). Bir
 sağlayıcı (önayar veya özel), API anahtarı (değişmez veya `${ENV}`), varsayılan
@@ -19,12 +19,12 @@ otomatik başlatma dolgusunu kurar.
 
 ## Proxy yaşam döngüsü
 
-### `ocx start [--port <port>] [--socks5 [host:port] | --socks5-off]`
+### `orl start [--port <port>] [--socks5 [host:port] | --socks5-off]`
 
 Proxy sunucusunu başlatın (tercih edilen port `10100`). PID/çalışma zamanı portu
 durumunu yazar ve ikinci bir canlı örneği başlatmayı reddeder. Tercih edilen port
 doluysa `start`, portu tutan süreci sorgular ve her iki durumda da durur: orada bir
-opencodex yanıt veriyorsa başlatmayı reddeder, aksi halde portu tutan sürecin
+OpenRelay yanıt veriyorsa başlatmayı reddeder, aksi halde portu tutan sürecin
 tanımlanamadığını bildirir. İlk proxy'yi çalışır durumda bırakıp Codex'i ikinciye
 yönlendireceği için dinleyiciyi kendiliğinden başka bir porta taşımaz. Aynı
 `OPENCODEX_HOME` kullanılırken farklı bir `--port` açıkça verilse de başlangıç reddedilir;
@@ -33,28 +33,28 @@ bir kardeş örnek için ayrı bir `OPENCODEX_HOME` kullanın. `port: 0` yalnız
 işletim sistemine bırakır, durumu ayırmaz. Başlangıçta her sağlayıcının modellerini Codex'in kataloğuna
 senkronize eder. Kapatıldığında — yönetilen bir servis olarak başlatılmadığı sürece
 (`OCX_SERVICE=1`) — yerel Codex'i geri yükler. Çalışan bir proxy'nin yanında başlatılan kardeş örnek,
-`ocx stop` ya da bir sinyalle durdurulduğunda da dahil ikisini de yapmaz: yalnızca kendi portundaki
+`orl stop` ya da bir sinyalle durdurulduğunda da dahil ikisini de yapmaz: yalnızca kendi portundaki
 doğrudan istekleri karşılar ve Codex, Grok ile Claude zaten çalışmakta olan proxy'yi göstermeye devam eder.
 
 `--socks5` (varsayılan `127.0.0.1:10808`) SOCKS5 URL'sini `config.proxy` içine kaydeder ve giden
 HTTP(S) isteklerini gerçek bir SOCKS5 tünelinden yönlendirir. `--socks5-off` yalnızca kaydedilmiş
-SOCKS5 proxy'sini temizler; HTTP proxy'sini silmez. Değer yapılandırmada tutulduğu için `ocx update`
+SOCKS5 proxy'sini temizler; HTTP proxy'sini silmez. Değer yapılandırmada tutulduğu için `orl update`
 sonrasında da korunur. URL kullanıcı adı ve parola içerebilir, ancak başlangıç günlüklerinde gizlenir.
 
 ```bash
-ocx start
-ocx start --port 8080
-ocx start --port 10100 --socks5
-ocx start --socks5-off
+orl start
+orl start --port 8080
+orl start --port 10100 --socks5
+orl start --socks5-off
 ```
 
-### `ocx stop`
+### `orl stop`
 
 Çalışan proxy'yi (PID'ye göre) durdurun, PID dosyasını kaldırın ve yerel Codex'i
-geri yükleyin. Yönetilen bir arka plan servisi kuruluysa `ocx stop` proxy'yi
-yeniden oluşturamaması için önce onu da durdurur. Web kontrol panelinin **Durdur** düğmesi aynı eylemi (`POST /api/stop`) Windows Görev Zamanlayıcı dışındaki tüm arka uçlarda çalıştırır: orada görev bittikten sonra sarmalayıcı proxy'yi yeniden başlatabilir, bu yüzden panel `respawnable_service` ile reddeder, hiçbir şeyi değiştirmez ve `ocx stop` çalıştırmanızı ister.
+geri yükleyin. Yönetilen bir arka plan servisi kuruluysa `orl stop` proxy'yi
+yeniden oluşturamaması için önce onu da durdurur. Web kontrol panelinin **Durdur** düğmesi aynı eylemi (`POST /api/stop`) Windows Görev Zamanlayıcı dışındaki tüm arka uçlarda çalıştırır: orada görev bittikten sonra sarmalayıcı proxy'yi yeniden başlatabilir, bu yüzden panel `respawnable_service` ile reddeder, hiçbir şeyi değiştirmez ve `orl stop` çalıştırmanızı ister.
 
-### `ocx restart`
+### `orl restart`
 
 Bir proxy çalışırken bu tam onaylanmış PID ve porttan yerinde yeniden
 başlatmasını isteyin, normal boşaltmasını bekleyin ve aynı portta farklı bir
@@ -64,17 +64,17 @@ yeniden oynatılmak yerine gözlemlenir. Hiçbir proxy çalışmıyorsa komut no
 `ensure` başlangıcına geri döner. Canlı bir dinleyici bir çalışma zamanı
 PID'sine (güncelleme öncesi proxy dahil) onaylanamazsa yeniden başlatma bir
 `ensure` veya durdurma/başlatma geri dönüşü olmadan kapalı olarak başarısız
-olur. Sahipliği onayladıktan sonra bağımsız bir proxy için `ocx stop` ardından
-`ocx start` kullanın. Servis tarafından yönetilen bir proxy için denetimin geri
-yüklenmesi amacıyla `ocx stop` ardından `ocx service start` kullanın.
+olur. Sahipliği onayladıktan sonra bağımsız bir proxy için `orl stop` ardından
+`orl start` kullanın. Servis tarafından yönetilen bir proxy için denetimin geri
+yüklenmesi amacıyla `orl stop` ardından `orl service start` kullanın.
 
-### `ocx ensure`
+### `orl ensure`
 
 Bir arka plan proxy'sinin çalıştığından eşgüçlü olarak (idempotently) emin olun,
 ardından canlı model kataloğunu senkronize edin. `codexAutoStart` `false` ise
 otomatik başlatmanın devre dışı bırakıldığını yazdırır ve hiçbir şey yapmaz.
 
-### `ocx restore [back]` · `ocx eject [back]`
+### `orl restore [back]` · `orl eject [back]`
 
 Proxy'yi **durdurmadan** yerel Codex'i geri yükleyin — enjekte edilen
 yapılandırma satırlarını ve yönlendirilen katalog girdilerini kaldırır, böylece
@@ -88,11 +88,11 @@ Proxy yaşam döngüsünü değiştirmeden düz `codex`'i zaten çalışan bir p
 yeniden yönlendirmek için her iki yazıma da `back` iletin:
 
 ```bash
-ocx restore back
-ocx eject back
+orl restore back
+orl eject back
 ```
 
-### `ocx recover-history --legacy-openai --yes`
+### `orl recover-history --legacy-openai --yes`
 
 Tersine çevrilebilir yedekleme desteği var olmadan önce Codex App geçmişini
 yeniden eşleyen eski geliştirme derlemeleri için açık kurtarma. Geçmiş
@@ -103,21 +103,21 @@ Bu, geniş kapsamlı ve yıkıcı bir yeniden etiketlemedir: kullanıcı iletisi
 olarak normalleştirilir ve event marker ayarlanır. Geçerli dedicated-provider geçmişi de kapsama
 dahildir. Durumu yedekleyin ve yalnızca bu kapsamın tamamını istiyorsanız çalıştırın.
 
-### `ocx recover-history --ocx-compaction <thread-id> --yes`
+### `orl recover-history --ocx-compaction <thread-id> --yes`
 
 Yönlendirilmiş bir sağlayıcı üzerinden sıkıştırılmış bir görevi yerel Codex ile sürdürmeden önce geçmişini onarın. Komut UUID ile yalnızca bir görevi seçer, önce özel ve bayt bayt bir yedek kaydeder, ardından yalnızca OpenCodeX'e ait `ocx1:` sıkıştırma durumunu yerel Codex'in yeniden oynatabileceği düz bir özete dönüştürür. Yerel şifreli içerik ve diğer görevler değişmeden kalır. Komutu çalıştırmadan önce seçili görevi kapatın; işlem sırasında rollout değişirse kurtarma dosyayı değiştirmeden durur.
 
-### `ocx uninstall` · `ocx remove`
+### `orl uninstall` · `orl remove`
 
 Servisi ve proxy'yi durdurun, servisi ve Codex dolgusunu kaldırın, yerel Codex'i
 geri yükleyin, ardından yalnızca tüm geri yükleme adımları başarılı olduysa
-opencodex yerel yapılandırmasını kaldırın. `remove`, `uninstall`'ın bir takma
+OpenRelay yerel yapılandırmasını kaldırın. `remove`, `uninstall`'ın bir takma
 adıdır. Yapılandırma temizliği yeni bir yükleme tarafından oluşturulan sahiplik
 meta verilerini gerektirir; eski veya paylaşılan dizinler yerinde bırakılır.
 
 ## Durum ve sağlık
 
-### `ocx status [--json]`
+### `orl status [--json]`
 
 Salt okunur bir tanılama özeti yazdırın: proxy PID, `/healthz` erişilebilirliği,
 kontrol paneli URL'si, yapılandırma yolu, varsayılan sağlayıcı, Codex otomatik
@@ -135,8 +135,8 @@ durum) artı isteğe bağlı bir `Action:` ipucu ile maskelenmiş bir satır iç
 asla yazdırılmaz. `--json` sözleşmesi şu anda bu sağlık bloğunu içermez.
 
 ```bash
-ocx status
-ocx status --json
+orl status
+orl status --json
 ```
 
 Kısaltılmış örnek şekli:
@@ -195,13 +195,13 @@ Windows'ta en fazla 16,5 saniye. Önbellekten yapılan okumalar hızla sonuç d�
 Zaman aşımında yine yerel tanılamalara dönülür; yalnızca `/healthz` sağlıklı diye
 yeniden başlatma korumasının etkin olduğu doğrulanamaz.
 
-### `ocx health [--json]`
+### `orl health [--json]`
 
 Canlı proxy'yi kimlik kontrolünden geçirin. İnsan çıktısı PID/port bildirir;
 `--json`, `{ok, pid, port}` yayar. Komut yalnızca sağlıklı olduğunda 0 ve aksi
 takdirde 1 ile çıkar, bu da onu servis probları için uygun hale getirir.
 
-### `ocx ready [--json] [--wait [--timeout <seconds>]]`
+### `orl ready [--json] [--wait [--timeout <seconds>]]`
 
 Kimliği doğrulanmamış `GET /readyz` uç noktası aracılığıyla senkronizasyon
 sonrası hazırlığı kontrol edin. Hazır olduğunda `200` veya `pending` ve terminal
@@ -217,7 +217,7 @@ saniyeleri kabul eder. CLI JSON, `status`'un `ready`, `pending`, `failed` veya
 için 0; hazır değil, beklemede, başarısız, zaman aşımı veya erişilemez için 1;
 ve geçersiz bağımsız değişkenler için 64'tür.
 
-### `ocx doctor`
+### `orl doctor`
 
 Salt okunur ortam ve bağlantı tanılamalarını çalıştırın: durum yolları ve dosya
 sistemi türü, WSL ikili yüklemeleri, proxy ortamı/yapılandırması, ChatGPT
@@ -236,20 +236,20 @@ Doctor asla kimlik bilgilerini değiştirmez veya onarımlar uygulamaz.
 
 ## Katalog senkronizasyonu
 
-### `ocx sync [--restart-codex] [--restart-app-server-only]`
+### `orl sync [--restart-codex] [--restart-app-server-only]`
 
 Yapılandırılmış her sağlayıcıdan canlı model listesini alın ve birleştirilmiş
 kataloğu Codex'e yeniden enjekte edin. Bir sağlayıcı ekledikten sonra veya
 kullanılabilir modelleri yenilemek için çalıştırın.
 
-Sağlayıcı keşfinden veya katalog/önbellek değiştirmeden önce `ocx sync`,
+Sağlayıcı keşfinden veya katalog/önbellek değiştirmeden önce `orl sync`,
 yönetilen Codex yapılandırmasının enjekte edilip edilemeyeceğini doğrular. Bu
 doğrulama yapılandırmayı reddederse komut sıfır olmayan bir çıkış yapar, somut
 nedeni stderr'e yazdırır ve mevcut kataloğu ve önbelleği değiştirmeden bırakır.
-`ocx restore back`, yönlendirmeyi yeniden etkinleştirmeden önce aynı yazmasız ön
+`orl restore back`, yönlendirmeyi yeniden etkinleştirmeden önce aynı yazmasız ön
 kontrolü kullanır.
 
-Uzun ömürlü Codex `app-server` süreçleri hala çalışıyorsa `ocx sync`,
+Uzun ömürlü Codex `app-server` süreçleri hala çalışıyorsa `orl sync`,
 `opencodex-catalog.json` / `models_cache.json` güncellenmiş olsa bile önceki
 bellek içi model listesini sunmaya devam edebilecekleri konusunda uyarır.
 Eşleşen `codex … app-server` ve `codex-code-mode-host` süreçlerini yeniden
@@ -272,15 +272,15 @@ alınamaz, eski bir seçici ise alınabilir.
 Komut Codex uygulamasının içinden çalıştırıldığında yeniden başlatma ayrılmış
 bir yardımcıya devredilir ve bu oturum uygulamayla birlikte sona erer.
 
-### `ocx sync-cache [--restart-codex] [--restart-app-server-only]`
+### `orl sync-cache [--restart-codex] [--restart-app-server-only]`
 
-Codex'in yerel model seçici önbelleğini geçersiz kılın, böylece aktif opencodex
-kataloğundan yeniden oluşturulur. `ocx sync` ile aynı eski `app-server` uyarısı
+Codex'in yerel model seçici önbelleğini geçersiz kılın, böylece aktif OpenRelay
+kataloğundan yeniden oluşturulur. `orl sync` ile aynı eski `app-server` uyarısı
 ve isteğe bağlı yeniden başlatma bayrakları geçerlidir.
 
-### `ocx catalog pull <https-url> [--auth-env <NAME>] [--json] [--restart-codex] [--restart-app-server-only]`
+### `orl catalog pull <https-url> [--auth-env <NAME>] [--json] [--restart-codex] [--restart-app-server-only]`
 
-Başka bir OpenCodex örneğinin `/v1/catalog` uç noktasının sunduğu eksiksiz kataloğu kurar ve
+Başka bir OpenRelay örneğinin `/v1/catalog` uç noktasının sunduğu eksiksiz kataloğu kurar ve
 ardından `models_cache.json` dosyasını eşitler. URL HTTPS olmalıdır; HTTP yalnızca loopback için
 kabul edilir. URL içine gömülü kimlik bilgileri, sorgular, parçalar, yönlendirmeler, boyutu aşan
 yanıtlar ve geçersiz kataloglar, herhangi bir yerel yazma işleminden önce reddedilir. Kimlik
@@ -292,15 +292,15 @@ alınmaz.
 Katalog ve önbellek, paylaşılan Codex katalog kilidi altında yazılır; bir hata durumunda
 last-known-good dosyalar korunur. Aynı baytlar, mtime değerlerini koruyan bir no-op'tur.
 `--restart-codex`, `--restart-app-server-only` ve kullanımdan kaldırılmış takma ad
-`--restart-desktop-app` yalnızca gerçek bir yazmadan sonra uygulanır ve `ocx sync` /
-`ocx sync-cache` ile aynı anlama gelir. `ETag` koşullu istekleri bu komutun kapsamında
+`--restart-desktop-app` yalnızca gerçek bir yazmadan sonra uygulanır ve `orl sync` /
+`orl sync-cache` ile aynı anlama gelir. `ETag` koşullu istekleri bu komutun kapsamında
 değildir. Tam `--json` zarfı ve çıkış kodları için [İngilizce referansa](/reference/cli/lifecycle/) bakın.
 
 ## Arka plan servisi
 
-### `ocx service [install|repair|restart|start|stop|status|uninstall|remove]`
+### `orl service [install|repair|restart|start|stop|status|uninstall|remove]`
 
-opencodex'i oturum açmada otomatik başlayan ve çökmede otomatik yeniden başlayan
+OpenRelay'i oturum açmada otomatik başlayan ve çökmede otomatik yeniden başlayan
 oturumla yönetilen bir arka plan servisi (macOS **launchd**, Linux **systemd
 kullanıcı birimi**, Windows **Görev Zamanlayıcı**) olarak çalıştırın. Servis
 çalıştırmaları `OCX_SERVICE=1` ayarlar, böylece bir yeniden başlatma Codex
@@ -309,7 +309,7 @@ yapılandırmasını dalgalandırmaz.
 Windows Görev Zamanlayıcı kurulumları normal işlem önceliğini (`Priority=4`) kullanır. Eski arka plan
 önceliği (`7`; değer belirtilmediğinde de zamanlayıcının varsayılanı `7` olur), CPU çekişmesi sırasında
 sağlık denetimi yanıtlarını geciktirebilir ve işlem çalışırken bile sistem tepsisinde Offline görünmesine neden olabilir.
-Güncellemeden sonra kayıtlı bu önceliği değiştirmek ve servisi yeniden başlatmak için `ocx service repair` komutunu çalıştırın.
+Güncellemeden sonra kayıtlı bu önceliği değiştirmek ve servisi yeniden başlatmak için `orl service repair` komutunu çalıştırın.
 UAC onayı gerekebilir. Zaten normal veya yüksek öncelik ayarlanmışsa yalnızca öncelik nedeniyle yeniden kayıt yapılmaz.
 
 Linux'ta systemd birimi, kurulum sırasında `PATH` üzerinde bulunan ilk normal, çalıştırılabilir `ocx`
@@ -322,16 +322,16 @@ paket içindeki paketlenmiş Bun yolları yükseltmelerden sonra yeniden keşfed
 macOS'ta launchd bunun yerine kurulum veya repair sırasında seçilen paket içi Bun ve CLI yollarını
 kullanır. Bu, değiştirilebilir bir PATH shim'inin sonraki bir yeniden başlatmada servis API token'ını
 ve yapılandırılmış proxy ortamını almasını engeller. Sürüm yöneticili bir kurulumu yükselttikten sonra,
-servisi yeniden başlatmadan önce bu yolları tazelemek için `ocx service repair` komutunu çalıştırın.
+servisi yeniden başlatmadan önce bu yolları tazelemek için `orl service repair` komutunu çalıştırın.
 
 Bu değişiklikten önce kurulan tanımlar hâlâ eski sürümlü yolları taşır ve kendilerini taşıyamaz —
-eski yürütülebilir dosya silindiğinde, onu düzeltecek hiçbir opencodex kodu çalışmaz. Yükseltmeden
-sonra bir kez `ocx service repair` çalıştırın. Bundan sonra Linux servis başlatmaları başlatıcıyı
+eski yürütülebilir dosya silindiğinde, onu düzeltecek hiçbir OpenRelay kodu çalışmaz. Yükseltmeden
+sonra bir kez `orl service repair` çalıştırın. Bundan sonra Linux servis başlatmaları başlatıcıyı
 izler; macOS repair'i yeni paket yollarını launchd tanımına yazar. Zaten çalışan bir proxy harici
 yükseltmeyle değiştirilmez: kurulu CLI çalışan proxy'den daha yeni ise, yeni derlemenin hizmet vermesi
-için `ocx service restart` çalıştırın. macOS'ta bu durumda `repair` yeterli değildir: tanım değişmedi
+için `orl service restart` çalıştırın. macOS'ta bu durumda `repair` yeterli değildir: tanım değişmedi
 ve hiçbir şeyi değiştirmeyen bir repair hiçbir şeyi yeniden yüklemez. Bunun yerine proxy daha yeni ise,
-[`ocx status`](#ocx-status---json) altında açıklandığı gibi CLI kurulumunu ve `PATH`'i kontrol edin.
+[`orl status`](#ocx-status---json) altında açıklandığı gibi CLI kurulumunu ve `PATH`'i kontrol edin.
 
 | Alt komut | Eylem |
 | --- | --- |
@@ -346,15 +346,15 @@ ve hiçbir şeyi değiştirmeyen bir repair hiçbir şeyi yeniden yüklemez. Bun
 | `remove` | `uninstall`'ın takma adıdır. |
 
 ```bash
-ocx service
-ocx service install
-ocx service repair
-ocx service restart
-ocx service status
-ocx service uninstall
+orl service
+orl service install
+orl service repair
+orl service restart
+orl service status
+orl service uninstall
 ```
 
-Windows'ta bare `ocx service`, yükleme yolunu ancak Task Scheduler ve WinSW'nin her ikisinin de yok olduğu kanıtlandıktan sonra çalıştırır. Durum sorgularından herhangi biri belirsizse hiçbir şey kaydetmeyi reddeder ve `ocx service status` çalıştırmanızı ister; yalnızca yokluk doğrulandıktan sonra açık `ocx service install` kullanın.
+Windows'ta bare `orl service`, yükleme yolunu ancak Task Scheduler ve WinSW'nin her ikisinin de yok olduğu kanıtlandıktan sonra çalıştırır. Durum sorgularından herhangi biri belirsizse hiçbir şey kaydetmeyi reddeder ve `orl service status` çalıştırmanızı ister; yalnızca yokluk doğrulandıktan sonra açık `orl service install` kullanın.
 
 `install`, `start` ve `repair`, başarı bildirmeden önce kurulu servise
 yerleştirilmiş portta bir proxy'nin gerçekten yanıt verdiğini onaylar — her üç
@@ -371,15 +371,15 @@ Hiçbir şey yanıt vermezse uyarırlar ve **sıfır olmayan bir çıkış yapar
 ⚠️  Service installed, but no proxy answered on port 10100 within 20s.
    The manager registered the job; that is not the same as serving.
    Log:       ~/.opencodex/service.log
-   Meanwhile: ocx start   (serves in the foreground)
+   Meanwhile: orl start   (serves in the foreground)
 ```
 
 Burada sıfır olmayan bir çıkış, *kurulu değil* değil, *kayıtlı ancak hizmet
 vermiyor* anlamına gelir. Servis yöneticisi işi kabul etti; arkasındaki proxy
 asla portu bağlamadı. Mesajda adı geçen günlüğü okuyun ve bu arada ön planda
-hizmet vermek için `ocx start` kullanın.
+hizmet vermek için `orl start` kullanın.
 
-`ocx service status` ham yönetici çıktısı yerine aynı üç durumu bildirir:
+`orl service status` ham yönetici çıktısı yerine aynı üç durumu bildirir:
 
 ```
 ✅ installed and loaded (launchd; logs: …)
@@ -390,10 +390,10 @@ hizmet vermek için `ocx start` kullanın.
 ⚠️  installed and loaded (launchd; logs: …)
    Registered, but no proxy is answering on port 10100.
    launchd is running an OLDER plist than the one on disk.
-   Fix:    launchctl bootout gui/$(id -u)/com.opencodex.proxy && ocx service repair
+   Fix:    launchctl bootout gui/$(id -u)/com.opencodex.proxy && orl service repair
    Log:    ~/.opencodex/service.log
-   Repair: ocx service repair
-   Meanwhile: ocx start           (serves in the foreground)
+   Repair: orl service repair
+   Meanwhile: orl start           (serves in the foreground)
 ```
 
 Artık hizmet veriyor, hiçbir şeye bağlı değil veya önceki bir tanımı
@@ -411,8 +411,8 @@ yazdırırken launchd'nin servis tanımının **önceki** bir sürümünü çal�
 neden olurdu. `install` artık bu durumda yüksek sesle başarısız olur ve eski işi
 temizleyen `launchctl bootout` komutunu adlandırır.
 
-Windows'ta `ocx service status`, Görev Zamanlayıcı kaydını kimliği doğrulanmış
-OpenCodex proxy erişilebilirliğinden ayrı olarak bildirir. Yerelleştirilmiş
+Windows'ta `orl service status`, Görev Zamanlayıcı kaydını kimliği doğrulanmış
+OpenRelay proxy erişilebilirliğinden ayrı olarak bildirir. Yerelleştirilmiş
 `schtasks` tablosunu yazdırmaz, bu nedenle özet Windows kod sayfaları arasında
 okunabilir kalır.
 
@@ -424,23 +424,23 @@ gerektirir; kontrol panelinin Başlangıç Güvenliği eylemi daha sonra UAC'yi
 otomatik olarak isteyebilir. Bu geri dönüş belirteç durumunu belirleyemezse
 orijinal zamanlayıcı hatasını korur. Yabancı görevler ve işlemler asla otomatik
 yükseltme işaretçisini yayamaz. Kontrol paneli UAC istemini onaylayın veya
-yükseltilmiş bir PowerShell penceresinde `ocx service install`'ı yeniden
+yükseltilmiş bir PowerShell penceresinde `orl service install`'ı yeniden
 çalıştırın.
 
-OpenCodex zamanlayıcı görevinin kesinlikle bulunmadığı yeni bir kurulum için UAC
+OpenRelay zamanlayıcı görevinin kesinlikle bulunmadığı yeni bir kurulum için UAC
 onayı artık yükleyici mevcut herhangi bir proxy'yi durdurmadan önce gerçekleşir.
 Görev çalıştırılmadan kaydedilir; yalnızca kayıt başarılı olduktan sonra
-OpenCodex eski dinleyiciyi durdurur, servis varlıklarını yayınlar ve zamanlanmış
+OpenRelay eski dinleyiciyi durdurur, servis varlıklarını yayınlar ve zamanlanmış
 görevi başlatır. Bu nedenle UAC'yi iptal etmek veya reddetmek çalışan proxy'yi
 ve Codex yönlendirmesini yerinde bırakır. Mevcut veya çakışan zamanlayıcı
 kayıtları güvenli olmayan en iyi çaba geri alması olarak silinmek yerine kapalı
 olarak başarısız olmaya devam eder.
 
-Başlatma sırasında `another process owns the runtime mutation lease` bildirilirse ya da `ocx service status` `Runtime mutation lease busy` gösterirse, proxy çalışmıyor olsa bile bu kiralama başlatmayı veya hizmet değişikliklerini engelliyordur. Mesaj; kilit yolunu, kayıtlı PID'yi, bu PID'nin şu anda canlı olup olmadığını, alınabildiyse yürütülebilir dosyanın adını ve kiralamanın yaşını içerir. Sürecin kimliği doğrulanmaz: PID yeniden kullanılmış olabilir, bu yüzden canlılık durumu ve yürütülebilir dosya adı o PID'yi şu anda kullanan süreci tanımlar. İşlemin bitmesini bekleyip yeniden deneyin; yalnızca bu PID'ye dayanarak kilidi silmeyin ya da bir süreci durdurmayın. Kiralamanın yaşı 30 saniyeyi aştığında ve kayıtlı PID artık canlı olmadığında, sonraki bir değişiklik girişimi eskimiş kiralamayı geri alabilir; `ocx service status` yalnızca onu inceler.
+Başlatma sırasında `another process owns the runtime mutation lease` bildirilirse ya da `orl service status` `Runtime mutation lease busy` gösterirse, proxy çalışmıyor olsa bile bu kiralama başlatmayı veya hizmet değişikliklerini engelliyordur. Mesaj; kilit yolunu, kayıtlı PID'yi, bu PID'nin şu anda canlı olup olmadığını, alınabildiyse yürütülebilir dosyanın adını ve kiralamanın yaşını içerir. Sürecin kimliği doğrulanmaz: PID yeniden kullanılmış olabilir, bu yüzden canlılık durumu ve yürütülebilir dosya adı o PID'yi şu anda kullanan süreci tanımlar. İşlemin bitmesini bekleyip yeniden deneyin; yalnızca bu PID'ye dayanarak kilidi silmeyin ya da bir süreci durdurmayın. Kiralamanın yaşı 30 saniyeyi aştığında ve kayıtlı PID artık canlı olmadığında, sonraki bir değişiklik girişimi eskimiş kiralamayı geri alabilir; `orl service status` yalnızca onu inceler.
 
-### `ocx codex-shim <install|status|uninstall|remove>`
+### `orl codex-shim <install|status|uninstall|remove>`
 
-macOS ve Linux'ta `ocx codex-shim install`, çözümlenen OpenCodex dizininde özel `<OPENCODEX_HOME>/bin/codex` sarmalayıcısını ve kabuğa yüklenecek `<OPENCODEX_HOME>/codex-shell-env.sh` dosyasını oluşturur. Yerel başlatıcı brew, npm veya fnm'nin kurduğu yerde kalır; paket yöneticisi güncellemeleri ve önceki sürüme dönüşler yeniden sarmalama gerektirmez. Windows'ta betik başlatıcıları mevcut konumlarında sarılmaya devam eder, gerçek `codex.exe` değiştirilmez. Yalnızca `codex.exe` varsa `ocx service install` kullanın.
+macOS ve Linux'ta `orl codex-shim install`, çözümlenen OpenRelay dizininde özel `<OPENCODEX_HOME>/bin/codex` sarmalayıcısını ve kabuğa yüklenecek `<OPENCODEX_HOME>/codex-shell-env.sh` dosyasını oluşturur. Yerel başlatıcı brew, npm veya fnm'nin kurduğu yerde kalır; paket yöneticisi güncellemeleri ve önceki sürüme dönüşler yeniden sarmalama gerektirmez. Windows'ta betik başlatıcıları mevcut konumlarında sarılmaya devam eder, gerçek `codex.exe` değiştirilmez. Yalnızca `codex.exe` varsa `orl service install` kullanın.
 
 brew/fnm PATH ayarlarından sonra kurulumun yazdırdığı etkinleştirme komutunu çalıştırın. Varsayılan dizinde:
 
@@ -448,9 +448,9 @@ brew/fnm PATH ayarlarından sonra kurulumun yazdırdığı etkinleştirme komutu
 . "$HOME/.opencodex/codex-shell-env.sh"
 ```
 
-Özel bir dizin için yazdırılan tırnaklı yolu kullanın. Dosyayı tekrar yüklemek özel bin tekrarlarını kaldırıp dizini PATH'in başına koyar. Gelecekteki kabuklar için bu satırı başlangıç dosyasındaki PATH ayarlarından sonra kendiniz ekleyin; OpenCodex kabuk başlangıç dosyalarını düzenlemez. Kurulum üst kabuğun PATH'ini değiştiremez. Sarmalayıcı çalıştırılabiliyorsa geçerli kabukta henüz etkin olmasa da kurulum başarılıdır; reddedilen kurulum veya çalışmayan sarmalayıcı hata verir. `ocx status`, `ocx codex-shim status`, `ocx doctor` ve `ocx connect`, PATH sarmalayıcıyı seçmiyorsa **not active** durumunu ve etkinleştirme komutunu gösterir. connect uyarıları çıkış kodunu değiştirmez. Takma adlar, işlevler, masaüstü ve servis başlatmaları ayrıca ayarlanmalıdır.
+Özel bir dizin için yazdırılan tırnaklı yolu kullanın. Dosyayı tekrar yüklemek özel bin tekrarlarını kaldırıp dizini PATH'in başına koyar. Gelecekteki kabuklar için bu satırı başlangıç dosyasındaki PATH ayarlarından sonra kendiniz ekleyin; OpenRelay kabuk başlangıç dosyalarını düzenlemez. Kurulum üst kabuğun PATH'ini değiştiremez. Sarmalayıcı çalıştırılabiliyorsa geçerli kabukta henüz etkin olmasa da kurulum başarılıdır; reddedilen kurulum veya çalışmayan sarmalayıcı hata verir. `orl status`, `orl codex-shim status`, `orl doctor` ve `orl connect`, PATH sarmalayıcıyı seçmiyorsa **not active** durumunu ve etkinleştirme komutunu gösterir. connect uyarıları çıkış kodunu değiştirmez. Takma adlar, işlevler, masaüstü ve servis başlatmaları ayrıca ayarlanmalıdır.
 
-Bir kurulum veya onarım uygulanmadan önce OpenCodex servis başlangıcı atlanırken
+Bir kurulum veya onarım uygulanmadan önce OpenRelay servis başlangıcı atlanırken
 kaydedilen başlatıcıyı `--version` ile çalıştırır. Başlatıcı `codex`'i tekrar
 dolguya çözdüğünde, sıfır olmayan bir çıkış yaptığında, beş saniyeyi aştığında,
 alt süreçleri çalışır durumda bıraktığında veya güvenli bir şekilde doğrulanıp
@@ -458,11 +458,11 @@ temizlenemediğinde değişikliği reddeder ve geri alır. Bu nedenle `codex-shi
 install` koşulsuz değildir. Reddedilirse PATH girdisinin somut bir yürütülebilir
 dosya veya başlatıcı olması için Codex'i yeniden yükleyin ve yeniden deneyin;
 dinamik bir komut yöneticisi başlatıcısı bu denetimleri karşılayamadığında bunun
-yerine `ocx service install` kullanın.
+yerine `orl service install` kullanın.
 
-Eski, yerinde kurulu Unix shim yalnızca açıkça çalıştırılan `ocx codex-shim install` ile taşınır. Kaydedilen yerel başlatıcı, mevcut daha yeni başlatıcının üzerine yazılmadan geri yüklenir; ardından özel sarmalayıcı kurulur. Geri yüklemeden sonra özel kurulum başarısız olsa da yerel başlatıcı geri yüklenmiş kalır ve işlem yeniden denenebilir. Kayıtlı başlatıcı yoksa veya çalışmıyorsa paket yöneticisiyle onarın; OpenCodex başka bir kurulumu tahmin etmez ve yöneticinin yolunu yeniden sarmalamaz.
+Eski, yerinde kurulu Unix shim yalnızca açıkça çalıştırılan `orl codex-shim install` ile taşınır. Kaydedilen yerel başlatıcı, mevcut daha yeni başlatıcının üzerine yazılmadan geri yüklenir; ardından özel sarmalayıcı kurulur. Geri yüklemeden sonra özel kurulum başarısız olsa da yerel başlatıcı geri yüklenmiş kalır ve işlem yeniden denenebilir. Kayıtlı başlatıcı yoksa veya çalışmıyorsa paket yöneticisiyle onarın; OpenRelay başka bir kurulumu tahmin etmez ve yöneticinin yolunu yeniden sarmalamaz.
 
-Yalnızca başlatıcı kurulumu Codex isteklerinin OpenCodex kullanacağını
+Yalnızca başlatıcı kurulumu Codex isteklerinin OpenRelay kullanacağını
 kanıtlamaz. Çalıştırılabilir bir sarmalayıcı kurulduktan sonra komut geçerli Codex yönlendirmesini
 kontrol eder ve yönlendirme harici, kullanıcıya ait veya doğrulanamaz olduğunda
 yeşil bir sonuç yerine bir uyarı bildirir. Ayrıca giden proxy değişkenleri
@@ -472,7 +472,7 @@ ortamı devralmayabilir. Bu denetimler salt okunurdur ve asla proxy değerlerini
 yazdırmaz; otomatik başlatmaya güvenmeden önce bildirilen devri çözün ve `ocx
 doctor` çalıştırın.
 
-Unix'te otomatik onarım yalnızca özel sarmalayıcıyı yeniler; paket yöneticisinin başlatıcılarını yeniden yazmaz veya eski yerinde shim'i taşımaz. Windows'ta tamamlanan harici güncelleme shim'i değiştirirse sonraki sıradan `ocx` komutu kararlı yeni başlatıcıyı yedekleyip shim'i geri yükler. Değişmekte olan başlatıcıya dokunulmaz ve daha sonra yeniden denenir. `ocx status`, `ocx doctor`, `ocx codex-shim status`, `ocx system codex-cli-update check` ve ayrılmış ad alanındaki hatalı çağrılar bu onarımı yapmaz. Onarım hataları istenen komutun çıkış kodunu değiştirmeden uyarı verir. Elle onarım: `ocx codex-shim install`. Devre dışı bırakmak için `codexShimAutoRestore` değerini `false` yapın veya süreç için `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0` ayarlayın.
+Unix'te otomatik onarım yalnızca özel sarmalayıcıyı yeniler; paket yöneticisinin başlatıcılarını yeniden yazmaz veya eski yerinde shim'i taşımaz. Windows'ta tamamlanan harici güncelleme shim'i değiştirirse sonraki sıradan `ocx` komutu kararlı yeni başlatıcıyı yedekleyip shim'i geri yükler. Değişmekte olan başlatıcıya dokunulmaz ve daha sonra yeniden denenir. `orl status`, `orl doctor`, `orl codex-shim status`, `orl system codex-cli-update check` ve ayrılmış ad alanındaki hatalı çağrılar bu onarımı yapmaz. Onarım hataları istenen komutun çıkış kodunu değiştirmeden uyarı verir. Elle onarım: `orl codex-shim install`. Devre dışı bırakmak için `codexShimAutoRestore` değerini `false` yapın veya süreç için `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0` ayarlayın.
 
 | Alt komut | Eylem |
 | --- | --- |
@@ -482,47 +482,47 @@ Unix'te otomatik onarım yalnızca özel sarmalayıcıyı yeniler; paket yöneti
 | `status` | shim durumunu ve özel sarmalayıcının PATH üzerinde etkin olup olmadığını bildirir. |
 
 ```bash
-ocx codex-shim install
-ocx codex-shim status
-ocx codex-shim uninstall
+orl codex-shim install
+orl codex-shim status
+orl codex-shim uninstall
 ```
 
 Unix'te kaldırdıktan sonra başlangıç dosyasındaki yükleme satırını silin ve kabuğu yeniden başlatın veya özel bin girdisini PATH'ten çıkarın. Yalnızca sahip olunan sarmalayıcı, kabuk ortam dosyası ve durum kaldırılır; paket yöneticisinin başlatıcısına dokunulmaz. Eski yerinde Unix shim kayıtlı geri yükleme bilgileriyle kaldırılır.
 
 :::tip[Servis mi Dolgu mu?]
-Her zaman açık bir arka plan proxy'si için `ocx service` kullanın (önerilir).
+Her zaman açık bir arka plan proxy'si için `orl service` kullanın (önerilir).
 Bir arka plan programı olmadan hafif, isteğe bağlı başlatma için `ocx
 codex-shim` kullanın — proxy yalnızca `codex` başlatıldığında başlar.
 :::
 
-### `ocx tray <install|start|stop|status|uninstall|remove> [--json] [--no-start]`
+### `orl tray <install|start|stop|status|uninstall|remove> [--json] [--no-start]`
 
 Windows durum tepsisi simgesini kurun ve kontrol edin. Windows oturum açılışında
 başlar ve tek tıklamayla proxy kontrolleri sağlar. `start` ve `stop` yalnızca
 simgeyi kontrol eder; proxy'yi kontrol etmek için menüsünü kullanın.
 `--no-start`, `install` için geçerlidir ve tepsiyi hemen başlatmadan kurar.
-Kullanımdan kaldırıldı: OpenCodex masaüstü uygulaması Windows, macOS ve Linux'ta tepsi sağlar;
-`ocx tray`, masaüstü uygulaması olmayan kurulumlar için kullanılmaya devam eder.
+Kullanımdan kaldırıldı: OpenRelay masaüstü uygulaması Windows, macOS ve Linux'ta tepsi sağlar;
+`orl tray`, masaüstü uygulaması olmayan kurulumlar için kullanılmaya devam eder.
 Yeni bir paket sürümü bilindiğinde tepsi, çevrimiçi, uyarı veya çevrimdışı simgesine mavi bir nokta ekler ve **Update available** gösterir. Yerel önbellekteki rozeti yaklaşık dakikada bir denetler; eski veya kullanılamayan sonuçlar noktayı kaldırır. Menü öğesi panoyu açar ve paket güncellemesini oradan başlatabilirsiniz. Otomatik yükleme yapmaz.
 
 ## Kontrol Paneli
 
-### `ocx gui`
+### `orl gui`
 
 Çalışmıyorsa proxy'yi otomatik olarak başlatarak `http://localhost:<port>`
 adresindeki [web kontrol panelini](/tr/guides/web-dashboard/) açın; hub'da yönetim ingress'i etkinse `http://127.0.0.1:<yönetim portu>` adresini açar.
 
 ## Güncelleme
 
-`ocx update`, Codex CLI'yi değil OpenCodex'in kendisini günceller. Yapılandırılmış Codex CLI adayının provenance bilgisini sınırlı ve salt okunur biçimde denetlemek için [sistem denetim komutları](/tr/reference/cli/agents/) arasındaki `ocx system codex-cli-update check` komutunu kullanın. Komut package registry'ye istek göndermez ve güncelleme kurmaz.
+`orl update`, Codex CLI'yi değil OpenRelay'in kendisini günceller. Yapılandırılmış Codex CLI adayının provenance bilgisini sınırlı ve salt okunur biçimde denetlemek için [sistem denetim komutları](/tr/reference/cli/agents/) arasındaki `orl system codex-cli-update check` komutunu kullanın. Komut package registry'ye istek göndermez ve güncelleme kurmaz.
 
-### `ocx update [--tag latest|preview]`
+### `orl update [--tag latest|preview]`
 
-OpenCodex mise üzerinden kurulduğunda bu komut proxy'yi durdurmadan veya paket dosyalarını değiştirmeden önce başarısız olur ve doğrulanmış yerel mise diğer adını kullanarak `mise upgrade <tool>` komutunu gösterir. Güncelleme denetimi kullanılabilir kalır ve kurulumun harici olarak yönetildiğini bildirir. Okunamayan veya tutarsız mise sahiplik meta verileri de araç adını tahmin etmeden değişikliği reddeder; `--tag preview` mise içinde yapılandırılmış seçimi değiştirmez.
+OpenRelay mise üzerinden kurulduğunda bu komut proxy'yi durdurmadan veya paket dosyalarını değiştirmeden önce başarısız olur ve doğrulanmış yerel mise diğer adını kullanarak `mise upgrade <tool>` komutunu gösterir. Güncelleme denetimi kullanılabilir kalır ve kurulumun harici olarak yönetildiğini bildirir. Okunamayan veya tutarsız mise sahiplik meta verileri de araç adını tahmin etmeden değişikliği reddeder; `--tag preview` mise içinde yapılandırılmış seçimi değiştirmez.
 
-Linux'ta kayıtlı başlatıcısı mise paket başlatıcısı (mise shim'i değil, `<tool>/latest/node_modules/.bin/ocx`) olan bir arka plan hizmeti `mise upgrade` işlemini kendiliğinden izler: yeni sürüm oturduktan yaklaşık on saniye sonra etkin istekleri boşaltır ve yeni sürümle yeniden başlar; mise daha sonra çalıştığı sürümü temizlerse de aynı şekilde toparlanır. macOS'ta, mise shim'i üzerinden kurulan bir hizmette ve ön plandaki bir proxy'de yükseltmeden sonra kendiniz yeniden başlatın (macOS'ta önce `ocx service repair`).
+Linux'ta kayıtlı başlatıcısı mise paket başlatıcısı (mise shim'i değil, `<tool>/latest/node_modules/.bin/ocx`) olan bir arka plan hizmeti `mise upgrade` işlemini kendiliğinden izler: yeni sürüm oturduktan yaklaşık on saniye sonra etkin istekleri boşaltır ve yeni sürümle yeniden başlar; mise daha sonra çalıştığı sürümü temizlerse de aynı şekilde toparlanır. macOS'ta, mise shim'i üzerinden kurulan bir hizmette ve ön plandaki bir proxy'de yükseltmeden sonra kendiniz yeniden başlatın (macOS'ta önce `orl service repair`).
 
-opencodex'i npm'den kendi kendine güncelleyin. Kararlı kurulumlar `@latest`
+OpenRelay'i npm'den kendi kendine güncelleyin. Kararlı kurulumlar `@latest`
 kullanır; önizleme kurulumları `--tag latest|preview` iletmediğiniz sürece
 `@preview` üzerinde kalır. Bir kaynak kod kopyasını algılar ve bunun yerine `git
 pull && bun install` yapmanızı söyler ve o etiket için zaten en yeni
@@ -532,13 +532,13 @@ kurulumları sınırlı bir Unix önbellek sahipliği ve erişim kontrolü çal�
 Windows bu yalnızca Unix denetimini açıkça atlar. Bir arıza tepsi ve proxy hala
 çalışırken iptal eder. Çalışan bir proxy daha sonra dosyalar değiştirilmeden
 önce durdurulur; kurulu bir servis otomatik olarak yeniden oluşturulur ve
-başlatılır, ön plan kurulumu ise sonraki adım olarak `ocx start` yazdırır.
+başlatılır, ön plan kurulumu ise sonraki adım olarak `orl start` yazdırır.
 Kontrol paneli güncelleme kayıtları kalıcı hale getirilmeden önce
 profil/önbellek yollarını ve UID/GID değerlerini maskeler.
 
 ```bash
-ocx update
-ocx update --tag preview
+orl update
+orl update --tag preview
 ```
 
 Yeni sürümler, [Sürüm iş
@@ -547,4 +547,4 @@ bunları npm'de yayınladığında kullanılabilir hale gelir.
 
 ## Remote Hub istemci yaşam döngüsü
 
-`ocx connect <url> --pairing-code-stdin`, `ocx connect status`, `ocx sync` ve `ocx connect rotate --pairing-code-stdin` kullanın. `ocx disconnect` yerel durumu çevrimdışı geri yükler ancak hub anahtarını iptal etmez. Bağlıyken `ocx connect revoke --admin-token-stdin` kayıtlı `apiKeyId` değerini iptal eder; bağlantıdan sonra hub üzerindeki **Bağlantı → API Anahtarları** kullanılmalıdır. Sırlar yalnızca stdin üzerinden geçer, argv'ye yazılmaz.
+`orl connect <url> --pairing-code-stdin`, `orl connect status`, `orl sync` ve `orl connect rotate --pairing-code-stdin` kullanın. `orl disconnect` yerel durumu çevrimdışı geri yükler ancak hub anahtarını iptal etmez. Bağlıyken `orl connect revoke --admin-token-stdin` kayıtlı `apiKeyId` değerini iptal eder; bağlantıdan sonra hub üzerindeki **Bağlantı → API Anahtarları** kullanılmalıdır. Sırlar yalnızca stdin üzerinden geçer, argv'ye yazılmaz.

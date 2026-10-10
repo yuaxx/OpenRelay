@@ -109,7 +109,7 @@ function stopOutcome(record: StopRunRecord, signals: StopRunSignals): StopSummar
 
 function stopMessage(record: StopRunRecord, signals: StopRunSignals, outcome: StopSummaryJson["outcome"]): string {
   if (record.proxy === "respawned") return "The proxy was respawned after the stop; it is still running.";
-  if (record.proxy === "ownership-refused") return "The proxy refused the stop; it belongs to a different opencodex home.";
+  if (record.proxy === "ownership-refused") return "The proxy refused the stop; it belongs to a different OpenRelay home.";
   if (record.proxy === "unresolvable-pid") return "A proxy is answering, but its process id could not be resolved, so it was not stopped.";
   if (record.proxy === "stop-failed") return "The proxy process could not be stopped.";
   if (record.service === "failed") return "The installed service manager did not stop and may respawn the proxy.";

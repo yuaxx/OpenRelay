@@ -1,16 +1,18 @@
 ---
 title: Web Dashboard
-description: The opencodex GUI for proxy health, providers, models, delegation guidance, auth pools, usage, and logs.
+description: The OpenRelay GUI for proxy health, providers, models, delegation guidance, auth pools, usage, and logs.
 ---
 
-opencodex ships a local web dashboard (a Vite/React app under `gui/`) served from the proxy. It is the
+OpenRelay ships a local web dashboard (a Vite/React app under `gui/`) served from the proxy. It is the
 shortest path to managing providers, Codex/ChatGPT accounts, catalog models, sidecars, sub-agent
 settings, and request traffic.
+
+The OpenRelay fork presents a refreshed shell, Dashboard and Providers workspace, with Light/Dark/System themes. Provider quota cards expand to show individual accounts; expanding a card does not refresh its data. Provider and account refresh controls keep their existing scope. The sidebar retains OpenCodex attribution.
 
 ## Opening it
 
 ```bash
-ocx gui
+orl gui
 ```
 
 This opens `http://localhost:<port>` in your browser — or `http://127.0.0.1:<management port>` when hub
@@ -18,7 +20,7 @@ management ingress is enabled — auto-starting the proxy first if needed. In
 development you can run the GUI dev server separately against a running proxy:
 
 ```bash
-ocx start
+orl start
 bun run dev:gui
 ```
 
@@ -58,7 +60,7 @@ takes precedence over the file, and the file is then neither read nor created. P
 distinct from your data-plane credential (`OPENCODEX_API_AUTH_TOKEN` or a configured API key) —
 reusing one is rejected.
 
-There is no CLI command that prints the token. `ocx doctor` deliberately reports whether a
+There is no CLI command that prints the token. `orl doctor` deliberately reports whether a
 credential is present without ever revealing its value.
 
 ### When a local dashboard cannot start a session
@@ -106,18 +108,36 @@ is visible) and never forces an upstream refresh.
 - The right edge shows when the dashboard last read the reports. It turns amber when the latest
   read failed and the previous reading is still shown.
 
+### Unified quota overview
+
+Open **Providers** and leave the provider rail unselected to see quota for configured providers
+and their accounts together. Each provider row uses the existing provider quota report; account
+rows use the account readings already loaded by the Providers page. Known windows show usage and
+reset time and the date of the last successful reading. Accounts with no reading, an unsupported quota
+lookup, stale data, or a failed lookup show separate states. A missing limit is never shown as
+zero usage. Antigravity groups appear under their upstream labels when the provider reports them;
+the dashboard does not infer which models belong to a group. A custom API-key provider such as
+api.navy shows an unsupported lookup when its configured key reports that mode. **Refresh provider
+quotas** refreshes provider reports; use the provider's own Accounts or API Keys view for a fresh
+account reading. The global quota summary bar remains available on every page.
+
+The overview marks a probed reading stale at the existing 30-minute provider display bound;
+this is a presentation rule derived from the reading time, not an upstream status. An older
+provider report is not drawn as a live quota bar, but its last successful reading time remains
+visible when the dashboard still has it. Passively observed reports keep their observation age.
+
 ## What you can do
 
 | Area | What it does |
 | --- | --- |
 | **Dashboard summary** | Multi-agent mode, online state, version, uptime, provider count, 30-day token total, active providers, and available native/routed models. |
-| **Sub-agent delegation** | Choose a native or routed model and optional reasoning effort shared by OpenCodex delegation guidance and the separate native-default opt-in. This is not a proxy-side per-spawn router; see below. |
+| **Sub-agent delegation** | Choose a native or routed model and optional reasoning effort shared by OpenRelay delegation guidance and the separate native-default opt-in. This is not a proxy-side per-spawn router; see below. |
 | **Sidecars** | Choose the web-search model and effort plus the vision-description model. Changes apply on the next request. |
 | **Maintenance** | Resync the Codex model catalog, inspect project-local config bypass warnings, check the latest or preview release, and run an update with optional proxy restart. In the desktop shell, its update entry opens the native app update page instead of running the package updater. |
 | **Startup safety** | Show whether injected Codex routing survives a restart, with separate service and launcher-shim health plus exact repair commands. |
 | **Windows tray** | Install a per-user login tray for one-click proxy start, stop, restart, dashboard access, and status. The tray is a controller, not a proxy restart service. |
-| **Codex autostart** | Allow an already-installed Codex launcher shim to run `ocx ensure`. This toggle does not install a shim or background service. |
-| **Providers** | Add, edit, set the default (enabled providers only), enable/disable, and remove providers; manage OAuth account pools and API-key pools where supported. Removing the current default switches to the first remaining enabled provider when one exists; otherwise deletion is refused and the current default is kept. Provider Settings can disable live model discovery for endpoints with missing, slow, or oversized `/models` catalogs. For Claude (Anthropic) OAuth pools, each logged-in account shows its own 5-hour and weekly rate-limit bars (usage is per credential); a failed probe keeps the last-known bars and marks them unavailable until the next successful refresh. The Provider Overview shown when no provider is selected carries a **Refresh all quotas** control that forces one server-side re-read of every configured provider; a provider whose upstream probe fails keeps its last-good row, so the status line reports that the check completed rather than claiming every value is fresh, and each row's own age stays the per-provider freshness signal. |
+| **Codex autostart** | Allow an already-installed Codex launcher shim to run `orl ensure`. This toggle does not install a shim or background service. |
+| **Providers** | Add, edit, set the default (enabled providers only), enable/disable, and remove providers; manage OAuth account pools and API-key pools where supported. Removing the current default switches to the first remaining enabled provider when one exists; otherwise deletion is refused and the current default is kept. Provider Settings can disable live model discovery for endpoints with missing, slow, or oversized `/models` catalogs. For Claude (Anthropic) OAuth pools, each logged-in account shows its own 5-hour and weekly rate-limit bars (usage is per credential); a failed probe keeps the last-known bars and marks them unavailable until the next successful refresh. The Provider Overview shown when no provider is selected carries a **Refresh provider quotas** control that forces one server-side re-read of every configured provider; a provider whose upstream probe fails keeps its last-good row, so the status line reports that the check completed rather than claiming every value is fresh. Account readings retain their separate refresh controls. |
 | **Add provider** | One search above the tabs reaches all four at once — Accounts, Free, Local, Paid. While a query is live the results are grouped by tab with a count each, and the selected tab stays put rather than jumping. Press ArrowDown in the search box to focus the first available result action, skipping disabled buttons; if no action is available, focus stays in the search box. Local runtimes (Ollama, vLLM, LM Studio, LiteLLM) have their own tab, and a long provider note clamps to two lines with the full text one click away. Claude Code CLI (subscription) sits under Paid with a Subscription CLI badge, and selecting it warns that it bills the signed-in Claude subscription through `claude -p` and never uses an API key (use `anthropic-apikey` for key billing). |
 | **Codex Auth** | Add ChatGPT/Codex pool accounts, select the next-session account, refresh 5h / weekly / 30d quotas, enable or disable quota auto-switch, set its 1–100% threshold, and configure transient-failure failover. |
 | **Subagents** | Feature up to five bare native or namespaced routed models in the `spawn_agent` override list. |
@@ -125,7 +145,7 @@ is visible) and never forces an upstream refresh.
 | **Logs** | Auto-refresh recent requests with tokens, requested effort and (when available) effective outbound effort, resolved model, provider, status, request id, duration, and error details. The detail view includes the exact reasoning wire field when the adapter emits one. Filter by opaque conversation/session id (when the client sends one) to total tokens and estimated list-price cost for the currently loaded Logs ring. |
 | **Usage / Debug** | Inspect token-usage coverage and trends. The Usage page's Models table also breaks each model down into input tokens, output tokens, cache hits, cache writes, and cache hit rate; a dash means cache telemetry for that metric is unavailable. Or enable opt-in provider transport and usage-extraction diagnostics. |
 | **Storage** | Read-only CODEX_HOME disk breakdown (sessions, archives, DBs, attachments). Optional archived cleanup: preview the oldest N%, then quarantine to `CODEX_HOME/.trash` (default) or permanently delete behind an explicit checkbox. **Auto-cleanup policy** is opt-in and **default OFF** (`storageCleanupPolicy.enabled`); configure threshold/target/schedule/mode on the Storage page, or trigger **Run now**. Quarantined entries can be restored from the Storage page (JSONL + threads). Active sessions stay read-only. Cleanup and restore are refused while Codex holds the newest/active `state_*.sqlite` locked. |
-| **Stop** | Gracefully stop the proxy and installed background service, restore native Codex, and exit (`POST /api/stop`). On Windows with the Task Scheduler backend the dashboard refuses and asks you to run `ocx stop` instead: that wrapper can respawn the proxy after the task ends, and only a stop running outside this process can verify the restart window before restoring your client config. Nothing is changed when it refuses. It also refuses for a proxy the OpenCodex desktop app runs, which the app would start again: use the app's tray **Stop proxy** or **Quit** there. |
+| **Stop** | Gracefully stop the proxy and installed background service, restore native Codex, and exit (`POST /api/stop`). On Windows with the Task Scheduler backend the dashboard refuses and asks you to run `orl stop` instead: that wrapper can respawn the proxy after the task ends, and only a stop running outside this process can verify the restart window before restoring your client config. Nothing is changed when it refuses. It also refuses for a proxy the OpenRelay desktop app runs, which the app would start again: use the app's tray **Stop proxy** or **Quit** there. |
 
 If some usage records cannot be included, the Usage page, Dashboard, provider workspace, provider
 catalog, and API key views show a warning even when no readable records remain. Counts, dates, and
@@ -150,7 +170,7 @@ but does not match partial names. Choices that disappear from the ring reset to 
 The conversation field also accepts a pasted `codex://threads/<id>` deep link, the form a
 Codex "copy session link" puts on the clipboard — the wrapper and any link metadata such
 as `?hostId=…` are ignored and the bare thread id is matched, the same value an
-`ocx logs filter --conversation` search unwraps.
+`orl logs filter --conversation` search unwraps.
 
 Time windows cover the last 15 minutes, hour, or day and refresh every 30 seconds while the
 Logs tab is active, even with auto-refresh off. Windows use the proxy timestamp from
@@ -252,19 +272,19 @@ badges and discovery information remain separate from that count.
 ## Delegation picker vs spawn routing
 
 The Dashboard's **Sub-agent delegation** picker stores `injectionModel` and, optionally,
-`injectionEffort`. **OpenCodex multi-agent guidance** independently controls the delegation
+`injectionEffort`. **OpenRelay multi-agent guidance** independently controls the delegation
 instructions that use those values. On eligible v2 turns, that guidance tells the parent
 agent which exact model and reasoning effort to pass to `spawn_agent`; clearing the model also clears
 the stored effort.
 
 The default-off **Use as native Codex subagent defaults** switch applies the same selection to Codex's
-native `[agents]` defaults on the next sync/restart when OpenCodex manages the active Codex routing.
+native `[agents]` defaults on the next sync/restart when OpenRelay manages the active Codex routing.
 External user-managed provider configs remain untouched. Those defaults affect newly created Codex tasks
 and do not themselves cause delegation. Existing user-owned `[agents]` defaults are preserved rather
 than overwritten, so they may continue to override the requested defaults.
 
 :::caution
-Neither control is a proxy-side cross-model spawn router. OpenCodex guidance asks Codex to pass
+Neither control is a proxy-side cross-model spawn router. OpenRelay guidance asks Codex to pass
 overrides to `spawn_agent`; native `[agents]` defaults apply only when Codex creates a new task after
 they have been synchronized. See
 [Sub-agent Surface](/guides/sub-agent-surface/) for the canonical v1/base/v2 behavior.
@@ -323,10 +343,10 @@ and other providers.
 :::caution[Provider-policy responsibility]
 The account pool is a technical account-management, routing, and resilience feature. It does not
 claim that having multiple accounts is itself prohibited; compliance depends on the account setup and
-use pattern. OpenCodex does not endorse using additional accounts to circumvent rate limits, quotas,
+use pattern. OpenRelay does not endorse using additional accounts to circumvent rate limits, quotas,
 plan limits, or other provider restrictions, or sharing account credentials between people. You are
 responsible for complying with the provider's current terms for every connected account and use
-pattern. Provider restrictions, suspension, or termination are outside OpenCodex's control;
+pattern. Provider restrictions, suspension, or termination are outside OpenRelay's control;
 maintainers do not provide policy advice and cannot resolve provider enforcement. Review
 [OpenAI's current Terms of Use](https://openai.com/policies/terms-of-use/).
 :::
@@ -339,7 +359,7 @@ maintainers do not provide policy advice and cannot resolve provider enforcement
   Higher order is used first, and the pool drops to a lower order only once every account above it is
   drained or unavailable. A changed order applies from the next unbound request and never moves a
   thread that is already bound. The Codex Desktop (main) account is ordered like any other, so it can
-  be set to **Last** and kept as the reserve. An order set from `ocx account priority` outside those
+  be set to **Last** and kept as the reserve. An order set from `orl account priority` outside those
   five presets stays visible and selectable on the card.
 - Thread affinity prevents per-request flapping. With `pool.cacheAffinity` on (the default), a
   long-running thread is not rebound merely because usage crossed the threshold; it stays until the
@@ -372,7 +392,7 @@ maintainers do not provide policy advice and cannot resolve provider enforcement
   model ids continue to use the configured Pool or Direct behavior.
 - Account add, remove, and picker-setting changes are saved before the model catalog is refreshed.
   If that bounded refresh cannot finish, the dashboard shows an amber success-with-recovery notice;
-  run `ocx sync` to retry. The account or setting change itself remains saved.
+  run `orl sync` to retry. The account or setting change itself remains saved.
 
 The Providers overview separately summarizes Pool-mode usage as a display-only weighted capacity
 estimate, alongside the effective account's raw quota and the next capacity recovery. See
@@ -381,14 +401,14 @@ visible fields, incomplete-coverage meaning, and routing boundary.
 
 ## Starring is yours to decide, not an agent's
 
-The sidebar's star button — and the one-time question `ocx start` asks in an interactive
-terminal — goes through **your own `gh` login**. opencodex holds no GitHub token, and the
+The sidebar's star button — and the one-time question `orl start` asks in an interactive
+terminal — goes through **your own `gh` login**. OpenRelay holds no GitHub token, and the
 only thing it learns is your yes or no.
 
 Because that writes to your GitHub account, agent-driven callers are refused rather than
 allowed to answer for you:
 
-- `ocx start` and `ocx service install` **skip the prompt entirely** when an agent or CI
+- `orl start` and `orl service install` **skip the prompt entirely** when an agent or CI
   harness is driving them (`CLAUDECODE`, `CODEX_THREAD_ID`, `CURSOR_TRACE_ID`, `CI`, and
   similar). The one-time marker stays unwritten, so the real prompt still shows up on your
   next hand-typed run. The agent is told to ask you instead — and to ask as a plain Yes/No
@@ -430,7 +450,7 @@ The GUI is a thin client over the proxy's JSON management API. Useful endpoints 
 | `POST /api/codex-auth/login` · `GET /api/codex-auth/login-status` | Add a pool account through browser login. |
 | `GET /api/logs?tail=50&limit=20&offset=0&provider=...&status=5xx` | Read recent request metadata with optional tail, provider, and exact/class status filters. With `limit`/`offset`, paging walks backward from the newest row (`offset=0` returns the latest page). Response shape: `{ timeZone, generatedAt, total, logs }` where `total` is the filtered row count before pagination. |
 | `GET` / `PUT /api/subagent-models` | Read or set the five featured `spawn_agent` override models. |
-| `POST /api/stop` | Stop the proxy/service, restore native Codex, and exit. Refused with `respawnable_service` on the Windows Task Scheduler backend, with `self_unload_service` when this proxy is itself the installed launchd/systemd job, and with `service_state_unknown` when the Task Scheduler state cannot be read; nothing is changed in any of those cases. A dashboard session is also refused, with `desktop_supervised`, while the OpenCodex desktop app runs the proxy. |
+| `POST /api/stop` | Stop the proxy/service, restore native Codex, and exit. Refused with `respawnable_service` on the Windows Task Scheduler backend, with `self_unload_service` when this proxy is itself the installed launchd/systemd job, and with `service_state_unknown` when the Task Scheduler state cannot be read; nothing is changed in any of those cases. A dashboard session is also refused, with `desktop_supervised`, while the OpenRelay desktop app runs the proxy. |
 
 :::tip
 Adding **Ollama Cloud** or another catalog provider from the dashboard copies its text-versus-vision
@@ -440,7 +460,7 @@ is gated correctly without manual classification.
 
 ### Pairing this browser with a hub
 
-Machine enrollment and browser authentication are separate. The pairing panel names the hub and displays an `ocx gui pair --origin` command for the exact origin currently open in your browser. Run that command on the hub, or send it to the hub operator and request a one-time pairing code. Paste that code into the panel; a data API key or admin token is not a pairing code.
+Machine enrollment and browser authentication are separate. The pairing panel names the hub and displays an `orl gui pair --origin` command for the exact origin currently open in your browser. Run that command on the hub, or send it to the hub operator and request a one-time pairing code. Paste that code into the panel; a data API key or admin token is not a pairing code.
 
 While browser authentication is pending, the dashboard does not recommend restarting a healthy connected client. Completing pairing refreshes the dashboard data immediately, including a previously cached authentication failure. Session expiry returns to pairing; permission denial keeps its own access-settings guidance. Other failed refreshes may show the last received data with a stale-data notice and retry action.
 

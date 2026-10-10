@@ -1,6 +1,6 @@
 ---
 title: Участие в разработке
-description: Разработка opencodex — настройка окружения, структура, конвенции и добавление провайдера или адаптера.
+description: Разработка OpenRelay — настройка окружения, структура, конвенции и добавление провайдера или адаптера.
 ---
 
 ## Настройка окружения
@@ -77,7 +77,7 @@ GitHub Actions намеренно остаются компактными:
 - **Cross-platform CI** (`.github/workflows/ci.yml`) запускается на pull request и push в `main`,
   затрагивающих файлы рантайма, тестов, пакета, скриптов, TypeScript или воркфлоу. Его Bun-матрица
   покрывает Linux, Windows и macOS: install, typecheck, тесты, privacy scan, smoke-сборка
-  release-helper, сборка GUI и `ocx help`. Отдельная линия на тех же трёх ОС подтверждает, что
+  release-helper, сборка GUI и `orl help`. Отдельная линия на тех же трёх ОС подтверждает, что
   npm global install работает без отдельно установленного Bun — за счёт runtime, входящего в
   состав пакета.
 - **Release** (`.github/workflows/release.yml`) запускается вручную. Он не служит вторым полным
@@ -152,7 +152,7 @@ Pull request'ы с ребейзом приветствуются: ребейз �
 },
 ```
 
-`src/providers/derive.ts` передаёт эту запись в `ocx init`, `ocx provider`, пресеты дашборда, вход
+`src/providers/derive.ts` передаёт эту запись в `orl init`, `orl provider`, пресеты дашборда, вход
 по API-ключу и seed-конфигурации OAuth. `enrichProviderFromCatalog()` копирует метаданные моделей и
 классификацию возможностей в сохранённую конфигурацию провайдера. Реализации OAuth-протоколов
 по-прежнему живут в `src/oauth/`; одни лишь метаданные реестра ещё не образуют OAuth-flow.

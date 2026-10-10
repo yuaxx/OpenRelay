@@ -1,6 +1,6 @@
 import type { importOrcaAccounts } from "../codex/orca-import";
 
-const USAGE = "Usage: ocx account import-orca --source <orca-data-directory> --registry <orca-data.json> [--apply] [--json]";
+const USAGE = "Usage: orl account import-orca --source <orca-data-directory> --registry <orca-data.json> [--apply] [--json]";
 
 export interface OrcaImportCommandDeps {
   importAccounts?: typeof importOrcaAccounts;

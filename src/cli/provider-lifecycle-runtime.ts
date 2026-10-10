@@ -13,14 +13,14 @@ import {
 } from "./runtime-api";
 
 const USAGE = `Usage:
-  ocx provider add <name> --live [--adapter <id>] [--base-url <url>]
+  orl provider add <name> --live [--adapter <id>] [--base-url <url>]
       [--api-key <key>] [--api-key-transport <x-api-key|bearer>]
       [--auth-mode <key|forward|oauth|local>] [--responses-path <path>]
       [--default-model <id>] [--model <id> --text-only]
       [--google-tool-schema-policy <compatible|reject-lossy>]
       [--allow-private-network] [--set-default] [--force] [--json]
-  ocx provider set-default <name> --live [--json]
-  ocx provider remove <name> --live --yes [--json]
+  orl provider set-default <name> --live [--json]
+  orl provider remove <name> --live --yes [--json]
 Add checks the target roster before writing; a concurrent change can still win the upsert race.
 --force permits overwriting an observed provider. --sync is not supported with --live.
 Remove uses server default reassignment, dependency checks and account/custom-model cleanup.`;

@@ -1,15 +1,15 @@
 ---
 title: Liaison distante
-description: Connecter un ordinateur OpenCodex Home à un ordinateur Child avec SSH.
+description: Connecter un ordinateur OpenRelay Home à un ordinateur Child avec SSH.
 ---
 
-Une liaison entre machines connecte un ordinateur OpenCodex **Home** à un ordinateur **Child** avec SSH. Home sert le trafic de Child par le tunnel SSH, et les deux ordinateurs gardent leur service OpenCodex local sur le port `10100`. Le tableau de bord transmet la clé de liaison propre à Child par SSH, sans vous demander de saisir un jeton.
+Une liaison entre machines connecte un ordinateur OpenRelay **Home** à un ordinateur **Child** avec SSH. Home sert le trafic de Child par le tunnel SSH, et les deux ordinateurs gardent leur service OpenRelay local sur le port `10100`. Le tableau de bord transmet la clé de liaison propre à Child par SSH, sans vous demander de saisir un jeton.
 
 ## Conditions requises
 
 - Home peut se connecter à Child avec une clé OpenSSH.
 - Pour une liaison initiée par Child, Child peut se connecter à Home avec une clé OpenSSH (la connexion par mot de passe n’est pas prise en charge).
-- OpenCodex 2.66.0 ou ultérieur est installé sur Child (et sur Home pour une liaison initiée par Child).
+- OpenRelay 2.66.0 ou ultérieur est installé sur Child (et sur Home pour une liaison initiée par Child).
 - Les deux ordinateurs utilisent macOS ou Linux.
 - Le tableau de bord qui ajoute un Child depuis Home est ouvert sur Home ou via une session Hub appairée. Transformer l’ordinateur actuel en Child exige une session de tableau de bord appairée par l’opérateur ; une session locale sans identifiant ne peut pas valider ce changement de routage.
 
@@ -25,7 +25,7 @@ SSH par mot de passe et Windows restent hors du flux actuel. Une liaison peut ê
 
 Le tableau de bord ne demande pas de saisir un jeton. Il sonde d’abord l’hôte et ne peut appliquer la liaison qu’après votre confirmation explicite de l’empreinte.
 
-La fenêtre d’ajout Child rappelle que Child utilise les fournisseurs de ce Home via SSH et affiche les prérequis ci-dessus. Les alias viennent de `~/.ssh/config` sur le Home exécutant OpenCodex, pas forcément de l’ordinateur du navigateur. Si la recherche réussit sans hôte, ajoutez une entrée `Host` comme ci-dessous puis relancez la recherche. La saisie manuelle d’un alias existant reste possible ; sélectionner ou saisir un alias active le test de connexion. La fenêtre propose un lien vers ce guide.
+La fenêtre d’ajout Child rappelle que Child utilise les fournisseurs de ce Home via SSH et affiche les prérequis ci-dessus. Les alias viennent de `~/.ssh/config` sur le Home exécutant OpenRelay, pas forcément de l’ordinateur du navigateur. Si la recherche réussit sans hôte, ajoutez une entrée `Host` comme ci-dessous puis relancez la recherche. La saisie manuelle d’un alias existant reste possible ; sélectionner ou saisir un alias active le test de connexion. La fenêtre propose un lien vers ce guide.
 
 ```sshconfig
 Host devbox
@@ -45,11 +45,11 @@ Sur l’ordinateur qui doit utiliser les fournisseurs de Home :
 3. Choisissez l’hôte SSH de Home, lancez le test de connexion, puis comparez et confirmez son empreinte d’hôte.
 4. Lisez l’avertissement et choisissez **Connect as Child**.
 
-La connexion redémarre OpenCodex sur cet ordinateur. Les tours Codex déjà en cours se terminent d’abord, et les nouvelles requêtes peuvent échouer pendant une minute au plus pendant le redémarrage. Le tableau de bord se recharge ensuite de lui-même et affiche la liaison Child. Codex continue d’utiliser `http://127.0.0.1:<port>/v1` sur cet ordinateur, sans jeton ni variable d’environnement à définir : l’OpenCodex local relaie chaque requête vers Home, qui y répond avec ses propres fournisseurs et comptes.
+La connexion redémarre OpenRelay sur cet ordinateur. Les tours Codex déjà en cours se terminent d’abord, et les nouvelles requêtes peuvent échouer pendant une minute au plus pendant le redémarrage. Le tableau de bord se recharge ensuite de lui-même et affiche la liaison Child. Codex continue d’utiliser `http://127.0.0.1:<port>/v1` sur cet ordinateur, sans jeton ni variable d’environnement à définir : l’OpenRelay local relaie chaque requête vers Home, qui y répond avec ses propres fournisseurs et comptes.
 
-Si **Child** demande de jumeler d’abord cet ordinateur, ouvrez son tableau de bord HTTP à l’adresse IP de bouclage configurée, par exemple `http://127.0.0.1:<configured-port>`. Le formulaire de jumelage local apparaît uniquement lorsque le jumelage manque et que le tableau de bord et l’API utilisent la même origine de bouclage. Copiez la commande `ocx gui pair --origin "http://127.0.0.1:<configured-port>"` du formulaire, exécutez-la dans un terminal sur cet ordinateur, puis collez le code à usage unique dans le formulaire. Utilisez exactement l’origine affichée ; une clé API de fournisseur ou un jeton d’administration n’est pas un code de jumelage. L’absence de jumelage et un port différent du port configuré sont deux causes distinctes.
+Si **Child** demande de jumeler d’abord cet ordinateur, ouvrez son tableau de bord HTTP à l’adresse IP de bouclage configurée, par exemple `http://127.0.0.1:<configured-port>`. Le formulaire de jumelage local apparaît uniquement lorsque le jumelage manque et que le tableau de bord et l’API utilisent la même origine de bouclage. Copiez la commande `orl gui pair --origin "http://127.0.0.1:<configured-port>"` du formulaire, exécutez-la dans un terminal sur cet ordinateur, puis collez le code à usage unique dans le formulaire. Utilisez exactement l’origine affichée ; une clé API de fournisseur ou un jeton d’administration n’est pas un code de jumelage. L’absence de jumelage et un port différent du port configuré sont deux causes distinctes.
 
-Le rôle **Child** exige également qu’OpenCodex fonctionne en mode autonome sur son port configuré, car Child redémarre exactement sur ce port. Si le tableau de bord indique qu’OpenCodex ne tourne pas sur son port configuré, redémarrez-le d’abord sur ce port.
+Le rôle **Child** exige également qu’OpenRelay fonctionne en mode autonome sur son port configuré, car Child redémarre exactement sur ce port. Si le tableau de bord indique qu’OpenRelay ne tourne pas sur son port configuré, redémarrez-le d’abord sur ce port.
 
 ## État de la liaison
 
@@ -66,22 +66,22 @@ Sélectionnez **Disconnect** pour Child et confirmez son alias. Home arrête le 
 Si Home ne peut pas joindre Child pour exécuter la déconnexion, choisissez **Remove here only**. Cela supprime le tunnel, la clé et l’enregistrement locaux. Connectez-vous ensuite à Child et exécutez :
 
 ```bash
-ocx disconnect
+orl disconnect
 ```
 
-Pour déconnecter une liaison initiée par Child, exécutez `ocx disconnect` sur Child. La commande déconnecte le tunnel client et révoque la liaison sur Home via SSH. Si cette révocation échoue, elle affiche : `Home revoke failed; run ocx link revoke --link-id <linkId> on the home.`
+Pour déconnecter une liaison initiée par Child, exécutez `orl disconnect` sur Child. La commande déconnecte le tunnel client et révoque la liaison sur Home via SSH. Si cette révocation échoue, elle affiche : `Home revoke failed; run orl link revoke --link-id <linkId> on the home.`
 
 ## Sécurité
 
-Child utilise les fournisseurs et les identifiants de fournisseur de l’ordinateur Home via la liaison. Home crée une clé distincte pour chaque Child ; la suppression de la liaison révoque cette clé. Comparez l’empreinte de l’hôte avant de confirmer afin de ne pas accepter par erreur une mauvaise machine ou une clé modifiée. Les sessions du tableau de bord émises depuis une identité Tailscale ne peuvent pas gérer les liaisons. Sur Child, la clé reste dans OpenCodex : les identifiants que Codex ou Claude Code envoient sur Child ne sont pas transmis à Home, et tout programme de Child qui atteint `127.0.0.1:<port>` utilise Home sans clé, avec la même confiance locale qu’une installation autonome. Les pages web d’autres sites sont refusées.
+Child utilise les fournisseurs et les identifiants de fournisseur de l’ordinateur Home via la liaison. Home crée une clé distincte pour chaque Child ; la suppression de la liaison révoque cette clé. Comparez l’empreinte de l’hôte avant de confirmer afin de ne pas accepter par erreur une mauvaise machine ou une clé modifiée. Les sessions du tableau de bord émises depuis une identité Tailscale ne peuvent pas gérer les liaisons. Sur Child, la clé reste dans OpenRelay : les identifiants que Codex ou Claude Code envoient sur Child ne sont pas transmis à Home, et tout programme de Child qui atteint `127.0.0.1:<port>` utilise Home sans clé, avec la même confiance locale qu’une installation autonome. Les pages web d’autres sites sont refusées.
 
 ## Référence CLI
 
 ```text
-ocx link port [--json]
-ocx link issue --alias <alias> --tunnel-port <port> [--json]
-ocx link status [--json]
-ocx link revoke --link-id <id> [--json]
+orl link port [--json]
+orl link issue --alias <alias> --tunnel-port <port> [--json]
+orl link status [--json]
+orl link revoke --link-id <id> [--json]
 ```
 
 ## Guides associés

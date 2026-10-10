@@ -3,7 +3,7 @@ title: "Sidecars: Web Search & Vision"
 description: Give routed models real web search and text-only models image understanding through native ChatGPT sidecars.
 ---
 
-Routed models do not all expose hosted **web search** or native **image input**. opencodex backfills
+Routed models do not all expose hosted **web search** or native **image input**. OpenRelay backfills
 those capabilities with two sidecars. Both support a ChatGPT-login (`forward`) provider or stored
 Anthropic OAuth provider; web search can additionally use stored Grok OAuth through the explicit
 `xai` backend. Sidecar errors become bounded tool results or image markers instead of failing the
@@ -26,17 +26,17 @@ a missing credential produces no sidecar plan and the request takes the normal r
 
 | Backend | Runs | Credential | Notes |
 | --- | --- | --- | --- |
-| `xai` | Grok hosted `web_search` (+ opt-in `x_search`) on `api.x.ai` Responses | Stored Grok OAuth (`ocx login xai`) | `webSearchSidecar.xSearch` enables X search with `allowedXHandles`/`excludedXHandles` (max 20, mutually exclusive) and ISO `fromDate`/`toDate`. Default model `grok-4.6`. |
-| `gemini` | `google_search` grounding on the Antigravity transport | Stored Antigravity OAuth with a discovered project (`ocx login google-antigravity`) | Default model `gemini-3.8-flash`; reasoning selects the matching tier. |
+| `xai` | Grok hosted `web_search` (+ opt-in `x_search`) on `api.x.ai` Responses | Stored Grok OAuth (`orl login xai`) | `webSearchSidecar.xSearch` enables X search with `allowedXHandles`/`excludedXHandles` (max 20, mutually exclusive) and ISO `fromDate`/`toDate`. Default model `grok-4.6`. |
+| `gemini` | `google_search` grounding on the Antigravity transport | Stored Antigravity OAuth with a discovered project (`orl login google-antigravity`) | Default model `gemini-3.8-flash`; reasoning selects the matching tier. |
 | `exa` | Exa Search API (non-LLM result digest) | `webSearchSidecar.exaApiKey` | The key is write-only through the management API (never echoed, redacted from logs). No sidecar model applies. |
 
 ## Web-search sidecar
 
-When Codex requests hosted `web_search` for a non-passthrough routed model, opencodex:
+When Codex requests hosted `web_search` for a non-passthrough routed model, OpenRelay:
 
 1. **Drops** the hosted `web_search` tool and exposes a synthetic `web_search(query)` function tool
    to the routed model instead. The original hosted-tool options are retained for the sidecar call.
-2. Runs the routed model in a small **agentic loop**. When it calls `web_search`, opencodex uses the
+2. Runs the routed model in a small **agentic loop**. When it calls `web_search`, OpenRelay uses the
    selected sidecar backend: OpenAI runs hosted `web_search` with `gpt-5.6-luna` by default;
    Anthropic runs `web_search_20250305` with `claude-sonnet-5` by default. The streamed answer and
    citations become a tool result. xAI runs Grok hosted `web_search` with `grok-4.6` by default and,
@@ -50,7 +50,7 @@ When the model batches several queries into one `web_search` call, their results
 query disappears from the result. Shortened answers and unlisted sources are marked
 with their original sizes, which lets the model tell trimmed results from searches that found
 nothing. Structured-output turns receive the same information as one valid JSON document. If a call
-asks for more queries than one result can describe, opencodex lists each query's status without its
+asks for more queries than one result can describe, OpenRelay lists each query's status without its
 content and counts any queries it could not list.
 
 Every routed-model iteration requests upstream `stream: true`, but by default opencodex fully
@@ -100,7 +100,7 @@ relevant images in words and include their source URLs.
 }
 ```
 
-The explicit xAI backend uses the stored credential created by `ocx login xai`. Its optional
+The explicit xAI backend uses the stored credential created by `orl login xai`. Its optional
 `xSearch` block enables X search and may restrict it to one handle list and an ISO date range:
 
 ```json
@@ -140,7 +140,7 @@ failures after response headers have started are delivered as `response.failed` 
 
 Image routing is capability-aware. Before an image-bearing upstream send, opencodex resolves the selected model's effective input modalities from runtime provider evidence, explicit operator declarations, backend/registry metadata, and generated vendor metadata. A target positively known to be text-only goes through the Vision Sidecar first; the image is described **before** the main call and replaced inline with text. A target positively known to support images receives the image directly. Unknown custom models keep the existing compatibility behavior rather than being guessed text-only.
 
-For the canonical ChatGPT Codex route, opencodex uses the `openai-codex` metadata bundle rather than public OpenAI API metadata, so backend-specific modality differences are respected. The native Chat fast path uses the same gate and cannot bypass a known text-only verdict. Without an available sidecar plan, raw images are stripped before a proven text-only backend.
+For the canonical ChatGPT Codex route, OpenRelay uses the `openai-codex` metadata bundle rather than public OpenAI API metadata, so backend-specific modality differences are respected. The native Chat fast path uses the same gate and cannot bypass a known text-only verdict. Without an available sidecar plan, raw images are stripped before a proven text-only backend.
 Combos advertise image input only when every member accepts images, either natively or through a
 sidecar, and the combo's `imageInput` setting is not disabled, so clients such as the Codex app
 allow attachments instead of blocking them before the sidecar runs. When
@@ -223,7 +223,7 @@ omitted keys unchanged. `timeoutMs` uses the runtime integer bounds
 (1–2147483647 ms).
 
 The web-search sidecar card carries the same control shape: the model picker's first row is
-**Off**. Off does two things, and the second one is the reason the row exists. OpenCodex stops
+**Off**. Off does two things, and the second one is the reason the row exists. OpenRelay stops
 intercepting `web_search`, and the Codex integration writes Codex's own
 `web_search = "disabled"` mode into `~/.codex/config.toml` — because Codex keeps declaring its
 native hosted `web_search` tool until its own mode says otherwise, and the tool a client
@@ -231,7 +231,7 @@ advertises is the one the model reaches for. An operator who wants an MCP search
 the only search path needs both halves; otherwise the model keeps calling the native tool.
 
 `web_search` is Codex's key with its own value space (`disabled`, `cached`, `indexed`, `live`).
-OpenCodex only ever writes `disabled` while the sidecar is off, and removes its marker-owned line
+OpenRelay only ever writes `disabled` while the sidecar is off, and removes its marker-owned line
 again once the sidecar is back on — a re-enabled sidecar whose client still had the native tool
 switched off would have nothing to intercept. The write needs a managed `~/.codex/config.toml` (`ocx
 sync`); the management response reports it as `codexWebSearch`, and both surfaces that can show it
@@ -241,7 +241,7 @@ the ordinary "nothing changed" answer reports `not_requested` and prints nothing
 `web_search` line the operator set by hand is replaced while the sidecar is off, since two root keys
 of the same name are not valid TOML. Its exact text is recorded in the Codex journal and put back in
 its place when the sidecar is switched on again — including for a line added after the journal
-snapshot was taken, which `ocx restore` alone cannot cover. The same record is what still
+snapshot was taken, which `orl restore` alone cannot cover. The same record is what still
 recognizes our own `disabled` line when the Codex app has rewritten `config.toml` and dropped the
 comment that named its owner.
 

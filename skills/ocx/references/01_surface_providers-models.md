@@ -10,9 +10,9 @@ Non-mutating probes may still contact providers, consume quota or refresh caches
 
 Declared capabilities: 47.
 
-### `ocx models price`
+### `orl models price`
 
-Usage: `ocx models price <provider/model> [--json]`
+Usage: `orl models price <provider/model> [--json]`
 
 Read the saved manual price for an exact provider/model selector.
 
@@ -30,9 +30,9 @@ JSON mode: `envelope`.
 
 - The provider must be configured; everything after the first slash is the exact upstream model ID.
 
-### `ocx models set-price`
+### `orl models set-price`
 
-Usage: `ocx models set-price <provider/model> (--input <N> --output <N> [--cache-read <N>] [--cache-write <N>]|--auto) [--json]`
+Usage: `orl models set-price <provider/model> (--input <N> --output <N> [--cache-read <N>] [--cache-write <N>]|--auto) [--json]`
 
 Save four manual USD-per-1M-token rates, or restore automatic pricing for one model.
 
@@ -55,9 +55,9 @@ JSON mode: `envelope`.
 
 - Uses the exact upstream model ID after the first slash. Omitted cache rates default to zero; sibling model prices are preserved.
 
-### `ocx models set`
+### `orl models set`
 
-Usage: `ocx models set <provider/model> [--context-window <tokens|0|->] [--modalities <text,image,audio|->] [--reasoning-efforts <levels|->] [--default-reasoning-effort <level|->] [--reset] [--json]`
+Usage: `orl models set <provider/model> [--context-window <tokens|0|->] [--modalities <text,image,audio|->] [--reasoning-efforts <levels|->] [--default-reasoning-effort <level|->] [--reset] [--json]`
 
 Save per-model overrides for a routed model, or clear them back to the computed values.
 
@@ -82,9 +82,9 @@ JSON mode: `envelope`.
 - Context 0 or - and modalities/default effort - clear to null; reasoning efforts - restores inheritance while an empty string stores an empty ladder.
 - --reset clears all four overrides with null and cannot be combined with other settings. A saved-but-catalog-refresh-failed receipt must not be mistaken for an unsaved change.
 
-### `ocx provider list`
+### `orl provider list`
 
-Usage: `ocx provider list [--json|--jsonl]`
+Usage: `orl provider list [--json|--jsonl]`
 
 Configured providers with connectivity and selected models.
 
@@ -101,9 +101,9 @@ JSON mode: `envelope`.
 
 - Local config and registry read, not GET /api/providers. --json and --jsonl are mutually exclusive.
 
-### `ocx provider resets`
+### `orl provider resets`
 
-Usage: `ocx provider resets [--limit <n>] [--json]`
+Usage: `orl provider resets [--limit <n>] [--json]`
 
 Recently detected quota resets and whether reset notifications are enabled.
 
@@ -120,9 +120,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx provider keychain`
+### `orl provider keychain`
 
-Usage: `ocx provider keychain <name> [status|store|restore] [--json]`
+Usage: `orl provider keychain <name> [status|store|restore] [--json]`
 
 Move a provider's API key into the OS keychain, restore it, or report where it lives.
 
@@ -141,9 +141,9 @@ JSON mode: `payload`.
 
 - status reads by provider name; store/restore POST {name,action}. These move an existing secret between config and OS keychain; keep credential material out of transcripts.
 
-### `ocx provider add`
+### `orl provider add`
 
-Usage: `ocx provider add <name> [--adapter <id>] [--base-url <url>] [--responses-path <path>] [--auth-mode <key|forward|oauth|local>] [--api-key <key>] [--api-key-transport <x-api-key|bearer>] [--default-model <id>] [--model <id> --text-only] [--google-tool-schema-policy <compatible|reject-lossy>] [--allow-private-network] [--set-default] [--force] [--sync | --live] [--json]`
+Usage: `orl provider add <name> [--adapter <id>] [--base-url <url>] [--responses-path <path>] [--auth-mode <key|forward|oauth|local>] [--api-key <key>] [--api-key-transport <x-api-key|bearer>] [--default-model <id>] [--model <id> --text-only] [--google-tool-schema-policy <compatible|reject-lossy>] [--allow-private-network] [--set-default] [--force] [--sync | --live] [--json]`
 
 Add a provider locally or explicitly to the running proxy.
 
@@ -181,9 +181,9 @@ JSON mode: `envelope`.
 - Canonical OpenAI uses the target preset unchanged; transport/auth/model overrides are refused in live add. No local registry fallback when a needed target preset is missing.
 - Keep real credentials out of argv and agent transcripts; this does not authorize credential capture.
 
-### `ocx provider show`
+### `orl provider show`
 
-Usage: `ocx provider show <name> [--json]`
+Usage: `orl provider show <name> [--json]`
 
 Inspect one locally configured provider.
 
@@ -199,9 +199,9 @@ JSON mode: `envelope`.
 
 - Reads local config; masks API-key and key-pool fields. This is not a live provider read or a general secret-export interface.
 
-### `ocx provider remove`
+### `orl provider remove`
 
-Usage: `ocx provider remove <name> [--json]; ocx provider remove <name> --live --yes [--json]`
+Usage: `orl provider remove <name> [--json]; orl provider remove <name> --live --yes [--json]`
 
 Remove a local provider or explicitly delete it from the running proxy.
 
@@ -223,9 +223,9 @@ JSON mode: `envelope`.
 - Live removal uses one server DELETE. The server can choose a replacement default and clean custom models, context caps and OAuth accounts; dependency/last-provider refusals stay authoritative.
 - No local fallback, multi-step deletion or automatic retry. A saved result with failed catalog convergence exits nonzero without claiming rollback.
 
-### `ocx provider set-default`
+### `orl provider set-default`
 
-Usage: `ocx provider set-default <name> [--live] [--json]`
+Usage: `orl provider set-default <name> [--live] [--json]`
 
 Select the default provider locally or explicitly on the running proxy.
 
@@ -244,9 +244,9 @@ JSON mode: `envelope`.
 
 - Omission of --live retains local save/no-op semantics. Live sends only setDefault:true; disabled/unknown providers are refused by the server. This operation does not claim client synchronization.
 
-### `ocx provider edit`
+### `orl provider edit`
 
-Usage: `ocx provider edit <name> [--adapter <id>] [--base-url <url>] [--default-model <id|->] [--auth-mode <key|forward|oauth|local|->] [--note <text|->] [--api-key-transport <x-api-key|bearer|->] [--headers <json|->] [--enabled <on|off>] [--live-models <on|off>] [--retain-models <id,id|->] [--model <id> --text-only] [--xai-chat <on|off>] [--allow-private-network <on|off>] [--model-context-tier <model=default|long_context>] [--upstream-http-version <http1.1|->] [--fast <on|off>] [--context-window <tokens|->] [--json]`
+Usage: `orl provider edit <name> [--adapter <id>] [--base-url <url>] [--default-model <id|->] [--auth-mode <key|forward|oauth|local|->] [--note <text|->] [--api-key-transport <x-api-key|bearer|->] [--headers <json|->] [--enabled <on|off>] [--live-models <on|off>] [--retain-models <id,id|->] [--model <id> --text-only] [--xai-chat <on|off>] [--allow-private-network <on|off>] [--model-context-tier <model=default|long_context>] [--upstream-http-version <http1.1|->] [--fast <on|off>] [--context-window <tokens|->] [--json]`
 
 Patch an existing provider through the running proxy.
 
@@ -283,9 +283,9 @@ JSON mode: `payload`.
 - At least one edit is required; only supplied fields are patched. update is an existing alias. Use provider show only for local state, not as proof of the live write.
 - Management errors use safe fixed provider diagnostics; catalog failures retain the saved receipt and a nonzero exit.
 
-### `ocx provider test`
+### `orl provider test`
 
-Usage: `ocx provider test <name> [--json]`
+Usage: `orl provider test <name> [--json]`
 
 Probe a provider's live model discovery connectivity.
 
@@ -303,9 +303,9 @@ JSON mode: `payload`.
 
 - May contact the upstream provider; requires operator intent to probe. Static catalogs can return applicable:false; failed connectivity exits nonzero.
 
-### `ocx provider quota`
+### `orl provider quota`
 
-Usage: `ocx provider quota [--refresh] [--json]`
+Usage: `orl provider quota [--refresh] [--json]`
 
 Read provider quota reports, optionally refreshing them.
 
@@ -324,9 +324,9 @@ JSON mode: `payload`.
 
 - Reads quota observations without changing operator settings. Cache misses may probe upstream even without --refresh; --refresh bypasses the cache and updates observations. This GET is not the POST account-refresh operation.
 
-### `ocx provider presets`
+### `orl provider presets`
 
-Usage: `ocx provider presets [--json]`
+Usage: `orl provider presets [--json]`
 
 Read provider presets from the running proxy.
 
@@ -342,9 +342,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx provider account-mode`
+### `orl provider account-mode`
 
-Usage: `ocx provider account-mode <pool|direct> [--json]`
+Usage: `orl provider account-mode <pool|direct> [--json]`
 
 Set OpenAI Codex account routing to pool or direct.
 
@@ -362,9 +362,9 @@ JSON mode: `payload`.
 
 - Patches codexAccountMode on provider openai; this does not switch the physical Codex login.
 
-### `ocx provider selected`
+### `orl provider selected`
 
-Usage: `ocx provider selected <name> [--set <id,id...>|--clear] [--json]`
+Usage: `orl provider selected <name> [--set <id,id...>|--clear] [--json]`
 
 Read or replace one provider's selected model allowlist.
 
@@ -386,9 +386,9 @@ JSON mode: `envelope`.
 - Without a mutation flag this reads only. --clear sends models:[], not a model named -.
 - Read JSON is the CLI projection {provider, selected: string[], available: string[]}, not the API's provider-keyed maps; missing entries become empty arrays. --set/--clear JSON returns the server's write receipt unchanged.
 
-### `ocx models list`
+### `orl models list`
 
-Usage: `ocx models list [--provider <name>] [--json]`
+Usage: `orl models list [--provider <name>] [--json]`
 
 List static configured models locally.
 
@@ -405,9 +405,9 @@ JSON mode: `envelope`.
 
 - A bare models invocation is equivalent. Reads local config, never the live catalog; use models live for runtime discovery.
 
-### `ocx models add`
+### `orl models add`
 
-Usage: `ocx models add <provider> <modelId> [--display-name <name>] [--context-window <tokens>] [--modalities <text,image,audio>] [--reasoning-efforts <levels|->] [--default-reasoning-effort <level|->] [--live] [--json]`
+Usage: `orl models add <provider> <modelId> [--display-name <name>] [--context-window <tokens>] [--modalities <text,image,audio>] [--reasoning-efforts <levels|->] [--default-reasoning-effort <level|->] [--live] [--json]`
 
 Add a custom model locally or explicitly on the running proxy.
 
@@ -432,9 +432,9 @@ JSON mode: `envelope`.
 - Without --live, saves locally and opportunistically syncs only if a proxy is available. No proxy keeps the save successful with needsSync:true; attempted failure/refusal is nonzero. JSON is one safe save/sync receipt.
 - Live add sends the same metadata to the server and returns its stored custom identity plus catalog outcome. Empty reasoning ladder differs from omitted/inherited metadata. No local fallback.
 
-### `ocx models remove`
+### `orl models remove`
 
-Usage: `ocx models remove <customId|provider/modelId> [--yes] [--live] [--json]`
+Usage: `orl models remove <customId|provider/modelId> [--yes] [--live] [--json]`
 
 Remove an exact custom model locally or on the selected proxy.
 
@@ -456,9 +456,9 @@ JSON mode: `envelope`.
 - Live selection uses the complete target custom roster and an exact stored ID or unambiguous provider/raw selector. Display labels, ID prefixes and encoded/raw collisions never choose a deletion target.
 - One encoded stored-ID DELETE; no alternative-ID retry, local fallback or revision protection. Local JSON saves/syncs retain the same opportunistic policy as add.
 
-### `ocx models list-custom`
+### `orl models list-custom`
 
-Usage: `ocx models list-custom [--json]`
+Usage: `orl models list-custom [--json]`
 
 List locally stored custom model definitions and their IDs.
 
@@ -474,9 +474,9 @@ JSON mode: `payload`.
 
 - Reads local configuration, not the management API.
 
-### `ocx models live`
+### `orl models live`
 
-Usage: `ocx models live [--provider <name>] [--free-only] [--json]`
+Usage: `orl models live [--provider <name>] [--free-only] [--json]`
 
 Read the running proxy's model catalog.
 
@@ -494,9 +494,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx models edit`
+### `orl models edit`
 
-Usage: `ocx models edit <custom-id> [--model-id <id>] [--display-name <name|->] [--context-window <tokens|0>] [--modalities <text,image,audio|->] [--reasoning-efforts <levels|->] [--default-reasoning-effort <level|->] [--json]`
+Usage: `orl models edit <custom-id> [--model-id <id>] [--display-name <name|->] [--context-window <tokens|0>] [--modalities <text,image,audio|->] [--reasoning-efforts <levels|->] [--default-reasoning-effort <level|->] [--json]`
 
 Edit a custom model by its definition ID through the proxy.
 
@@ -520,9 +520,9 @@ JSON mode: `payload`.
 
 - At least one edit is required. Operand is the custom definition ID from list-custom, not a provider/model selector. Discovered-model display-name overrides are a different resource.
 
-### `ocx models enable`
+### `orl models enable`
 
-Usage: `ocx models enable <provider/model|native-model> [--native] [--json]`
+Usage: `orl models enable <provider/model|native-model> [--native] [--json]`
 
 Enable one routed or native catalog model.
 
@@ -539,9 +539,9 @@ State-changing: yes.
 
 JSON mode: `payload`.
 
-### `ocx models disable`
+### `orl models disable`
 
-Usage: `ocx models disable <provider/model|native-model> [--native] [--json]`
+Usage: `orl models disable <provider/model|native-model> [--native] [--json]`
 
 Disable one routed or native catalog model.
 
@@ -558,9 +558,9 @@ State-changing: yes.
 
 JSON mode: `payload`.
 
-### `ocx models provider`
+### `orl models provider`
 
-Usage: `ocx models provider <name> <on|off> [--json]`
+Usage: `orl models provider <name> <on|off> [--json]`
 
 Enable or disable all catalog rows for a provider.
 
@@ -579,9 +579,9 @@ JSON mode: `payload`.
 
 - Reads targets from the live catalog first; refuses a provider without available models.
 
-### `ocx models selected`
+### `orl models selected`
 
-Usage: `ocx models selected <provider> [--set <id,id...>|--clear] [--json]`
+Usage: `orl models selected <provider> [--set <id,id...>|--clear] [--json]`
 
 Read or replace a provider's selected model allowlist.
 
@@ -603,9 +603,9 @@ JSON mode: `envelope`.
 - Without --set or --clear this only reads. A literal - is not the clear spelling.
 - Read JSON is the CLI projection {provider, selected: string[], available: string[]}, not the API's provider-keyed maps; missing entries become empty arrays. --set/--clear JSON returns the server's write receipt unchanged.
 
-### `ocx models preset show`
+### `orl models preset show`
 
-Usage: `ocx models preset show [--provider <name>] [--json]`
+Usage: `orl models preset show [--provider <name>] [--json]`
 
 Inspect shipped model presets and applied versions.
 
@@ -622,9 +622,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx models preset apply`
+### `orl models preset apply`
 
-Usage: `ocx models preset apply <provider> [--all] [--json]`
+Usage: `orl models preset apply <provider> [--all] [--json]`
 
 Apply a provider's curated model preset or show all models.
 
@@ -643,9 +643,9 @@ JSON mode: `payload`.
 
 - An empty preset match preserves the previous selection and reports fallback; do not interpret it as successful narrowing.
 
-### `ocx models new-policy`
+### `orl models new-policy`
 
-Usage: `ocx models new-policy [on|off] [--provider <name>] [--json]`
+Usage: `orl models new-policy [on|off] [--provider <name>] [--json]`
 
 Read or set the policy for newly discovered models.
 
@@ -665,9 +665,9 @@ JSON mode: `payload`.
 
 - No state operand means read only. Only on/off writes exist; no inherit/clear operand is implemented.
 
-### `ocx models new-arrivals`
+### `orl models new-arrivals`
 
-Usage: `ocx models new-arrivals [--json]`
+Usage: `orl models new-arrivals [--json]`
 
 Read recent model discoveries.
 
@@ -683,9 +683,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx models context status`
+### `orl models context status`
 
-Usage: `ocx models context status [--json]`
+Usage: `orl models context status [--json]`
 
 Read routed-provider context caps.
 
@@ -701,9 +701,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx models context value`
+### `orl models context value`
 
-Usage: `ocx models context value <tokens> [--set-all] [--json]`
+Usage: `orl models context value <tokens> [--set-all] [--json]`
 
 Set the default routed-provider context cap value.
 
@@ -722,9 +722,9 @@ JSON mode: `payload`.
 
 - Tokens must be a positive safe integer; separators _ and , are accepted. Without --set-all only the default for future toggles changes.
 
-### `ocx models context provider`
+### `orl models context provider`
 
-Usage: `ocx models context provider <provider> <on|off> [--value <tokens>] [--json]`
+Usage: `orl models context provider <provider> <on|off> [--value <tokens>] [--json]`
 
 Toggle one provider's context cap, optionally choosing its value.
 
@@ -743,9 +743,9 @@ JSON mode: `payload`.
 
 - off disables this provider's cap; --value is not a global value change.
 
-### `ocx models context all`
+### `orl models context all`
 
-Usage: `ocx models context all <on|off> [--json]`
+Usage: `orl models context all <on|off> [--json]`
 
 Enable or disable caps for all routed providers.
 
@@ -761,9 +761,9 @@ State-changing: yes.
 
 JSON mode: `payload`.
 
-### `ocx models shadow status`
+### `orl models shadow status`
 
-Usage: `ocx models shadow status [--json]`
+Usage: `orl models shadow status [--json]`
 
 Read shadow-call settings.
 
@@ -779,9 +779,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx models shadow set`
+### `orl models shadow set`
 
-Usage: `ocx models shadow set [model|-] [--enabled <on|off>] [--json]`
+Usage: `orl models shadow set [model|-] [--enabled <on|off>] [--json]`
 
 Set the shadow-call model or enabled state.
 
@@ -800,9 +800,9 @@ JSON mode: `payload`.
 
 - At least a model or --enabled is required; - clears the model with an empty string. Enabling shadow calls can cause subsequent inference calls.
 
-### `ocx alias list`
+### `orl alias list`
 
-Usage: `ocx alias list [--json]`
+Usage: `orl alias list [--json]`
 
 Read provider and model aliases.
 
@@ -818,9 +818,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx alias set`
+### `orl alias set`
 
-Usage: `ocx alias set <provider|provider/native-model-id> <alias> [--json]`
+Usage: `orl alias set <provider|provider/native-model-id> <alias> [--json]`
 
 Assign a provider or upstream model alias.
 
@@ -839,9 +839,9 @@ JSON mode: `payload`.
 
 - The first slash separates provider from the complete upstream model ID.
 
-### `ocx alias rm`
+### `orl alias rm`
 
-Usage: `ocx alias rm <provider|provider/native-model-id> [--json]`
+Usage: `orl alias rm <provider|provider/native-model-id> [--json]`
 
 Clear a provider or model alias.
 
@@ -860,9 +860,9 @@ JSON mode: `payload`.
 
 - Provider clear sends alias:null; model clear sends remove:[modelId].
 
-### `ocx alias defaults`
+### `orl alias defaults`
 
-Usage: `ocx alias defaults <on|off> [--provider <name>] [--json]`
+Usage: `orl alias defaults <on|off> [--provider <name>] [--json]`
 
 Toggle built-in model aliases globally or for a provider.
 
@@ -879,9 +879,9 @@ State-changing: yes.
 
 JSON mode: `payload`.
 
-### `ocx provider pacing`
+### `orl provider pacing`
 
-Usage: `ocx provider pacing <name> [--json]; ocx provider pacing <name> [--enabled <on|off>] [--rpm <number>] [--min-interval-ms <integer>] [--max-concurrent <integer>] [--json]; ocx provider pacing <name> --file <FILE|-> [--json]`
+Usage: `orl provider pacing <name> [--json]; orl provider pacing <name> [--enabled <on|off>] [--rpm <number>] [--min-interval-ms <integer>] [--max-concurrent <integer>] [--json]; orl provider pacing <name> --file <FILE|-> [--json]`
 
 Read request pacing rules/status or explicitly replace the configured block.
 
@@ -908,9 +908,9 @@ JSON mode: `envelope`.
 - Scalar edits preserve model rules observed from the pinned config; PATCH replaces the block and can overwrite an intervening edit. Use snapshot/apply for public-baseline CAS.
 - File mode validates a complete non-null rules block and writes without a prior rule read. Pacing limits reject zero.
 
-### `ocx provider snapshot`
+### `orl provider snapshot`
 
-Usage: `ocx provider snapshot [--json]`
+Usage: `orl provider snapshot [--json]`
 
 Read the non-secret provider editor snapshot from the running proxy.
 
@@ -929,9 +929,9 @@ JSON mode: `envelope`.
 - Emits exactly {defaultProvider,providers}, validating the canonical editor DTO after removing only GUI display markers. Unexpected secret/unknown fields fail closed.
 - Save this JSON as the baseline for apply; it is not raw config export and carries no cross-invocation target identity. Use the intended host/context.
 
-### `ocx provider apply`
+### `orl provider apply`
 
-Usage: `ocx provider apply --baseline <FILE|-> --file <FILE|-> [--yes] [--json]`
+Usage: `orl provider apply --baseline <FILE|-> --file <FILE|-> [--yes] [--json]`
 
 Apply a provider editor document with the server public-baseline conflict check.
 
@@ -954,9 +954,9 @@ JSON mode: `payload`.
 - Sends one {baseline,next} PUT. Stale baseline is exit 5; no automatic refresh, rebase, retry or local fallback.
 - Batch removal preserves the server batch contract and does not promise single-provider DELETE OAuth cleanup. Saved-but-unconverged catalog outcomes remain visible and nonzero.
 
-### `ocx models display-name`
+### `orl models display-name`
 
-Usage: `ocx models display-name <provider/raw-model> (--set <text> | --clear) [--json]`
+Usage: `orl models display-name <provider/raw-model> (--set <text> | --clear) [--json]`
 
 Set or clear one raw upstream model display-name override.
 
@@ -977,9 +977,9 @@ JSON mode: `envelope`.
 - Split only the first provider slash; the remaining model ID is raw upstream identity, not a guessed public alias or encoded suffix.
 - A recognized saved-but-failed catalog HTTP503 retains its safe receipt and exits1; no retry or rollback claim.
 
-### `ocx models order status`
+### `orl models order status`
 
-Usage: `ocx models order status [--json]`
+Usage: `orl models order status [--json]`
 
 Read saved picker order, routed candidates and featured state.
 
@@ -997,9 +997,9 @@ JSON mode: `envelope`.
 
 - Preserves native IDs in saved order. pickerAvailable is routed-only; unknown featured state is not an empty successful roster.
 
-### `ocx models order set`
+### `orl models order set`
 
-Usage: `ocx models order set (--models <csv> | --mode <default|alphabetical|provider|most-used>) [--json]`
+Usage: `orl models order set (--models <csv> | --mode <default|alphabetical|provider|most-used>) [--json]`
 
 Replace the routed picker order with an explicit list or sort mode.
 
@@ -1024,9 +1024,9 @@ JSON mode: `envelope`.
 - Manual mode rechecks settings and identities before PUT and refuses observed drift; this is not server CAS. Raw/encoded ambiguities and missing identities refuse before writing.
 - Most-used reads all/all usage, uses requested model identities and refuses incomplete evidence. Presets retain unranked candidates. A saved receipt does not prove client convergence.
 
-### `ocx models order reset`
+### `orl models order reset`
 
-Usage: `ocx models order reset [--json]`
+Usage: `orl models order reset [--json]`
 
 Clear saved picker ordering and its mode.
 

@@ -191,7 +191,7 @@ describe("GUI/CLI Codex sync backend", () => {
     expect(result.warning).toContain("Codex catalog left unchanged");
     expect(result.warning).toContain("2 provider namespaces");
     expect(errors).toHaveLength(1);
-    expect(errors[0]).toStartWith("[opencodex] Codex catalog left unchanged");
+    expect(errors[0]).toStartWith("[openrelay] Codex catalog left unchanged");
     expect(logs.join("\n")).not.toContain("models appended");
   });
 
@@ -653,7 +653,7 @@ describe("GUI/CLI Codex sync backend", () => {
       id: "k3k3",
       targets: ["kimi/k3", "xianyu/kimi-k3"],
       reason: "incomplete_metadata" as const,
-      message: "[opencodex] Combo \"k3k3\" is omitted from the catalog because member capabilities are incomplete: kimi/k3, xianyu/kimi-k3.",
+      message: "[openrelay] Combo \"k3k3\" is omitted from the catalog because member capabilities are incomplete: kimi/k3, xianyu/kimi-k3.",
     };
     const result = await syncModelsToCodex(12345, config, { log: line => logs.push(String(line)), error: line => errors.push(String(line)) }, {
       admitCodexWrite: admittedSync,
@@ -683,7 +683,7 @@ describe("GUI/CLI Codex sync backend", () => {
       id: "disjoint",
       targets: ["a/m1", "b/m2"],
       reason: "incompatible_modalities" as const,
-      message: "[opencodex] Combo \"disjoint\" is omitted from the catalog because members have no common input modalities: a/m1, b/m2.",
+      message: "[openrelay] Combo \"disjoint\" is omitted from the catalog because members have no common input modalities: a/m1, b/m2.",
     };
     const result = await syncModelsToCodex(12345, config, { log: () => {}, error: line => errors.push(String(line)) }, {
       admitCodexWrite: admittedSync,

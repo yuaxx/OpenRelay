@@ -1,9 +1,9 @@
 ---
 title: Factory Droid ブリッジ
-description: ローカルの Responses 互換ブリッジを通じて、Factory Droid のモデルを opencodex に接続します。
+description: ローカルの Responses 互換ブリッジを通じて、Factory Droid のモデルを OpenRelay に接続します。
 ---
 
-Factory Droid はエージェント実行環境であり、公開仕様のある OpenAI 互換推論エンドポイントではありません。カスタムプロバイダーを Factory の内部 LLM URL に向けて `403 Forbidden` が返る場合、opencodex のアダプターだけを変えたりプロバイダーヘッダーを足したりしても、その非公開経路がサポート対象の公開 API になるわけではありません。
+Factory Droid はエージェント実行環境であり、公開仕様のある OpenAI 互換推論エンドポイントではありません。カスタムプロバイダーを Factory の内部 LLM URL に向けて `403 Forbidden` が返る場合、OpenRelay のアダプターだけを変えたりプロバイダーヘッダーを足したりしても、その非公開経路がサポート対象の公開 API になるわけではありません。
 
 動作する連携は次のとおりです。
 
@@ -15,7 +15,7 @@ Text-only Responses client
   -> Factory account and selected model
 ```
 
-これにより Factory の資格情報は公式 Droid クライアント内に保持されます。OpenCodex が受け取るのは別の、ローカル専用ブリッジトークンです。
+これにより Factory の資格情報は公式 Droid クライアント内に保持されます。OpenRelay が受け取るのは別の、ローカル専用ブリッジトークンです。
 
 ## 失敗例とその理由
 
@@ -25,7 +25,7 @@ Text-only Responses client
 | `/models/models` で `404` | プロバイダーのベース URL が既に `/models` で終わっていた | API のルートを `baseUrl` に使い、検出用パスは含めない |
 | モデル検索に失敗する | ブリッジが完全なライブカタログを公開していない | `liveModels: false` を設定し、静的な `models` 一覧を指定する |
 | ループバックのプロバイダーが拒否される | プライベートネットワークへのアクセスが既定で拒否されている | ループバックブリッジに限って `allowPrivateNetwork: true` を設定する |
-| `${DROID_BRIDGE_TOKEN}` が解決されない | opencodex サービスの環境変数に値がない | 対話シェルだけでなくサービスプロセスへ渡す |
+| `${DROID_BRIDGE_TOKEN}` が解決されない | OpenRelay サービスの環境変数に値がない | 対話シェルだけでなくサービスプロセスへ渡す |
 | `OutputTextDelta without active item` | 出力アイテムとコンテンツパートを開始する前にブリッジがテキスト差分を送った | Responses SSE の全ライフサイクルを順番どおりに送る |
 
 このため、同じ Factory 資格情報で `droid exec` は動作しても、文書化されていない LLM URL への直接リクエストは `403` を返すことがあります。両者は異なる製品を試しているため、矛盾ではありません。
@@ -90,12 +90,12 @@ response.completed
 
 ブリッジを `0.0.0.0` で公開したり、Factory の資格情報をブリッジの bearer トークンとして再利用したりしないでください。
 
-## OpenCodex プロバイダー設定
+## OpenRelay プロバイダー設定
 
 明示的なプロバイダー ID `droid` でカスタムプロバイダーを作成します。
 
 ```bash
-ocx provider add droid \
+orl provider add droid \
   --adapter openai-responses \
   --base-url http://127.0.0.1:11435/v1 \
   --default-model glm-5.2 \
@@ -124,8 +124,8 @@ JSON** を開き、そのプロバイダーの値を次に置き換えます。
 プロバイダーを保存した後や静的カタログを変更した後は、Codex を同期して再起動し、新しいセッションに更新済みカタログを読ませます。
 
 ```bash
-ocx sync --restart-codex
-ocx doctor
+orl sync --restart-codex
+orl doctor
 ```
 
 `--restart-codex` は一致する app-server を再起動し、Codex デスクトップアプリを完全終了して再起動するため、進行中の会話が終わります。デスクトップアプリを起動したままにするには `--restart-app-server-only` を使います。再起動は、それらのセッションを終えるか保存した後にだけ実行してください。
@@ -136,12 +136,12 @@ ocx doctor
 
 ```bash
 curl -fsS http://127.0.0.1:11435/healthz
-ocx doctor
-ocx access test droid/glm-5.2 --protocol responses
+orl doctor
+orl access test droid/glm-5.2 --protocol responses
 ```
 
 プロバイダー行やモデルピッカーの項目が証明するのは、カタログに表示されることだけです。Responses の確認リクエストが `droid/<model>` 経路を通って戻って初めて連携が動作したと言えます。
 
 ## 現在の制限
 
-上記の最小構成ブリッジが変換するのは、テキストと Responses SSE のライフサイクルです。双方向の Codex 関数・ツール呼び出しプロトコル全体は実装しません。Codex App と `codex exec` は、プロンプトでツールを呼ばないよう指示しても通常はツール定義を送ります。現行 Codex CLI に、その定義を除去する汎用フラグはありません。最小構成ブリッジは、上記の `400` 契約でそれらのリクエストを拒否する必要があります。ツール定義、ツール呼び出し、ツール結果、権限、キャンセル、豊富な Droid イベントに対応するには、Factory のストリーム JSON-RPC モードか公式 Droid SDK に基づく状態管理付きブリッジが必要です。`ocx access test` の成功はテキスト経路の検証であり、Codex エージェントやツール経路の検証ではありません。
+上記の最小構成ブリッジが変換するのは、テキストと Responses SSE のライフサイクルです。双方向の Codex 関数・ツール呼び出しプロトコル全体は実装しません。Codex App と `codex exec` は、プロンプトでツールを呼ばないよう指示しても通常はツール定義を送ります。現行 Codex CLI に、その定義を除去する汎用フラグはありません。最小構成ブリッジは、上記の `400` 契約でそれらのリクエストを拒否する必要があります。ツール定義、ツール呼び出し、ツール結果、権限、キャンセル、豊富な Droid イベントに対応するには、Factory のストリーム JSON-RPC モードか公式 Droid SDK に基づく状態管理付きブリッジが必要です。`orl access test` の成功はテキスト経路の検証であり、Codex エージェントやツール経路の検証ではありません。

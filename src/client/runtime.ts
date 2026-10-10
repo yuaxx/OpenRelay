@@ -177,7 +177,7 @@ export async function recycleStandalone(
     return;
   }
   if (port === undefined) {
-    console.warn("[client] no valid port to restart the standalone proxy on; run 'ocx start'");
+    console.warn("[client] no valid port to restart the standalone proxy on; run 'orl start'");
     exit(1);
     return;
   }
@@ -194,7 +194,7 @@ export async function recycleStandalone(
       env: replacementEnv,
     });
   } catch (error) {
-    console.warn(`[client] the standalone replacement did not start (${errorCode(error)}); run 'ocx start'`);
+    console.warn(`[client] the standalone replacement did not start (${errorCode(error)}); run 'orl start'`);
     exit(1);
     return;
   }

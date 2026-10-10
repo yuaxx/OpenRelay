@@ -3,48 +3,48 @@ title: Cycle de vie de la CLI
 description: Commandes de configuration initiale, de démarrage, d’arrêt, de service, de diagnostic, de synchronisation et de mise à jour.
 ---
 
-Ces commandes permettent d’installer, d’exécuter, d’examiner, de réparer et de mettre à jour le proxy opencodex local ainsi que son intégration à Codex.
+Ces commandes permettent d’installer, d’exécuter, d’examiner, de réparer et de mettre à jour le proxy OpenRelay local ainsi que son intégration à Codex.
 
 ## Configuration initiale
 
-### `ocx init` · `ocx setup`
+### `orl init` · `orl setup`
 
 Assistant de configuration interactif (`setup` est un alias de `init`). Il demande un fournisseur (prédéfini ou personnalisé), une clé d’API (valeur littérale ou `${ENV}`), un modèle par défaut et le port du proxy, puis enregistre le tout dans `~/.opencodex/config.json`. Il peut également injecter le proxy dans `$CODEX_HOME/config.toml` (par défaut `~/.codex/config.toml`) et installer le shim de démarrage automatique de Codex.
 
 ## Cycle de vie du proxy
 
-### `ocx start [--port <port>] [--socks5 [host:port] | --socks5-off]`
+### `orl start [--port <port>] [--socks5 [host:port] | --socks5-off]`
 
 Démarre le serveur proxy, de préférence sur le port `10100`. La commande écrit l’état du PID et du port d’exécution, et refuse de démarrer une deuxième instance active. Lorsque le port préféré est occupé, `start` interroge le processus qui l’occupe puis s’arrête dans tous les cas : elle refuse de démarrer si un processus opencodex y répond et signale sinon que le processus est inconnu. Elle ne déplace jamais l’écouteur vers un autre port d’elle-même, car cela laisserait le premier proxy en cours d’exécution et redirigerait Codex vers le second. Un autre `--port` explicite est également refusé avec le même `OPENCODEX_HOME`, car les modes d’observation et de plafond écrivent tous deux dans le même journal de dépenses. Utilisez un `OPENCODEX_HOME` distinct pour une instance sœur indépendante ; `port: 0` ne sépare que l’attribution du port, pas l’état. Au démarrage, elle synchronise dans le catalogue Codex les modèles de chaque fournisseur. À l’arrêt, elle rétablit le fonctionnement natif de Codex, sauf si le proxy a été lancé comme service géré (`OCX_SERVICE=1`). Une instance sœur démarrée à côté d’un proxy déjà actif ne fait ni l’un ni l’autre, même lorsqu’elle est arrêtée avec `ocx stop` ou par un signal : elle ne sert que les requêtes directes sur son propre port, et Codex, Grok et Claude restent dirigés vers le proxy qui tournait déjà.
 
 `--socks5` (par défaut `127.0.0.1:10808`) enregistre l’URL SOCKS5 dans `config.proxy` et achemine
 les requêtes HTTP(S) sortantes dans un véritable tunnel SOCKS5. `--socks5-off` supprime uniquement
-le proxy SOCKS5 enregistré et ne supprime pas un proxy HTTP. La valeur reste après `ocx update`,
+le proxy SOCKS5 enregistré et ne supprime pas un proxy HTTP. La valeur reste après `orl update`,
 car elle est stockée dans la configuration. L’URL peut contenir un nom d’utilisateur et un mot de
 passe, mais les journaux de démarrage les masquent.
 
 ```bash
-ocx start
-ocx start --port 8080
-ocx start --port 10100 --socks5
-ocx start --socks5-off
+orl start
+orl start --port 8080
+orl start --port 10100 --socks5
+orl start --socks5-off
 ```
 
-### `ocx stop`
+### `orl stop`
 
-Arrête le proxy actif à partir de son PID, supprime le fichier de PID et rétablit le fonctionnement natif de Codex. Si un service d’arrière-plan géré est installé, `ocx stop` l’arrête d’abord afin qu’il ne puisse pas relancer le proxy. Le bouton **Stop** du tableau de bord Web exécute la même opération (`POST /api/stop`) sur tous les backends, sauf le Planificateur de tâches Windows : le wrapper peut y relancer le proxy après la fin de la tâche, donc le tableau de bord refuse avec `respawnable_service`, ne modifie rien et vous demande d'exécuter `ocx stop`.
+Arrête le proxy actif à partir de son PID, supprime le fichier de PID et rétablit le fonctionnement natif de Codex. Si un service d’arrière-plan géré est installé, `orl stop` l’arrête d’abord afin qu’il ne puisse pas relancer le proxy. Le bouton **Stop** du tableau de bord Web exécute la même opération (`POST /api/stop`) sur tous les backends, sauf le Planificateur de tâches Windows : le wrapper peut y relancer le proxy après la fin de la tâche, donc le tableau de bord refuse avec `respawnable_service`, ne modifie rien et vous demande d'exécuter `orl stop`.
 
-### `ocx restart`
+### `orl restart`
 
 Lorsqu’un proxy est actif, demande précisément au PID et au port dont l’identité a été vérifiée de redémarrer sur place, attend la fin du drainage normal, puis vérifie qu’un autre PID d’exécution écoute sur le même port. Le routage géré et la supervision du service restent installés pendant toute l’opération. Une requête dont l’état est incertain est observée, et non rejouée comme lors d’une séquence distincte d’arrêt et de démarrage.
 
-Si aucun proxy n’est actif, la commande revient au démarrage normal avec `ensure`. Si l’identité d’un processus à l’écoute ne peut pas être rattachée à un PID d’exécution — notamment avec un proxy antérieur à une mise à jour — le redémarrage échoue de manière sûre, sans repli sur `ensure` ni sur une séquence arrêt/démarrage. Après avoir confirmé que le processus vous appartient, utilisez `ocx stop` puis `ocx start` pour un proxy autonome. Pour un proxy géré par un service, utilisez `ocx stop` puis `ocx service start` afin de rétablir la supervision.
+Si aucun proxy n’est actif, la commande revient au démarrage normal avec `ensure`. Si l’identité d’un processus à l’écoute ne peut pas être rattachée à un PID d’exécution — notamment avec un proxy antérieur à une mise à jour — le redémarrage échoue de manière sûre, sans repli sur `ensure` ni sur une séquence arrêt/démarrage. Après avoir confirmé que le processus vous appartient, utilisez `orl stop` puis `orl start` pour un proxy autonome. Pour un proxy géré par un service, utilisez `orl stop` puis `orl service start` afin de rétablir la supervision.
 
-### `ocx ensure`
+### `orl ensure`
 
 Vérifie de manière idempotente qu’un proxy d’arrière-plan est actif, puis synchronise son catalogue de modèles en direct. Si `codexAutoStart` vaut `false`, la commande indique que le démarrage automatique est désactivé et n’effectue aucune opération.
 
-### `ocx restore [back]` · `ocx eject [back]`
+### `orl restore [back]` · `orl eject [back]`
 
 Rétablit le fonctionnement natif de Codex **sans arrêter** le proxy : les lignes de configuration injectées et les entrées routées du catalogue sont supprimées, de sorte qu’une invocation simple de `codex` utilise de nouveau Codex directement. `eject` est un alias de `restore`.
 
@@ -56,27 +56,27 @@ enregistrés par l’utilisateur sont conservés.
 Ajoutez `back` à l’une ou l’autre forme pour rediriger une invocation simple de `codex` vers un proxy déjà actif, sans modifier le cycle de vie du proxy :
 
 ```bash
-ocx restore back
-ocx eject back
+orl restore back
+orl eject back
 ```
 
-### `ocx recover-history --legacy-openai --yes`
+### `orl recover-history --legacy-openai --yes`
 
 Récupération explicite destinée aux anciennes versions de développement qui remappaient l’historique de Codex App avant l’ajout des sauvegardes réversibles. Fermez d’abord Codex si sa base de données d’historique est verrouillée.
 
 Il s'agit d'un réétiquetage large et destructif : chaque fil contenant un message utilisateur et actuellement marqué `opencodex` passe à `openai`, `exec` est normalisé en `cli` et l'indicateur d'événement est activé. L'historique légitime d'un fournisseur dédié est également concerné. Sauvegardez l'état et n'exécutez la commande que si vous souhaitez cette portée complète.
 
-### `ocx recover-history --ocx-compaction <thread-id> --yes`
+### `orl recover-history --ocx-compaction <thread-id> --yes`
 
 Réparez l'historique d'une tâche compactée par un fournisseur routé avant de la reprendre avec Codex natif. La commande sélectionne exactement une tâche par UUID, enregistre d'abord une sauvegarde privée octet par octet, puis convertit uniquement l'état de compaction `ocx1:` propre à OpenCodeX en résumé ordinaire relisible par Codex natif. Le contenu chiffré natif et les autres tâches restent inchangés. Fermez la tâche sélectionnée avant d'exécuter la commande ; toute modification simultanée du rollout interrompt la récupération sans remplacer le fichier.
 
-### `ocx uninstall` · `ocx remove`
+### `orl uninstall` · `orl remove`
 
-Arrête le service et le proxy, supprime le service et le shim Codex, rétablit le fonctionnement natif de Codex, puis supprime la configuration locale d’opencodex uniquement si toutes les étapes de restauration ont réussi. `remove` est un alias de `uninstall`. Le nettoyage de la configuration exige les métadonnées de propriété créées par une installation récente ; les répertoires anciens ou partagés sont conservés.
+Arrête le service et le proxy, supprime le service et le shim Codex, rétablit le fonctionnement natif de Codex, puis supprime la configuration locale d’OpenRelay uniquement si toutes les étapes de restauration ont réussi. `remove` est un alias de `uninstall`. Le nettoyage de la configuration exige les métadonnées de propriété créées par une installation récente ; les répertoires anciens ou partagés sont conservés.
 
 ## État et santé
 
-### `ocx status [--json]`
+### `orl status [--json]`
 
 Affiche un résumé de diagnostic en lecture seule : PID du proxy, accessibilité de `/healthz`, URL du tableau de bord, chemin de configuration, fournisseur par défaut, réglage du démarrage automatique de Codex, état du service, état du shim et répertoire Codex effectif expurgé. Seule la signature explicite et hautement fiable du répertoire d’exécution Windows Orca ajoute un avertissement exploitable lorsqu’il diffère du répertoire de Codex App ; la commande ne modifie jamais `CODEX_HOME` automatiquement.
 
@@ -84,8 +84,8 @@ Après le résumé des connexions OAuth, la sortie destinée aux utilisateurs co
 ok` lorsque tous les comptes connus sont sains, ou `OAuth health: warning` accompagné d’une ligne expurgée pour chaque compte en anomalie (fournisseur, identifiant de compte masqué, état tel qu’une réauthentification requise, une limitation de débit ou de quota, ou un conflit d’actualisation), ainsi que d’une indication facultative `Action:`. Les identifiants de compte sont masqués ; les jetons et adresses électroniques ne sont jamais affichés. Le contrat `--json` n’inclut pas encore ce bloc de santé.
 
 ```bash
-ocx status
-ocx status --json
+orl status
+orl status --json
 ```
 
 Exemple de structure abrégée :
@@ -135,17 +135,17 @@ L’objet réel comprend également `listen` (port, nom d’hôte, source du run
 
 La lecture en direct laisse la sonde de service à durée limitée se terminer : jusqu’à 6,5 secondes sous macOS/Linux et 16,5 secondes sous Windows lorsque le cache de diagnostic est vide ou expiré. Les lectures depuis le cache renvoient rapidement leur résultat. En cas de dépassement du délai, la commande se replie toujours sur les diagnostics locaux ; un `/healthz` sain ne suffit pas à confirmer que la protection contre les redémarrages est active.
 
-### `ocx health [--json]`
+### `orl health [--json]`
 
 Vérifie l’identité du proxy actif. La sortie destinée aux utilisateurs indique le PID et le port ; `--json` produit `{ok, pid, port}`. La commande renvoie 0 uniquement lorsque le proxy est sain, et 1 dans le cas contraire, ce qui permet de l’utiliser comme sonde de service.
 
-### `ocx ready [--json] [--wait [--timeout <seconds>]]`
+### `orl ready [--json] [--wait [--timeout <seconds>]]`
 
 Vérifie l’état de préparation après synchronisation au moyen du point de terminaison non authentifié `GET /readyz`. Il renvoie `200` lorsque le service est prêt, ou `503` avec `Retry-After: 1` pour les états `pending` et terminal `failed`. Son identité HTTP expurgée est `{service, version, uptime, pid, port, status, protocol, minimumClientProtocol, managementUrl}`. `protocol` est la version courante du protocole distant du hub, `minimumClientProtocol` la plus ancienne version cliente compatible et `managementUrl` l’origine canonique de gestion visible par le navigateur. Les anciens proxys dépourvus de `/readyz` échouent de manière sûre avec l’état `unreachable` ; `/healthz` mesure la disponibilité du processus, et non son état de préparation.
 
 Par défaut, la commande effectue une seule sonde. Avec `--wait`, elle interroge le service jusqu’à ce qu’il soit prêt ou jusqu’à l’expiration du délai, mais s’arrête immédiatement si elle observe l’état terminal `failed`. Le délai par défaut est de 45 secondes. `--timeout <seconds>` exige `--wait` et accepte un entier positif compris entre 1 et 300. La sortie JSON de la CLI est `{ready, status, pid, port}`, où `status` vaut `ready`, `pending`, `failed` ou `unreachable`. Les codes de sortie sont 0 si le service est prêt ; 1 s’il n’est pas prêt, reste en attente, échoue, dépasse le délai ou est inaccessible ; et 64 si les arguments sont invalides.
 
-### `ocx doctor`
+### `orl doctor`
 
 Exécute des diagnostics en lecture seule sur l’environnement et la connectivité : chemins d’état et type de système de fichiers, installations doubles sous WSL, environnement et configuration du proxy, accessibilité de ChatGPT, avertissements liés au plug-in Codex et à la configuration du projet, ainsi que migration d’historique en attente. La section consacrée au répertoire de Codex App détecte également le cas précis où le répertoire d’exécution Windows Orca ne correspond pas et, le cas échéant, explique la migration du service. Les chemins affichés masquent le nom d’utilisateur du système d’exploitation. La commande doctor propose des réparations, mais ne les applique pas.
 
@@ -153,13 +153,13 @@ La section **OAuth reliability** indique si le stockage des identifiants est acc
 
 ## Synchronisation du catalogue
 
-### `ocx sync [--restart-codex] [--restart-app-server-only]`
+### `orl sync [--restart-codex] [--restart-app-server-only]`
 
 Récupère la liste active des modèles de chaque fournisseur configuré et réinjecte le catalogue fusionné dans Codex. Exécutez cette commande après l’ajout d’un fournisseur ou pour actualiser les modèles disponibles.
 
-Avant la découverte des fournisseurs ou le remplacement du catalogue et du cache, `ocx sync` vérifie que la configuration Codex gérée peut recevoir l’injection. Si cette validation refuse la configuration, la commande renvoie un code non nul, affiche la cause précise sur stderr et laisse le catalogue ainsi que le cache existants inchangés. `ocx restore back` effectue la même vérification préalable sans écriture avant de réactiver le routage.
+Avant la découverte des fournisseurs ou le remplacement du catalogue et du cache, `orl sync` vérifie que la configuration Codex gérée peut recevoir l’injection. Si cette validation refuse la configuration, la commande renvoie un code non nul, affiche la cause précise sur stderr et laisse le catalogue ainsi que le cache existants inchangés. `orl restore back` effectue la même vérification préalable sans écriture avant de réactiver le routage.
 
-Si des processus Codex `app-server` de longue durée sont encore actifs, `ocx sync` avertit qu’ils peuvent continuer à servir l’ancienne liste de modèles conservée en mémoire, même après la mise à jour de `opencodex-catalog.json` / `models_cache.json`. Ajoutez `--restart-codex` pour redémarrer les processus `codex … app-server` et `codex-code-mode-host` correspondants **et** quitter puis relancer entièrement l’application Codex Desktop, sous macOS, Linux et Windows, afin que le sélecteur de modèles relise le catalogue. Les conversations en cours se terminent. La recherche générale `pkill -f codex` est volontairement évitée.
+Si des processus Codex `app-server` de longue durée sont encore actifs, `orl sync` avertit qu’ils peuvent continuer à servir l’ancienne liste de modèles conservée en mémoire, même après la mise à jour de `opencodex-catalog.json` / `models_cache.json`. Ajoutez `--restart-codex` pour redémarrer les processus `codex … app-server` et `codex-code-mode-host` correspondants **et** quitter puis relancer entièrement l’application Codex Desktop, sous macOS, Linux et Windows, afin que le sélecteur de modèles relise le catalogue. Les conversations en cours se terminent. La recherche générale `pkill -f codex` est volontairement évitée.
 
 `--restart-desktop-app` est un alias déprécié de `--restart-codex`. Il fonctionne encore, affiche un avis de dépréciation, et n’est pas limité à Windows.
 
@@ -167,14 +167,14 @@ Si des processus Codex `app-server` de longue durée sont encore actifs, `ocx sy
 
 Lorsque la commande s’exécute depuis l’application Codex, le redémarrage est confié à un assistant détaché et cette session se termine avec l’application.
 
-### `ocx sync-cache [--restart-codex] [--restart-app-server-only]`
+### `orl sync-cache [--restart-codex] [--restart-app-server-only]`
 
-Invalide le cache local du sélecteur de modèles de Codex afin qu’il soit reconstruit à partir du catalogue opencodex actif. Le même avertissement concernant un `app-server` obsolète et les mêmes options de redémarrage que pour `ocx sync` s’appliquent.
+Invalide le cache local du sélecteur de modèles de Codex afin qu’il soit reconstruit à partir du catalogue OpenRelay actif. Le même avertissement concernant un `app-server` obsolète et les mêmes options de redémarrage que pour `orl sync` s’appliquent.
 
-### `ocx catalog pull <https-url> [--auth-env <NAME>] [--json] [--restart-codex] [--restart-app-server-only]`
+### `orl catalog pull <https-url> [--auth-env <NAME>] [--json] [--restart-codex] [--restart-app-server-only]`
 
 Installe un catalogue complet servi par le point de terminaison `/v1/catalog` d'une autre instance
-OpenCodex, puis synchronise `models_cache.json`. L'URL doit être en HTTPS ; le HTTP est accepté
+OpenRelay, puis synchronise `models_cache.json`. L'URL doit être en HTTPS ; le HTTP est accepté
 uniquement en loopback. Les identifiants intégrés à l'URL, les requêtes, les fragments, les
 redirections, les réponses trop volumineuses et les catalogues invalides sont refusés avant toute
 écriture locale. L'authentification est facultative et lue uniquement par référence à une variable
@@ -185,21 +185,21 @@ Les requêtes HTTP en loopback sont refusées avant l’ajout des en-têtes d’
 Le catalogue et le cache sont écrits sous le verrou de catalogue Codex partagé ; un échec préserve
 les derniers fichiers valides connus. Des octets identiques constituent une non-opération qui
 préserve les mtimes. `--restart-codex`, `--restart-app-server-only` et l'alias déprécié
-`--restart-desktop-app` ont ici le même sens que pour `ocx sync` et `ocx sync-cache`, et ne
+`--restart-desktop-app` ont ici le même sens que pour `orl sync` et `orl sync-cache`, et ne
 s'appliquent qu'après une écriture réelle. Les requêtes conditionnelles `ETag` ne font pas partie
 de cette commande. Voir la [référence anglaise](/reference/cli/lifecycle/) pour l'enveloppe
 `--json` complète et les codes de sortie.
 
 ## Service d’arrière-plan
 
-### `ocx service [install|repair|restart|start|stop|status|uninstall|remove]`
+### `orl service [install|repair|restart|start|stop|status|uninstall|remove]`
 
-Exécute opencodex comme service d’arrière-plan géré à l’ouverture de session — **launchd** sous macOS, **unité utilisateur systemd** sous Linux et **Task Scheduler** sous Windows — qui démarre automatiquement à la connexion et redémarre après un plantage. Les services définissent `OCX_SERVICE=1` afin qu’un redémarrage ne réécrive pas inutilement la configuration Codex.
+Exécute OpenRelay comme service d’arrière-plan géré à l’ouverture de session — **launchd** sous macOS, **unité utilisateur systemd** sous Linux et **Task Scheduler** sous Windows — qui démarre automatiquement à la connexion et redémarre après un plantage. Les services définissent `OCX_SERVICE=1` afin qu’un redémarrage ne réécrive pas inutilement la configuration Codex.
 
 Les installations via le Planificateur de tâches Windows utilisent une priorité de processus normale (`Priority=4`).
 L’ancienne priorité d’arrière-plan (`7`, également la valeur par défaut si le paramètre est omis) peut retarder les réponses
 aux contrôles de santé en cas de contention CPU : la zone de notification affiche alors Offline même si le processus fonctionne.
-Après la mise à jour, exécutez `ocx service repair` pour migrer cette priorité enregistrée et redémarrer le service.
+Après la mise à jour, exécutez `orl service repair` pour migrer cette priorité enregistrée et redémarrer le service.
 Une confirmation UAC peut être nécessaire. Une priorité déjà normale ou haute ne déclenche pas, à elle seule, de réenregistrement.
 
 Sous Linux, l’unité systemd invoque le premier fichier `ocx` ordinaire et exécutable trouvé dans `PATH`
@@ -213,19 +213,19 @@ les chemins du Bun embarqué dans le paquet sont redécouverts après les mises 
 Sous macOS, launchd utilise à la place les chemins Bun et CLI propres au paquet choisis lors de
 l’installation ou de la réparation. Cela empêche un shim PATH mutable de recevoir le jeton d’API du
 service et l’environnement de proxy configuré lors d’un redémarrage ultérieur. Après la mise à niveau
-d’une installation gérée par un gestionnaire de versions, exécutez `ocx service repair` pour
+d’une installation gérée par un gestionnaire de versions, exécutez `orl service repair` pour
 actualiser ces chemins avant de redémarrer le service.
 
 Les définitions installées avant ce changement portent encore les anciens chemins versionnés et ne
-peuvent pas migrer d’elles-mêmes — une fois l’ancien exécutable supprimé, aucun code opencodex ne
-s’exécute pour le réparer. Exécutez `ocx service repair` une fois après la mise à niveau. Les
+peuvent pas migrer d’elles-mêmes — une fois l’ancien exécutable supprimé, aucun code OpenRelay ne
+s’exécute pour le réparer. Exécutez `orl service repair` une fois après la mise à niveau. Les
 démarrages du service Linux suivent alors le lanceur ; la réparation macOS écrit les nouveaux chemins
 du paquet dans la définition launchd. Un proxy déjà en cours d’exécution n’est pas remplacé par une
 mise à niveau externe : lorsque la CLI installée est plus récente que le proxy en cours, exécutez
-`ocx service restart` pour que la nouvelle version serve. Sous macOS, `repair` ne suffit pas dans ce
+`orl service restart` pour que la nouvelle version serve. Sous macOS, `repair` ne suffit pas dans ce
 cas : la définition n’a pas changé, et une réparation qui ne change rien ne recharge rien. Si c’est le
 proxy qui est plus récent, vérifiez l’installation de la CLI et le `PATH` comme décrit sous
-[`ocx status`](#ocx-status---json).
+[`orl status`](#ocx-status---json).
 
 | Sous-commande | Action |
 | --- | --- |
@@ -240,15 +240,15 @@ proxy qui est plus récent, vérifiez l’installation de la CLI et le `PATH` co
 | `remove` | Alias de `uninstall`. |
 
 ```bash
-ocx service
-ocx service install
-ocx service repair
-ocx service restart
-ocx service status
-ocx service uninstall
+orl service
+orl service install
+orl service repair
+orl service restart
+orl service status
+orl service uninstall
 ```
 
-Sous Windows, un `ocx service` nu n'exécute le chemin d'installation qu'après avoir prouvé l'absence à la fois du Task Scheduler et de WinSW. Si l'une des requêtes de statut est inconcluante, il refuse d'enregistrer quoi que ce soit et demande d'exécuter `ocx service status` ; n'utilisez un `ocx service install` explicite qu'après avoir confirmé l'absence.
+Sous Windows, un `orl service` nu n'exécute le chemin d'installation qu'après avoir prouvé l'absence à la fois du Task Scheduler et de WinSW. Si l'une des requêtes de statut est inconcluante, il refuse d'enregistrer quoi que ce soit et demande d'exécuter `orl service status` ; n'utilisez un `orl service install` explicite qu'après avoir confirmé l'absence.
 
 Avant de signaler une réussite, `install`, `start` et `repair` vérifient, sur les trois plateformes, qu’un proxy répond effectivement sur le port inscrit dans le service installé. Elles attendent jusqu’à 20 secondes, puis affichent le port utilisé :
 
@@ -262,12 +262,12 @@ Si aucun processus ne répond, elles affichent un avertissement et **renvoient u
 ⚠️  Service installed, but no proxy answered on port 10100 within 20s.
    The manager registered the job; that is not the same as serving.
    Log:       ~/.opencodex/service.log
-   Meanwhile: ocx start   (serves in the foreground)
+   Meanwhile: orl start   (serves in the foreground)
 ```
 
-Dans ce cas, un code non nul signifie *enregistré, mais non opérationnel*, et non *non installé*. Le gestionnaire de services a accepté la tâche, mais le proxy n’a jamais ouvert le port. Consultez le journal indiqué et utilisez `ocx start` pour servir temporairement au premier plan.
+Dans ce cas, un code non nul signifie *enregistré, mais non opérationnel*, et non *non installé*. Le gestionnaire de services a accepté la tâche, mais le proxy n’a jamais ouvert le port. Consultez le journal indiqué et utilisez `orl start` pour servir temporairement au premier plan.
 
-`ocx service status` distingue les trois mêmes états au lieu d’afficher la sortie brute du gestionnaire :
+`orl service status` distingue les trois mêmes états au lieu d’afficher la sortie brute du gestionnaire :
 
 ```text
 ✅ installed and loaded (launchd; logs: …)
@@ -278,10 +278,10 @@ Dans ce cas, un code non nul signifie *enregistré, mais non opérationnel*, et 
 ⚠️  installed and loaded (launchd; logs: …)
    Registered, but no proxy is answering on port 10100.
    launchd is running an OLDER plist than the one on disk.
-   Fix:    launchctl bootout gui/$(id -u)/com.opencodex.proxy && ocx service repair
+   Fix:    launchctl bootout gui/$(id -u)/com.opencodex.proxy && orl service repair
    Log:    ~/.opencodex/service.log
-   Repair: ocx service repair
-   Meanwhile: ocx start           (serves in the foreground)
+   Repair: orl service repair
+   Meanwhile: orl start           (serves in the foreground)
 ```
 
 La commande n’affiche plus la ligne brute `launchctl list` / `systemctl status`, qui présentait une tâche enregistrée de la même manière qu’elle serve effectivement, n’écoute sur aucun port ou utilise une ancienne définition. La ligne `Diagnostics:` contient toujours le chemin du journal et toute détection de chemin périmé inscrit dans le service.
@@ -290,19 +290,19 @@ Sous Windows, le moteur du planificateur conserve sa sortie d’état plus déta
 
 Sous macOS, cette vérification couvre aussi un échec plus subtil : `launchctl load` peut signaler une erreur sur stderr tout en renvoyant 0. Auparavant, un chargement manqué pouvait donc laisser launchd exécuter une **ancienne** version de la définition du service alors que la commande affichait une coche. `install` échoue désormais explicitement dans ce cas et indique la commande `launchctl bootout` qui supprime la tâche obsolète.
 
-Sous Windows, `ocx service status` distingue l’enregistrement dans Task Scheduler de l’accessibilité du proxy OpenCodex dont l’identité a été vérifiée. Il n’affiche pas le tableau localisé de `schtasks`, afin que le résumé reste lisible quelle que soit la page de codes Windows.
+Sous Windows, `orl service status` distingue l’enregistrement dans Task Scheduler de l’accessibilité du proxy OpenRelay dont l’identité a été vérifiée. Il n’affiche pas le tableau localisé de `schtasks`, afin que le résumé reste lisible quelle que soit la page de codes Windows.
 
-Sous Windows, la création de l’entrée Task Scheduler exige une élévation. Lorsqu’un texte localisé de refus d’accès est reconnu, les consignes existantes sont conservées. Si ce texte est illisible, le mécanisme de repli exige la forme de commande détenue `/create /tn opencodex-proxy /xml <non-empty-path> /f`, le code d’état 1 et la confirmation que le jeton n’est pas élevé ; l’action Startup Safety du tableau de bord peut alors demander automatiquement l’autorisation UAC. Si le mécanisme ne peut pas déterminer l’état du jeton, l’erreur d’origine du planificateur est conservée. Une tâche étrangère ou une autre opération ne peut jamais émettre le marqueur d’élévation automatique. Acceptez la demande UAC du tableau de bord ou réexécutez `ocx service install` dans une fenêtre PowerShell élevée.
+Sous Windows, la création de l’entrée Task Scheduler exige une élévation. Lorsqu’un texte localisé de refus d’accès est reconnu, les consignes existantes sont conservées. Si ce texte est illisible, le mécanisme de repli exige la forme de commande détenue `/create /tn opencodex-proxy /xml <non-empty-path> /f`, le code d’état 1 et la confirmation que le jeton n’est pas élevé ; l’action Startup Safety du tableau de bord peut alors demander automatiquement l’autorisation UAC. Si le mécanisme ne peut pas déterminer l’état du jeton, l’erreur d’origine du planificateur est conservée. Une tâche étrangère ou une autre opération ne peut jamais émettre le marqueur d’élévation automatique. Acceptez la demande UAC du tableau de bord ou réexécutez `orl service install` dans une fenêtre PowerShell élevée.
 
-Lors d’une nouvelle installation où l’absence de la tâche OpenCodex dans le planificateur est confirmée, l’autorisation UAC est désormais demandée avant l’arrêt d’un proxy existant. Le fichier XML d’enregistrement unique est préparé dans un répertoire privé aux ACL renforcées, en dehors de la racine de configuration OpenCodex, puis la tâche est enregistrée sans être exécutée. Ce n’est qu’après la réussite de cet enregistrement qu’OpenCodex supprime le fichier XML, exige des métadonnées de propriété pour une racine de configuration réellement nouvelle, arrête l’ancien processus à l’écoute, supprime et revérifie de manière bornée toute inscription WinSW native, publie les artefacts du service et démarre la tâche planifiée.
+Lors d’une nouvelle installation où l’absence de la tâche OpenRelay dans le planificateur est confirmée, l’autorisation UAC est désormais demandée avant l’arrêt d’un proxy existant. Le fichier XML d’enregistrement unique est préparé dans un répertoire privé aux ACL renforcées, en dehors de la racine de configuration OpenRelay, puis la tâche est enregistrée sans être exécutée. Ce n’est qu’après la réussite de cet enregistrement qu’OpenRelay supprime le fichier XML, exige des métadonnées de propriété pour une racine de configuration réellement nouvelle, arrête l’ancien processus à l’écoute, supprime et revérifie de manière bornée toute inscription WinSW native, publie les artefacts du service et démarre la tâche planifiée.
 
 Ainsi, l’annulation ou le refus de l’UAC, comme l’impossibilité de revendiquer une nouvelle racine en toute sécurité, laisse en place le proxy fonctionnel et son routage Codex. Les inscriptions existantes ou conflictuelles continuent d’échouer de manière sûre au lieu d’être supprimées dans le cadre d’une annulation approximative.
 
-Si le démarrage signale `another process owns the runtime mutation lease` ou si `ocx service status` affiche `Runtime mutation lease busy`, le bail bloque le démarrage ou les modifications du service, même lorsque le proxy ne tourne pas. Le message indique le chemin du verrou, le PID enregistré, si ce PID est encore actif, le nom de l’exécutable lorsqu’il est disponible et l’âge du bail. L’identité du processus n’est pas vérifiée : le PID a pu être réutilisé, si bien que l’état actif et le nom de l’exécutable décrivent le processus qui occupe ce PID à présent. Attendez la fin de l’opération puis réessayez ; ne supprimez pas le verrou et n’arrêtez aucun processus sur la seule foi de ce PID. Une tentative de modification ultérieure peut récupérer un bail périmé dès que son âge dépasse 30 secondes et que le PID enregistré n’est plus actif ; `ocx service status` se contente de l’inspecter.
+Si le démarrage signale `another process owns the runtime mutation lease` ou si `orl service status` affiche `Runtime mutation lease busy`, le bail bloque le démarrage ou les modifications du service, même lorsque le proxy ne tourne pas. Le message indique le chemin du verrou, le PID enregistré, si ce PID est encore actif, le nom de l’exécutable lorsqu’il est disponible et l’âge du bail. L’identité du processus n’est pas vérifiée : le PID a pu être réutilisé, si bien que l’état actif et le nom de l’exécutable décrivent le processus qui occupe ce PID à présent. Attendez la fin de l’opération puis réessayez ; ne supprimez pas le verrou et n’arrêtez aucun processus sur la seule foi de ce PID. Une tentative de modification ultérieure peut récupérer un bail périmé dès que son âge dépasse 30 secondes et que le PID enregistré n’est plus actif ; `orl service status` se contente de l’inspecter.
 
-### `ocx codex-shim <install|status|uninstall|remove>`
+### `orl codex-shim <install|status|uninstall|remove>`
 
-Sur macOS et Linux, `ocx codex-shim install` crée un wrapper privé dans `<OPENCODEX_HOME>/bin/codex` et le fichier à sourcer `<OPENCODEX_HOME>/codex-shell-env.sh`, dans le répertoire OpenCodex résolu. Le lanceur natif reste à l’emplacement installé par brew, npm ou fnm : mises à niveau et retours à une version précédente fonctionnent sans réécrire ce lanceur. Sur Windows, les lanceurs à base de scripts restent enveloppés sur place ; les vrais `codex.exe` restent intacts. Pour une installation Windows ne proposant que `codex.exe`, utilisez `ocx service install`.
+Sur macOS et Linux, `orl codex-shim install` crée un wrapper privé dans `<OPENCODEX_HOME>/bin/codex` et le fichier à sourcer `<OPENCODEX_HOME>/codex-shell-env.sh`, dans le répertoire OpenRelay résolu. Le lanceur natif reste à l’emplacement installé par brew, npm ou fnm : mises à niveau et retours à une version précédente fonctionnent sans réécrire ce lanceur. Sur Windows, les lanceurs à base de scripts restent enveloppés sur place ; les vrais `codex.exe` restent intacts. Pour une installation Windows ne proposant que `codex.exe`, utilisez `orl service install`.
 
 Après la configuration PATH de brew/fnm, exécutez la commande d’activation affichée par l’installation. Avec le répertoire par défaut :
 
@@ -310,15 +310,15 @@ Après la configuration PATH de brew/fnm, exécutez la commande d’activation a
 . "$HOME/.opencodex/codex-shell-env.sh"
 ```
 
-Pour un répertoire personnalisé, utilisez le chemin entre guillemets affiché. Le sourçage est idempotent : il retire les doublons du répertoire privé et le place en tête de PATH. Ajoutez vous-même cette ligne après la configuration PATH dans votre fichier de démarrage pour les futures sessions ; OpenCodex ne modifie jamais ces fichiers. Un wrapper exécutable suffit pour réussir l’installation, même s’il n’est pas encore actif dans le shell courant. Une installation refusée ou un wrapper inutilisable reste un échec. `ocx status`, `ocx codex-shim status`, `ocx doctor` et `ocx connect` signalent **not active** avec la commande d’activation si PATH ne sélectionne pas le wrapper ; les avertissements de connect ne changent pas son code de sortie. Les alias, fonctions et lancements depuis le bureau ou les services nécessitent leur propre configuration.
+Pour un répertoire personnalisé, utilisez le chemin entre guillemets affiché. Le sourçage est idempotent : il retire les doublons du répertoire privé et le place en tête de PATH. Ajoutez vous-même cette ligne après la configuration PATH dans votre fichier de démarrage pour les futures sessions ; OpenRelay ne modifie jamais ces fichiers. Un wrapper exécutable suffit pour réussir l’installation, même s’il n’est pas encore actif dans le shell courant. Une installation refusée ou un wrapper inutilisable reste un échec. `orl status`, `orl codex-shim status`, `orl doctor` et `orl connect` signalent **not active** avec la commande d’activation si PATH ne sélectionne pas le wrapper ; les avertissements de connect ne changent pas son code de sortie. Les alias, fonctions et lancements depuis le bureau ou les services nécessitent leur propre configuration.
 
-Avant de valider une installation ou une réparation, OpenCodex exécute le lanceur enregistré avec `--version` en désactivant le démarrage du service. La modification est refusée et annulée si le lanceur résout `codex` vers le shim lui-même, renvoie un code non nul, dépasse cinq secondes, laisse des processus descendants actifs, ou ne peut pas être validé et nettoyé en toute sécurité. `codex-shim install` n’est donc pas inconditionnel. En cas de refus, réinstallez Codex afin que l’entrée PATH désigne un exécutable ou un lanceur concret, puis recommencez. Utilisez plutôt `ocx service install` lorsqu’un lanceur dynamique fourni par un gestionnaire de commandes ne peut pas satisfaire ces contrôles.
+Avant de valider une installation ou une réparation, OpenRelay exécute le lanceur enregistré avec `--version` en désactivant le démarrage du service. La modification est refusée et annulée si le lanceur résout `codex` vers le shim lui-même, renvoie un code non nul, dépasse cinq secondes, laisse des processus descendants actifs, ou ne peut pas être validé et nettoyé en toute sécurité. `codex-shim install` n’est donc pas inconditionnel. En cas de refus, réinstallez Codex afin que l’entrée PATH désigne un exécutable ou un lanceur concret, puis recommencez. Utilisez plutôt `orl service install` lorsqu’un lanceur dynamique fourni par un gestionnaire de commandes ne peut pas satisfaire ces contrôles.
 
-Un ancien shim Unix installé sur place n’est migré que par un `ocx codex-shim install` explicite. Le lanceur natif enregistré est restauré sans remplacer un lanceur plus récent déjà présent, puis le wrapper privé est installé. Si cette installation échoue après la restauration, le lanceur natif reste restauré et vous pouvez recommencer. Si le lanceur enregistré manque ou ne fonctionne plus, réparez l’installation avec le gestionnaire de paquets ; OpenCodex ne choisit pas une autre installation et ne réenveloppe pas le chemin du gestionnaire.
+Un ancien shim Unix installé sur place n’est migré que par un `orl codex-shim install` explicite. Le lanceur natif enregistré est restauré sans remplacer un lanceur plus récent déjà présent, puis le wrapper privé est installé. Si cette installation échoue après la restauration, le lanceur natif reste restauré et vous pouvez recommencer. Si le lanceur enregistré manque ou ne fonctionne plus, réparez l’installation avec le gestionnaire de paquets ; OpenRelay ne choisit pas une autre installation et ne réenveloppe pas le chemin du gestionnaire.
 
-L’installation du lanceur ne prouve pas à elle seule que les requêtes Codex passeront par OpenCodex. Après une installation dont le wrapper est exécutable, la commande examine le routage Codex actuel et affiche un avertissement plutôt qu’un résultat positif lorsque le routage est externe, appartient à l’utilisateur ou ne peut pas être vérifié. Elle avertit aussi lorsque des variables de proxy sortant n’existent que dans le processus actuel alors que `config.proxy` est absent ou non résolu, car les lanceurs Codex et les services d’arrière-plan peuvent ne pas hériter de cet environnement. Ces contrôles sont en lecture seule et n’affichent jamais la valeur du proxy. Corrigez le transfert signalé et exécutez `ocx doctor` avant de compter sur le démarrage automatique.
+L’installation du lanceur ne prouve pas à elle seule que les requêtes Codex passeront par OpenCodex. Après une installation dont le wrapper est exécutable, la commande examine le routage Codex actuel et affiche un avertissement plutôt qu’un résultat positif lorsque le routage est externe, appartient à l’utilisateur ou ne peut pas être vérifié. Elle avertit aussi lorsque des variables de proxy sortant n’existent que dans le processus actuel alors que `config.proxy` est absent ou non résolu, car les lanceurs Codex et les services d’arrière-plan peuvent ne pas hériter de cet environnement. Ces contrôles sont en lecture seule et n’affichent jamais la valeur du proxy. Corrigez le transfert signalé et exécutez `orl doctor` avant de compter sur le démarrage automatique.
 
-Sur Unix, la réparation automatique ne rafraîchit que le wrapper privé ; elle ne réécrit jamais les lanceurs du gestionnaire de paquets et ne migre pas les anciens shims installés sur place. Sur Windows, après une mise à jour externe achevée qui remplace le shim, la prochaine commande `ocx` ordinaire sauvegarde le nouveau lanceur stable et rétablit le shim. Un lanceur encore en cours de modification reste intact et sera réexaminé plus tard. `ocx status`, `ocx doctor`, `ocx codex-shim status`, `ocx system codex-cli-update check` et les invocations mal formées de son espace de noms réservé ne déclenchent pas cette réparation. Un échec produit un avertissement sans faire échouer la commande demandée. Repli manuel : `ocx codex-shim install`. Définissez `codexShimAutoRestore` sur `false`, ou `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0` pour désactiver ce comportement au niveau du processus.
+Sur Unix, la réparation automatique ne rafraîchit que le wrapper privé ; elle ne réécrit jamais les lanceurs du gestionnaire de paquets et ne migre pas les anciens shims installés sur place. Sur Windows, après une mise à jour externe achevée qui remplace le shim, la prochaine commande `ocx` ordinaire sauvegarde le nouveau lanceur stable et rétablit le shim. Un lanceur encore en cours de modification reste intact et sera réexaminé plus tard. `orl status`, `orl doctor`, `orl codex-shim status`, `orl system codex-cli-update check` et les invocations mal formées de son espace de noms réservé ne déclenchent pas cette réparation. Un échec produit un avertissement sans faire échouer la commande demandée. Repli manuel : `orl codex-shim install`. Définissez `codexShimAutoRestore` sur `false`, ou `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0` pour désactiver ce comportement au niveau du processus.
 
 | Sous-commande | Action |
 | --- | --- |
@@ -328,50 +328,50 @@ Sur Unix, la réparation automatique ne rafraîchit que le wrapper privé ; elle
 | `status` | Indique l’état du shim et si le wrapper privé est actif dans PATH. |
 
 ```bash
-ocx codex-shim install
-ocx codex-shim status
-ocx codex-shim uninstall
+orl codex-shim install
+orl codex-shim status
+orl codex-shim uninstall
 ```
 
-Après la désinstallation Unix, retirez la ligne de sourçage de votre fichier de démarrage et redémarrez le shell ou retirez le répertoire privé de PATH. Seuls le wrapper, le fichier d’environnement et l’état détenus par OpenCodex sont supprimés ; le lanceur du gestionnaire reste intact. Un ancien shim Unix installé sur place est libéré à l’aide de ses données de restauration enregistrées.
+Après la désinstallation Unix, retirez la ligne de sourçage de votre fichier de démarrage et redémarrez le shell ou retirez le répertoire privé de PATH. Seuls le wrapper, le fichier d’environnement et l’état détenus par OpenRelay sont supprimés ; le lanceur du gestionnaire reste intact. Un ancien shim Unix installé sur place est libéré à l’aide de ses données de restauration enregistrées.
 
 :::tip[Service ou shim]
-Utilisez `ocx service` pour maintenir un proxy d’arrière-plan toujours actif, ce qui est recommandé. Utilisez `ocx codex-shim` pour un démarrage léger à la demande, sans démon : le proxy ne démarre que lorsque `codex` est lancé.
+Utilisez `orl service` pour maintenir un proxy d’arrière-plan toujours actif, ce qui est recommandé. Utilisez `orl codex-shim` pour un démarrage léger à la demande, sans démon : le proxy ne démarre que lorsque `codex` est lancé.
 :::
 
-### `ocx tray <install|start|stop|status|uninstall|remove> [--json] [--no-start]`
+### `orl tray <install|start|stop|status|uninstall|remove> [--json] [--no-start]`
 
-Installe et contrôle l’icône OpenCodex dans la zone de notification Windows. Elle démarre à l’ouverture de session et fournit des commandes du proxy accessibles en un clic. `start` et `stop` contrôlent uniquement l’icône ; utilisez son menu pour contrôler le proxy. `--no-start` s’applique à `install` et installe l’icône sans la lancer immédiatement.
-Obsolète : l’application OpenCodex fournit la zone de notification sous Windows, macOS et Linux ; `ocx tray` reste disponible pour les installations sans l’application de bureau.
+Installe et contrôle l’icône OpenRelay dans la zone de notification Windows. Elle démarre à l’ouverture de session et fournit des commandes du proxy accessibles en un clic. `start` et `stop` contrôlent uniquement l’icône ; utilisez son menu pour contrôler le proxy. `--no-start` s’applique à `install` et installe l’icône sans la lancer immédiatement.
+Obsolète : l’application OpenRelay fournit la zone de notification sous Windows, macOS et Linux ; `orl tray` reste disponible pour les installations sans l’application de bureau.
 Lorsqu'une version plus récente du paquet est connue, la zone de notification ajoute un point bleu à l'icône en ligne, d'avertissement ou hors ligne et affiche **Update available**. Elle vérifie le badge mis en cache localement environ une fois par minute ; les résultats obsolètes ou indisponibles retirent le point. L'élément ouvre le tableau de bord, où vous pouvez lancer la mise à jour du paquet. L'installation automatique est désactivée.
 
 ## Tableau de bord
 
-### `ocx gui`
+### `orl gui`
 
 Ouvre le [tableau de bord Web](/fr/guides/web-dashboard/) à l’adresse `http://localhost:<port>` — ou `http://127.0.0.1:<port de gestion>` lorsque l’ingress de gestion du hub est activé — et démarre automatiquement le proxy s’il n’est pas actif.
 
 ## Mise à jour
 
-`ocx update` met à jour OpenCodex lui-même, et non la CLI Codex. Utilisez `ocx system codex-cli-update check` parmi les [commandes d’inspection système](/fr/reference/cli/agents/) pour vérifier, de façon bornée et en lecture seule, la provenance du candidat Codex CLI configuré. Cette commande n’interroge aucun registre de paquets et n’installe aucune mise à jour.
+`orl update` met à jour OpenRelay lui-même, et non la CLI Codex. Utilisez `orl system codex-cli-update check` parmi les [commandes d’inspection système](/fr/reference/cli/agents/) pour vérifier, de façon bornée et en lecture seule, la provenance du candidat Codex CLI configuré. Cette commande n’interroge aucun registre de paquets et n’installe aucune mise à jour.
 
-### `ocx update [--tag latest|preview]`
+### `orl update [--tag latest|preview]`
 
-Lorsque OpenCodex est installé avec mise, cette commande échoue avant d'arrêter le proxy ou de modifier les fichiers du paquet et affiche `mise upgrade <outil>` avec l'alias mise local vérifié. La vérification des mises à jour reste disponible et signale une gestion externe. Des métadonnées de propriété mise illisibles ou incohérentes bloquent aussi toute modification sans deviner le nom de l'outil, et `--tag preview` ne change jamais la sélection configurée dans mise.
+Lorsque OpenRelay est installé avec mise, cette commande échoue avant d'arrêter le proxy ou de modifier les fichiers du paquet et affiche `mise upgrade <outil>` avec l'alias mise local vérifié. La vérification des mises à jour reste disponible et signale une gestion externe. Des métadonnées de propriété mise illisibles ou incohérentes bloquent aussi toute modification sans deviner le nom de l'outil, et `--tag preview` ne change jamais la sélection configurée dans mise.
 
-Sous Linux, un service en arrière-plan dont le lanceur enregistré est le lanceur de paquet de mise (`<tool>/latest/node_modules/.bin/ocx`, et non un shim mise) suit `mise upgrade` tout seul : une dizaine de secondes après la stabilisation de la nouvelle version, il draine les requêtes actives et redémarre sur celle-ci, et il se rétablit de la même façon si mise supprime plus tard la version qu'il exécutait. Sous macOS, pour un service installé via un shim mise et pour un proxy au premier plan, redémarrez-le vous-même après la mise à jour (sous macOS, d'abord `ocx service repair`).
+Sous Linux, un service en arrière-plan dont le lanceur enregistré est le lanceur de paquet de mise (`<tool>/latest/node_modules/.bin/ocx`, et non un shim mise) suit `mise upgrade` tout seul : une dizaine de secondes après la stabilisation de la nouvelle version, il draine les requêtes actives et redémarre sur celle-ci, et il se rétablit de la même façon si mise supprime plus tard la version qu'il exécutait. Sous macOS, pour un service installé via un shim mise et pour un proxy au premier plan, redémarrez-le vous-même après la mise à jour (sous macOS, d'abord `orl service repair`).
 
-Met à jour opencodex depuis npm. Les installations stables utilisent `@latest` ; les préversions restent sur `@preview`, sauf si vous indiquez `--tag latest|preview`. La commande détecte un dépôt de sources et vous invite alors à exécuter `git pull && bun install`. Elle ne fait rien si la version la plus récente correspondant à cette balise est déjà installée.
+Met à jour OpenRelay depuis npm. Les installations stables utilisent `@latest` ; les préversions restent sur `@preview`, sauf si vous indiquez `--tag latest|preview`. La commande détecte un dépôt de sources et vous invite alors à exécuter `git pull && bun install`. Elle ne fait rien si la version la plus récente correspondant à cette balise est déjà installée.
 
-Avant tout arrêt, les installations npm effectuent sous Unix un contrôle borné de la propriété et de l’accès au cache. Les liens symboliques imbriqués sont examinés avec `lstat`, sans être suivis ; Windows ignore explicitement ce contrôle propre à Unix. En cas d’échec, l’opération s’interrompt tandis que l’icône et le proxy fonctionnent encore. Le proxy actif est ensuite arrêté avant le remplacement des fichiers. Un service installé est reconstruit et redémarré automatiquement ; pour une installation au premier plan, la commande indique `ocx start` comme étape suivante. Avant leur conservation, les enregistrements de mise à jour du tableau de bord masquent les chemins de profil et de cache ainsi que les valeurs UID/GID.
+Avant tout arrêt, les installations npm effectuent sous Unix un contrôle borné de la propriété et de l’accès au cache. Les liens symboliques imbriqués sont examinés avec `lstat`, sans être suivis ; Windows ignore explicitement ce contrôle propre à Unix. En cas d’échec, l’opération s’interrompt tandis que l’icône et le proxy fonctionnent encore. Le proxy actif est ensuite arrêté avant le remplacement des fichiers. Un service installé est reconstruit et redémarré automatiquement ; pour une installation au premier plan, la commande indique `orl start` comme étape suivante. Avant leur conservation, les enregistrements de mise à jour du tableau de bord masquent les chemins de profil et de cache ainsi que les valeurs UID/GID.
 
 ```bash
-ocx update
-ocx update --tag preview
+orl update
+orl update --tag preview
 ```
 
 Les nouvelles versions deviennent disponibles lorsque le [workflow de publication](https://github.com/lidge-jun/opencodex/actions/workflows/release.yml) les publie sur npm.
 
 ## Cycle de vie du client Remote Hub
 
-Utilisez `ocx connect <url> --pairing-code-stdin`, `ocx connect status`, `ocx sync` et `ocx connect rotate --pairing-code-stdin`. `ocx disconnect` restaure l'état local hors ligne sans révoquer la clé du hub. Tant que le client est connecté, `ocx connect revoke --admin-token-stdin` révoque l'`apiKeyId` enregistré; après déconnexion, utilisez **Connexion → Clés API** sur le hub. Les secrets passent uniquement par stdin, jamais par argv.
+Utilisez `orl connect <url> --pairing-code-stdin`, `orl connect status`, `orl sync` et `orl connect rotate --pairing-code-stdin`. `orl disconnect` restaure l'état local hors ligne sans révoquer la clé du hub. Tant que le client est connecté, `orl connect revoke --admin-token-stdin` révoque l'`apiKeyId` enregistré; après déconnexion, utilisez **Connexion → Clés API** sur le hub. Les secrets passent uniquement par stdin, jamais par argv.

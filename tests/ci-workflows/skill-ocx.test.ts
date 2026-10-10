@@ -116,7 +116,7 @@ describe("documented commands exist", () => {
         spans.push(span[1]!);
       }
       for (const span of spans) {
-        for (const match of span.matchAll(/\bocx ([a-z][a-z0-9-]*)/g)) names.add(match[1]!);
+        for (const match of span.matchAll(/\b(?:orl|ocx|opencodex) ([a-z][a-z0-9-]*)/g)) names.add(match[1]!);
       }
     }
     return names;
@@ -181,7 +181,7 @@ describe("access-key recipes keep plaintext outside agent sessions", () => {
   // CLI oracle: access.ts removes one --json before checking exact commit/abort tokens.
   // These canonical spellings are case-sensitive; commit-old-id is a start, not a commit.
   const secretBearingAccessKeyCommand =
-    /\b(?:ocx|opencodex)(?:\.(?:exe|mjs|cmd|ps1))?["']?\s+(?:access\s+keys?|api-key)\s+(?:create\b|rotate\b(?!\s+(?:--json\s+)?(?:commit|abort)(?=\s|$)))/gm;
+    /\b(?:orl|ocx|opencodex)(?:\.(?:exe|mjs|cmd|ps1))?["']?\s+(?:access\s+keys?|api-key)\s+(?:create\b|rotate\b(?!\s+(?:--json\s+)?(?:commit|abort)(?=\s|$)))/gm;
   const secretBearingManagementRequest =
     /(?:(?:\bPOST\b|(?:--request|-X|-Method)\s+["']?POST["']?|method\s*:\s*["']POST["'])[^\n]{0,240}\/api\/keys(?:\/rotate)?(?=$|[\s"'?#])|\/api\/keys(?:\/rotate)?(?=$|[\s"'?#])[^\n]{0,240}(?:\bPOST\b|(?:--request|-X|-Method)\s+["']?POST["']?|method\s*:\s*["']POST["']))/gim;
 
@@ -207,7 +207,7 @@ describe("access-key recipes keep plaintext outside agent sessions", () => {
   }
 
   test("all key aliases reject creation/start and preserve non-secret commit/abort", () => {
-    for (const binary of ["ocx", "opencodex"]) {
+    for (const binary of ["orl", "ocx", "opencodex"]) {
       for (const group of ["access key", "access keys", "api-key"]) {
         const prefix = `${binary} ${group}`;
         for (const action of [
@@ -303,7 +303,7 @@ describe("access-key recipes keep plaintext outside agent sessions", () => {
     }
     const approvalAt = recipes.indexOf("separate explicit revocation approval");
     expect(approvalAt).toBeGreaterThanOrEqual(0);
-    for (const command of ["ocx access key rotate commit", "ocx access key remove"]) {
+    for (const command of ["orl access key rotate commit", "orl access key remove"]) {
       expect(recipes.indexOf(command)).toBeGreaterThan(approvalAt);
     }
   });

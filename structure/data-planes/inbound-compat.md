@@ -1,6 +1,6 @@
 # Inbound Compatibility Surfaces
 
-The names used for these paths (native, translated, legacy bridge) and the declared per-feature
+Chat and Messages preserve original-source terminal pairing for outbound-only RTK compression. Native HTTP builders and the Responses bridge share the [RTK contract](../transports/rtk.md); missing bridge provenance bypasses compression. The names used for these paths (native, translated, legacy bridge) and the declared per-feature
 dispositions are owned by [Protocol Paths](protocol-paths.md).
 
 Native result continuations and function-result injection follow [the mode-specific result and control contract](../transports/streaming-health.md#experimental-native-function-result-injection); this surface does not infer upstream support or alter its defaults.

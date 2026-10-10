@@ -15,7 +15,7 @@ export async function handleLogoutCommand(argv: string[], deps: LogoutCommandDep
     const live = takeFlag(args, "--live");
     const provider = args.shift()?.trim().toLowerCase();
     if (!provider || !isValidProviderName(provider) || args.length) {
-      throw new CliUsageError("Expected one provider and no unknown or repeated options.", "Usage: ocx logout <provider> [--live] [--json]");
+      throw new CliUsageError("Expected one provider and no unknown or repeated options.", "Usage: orl logout <provider> [--live] [--json]");
     }
     if (live) {
       const { isPublicOAuthProvider } = await import("../oauth");

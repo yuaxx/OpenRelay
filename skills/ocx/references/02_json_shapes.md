@@ -5,10 +5,10 @@ not a universal schema; check the installed leaf help and the actual receipt.
 
 ## Output modes
 
-`ocx capabilities --json` reports which style each verb uses, as `json: "payload"` or
+`orl capabilities --json` reports which style each verb uses, as `json: "payload"` or
 `json: "envelope"`.
 
-- **payload** — the management response, largely unwrapped. `ocx usage --json`
+- **payload** — the management response, largely unwrapped. `orl usage --json`
   without `--search` preserves its existing report. Search adds a local model-row view.
 - **envelope** — a CLI-shaped object with its own schema, usually carrying `ok: true` plus the
   fields the verb operated on.
@@ -18,7 +18,7 @@ Output flags are parsed by each command, not globally. Preserve the documented
 operand order; do not add `--json` to a leaf marked `none`. `doctor` rejects it
 with exit 2. `v2` supports `--json` for both local and explicit `--live` targets.
 
-## `ocx ready --json`
+## `orl ready --json`
 
 ```json
 {"ready":true,"status":"ready","pid":1443,"port":10100}
@@ -27,20 +27,20 @@ with exit 2. `v2` supports `--json` for both local and explicit `--live` targets
 A readiness probe, not a start command. `ready: false` can mean `pending`,
 `failed` or `unreachable`; only `pending` describes startup still in progress.
 
-## `ocx status --json`
+## `orl status --json`
 
 Carries `schemaVersion`, then `proxy.running`, `proxy.pid`, `proxy.health.ok`, and a `dashboard`
 section. This is also where a version skew between your binary and the running proxy shows up —
 check `versionSkew.relation` before trusting flags you just read about.
 `match` confirms version equality; `unknown` is not a match.
 
-## `ocx logs --jsonl`
+## `orl logs --jsonl`
 
 One row per line. The fields worth branching on:
 
 | Field | Meaning |
 |---|---|
-| `requestId` | pass to `ocx logs explain` |
+| `requestId` | pass to `orl logs explain` |
 | `conversationId` | groups a conversation; also printed as `conv=<id>` in human output |
 | `accountLogLabel` | which account served it (`main`, `p<hex6>`, `o<hex6>`); also printed as `acct=<label>` in human output |
 | `provider` / `model` | what actually served it |
@@ -57,12 +57,12 @@ to `requestedModel` is how you get a wrong answer about which provider served it
 `displayMetrics.cost.estimate.estimateReasons` lists why — for example `usage_estimated`,
 `cache_detail_missing`, `expected_price_overlay`.
 
-## `ocx provider list --jsonl`
+## `orl provider list --jsonl`
 
 One configured provider per line. Each object has the same fields as an item in the
-`configured` array from `ocx provider list --json`; the `registryCount` summary is omitted.
+`configured` array from `orl provider list --json`; the `registryCount` summary is omitted.
 
-## `ocx logs explain <request-id>`
+## `orl logs explain <request-id>`
 
 ```json
 {"requestId":"ocx-…","routeDecision":{"version":1,"decisionId":"…","requestedModel":"kiro/claude-opus-5",
@@ -74,7 +74,7 @@ One configured provider per line. Each object has the same fields as an item in 
 `candidates[].exclusions` is the useful part when a route surprised you: it says why each
 non-winner was rejected. `selected.reason` names the rule that decided it.
 
-## `ocx usage --json`
+## `orl usage --json`
 
 `summary`, then `providers[]`, `models[]`, `days[]`, and `accounts[]`. Costs appear as
 `estimatedCostUsd`.
@@ -86,7 +86,7 @@ Two honesty markers to respect:
 - Under `--provider` or `--model`, per-account rows are **withheld** rather than filtered, because
   account totals cannot be honestly re-partitioned by provider.
 
-## `ocx account list <provider> --json`
+## `orl account list <provider> --json`
 
 `accounts[]` with `id`, `email`, `plan`, `paused`, `selected`, `priority`, and `needsReauth`. Quota
 appears only under `--quota`.
@@ -105,7 +105,7 @@ Empty `account main list --json` adds `notes` pointing to `account main add <lab
 
 ## Pool settings
 
-`ocx account strategy|sticky <provider> --json` returns pool-neutral keys:
+`orl account strategy|sticky <provider> --json` returns pool-neutral keys:
 
 ```json
 {"ok":true,"provider":"openai","strategy":"quota","stickyLimit":1}
@@ -117,7 +117,7 @@ normalizes both so you do not branch on which pool answered.
 
 The value returned is the **applied** one after server normalization, not what you sent.
 
-## `ocx storage cleanup --percent N --json` (preview)
+## `orl storage cleanup --percent N --json` (preview)
 
 ```json
 {"percent":25,"count":3,"bytes":3145728,"digest":"…","candidates":[{"relPath":"archived_sessions/….jsonl","bytes":1048576,"mtimeMs":…}]}
@@ -250,7 +250,7 @@ committed, nondegraded catalog refresh returns 0. Failed, skipped or degraded
 refresh preserves the saved domain receipt but returns 1. This is stricter than
 the provider-write receipt above; do not apply one exit rule to every command.
 
-## `ocx combo stats <stored-id> --json`
+## `orl combo stats <stored-id> --json`
 
 The response has `comboId`, `range`, `since`, optional `until`, `generatedAt`,
 `summary`, `gates`, `backends`, `models`, and snapshot/history coverage fields.
@@ -436,7 +436,7 @@ scope fields in the PATCH preserve policy, and rename is not rotation or CAS.
 
 ## Filtered log snapshots
 
-`ocx logs filter --json` returns a CLI view, distinct from follow events:
+`orl logs filter --json` returns a CLI view, distinct from follow events:
 
 ```text
 { schemaVersion: 1, logs, cursor, filters,
@@ -451,7 +451,7 @@ metadata; empty matches succeed. The command preserves row order and duplicates.
 
 ## Usage model search
 
-`ocx usage --search <text> --json` retains the report's totals, provider/day/account
+`orl usage --search <text> --json` retains the report's totals, provider/day/account
 rows, filter acknowledgment and incomplete/window metadata. Only `models` is
 replaced, and this local view is added:
 
@@ -467,7 +467,7 @@ usage, and model-row filtering never recalculates its totals or broadens scope.
 
 ## Saved companion usage
 
-`ocx companion usage --json` reports the captured saved model/provider selection:
+`orl companion usage --json` reports the captured saved model/provider selection:
 
 ```text
 { schemaVersion: 1, filters: { models, hiddenProviders }, settingsUpdatedAt,
@@ -487,7 +487,7 @@ replaced by invented local defaults.
 
 ## API-key pool quota
 
-`ocx account list <provider> --quota --json` retains `accounts` and `notes`.
+`orl account list <provider> --quota --json` retains `accounts` and `notes`.
 API-key rows add `quotaMode` (`probe`, `passive`, or `unsupported`), optional/null
 `quota` and `quotaUnavailable` when supplied. Public quota fields can include
 percentage/reset windows, `customWindows`, `creditsUsd`, Kiro credits and

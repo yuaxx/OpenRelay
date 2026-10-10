@@ -1,6 +1,6 @@
 ---
 title: クイックスタート
-description: 最初のプロバイダーを構成し、3 つのコマンドで OpenAI Codex を opencodex 経由でルーティングします。
+description: 最初のプロバイダーを構成し、3 つのコマンドで OpenAI Codex を OpenRelay 経由でルーティングします。
 ---
 
 このガイドでは、新規インストールから非 OpenAI モデルに対して Codex を実行するまでを説明します。
@@ -8,23 +8,23 @@ description: 最初のプロバイダーを構成し、3 つのコマンドで O
 ## スタンドアロンバイナリ（npm 不要）
 
 npm を使わず、Bun ランタイムを含むリリースアーカイブの `ocx` バイナリも利用できます。
-`gui/dist` ディレクトリをバイナリの隣に置いて展開し、`./ocx start` を実行してください。
+`gui/dist` ディレクトリをバイナリの隣に置いて展開し、`./orl start` を実行してください。
 
 ## 1. セットアップウィザードを実行します
 
 ```bash
-ocx init
+orl init
 ```
 
-`ocx init` では次の手順を説明します。
+`orl init` では次の手順を説明します。
 
 1. **プロバイダーを選択してください** — 103 個の組み込みレジストリプリセットのいずれか、または `custom` を選択してベース URL とアダプターを入力します。
 2. **API キー** — キーを貼り付けるか、`${ANTHROPIC_API_KEY}` のような環境変数を参照します。
 3. **デフォルト モデル** — キー、ローカル、カスタム プロバイダーの場合は、プリセットを受け入れるか、モデル ID を入力します。
 4. **プロキシ ポート** — デフォルトは `10100` です。
-5. **Codex に挿入しますか?** - 通常のループバック設定では、opencodex はルート `openai_base_url` を
+5. **Codex に挿入しますか?** - 通常のループバック設定では、OpenRelay はルート `openai_base_url` を
 `$CODEX_HOME/config.toml` (デフォルトは `~/.codex/config.toml`) なので、Codex の組み込み `openai` プロバイダーはプロキシをターゲットにします。リモート/LAN バインドでは、代わりに API 認証ヘッダーを持つ専用プロバイダー エントリを使用します。
-6. **自動起動シムをインストールしますか?** — 有効にすると、`codex` を起動すると、最初に `ocx ensure` が実行されます。
+6. **自動起動シムをインストールしますか?** — 有効にすると、`codex` を起動すると、最初に `orl ensure` が実行されます。
 
 結果は `$OPENCODEX_HOME/config.json` (デフォルトは `~/.opencodex/config.json`) に保存されます。
 
@@ -35,29 +35,29 @@ ocx init
 ## 2.プロキシを開始します
 
 ```bash
-ocx start            # defaults to port 10100
-ocx start --port 8080
+orl start            # defaults to port 10100
+orl start --port 8080
 ```
 
-開始時、opencodex:
+開始時、OpenRelay:
 
 - PID を `~/.opencodex/ocx.pid` に書き込みます (そして 2 回起動を拒否します)。
 - プロバイダーがサポートするライブ モデルを検出し、**ネイティブ エントリとルーティングされたエントリを同期します
 Codex のモデル カタログ**、
 - `http://localhost:<port>/v1`で聴いています。
 
-要求されたポートが使用中の場合、`ocx start` は停止し、そのポートを使用しているプロセスを通知します。opencodex が応答している場合は先に `ocx stop` を実行し、空いているポートで起動する場合は `ocx start --port <port>` を使用してください。`ocx start` が自動で別のポートへ移ることはありません。以前はこの動作によって 2 つのプロキシが同時に動作し、Codex が後から起動した方を指すことがありました。
+要求されたポートが使用中の場合、`orl start` は停止し、そのポートを使用しているプロセスを通知します。OpenRelay が応答している場合は先に `orl stop` を実行し、空いているポートで起動する場合は `orl start --port <port>` を使用してください。`orl start` が自動で別のポートへ移ることはありません。以前はこの動作によって 2 つのプロキシが同時に動作し、Codex が後から起動した方を指すことがありました。
 
 確認してください:
 
 ```bash
-ocx status
-ocx gui       # open the dashboard on the live port
+orl status
+orl gui       # open the dashboard on the live port
 ```
 
 ## 3.Codexを使用する
 
-Codex は透過的に opencodex と通信するようになりました。
+Codex は透過的に OpenRelay と通信するようになりました。
 
 ```bash
 codex "Refactor this function for readability"
@@ -72,15 +72,15 @@ codex -m "ollama-cloud/glm-5.2"      "Write a SQL migration"
 
 ## サブエージェント モデルの選択 (オプション)
 
-新しい設定には、Codex のサブエージェント ピッカーの 5 つのネイティブ モデル、`gpt-5.5`、`gpt-5.6-sol`、`gpt-5.6-terra`、`gpt-5.6-luna`、および `gpt-6-astra` が含まれています。 `ocx gui` を開いて、最大 5 つのネイティブ モデルまたはルーティング モデルを置換または並べ替えます。ダッシュボードでは、優先サブエージェント モデルと推論負荷を 1 つ設定することもできます。 v1/base/v2 を選択し、ガイダンス、ネイティブのデフォルト、およびフォールバックがいつ適用されるかを理解するには、[サブエージェントサーフェス](/guides/sub-agent-surface/) を参照してください。
+新しい設定には、Codex のサブエージェント ピッカーの 5 つのネイティブ モデル、`gpt-5.5`、`gpt-5.6-sol`、`gpt-5.6-terra`、`gpt-5.6-luna`、および `gpt-6-astra` が含まれています。 `orl gui` を開いて、最大 5 つのネイティブ モデルまたはルーティング モデルを置換または並べ替えます。ダッシュボードでは、優先サブエージェント モデルと推論負荷を 1 つ設定することもできます。 v1/base/v2 を選択し、ガイダンス、ネイティブのデフォルト、およびフォールバックがいつ適用されるかを理解するには、[サブエージェントサーフェス](/guides/sub-agent-surface/) を参照してください。
 
 ## キーを貼り付ける代わりにログインする
 
 一部のプロバイダーはリアル アカウント ログイン (OAuth、自動更新) をサポートしています。
 
 ```bash
-ocx login xai          # or: anthropic, kimi, kiro, google-antigravity, cursor
-ocx logout xai
+orl login xai          # or: anthropic, kimi, kiro, google-antigravity, cursor
+orl logout xai
 ```
 
 OpenAI 自体には **キーは必要ありません**。デフォルトのプロバイダーは既存の `codex login` 認証情報をそのまま転送します ([プロバイダー](/guides/providers/) を参照)。
@@ -88,9 +88,9 @@ OpenAI 自体には **キーは必要ありません**。デフォルトのプ�
 ## 停止と復元
 
 ```bash
-ocx stop          # stop the proxy and restore native Codex
-ocx restore       # restore native Codex without stopping (alias: ocx eject)
-ocx restore back  # route Codex through the still-running proxy again
+orl stop          # stop the proxy and restore native Codex
+orl restore       # restore native Codex without stopping (alias: orl eject)
+orl restore back  # route Codex through the still-running proxy again
 ```
 
 ## 次

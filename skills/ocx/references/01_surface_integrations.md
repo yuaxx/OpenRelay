@@ -10,9 +10,9 @@ Non-mutating probes may still contact providers, consume quota or refresh caches
 
 Declared capabilities: 41.
 
-### `ocx claude config`
+### `orl claude config`
 
-Usage: `ocx claude config status [--json]; ocx claude config set [--enabled <on|off>] [--auth-mode <auto|proxy|subscription>] [--system-env <on|off>] [--fast-mode <on|off>] [--auto-context <on|off>] [--compact-window <tokens|default>] [--context-accounting <1m|200k>] [--inject-agents <on|off>] [--small-fast-model <id|->] [--model-map <from=to,...|->] [--blocked-skills <name,name|->] [--web-model <id|->] [--web-backend <openai|anthropic|xai|gemini|exa|->] [--vision-model <id|->] [--vision-backend <openai|anthropic|->] [--json]; or ocx claude config set --first-party <on|off> [--json]`
+Usage: `orl claude config status [--json]; orl claude config set [--enabled <on|off>] [--auth-mode <auto|proxy|subscription>] [--system-env <on|off>] [--fast-mode <on|off>] [--auto-context <on|off>] [--compact-window <tokens|default>] [--context-accounting <1m|200k>] [--inject-agents <on|off>] [--small-fast-model <id|->] [--model-map <from=to,...|->] [--blocked-skills <name,name|->] [--web-model <id|->] [--web-backend <openai|anthropic|xai|gemini|exa|->] [--vision-model <id|->] [--vision-backend <openai|anthropic|->] [--json]; or orl claude config set --first-party <on|off> [--json]`
 
 Read or update Claude Code settings, including independent CLI first-party routing.
 
@@ -48,9 +48,9 @@ JSON mode: `payload`.
 - At least one setting is required. --first-party must be set alone and writes Claude settings immediately.
 - Clear both helper model and backend with - to restore inheritance. Preserve shared_proxy_retained warnings.
 
-### `ocx claude intercept start`
+### `orl claude intercept start`
 
-Usage: `ocx claude intercept start [--json]`
+Usage: `orl claude intercept start [--json]`
 
 Start the local Claude interception pair on demand.
 
@@ -66,9 +66,9 @@ State-changing: yes.
 
 JSON mode: `payload`.
 
-### `ocx claude desktop status`
+### `orl claude desktop status`
 
-Usage: `ocx claude desktop status [--json]`
+Usage: `orl claude desktop status [--json]`
 
 Applied-vs-desired Claude Desktop state, including staleness, drift, and health.
 
@@ -86,9 +86,9 @@ JSON mode: `payload`.
 
 - Distinct from `claude desktop show`, which reports what this machine WOULD write; this reports what is actually in effect, which only the running proxy knows.
 
-### `ocx claude desktop bind`
+### `orl claude desktop bind`
 
-Usage: `ocx claude desktop bind <picker-model-id> <provider/model|native/slug>`
+Usage: `orl claude desktop bind <picker-model-id> <provider/model|native/slug>`
 
 First-party: serve a Claude Desktop Code tab picker model with an opencodex route.
 
@@ -101,12 +101,12 @@ State-changing: yes.
 JSON mode: `none`.
 
 - Takes a picker model id (claude-sonnet-4-6) and a route in the Desktop route vocabulary (provider/model or native/<slug>); the route must be one the Desktop profile can offer.
-- Only Claude Code traffic that reaches the proxy through the first-party intercept (Desktop's Code tab, the claude CLI) honours it; ocx claude and the public Messages endpoint are unaffected.
+- Only Claude Code traffic that reaches the proxy through the first-party intercept (Desktop's Code tab, the claude CLI) honours it; orl claude and the public Messages endpoint are unaffected.
 - The Desktop picker keeps Anthropic's label; the binding changes which model answers, starting with the next request.
 
-### `ocx claude desktop unbind`
+### `orl claude desktop unbind`
 
-Usage: `ocx claude desktop unbind <picker-model-id>`
+Usage: `orl claude desktop unbind <picker-model-id>`
 
 Remove a first-party Claude Desktop Code tab picker binding.
 
@@ -120,9 +120,9 @@ JSON mode: `none`.
 
 - Removing an id that is not bound is a no-op; the remaining bindings are printed.
 
-### `ocx claude desktop picker status`
+### `orl claude desktop picker status`
 
-Usage: `ocx claude desktop picker status [--json]`
+Usage: `orl claude desktop picker status [--json]`
 
 First-party picker mode: whether Claude Desktop's Code tab lists opencodex models, and what is missing if not.
 
@@ -140,9 +140,9 @@ JSON mode: `payload`.
 
 - Reads the live picker when available; otherwise reports local offline picker state. JSON emits the picker DTO, not the enclosing API response. No trust mutation.
 
-### `ocx claude desktop picker on`
+### `orl claude desktop picker on`
 
-Usage: `ocx claude desktop picker on`
+Usage: `orl claude desktop picker on`
 
 Turn first-party picker mode on and remember the choice.
 
@@ -155,11 +155,11 @@ State-changing: yes.
 JSON mode: `none`.
 
 - Needs a running proxy, first-party mode and macOS. The first time, macOS asks to trust a local certificate authority limited to claude.ai; when the server cannot show that prompt the command runs the trust step in this terminal.
-- Claude Desktop then reaches the network through opencodex; fully quit and reopen Desktop afterwards.
+- Claude Desktop then reaches the network through OpenRelay; fully quit and reopen Desktop afterwards.
 
-### `ocx claude desktop picker off`
+### `orl claude desktop picker off`
 
-Usage: `ocx claude desktop picker off`
+Usage: `orl claude desktop picker off`
 
 Turn first-party picker mode off, remove its Desktop egress profile and certificate trust, and remember the choice.
 
@@ -173,9 +173,9 @@ JSON mode: `none`.
 
 - Works without a running proxy: the preference is saved and the picker profile and trust are removed locally.
 
-### `ocx claude desktop picker trust`
+### `orl claude desktop picker trust`
 
-Usage: `ocx claude desktop picker trust`
+Usage: `orl claude desktop picker trust`
 
 Run the macOS keychain step for picker mode in this terminal, then ask the server to finish enabling it.
 
@@ -190,9 +190,9 @@ JSON mode: `none`.
 
 - The server removes trust this command added if the enable is refused; if the request is lost, trust is left alone and picker status tells what happened.
 
-### `ocx integration native`
+### `orl integration native`
 
-Usage: `ocx integration native [list] [--json]; ocx integration native <claude|claude-desktop|codex|grok> <on|off> [--json]`
+Usage: `orl integration native [list] [--json]; orl integration native <claude|claude-desktop|codex|grok> <on|off> [--json]`
 
 Read native integration state or toggle Claude, Claude Desktop, Codex and Grok.
 
@@ -214,9 +214,9 @@ JSON mode: `payload`.
 
 - Each toggle writes the selected client configuration through its runtime owner. Refused disables remain failures. Cursor status and local-installer are separate read-only subcommands; they do not toggle or install Cursor.
 
-### `ocx integration client`
+### `orl integration client`
 
-Usage: `ocx integration client status [--client <id>] [--profile <id>] [--json]; ocx integration client history [--client <id>] [--profile <id>] [--json]; ocx integration client enable --client <id> [--profile <id>] [--overwrite-conflict] [--json]; ocx integration client disable --client <id> [--profile <id>] [--json]; ocx integration client restore --op <opId> [--client aside --profile <id>] [--confirm-drift] [--json]`
+Usage: `orl integration client status [--client <id>] [--profile <id>] [--json]; orl integration client history [--client <id>] [--profile <id>] [--json]; orl integration client enable --client <id> [--profile <id>] [--overwrite-conflict] [--json]; orl integration client disable --client <id> [--profile <id>] [--json]; orl integration client restore --op <opId> [--client aside --profile <id>] [--confirm-drift] [--json]`
 
 Inspect and toggle file integrations and Aside profiles, read journals, and restore selected operations.
 
@@ -252,9 +252,9 @@ JSON mode: `payload`.
 - enable/disable requires --client; an omitted Aside --profile toggles all profiles. --overwrite-conflict applies only to enable.
 - restore requires --op (alias --op-id); --client requires --profile and only Aside supports that profile selector. --confirm-drift is an explicit user waiver, never auto-retried. Use client preview or restore --preview to inspect a change, history remove --op ID --yes to retire a journal row, and sync --client aside to refresh managed profiles.
 
-### `ocx grok status`
+### `orl grok status`
 
-Usage: `ocx grok status [--json]`
+Usage: `orl grok status [--json]`
 
 Read Grok model fence state and catalog.
 
@@ -273,9 +273,9 @@ JSON mode: `payload`.
 - integration grok is an alias of grok; show aliases status. Saving selection and applying the saved fence are separate actions.
 - Apply receipts can report changed or skippedReason; success is not a guarantee of a changed client file.
 
-### `ocx grok set`
+### `orl grok set`
 
-Usage: `ocx grok set <model,model...> [--json]`
+Usage: `orl grok set <model,model...> [--json]`
 
 Replace the excluded Grok model list.
 
@@ -294,9 +294,9 @@ JSON mode: `payload`.
 - integration grok is an alias of grok; show aliases status. Saving selection and applying the saved fence are separate actions.
 - Apply receipts can report changed or skippedReason; success is not a guarantee of a changed client file.
 
-### `ocx grok exclude`
+### `orl grok exclude`
 
-Usage: `ocx grok exclude <model,model...> [--json]`
+Usage: `orl grok exclude <model,model...> [--json]`
 
 Add models to the Grok exclusion list.
 
@@ -316,9 +316,9 @@ JSON mode: `payload`.
 - integration grok is an alias of grok; show aliases status. Saving selection and applying the saved fence are separate actions.
 - Apply receipts can report changed or skippedReason; success is not a guarantee of a changed client file.
 
-### `ocx grok include`
+### `orl grok include`
 
-Usage: `ocx grok include <model,model...> [--json]`
+Usage: `orl grok include <model,model...> [--json]`
 
 Remove models from the Grok exclusion list.
 
@@ -338,9 +338,9 @@ JSON mode: `payload`.
 - integration grok is an alias of grok; show aliases status. Saving selection and applying the saved fence are separate actions.
 - Apply receipts can report changed or skippedReason; success is not a guarantee of a changed client file.
 
-### `ocx grok clear`
+### `orl grok clear`
 
-Usage: `ocx grok clear [--json]`
+Usage: `orl grok clear [--json]`
 
 Clear Grok exclusions.
 
@@ -359,9 +359,9 @@ JSON mode: `payload`.
 - integration grok is an alias of grok; show aliases status. Saving selection and applying the saved fence are separate actions.
 - Apply receipts can report changed or skippedReason; success is not a guarantee of a changed client file.
 
-### `ocx grok apply`
+### `orl grok apply`
 
-Usage: `ocx grok apply [--json]`
+Usage: `orl grok apply [--json]`
 
 Apply the saved Grok model fence.
 
@@ -380,9 +380,9 @@ JSON mode: `payload`.
 - integration grok is an alias of grok; show aliases status. Saving selection and applying the saved fence are separate actions.
 - Apply receipts can report changed or skippedReason; success is not a guarantee of a changed client file.
 
-### `ocx integration client status`
+### `orl integration client status`
 
-Usage: `ocx integration client status [--client <id>] [--profile <id>] [--json]`
+Usage: `orl integration client status [--client <id>] [--profile <id>] [--json]`
 
 Read all file integrations, one client or an Aside profile.
 
@@ -405,9 +405,9 @@ JSON mode: `payload`.
 
 - show and list alias status; omitted Aside profile means the aggregate profile collection.
 
-### `ocx integration client history`
+### `orl integration client history`
 
-Usage: `ocx integration client history [--client <id>] [--profile <id>] [--json]`
+Usage: `orl integration client history [--client <id>] [--profile <id>] [--json]`
 
 Read integration rollback history and snapshot availability.
 
@@ -429,9 +429,9 @@ JSON mode: `payload`.
 
 - journal is an alias. Ordinary client filtering uses ?client=; expired snapshots remain visibly expired.
 
-### `ocx integration client enable`
+### `orl integration client enable`
 
-Usage: `ocx integration client enable --client <id> [--profile <id>] [--overwrite-conflict] [--plan-fingerprint <token>] [--reasoning-default <model=effort> ... | --clear-reasoning-defaults] [--json]`
+Usage: `orl integration client enable --client <id> [--profile <id>] [--overwrite-conflict] [--plan-fingerprint <token>] [--reasoning-default <model=effort> ... | --clear-reasoning-defaults] [--json]`
 
 Apply the selected managed file integration.
 
@@ -460,9 +460,9 @@ JSON mode: `payload`.
 - Bound Aside mutations require one explicit profile. Repeat the exact preview action/profile/options. The token is concurrency evidence, not authorization; stale state requires a new explicit preview.
 - Droid map omission preserves inheritance; supplied entries replace the full map, clear sends {}. Only Droid apply/overwrite accepts these options.
 
-### `ocx integration client disable`
+### `orl integration client disable`
 
-Usage: `ocx integration client disable --client <id> [--profile <id>] [--plan-fingerprint <token>] [--json]`
+Usage: `orl integration client disable --client <id> [--profile <id>] [--plan-fingerprint <token>] [--json]`
 
 Disable the selected managed file integration.
 
@@ -487,9 +487,9 @@ JSON mode: `payload`.
 - Partial Aside failures remain failures after emitting the per-profile result. Never infer permission to overwrite from a refusal.
 - Bound Aside mutations require one explicit profile. Repeat the exact preview action/profile/options. The token is concurrency evidence, not authorization; stale state requires a new explicit preview.
 
-### `ocx integration client restore`
+### `orl integration client restore`
 
-Usage: `ocx integration client restore --op <opId> [--client aside --profile <id>] [--confirm-drift] [--preview | --plan-fingerprint <token>] [--json]`
+Usage: `orl integration client restore --op <opId> [--client aside --profile <id>] [--confirm-drift] [--preview | --plan-fingerprint <token>] [--json]`
 
 Restore a selected rollback operation, retaining drift refusal.
 
@@ -518,9 +518,9 @@ JSON mode: `payload`.
 - Preview preserves exact opId/profile/confirm-drift intent. Generic restore derives the client on the server; the returned plan does not embed opId or complete command input.
 - A refused or no-op preview is completed inspection, not applied work. A stale bound mutation exits5 with a fixed re-preview hint; no replacement token is automatically adopted.
 
-### `ocx commandcode restore`
+### `orl commandcode restore`
 
-Usage: `ocx commandcode restore --op <opId> [--confirm-drift] [--preview | --plan-fingerprint <token>] [--json]`
+Usage: `orl commandcode restore --op <opId> [--confirm-drift] [--preview | --plan-fingerprint <token>] [--json]`
 
 Restore a Command Code rollback operation, retaining client ownership and drift checks.
 
@@ -545,9 +545,9 @@ JSON mode: `payload`.
 - Older proxies without the dedicated route fail without a generic restore fallback. Redirects are refused.
 - Preview preserves the operation and drift intent. A stale bound mutation requires a new explicit preview.
 
-### `ocx claude config status`
+### `orl claude config status`
 
-Usage: `ocx claude config status [--json]`
+Usage: `orl claude config status [--json]`
 
 Read effective Claude Code configuration.
 
@@ -565,9 +565,9 @@ JSON mode: `payload`.
 
 - show is an alias; integration claude forwards to the same handler.
 
-### `ocx claude config set`
+### `orl claude config set`
 
-Usage: `ocx claude config set [--enabled <on|off>] [--auth-mode <auto|proxy|subscription>] [--system-env <on|off>] [--fast-mode <on|off>] [--auto-context <on|off>] [--compact-window <tokens|default>] [--context-accounting <1m|200k>] [--inject-agents <on|off>] [--small-fast-model <id|->] [--model-map <from=to,...|->] [--blocked-skills <name,name|->] [--web-model <id|->] [--web-backend <openai|anthropic|xai|gemini|exa|->] [--vision-model <id|->] [--vision-backend <openai|anthropic|->] [--json]; or ocx claude config set --first-party <on|off> [--json]`
+Usage: `orl claude config set [--enabled <on|off>] [--auth-mode <auto|proxy|subscription>] [--system-env <on|off>] [--fast-mode <on|off>] [--auto-context <on|off>] [--compact-window <tokens|default>] [--context-accounting <1m|200k>] [--inject-agents <on|off>] [--small-fast-model <id|->] [--model-map <from=to,...|->] [--blocked-skills <name,name|->] [--web-model <id|->] [--web-backend <openai|anthropic|xai|gemini|exa|->] [--vision-model <id|->] [--vision-backend <openai|anthropic|->] [--json]; or orl claude config set --first-party <on|off> [--json]`
 
 Change Claude Code settings through the runtime owner.
 
@@ -602,9 +602,9 @@ JSON mode: `payload`.
 - At least one setting is required. --first-party must be set alone and writes Claude settings immediately.
 - Clear both helper model and backend with - to restore inheritance. Preserve shared_proxy_retained warnings.
 
-### `ocx claude desktop show`
+### `orl claude desktop show`
 
-Usage: `ocx claude desktop show [--json]`
+Usage: `orl claude desktop show [--json]`
 
 Inspect the desired profile derived on this machine.
 
@@ -620,9 +620,9 @@ JSON mode: `envelope`.
 
 - Local config/catalog derivation, not GET of the remote desired profile. On a connected client scope is local; apply uses the hub profile. Catalog derivation may discover upstream models.
 
-### `ocx claude desktop move`
+### `orl claude desktop move`
 
-Usage: `ocx claude desktop move <provider/model> <opus|fable|sonnet|haiku> [--default]`
+Usage: `orl claude desktop move <provider/model> <opus|fable|sonnet|haiku> [--default]`
 
 Move an available route to a local Desktop family.
 
@@ -638,9 +638,9 @@ JSON mode: `none`.
 
 - Local profile persistence only; no management HTTP or --json. On connected clients this does not change the hub profile.
 
-### `ocx claude desktop default`
+### `orl claude desktop default`
 
-Usage: `ocx claude desktop default <opus|fable|sonnet|haiku> <provider/model|none>`
+Usage: `orl claude desktop default <opus|fable|sonnet|haiku> <provider/model|none>`
 
 Set or clear a local Desktop family default.
 
@@ -652,9 +652,9 @@ JSON mode: `none`.
 
 - Local profile persistence only; none clears the default. Connected Desktop apply uses the hub profile.
 
-### `ocx claude desktop export`
+### `orl claude desktop export`
 
-Usage: `ocx claude desktop export <path|->`
+Usage: `orl claude desktop export <path|->`
 
 Export the persisted local Desktop profile.
 
@@ -666,9 +666,9 @@ JSON mode: `none`.
 
 - Local file output; - writes JSON to stdout. There is no --json flag. A file destination is overwritten; this is not a GUI draft export.
 
-### `ocx claude desktop import`
+### `orl claude desktop import`
 
-Usage: `ocx claude desktop import <path> [--apply]`
+Usage: `orl claude desktop import <path> [--apply]`
 
 Import a local Desktop profile, optionally applying it as a static gateway.
 
@@ -687,9 +687,9 @@ JSON mode: `none`.
 - Without --apply this only persists locally. With a live local proxy, gateway apply is delegated by HTTP; otherwise local helpers apply it.
 - Connected clients refuse import --apply. A saved profile can remain saved after application fails; no --json mode.
 
-### `ocx claude desktop apply`
+### `orl claude desktop apply`
 
-Usage: `ocx claude desktop [apply] [--first-party | --gateway [--static|--hybrid|--discovery-only]]`
+Usage: `orl claude desktop [apply] [--first-party | --gateway [--static|--hybrid|--discovery-only]]`
 
 Apply Claude Desktop first-party interception or gateway profile.
 
@@ -713,9 +713,9 @@ JSON mode: `none`.
 - First-party requires a local hub with interception enabled. Preserve account-risk warnings, trust prompts and ownership refusals; metadata grants no consent.
 - Application and committed-marker persistence can diverge; inspect status after application and preserve warnings.
 
-### `ocx integration client preview`
+### `orl integration client preview`
 
-Usage: `ocx integration client preview --client <id> --operation <apply|overwrite|disable> [--profile <id>] [--reasoning-default <model=effort> ... | --clear-reasoning-defaults] [--json]`
+Usage: `orl integration client preview --client <id> --operation <apply|overwrite|disable> [--profile <id>] [--reasoning-default <model=effort> ... | --clear-reasoning-defaults] [--json]`
 
 Inspect a managed client change before choosing whether to apply it.
 
@@ -741,9 +741,9 @@ JSON mode: `payload`.
 - A valid refused plan, including an unbound refusal, is readable inspection. Only an applicable bound token can accompany a later write; repeat the original command intent.
 - Shows structural paths and consequences, not secret values or a client-file diff.
 
-### `ocx integration client history remove`
+### `orl integration client history remove`
 
-Usage: `ocx integration client history remove --op <opId> --yes [--client aside [--profile <id>]] [--json]`
+Usage: `orl integration client history remove --op <opId> --yes [--client aside [--profile <id>]] [--json]`
 
 Retire a selected rollback-history entry and its retained snapshot.
 
@@ -768,9 +768,9 @@ JSON mode: `payload`.
 - journal remove is an alias. Omitting --client addresses the global journal; --client aside selects Aside history and optional --profile narrows it. Other clients are rejected for deletion scope.
 - The server protects the latest row and validates ownership. snapshotRemoved:false reports committed retirement with incomplete cleanup and exits1; never retry blindly or claim rollback.
 
-### `ocx integration client sync`
+### `orl integration client sync`
 
-Usage: `ocx integration client sync --client aside [--json]`
+Usage: `orl integration client sync --client aside [--json]`
 
 Refresh the managed Aside profiles through their existing owner.
 
@@ -790,9 +790,9 @@ JSON mode: `envelope`.
 - Uses the existing local attested synchronization exchange; no new public target/auth option, profile override or broad sync fallback.
 - Empty results mean no eligible profiles. Partial or malformed outcomes stay nonzero with safe per-profile recovery facts.
 
-### `ocx claude desktop profile show`
+### `orl claude desktop profile show`
 
-Usage: `ocx claude desktop profile show [--json]`
+Usage: `orl claude desktop profile show [--json]`
 
 Read the selected running proxy’s Desktop profile and available models.
 
@@ -810,9 +810,9 @@ JSON mode: `payload`.
 
 - The existing claude desktop show remains local. Runtime profile observation can gather model inventory; it is not guaranteed offline.
 
-### `ocx claude desktop profile import`
+### `orl claude desktop profile import`
 
-Usage: `ocx claude desktop profile import <file|-> [--json]`
+Usage: `orl claude desktop profile import <file|-> [--json]`
 
 Validate and save a Desktop profile on the selected running proxy.
 
@@ -831,9 +831,9 @@ JSON mode: `payload`.
 - Bounded JSON file or explicit stdin; canonical DesktopProfile validation and the management owner retain availability, concurrent-save and applied-marker rules.
 - Save only: --apply and native-mode flags are refused, and failed management writes never save a local fallback. Apply separately through the existing Desktop workflow.
 
-### `ocx integration native cursor status`
+### `orl integration native cursor status`
 
-Usage: `ocx integration native cursor status [--json]`
+Usage: `orl integration native cursor status [--json]`
 
 Read Cursor installation, gateway requirements and model capabilities.
 
@@ -851,9 +851,9 @@ JSON mode: `payload`.
 
 - Status can gather model inventory but does not install or toggle Cursor. A displayed placeholder does not authorize a credential-required listener.
 
-### `ocx integration native cursor local-installer`
+### `orl integration native cursor local-installer`
 
-Usage: `ocx integration native cursor local-installer [--json]`
+Usage: `orl integration native cursor local-installer [--json]`
 
 Read the available Cursor installer link without downloading or installing it.
 
@@ -871,9 +871,9 @@ JSON mode: `payload`.
 
 - May fetch the public update manifest. available:false and nullable reason are valid observations; no installation or trust change is performed.
 
-### `ocx codex-shim install`
+### `orl codex-shim install`
 
-Usage: `ocx codex-shim install`
+Usage: `orl codex-shim install`
 
 Local Codex launcher shim install.
 
@@ -888,9 +888,9 @@ JSON mode: `none`.
 - On macOS/Linux with sh/bash/zsh, source the printed codex-shell-env.sh path, then add that line after PATH setup in your shell startup file.
 - Installation diagnoses wrapper health and reports readiness warnings; Windows keeps in-place wrappers.
 
-### `ocx codex-shim status`
+### `orl codex-shim status`
 
-Usage: `ocx codex-shim status`
+Usage: `orl codex-shim status`
 
 Local Codex launcher shim status.
 
@@ -902,11 +902,11 @@ JSON mode: `none`.
 
 - Local launcher/PATH wrapper operation on macOS, Linux and Windows; no management API or JSON mode.
 - Reports wrapper health, Unix overlay PATH activation, and explicit legacy migration guidance.
-- For JSON, run ocx status --json and inspect codexShim; this command rejects --json and unexpected arguments.
+- For JSON, run orl status --json and inspect codexShim; this command rejects --json and unexpected arguments.
 
-### `ocx codex-shim uninstall`
+### `orl codex-shim uninstall`
 
-Usage: `ocx codex-shim uninstall`
+Usage: `orl codex-shim uninstall`
 
 Local Codex launcher shim uninstall.
 

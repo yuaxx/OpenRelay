@@ -82,7 +82,7 @@ export function parseCliHead(argv: string[]): CliHead {
 
 export function uninstallArgsError(command: string | undefined, args: string[]): string | undefined {
   if ((command !== "uninstall" && command !== "remove") || args.length <= 1) return undefined;
-  return `ocx ${command} does not accept arguments (got: ${redactSecretArgs(args.slice(1)).join(" ")}). No changes were made. See: ocx help ${command}`;
+  return `orl ${command} does not accept arguments (got: ${redactSecretArgs(args.slice(1)).join(" ")}). No changes were made. See: orl help ${command}`;
 }
 
 export async function runCli(argv: string[]): Promise<CliHead> {
@@ -107,7 +107,7 @@ export async function runCli(argv: string[]): Promise<CliHead> {
       // without readyArgs means dispatch diverged. Refuse with code 64 and
       // perform NO I/O (no discovery/probe).
       if (!head.readyArgs) {
-        console.error("Usage: ocx ready [--json] [--wait [--timeout <seconds>]]");
+        console.error("Usage: orl ready [--json] [--wait [--timeout <seconds>]]");
         console.error("  --timeout requires --wait; <seconds> must be a positive integer (1..300).");
         console.error("  Default wait timeout is 45 seconds.");
         process.exit(64);
@@ -120,7 +120,7 @@ export async function runCli(argv: string[]): Promise<CliHead> {
       // rejected invalid arguments before any preflight, so a missing resolveArgs means
       // dispatch diverged. Refuse with code 64 and perform NO I/O.
       if (!head.resolveArgs) {
-        console.error("Usage: ocx resolve [--json]");
+        console.error("Usage: orl resolve [--json]");
         console.error("  --json prints one JSON document: the config home, the effective port,");
         console.error("  and the identity-checked liveness verdict.");
         process.exit(64);
@@ -134,7 +134,7 @@ export async function runCli(argv: string[]): Promise<CliHead> {
         process.exit(1);
       }
       if (head.command === "stop" && !parseStopApproval(head.args.slice(1)).ok) {
-        console.error("Usage: ocx stop [--json [--expect-pid <pid> --expect-port <port> --expect-hostname <host> --expect-config-home <home> --expect-cli-version <version> --expect-compatibility-token <hex>]]");
+        console.error("Usage: orl stop [--json [--expect-pid <pid> --expect-port <port> --expect-hostname <host> --expect-config-home <home> --expect-cli-version <version> --expect-compatibility-token <hex>]]");
         process.exit(64);
       }
       const uninstallError = uninstallArgsError(head.command, head.args);

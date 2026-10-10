@@ -1,9 +1,9 @@
 ---
 title: Architecture
-description: opencodex internals — module map, the AdapterEvent bridge, the request parser, and caching.
+description: OpenRelay internals — module map, the AdapterEvent bridge, the request parser, and caching.
 ---
 
-opencodex is a single Bun process. A request enters as OpenAI Responses, is normalized to an internal
+OpenRelay is a single Bun process. A request enters as OpenAI Responses, is normalized to an internal
 model, routed, sent to a provider via an adapter, and bridged back to Responses SSE. See
 [How It Works](/getting-started/how-it-works/) for the end-to-end flow.
 
@@ -11,7 +11,7 @@ model, routed, sent to a provider via an adapter, and bridged back to Responses 
 
 ```
 src/
-├── cli/                # ocx command dispatch, init, status, provider commands
+├── cli/                # orl command dispatch, init, status, provider commands
 ├── server/             # Bun.serve, /v1/* proxy, /api/* management API, WS bridge
 ├── codex/              # Codex config injection, catalog sync, auth/account integration
 ├── providers/          # provider metadata, API-key pool, quota and labels
@@ -140,7 +140,7 @@ OAuth implementations live in `oauth/`; access tokens are loaded or refreshed im
 routed call, while `oauth/token-guardian.ts` can proactively refresh only providers whose policy
 allows it. Refresh is coordinated with in-process single-flight, a per-account file lock, and
 generation CAS so concurrent writers cannot clobber a newer credential. A shared health projection
-(`oauth/health.ts`) feeds `ocx status`, `ocx doctor`, the management API, and the dashboard.
+(`oauth/health.ts`) feeds `orl status`, `orl doctor`, the management API, and the dashboard.
 Codex/ChatGPT pool credentials and process-local thread affinity live under `codex/` and are kept out
 of management responses; affinity clears on `401` / `403` / `429` (not pinned through rate limits)
 and is not persisted across restarts. Request usage is normalized to `OcxUsage`, surfaced in
@@ -150,7 +150,7 @@ diagnostics.
 ## Transport and compaction
 
 `server/index/serve-options.ts` serves HTTP/SSE on `/v1/responses` by default. If Codex attempts a Responses
-WebSocket upgrade while `websockets` is `false`, opencodex returns `426 upgrade_required`; Codex then
+WebSocket upgrade while `websockets` is `false`, OpenRelay returns `426 upgrade_required`; Codex then
 falls back to HTTP for that session. When `"websockets": true` is set, the same endpoint accepts the
 upgrade and uses the WebSocket bridge.
 
@@ -177,10 +177,10 @@ while the tools exist only in the Lite shape. A changed Lite identity retires th
 requests with the same identity can reuse the new socket. Other models and gateways keep
 their existing Lite policy. Malformed native metadata still falls back to HTTP with its body unchanged.
 
-When a provider rejects a streaming request with HTTP 413 before SSE begins, OpenCodex emits one
+When a provider rejects a streaming request with HTTP 413 before SSE begins, OpenRelay emits one
 terminal `response.failed` event with `context_length_exceeded` instead of relaying the retryable
 unknown status. This lets Codex stop its reconnect loop and apply its own context-compaction policy
-on the next turn. OpenCodex does not silently delete prompts or images; reduce the current input or
+on the next turn. OpenRelay does not silently delete prompts or images; reduce the current input or
 retry after compaction. Non-streaming API callers continue to receive the provider's HTTP 413.
 
 Codex context compaction works for routed models. `server/responses/compact.ts` handles

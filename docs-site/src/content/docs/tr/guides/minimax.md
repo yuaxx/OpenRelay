@@ -1,23 +1,23 @@
 ---
 title: MiniMax istemcileri
-description: MiniMax kimlik bilgilerini açığa çıkarmadan MiniMax Code ve MiniMax CLI metin komutlarını OpenCodex üzerinden yönlendirin.
+description: MiniMax kimlik bilgilerini açığa çıkarmadan MiniMax Code ve MiniMax CLI metin komutlarını OpenRelay üzerinden yönlendirin.
 ---
 
-MiniMax iki farklı komut satırı ürünü sunar. OpenCodex, her birini gerçekten sunduğu
+MiniMax iki farklı komut satırı ürünü sunar. OpenRelay, her birini gerçekten sunduğu
 protokol sınırında bütünleştirir:
 
 - **MiniMax Code** (`mcode`), özel Anthropic Messages sağlayıcıları kullanan bir kodlama ajanıdır.
-- **MiniMax CLI** (`mmx`), çok modlu bir platform CLI'ıdır. Yalnızca `text` kaynağı, OpenCodex'in yönlendirebildiği Anthropic uyumlu API'yi kullanır.
+- **MiniMax CLI** (`mmx`), çok modlu bir platform CLI'ıdır. Yalnızca `text` kaynağı, OpenRelay'in yönlendirebildiği Anthropic uyumlu API'yi kullanır.
 
 ## MiniMax Code
 
 Önce MiniMax'ın yönergelerini kullanarak MiniMax Code'u kurup oturum açın. Ardından
-OpenCodex'i başlatıp geri alınabilir dosya bütünleştirmesini bağlayın:
+OpenRelay'i başlatıp geri alınabilir dosya bütünleştirmesini bağlayın:
 
 ```bash
-ocx start
-ocx integration client enable --client mcode
-ocx mcode
+orl start
+orl integration client enable --client mcode
+orl mcode
 ```
 
 ![Yalıtılmış örnek verilerle gösterilen MiniMax Code bütünleştirmesi](/screenshots/minimax-code-integration.png)
@@ -42,29 +42,29 @@ custom_provider:
 ```
 
 Gerçek oluşturulan model listesi ile bilinen bağlam pencereleri ve akıl yürütme çabası
-basamakları çalışan OpenCodex kataloğundan gelir. Yetkili bağlam penceresi veya çaba
+basamakları çalışan OpenRelay kataloğundan gelir. Yetkili bağlam penceresi veya çaba
 basamağı olmayan model için tahmini bir değer yazılmaz; ilgili alan atlanır. MCode,
-oturumda o anda seçili çabayı korur; bu nedenle OpenCodex, seçimi değiştirmeden
+oturumda o anda seçili çabayı korur; bu nedenle OpenRelay, seçimi değiştirmeden
 `effortOptions` değerini dışa aktarır. Blok gerçek bir anahtar yazmaz, `defaultModel`
 değerini değiştirmez ve MiniMax girişinizi etkilemez. MCode içinde
 `custom_provider:opencodex/...` altından bir model seçin.
 
-`ocx mcode`, istemciyi başlatmadan önce sağlayıcının o anda çalışan proxy'ye işaret
-ettiğini doğrular. Bir kez etkinleştirdikten sonra `ocx sync`, port veya katalog
+`orl mcode`, istemciyi başlatmadan önce sağlayıcının o anda çalışan proxy'ye işaret
+ettiğini doğrular. Bir kez etkinleştirdikten sonra `orl sync`, port veya katalog
 yetenekleri değiştiğinde sahiplenilmiş bloğu yeniler. Otomatik senkronizasyon
-sahipsiz bir blok oluşturmaz, kaldırdığınız bloğu yeniden oluşturmaz ve OpenCodex
+sahipsiz bir blok oluşturmaz, kaldırdığınız bloğu yeniden oluşturmaz ve OpenRelay
 son yazdığından beri değişen dosyanın üzerine yazmaz; bilerek yeniden bağlanmak
 için etkinleştirme komutunu kullanın. Aynı denetlenen bütünleştirme sistemiyle
 devre dışı bırakın veya geri yükleyin:
 
 ```bash
-ocx integration client disable --client mcode
-ocx integration client history --client mcode
-ocx integration client restore --op <opId> [--confirm-drift]
+orl integration client disable --client mcode
+orl integration client history --client mcode
+orl integration client restore --op <opId> [--confirm-drift]
 ```
 
 `MINIMAX_DATA_DIR` ve eski `MAVIS_DATA_DIR` değerleri dikkate alınır. Göreli yol
-geçersiz kılmaları reddedilir; OpenCodex ve MCode farklı çalışma dizinlerinde
+geçersiz kılmaları reddedilir; OpenRelay ve MCode farklı çalışma dizinlerinde
 başlayabilir.
 
 ## MiniMax CLI (`mmx`)
@@ -76,14 +76,14 @@ npm install -g mmx-cli
 mmx --version
 ```
 
-Bir metin komutunu sarmalayıcı ve bir OpenCodex model kimliğiyle yönlendirin:
+Bir metin komutunu sarmalayıcı ve bir OpenRelay model kimliğiyle yönlendirin:
 
 ```bash
-ocx mmx text chat \
+orl mmx text chat \
   --model anthropic/claude-opus-5 \
   --message "Explain this function"
 
-ocx mmx --output json text chat \
+orl mmx --output json text chat \
   --model openai/gpt-5.6-sol \
   --message "Return a JSON summary"
 ```
@@ -92,8 +92,8 @@ MMX, API temel URL'sinin altına `/anthropic/v1/messages` yolunu sabit kodlar.
 Sarmalayıcı, alt sürecin ömrü boyunca geçici bir geri döngü köprüsü başlatır.
 Köprü yalnızca bu Messages yoluna ve `/anthropic/v1/messages/count_tokens`
 yoluna gelen POST isteklerini kabul eder; istek gövdeleri ile sorgu verilerini
-koruyarak bunları OpenCodex'in mevcut `/v1/messages` ve
-`/v1/messages/count_tokens` veri düzlemine eşler. Kanonik OpenCodex istek
+koruyarak bunları OpenRelay'in mevcut `/v1/messages` ve
+`/v1/messages/count_tokens` veri düzlemine eşler. Kanonik OpenRelay istek
 çevirisi, kullanım muhasebesi ve yapılandırılmış aşağı akış sağlayıcı kimlik
 doğrulaması geçerliliğini korur; sağlayıcılar yapılandırmalarına göre `x-api-key`
 veya bearer aktarımı alır. Akış, Anthropic ileti ve içerik olaylarını korur.
@@ -108,12 +108,12 @@ kopyalanmaz.
 
 Aşağıdaki sınırlar bilinçli olarak uygulanır:
 
-- OpenCodex üzerinden yalnızca `text chat` ve `text repl` yönlendirilir.
+- OpenRelay üzerinden yalnızca `text chat` ve `text repl` yönlendirilir.
 - Arayanın kimlik bilgileri veya hedef seçicileri yalıtılmış köprüyle çakışmasın diye sarmalayıcı `--api-key`, `--base-url` ve `--region` seçeneklerini reddeder.
-- MMX, uzak bir bağ için OpenCodex'in özel `x-opencodex-api-key` kabul başlığını gönderemediğinden sarmalayıcı yalnızca geri döngüde çalışır.
-- `image`, `video`, `speech`, `music`, `vision`, `search`, `quota`, `auth`, `config`, `file` ve `update` için düz `mmx` çalıştırın; bunlar OpenCodex'in taklit etmediği MiniMax API'lerini çağırır.
+- MMX, uzak bir bağ için OpenRelay'in özel `x-opencodex-api-key` kabul başlığını gönderemediğinden sarmalayıcı yalnızca geri döngüde çalışır.
+- `image`, `video`, `speech`, `music`, `vision`, `search`, `quota`, `auth`, `config`, `file` ve `update` için düz `mmx` çalıştırın; bunlar OpenRelay'in taklit etmediği MiniMax API'lerini çağırır.
 
-`mmx`, metin modeli olarak varsayılan `MiniMax-M3` kullanır. Belirli bir OpenCodex
-rotası istiyorsanız `--model <provider/model>` iletin; aksi halde normal OpenCodex
+`mmx`, metin modeli olarak varsayılan `MiniMax-M3` kullanır. Belirli bir OpenRelay
+rotası istiyorsanız `--model <provider/model>` iletin; aksi halde normal OpenRelay
 model yönlendirme kuralları varsayılan kimliğin kullanılabilir olup olmadığını
 belirler.

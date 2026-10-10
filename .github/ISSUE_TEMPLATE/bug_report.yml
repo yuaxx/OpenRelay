@@ -1,12 +1,13 @@
 name: Bug report
-description: Report a defect in the proxy, CLI, dashboard, provider adapter, or packaging.
+description: Report a defect in the OpenRelay proxy, CLI, dashboard, provider adapter, or packaging.
 labels:
   - bug
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the report. Include a minimal reproduction and exact environment details so we can confirm and fix the problem quickly.
+        Thanks for reporting an issue in OpenRelay. Include a minimal reproduction and exact environment details.
+        **Warning**: Do not include secrets, API keys, OAuth session tokens, cookies, emails, or personal identifiers.
 
   - type: dropdown
     id: client
@@ -19,7 +20,7 @@ body:
         - Codex SDK
         - Claude Code
         - Direct HTTP/API client
-        - OpenCodex dashboard
+        - OpenRelay dashboard
         - Other
     validations:
       required: true
@@ -28,7 +29,7 @@ body:
     id: area
     attributes:
       label: Area
-      description: Which part of OpenCodex is affected?
+      description: Which part of OpenRelay is affected?
       options:
         - CLI
         - Proxy and routing
@@ -36,6 +37,7 @@ body:
         - Provider adapter
         - Authentication and account pool
         - Catalog / models
+        - RTK output compression
         - Streaming
         - Tools / MCP / web search
         - Installation or packaging
@@ -55,6 +57,13 @@ body:
     validations:
       required: true
 
+  - type: input
+    id: command
+    attributes:
+      label: Command executed
+      description: Exact CLI command or request executed (e.g. orl start, orl doctor, curl).
+      placeholder: "orl start --port 10100"
+
   - type: textarea
     id: reproduction
     attributes:
@@ -62,7 +71,7 @@ body:
       description: |
         Exact commands, steps, configuration shape, and inputs. If the problem is intermittent or not yet consistently reproducible, explain what you have observed and under which conditions.
       placeholder: |
-        1. ocx start --port 10100
+        1. orl start --port 10100
         2. Send a request to /v1/responses with ...
         3. Observe ...
     validations:
@@ -71,9 +80,18 @@ body:
   - type: input
     id: version
     attributes:
-      label: Version
-      description: Installed `@bitkyc08/opencodex` version or commit SHA.
-      placeholder: "2.7.31"
+      label: OpenRelay version
+      description: Installed OpenRelay version (`orl --version`) or commit SHA.
+      placeholder: "2.82.0"
+    validations:
+      required: true
+
+  - type: input
+    id: bun-version
+    attributes:
+      label: Bun version
+      description: Version of Bun (`bun --version`).
+      placeholder: "1.4.0"
     validations:
       required: true
 
@@ -120,5 +138,5 @@ body:
       options:
         - label: I searched existing issues and documentation.
           required: true
-        - label: I removed secrets, tokens, account details, request credentials, and personal data.
+        - label: I removed secrets, tokens, cookies, passwords, account details, request credentials, and personal data.
           required: true

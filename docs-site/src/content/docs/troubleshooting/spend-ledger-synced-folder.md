@@ -1,6 +1,6 @@
 ---
 title: Spend Ledger Refused in a Synced Folder
-description: Why requests can fail with "Spend-ledger storage could not be opened safely" when the opencodex state directory is inside iCloud Drive or another synced folder, and how to fix it.
+description: Why requests can fail with "Spend-ledger storage could not be opened safely" when the OpenRelay state directory is inside iCloud Drive or another synced folder, and how to fix it.
 ---
 
 Some macOS users saw requests fail intermittently with HTTP 502 and this message, while
@@ -18,11 +18,11 @@ Spend-ledger storage could not be opened safely (journal: extra-hard-link).
 
 ## What the check is
 
-opencodex keeps a spend ledger in its state directory (`~/.opencodex` by default, or
+OpenRelay keeps a spend ledger in its state directory (`~/.opencodex` by default, or
 `OPENCODEX_HOME`): a journal file, `spend-ledger.jsonl`, and a salt file, `spend-ledger.salt`.
 Before every write it checks that each file is a regular file owned by you, is not a symbolic
 link, and has exactly one directory entry. A second hard link would mean another name elsewhere
-on the volume can see or change the same bytes, so opencodex refuses instead of writing through
+on the volume can see or change the same bytes, so OpenRelay refuses instead of writing through
 it. This check stays strict on purpose.
 
 | Condition in the message | Meaning |
@@ -45,7 +45,7 @@ the journal can have two links for a moment after an ordinary write. A request t
 that moment is refused, and the next one may succeed. Once the sync settles, the file is back to
 one link, so inspecting it afterwards shows nothing wrong.
 
-At startup opencodex warns when the state directory resolves inside iCloud Drive
+At startup OpenRelay warns when the state directory resolves inside iCloud Drive
 (`~/Library/Mobile Documents`), a File Provider folder (`~/Library/CloudStorage`), Desktop
 or Documents while iCloud Desktop & Documents sync appears to be on, or Desktop or Documents
 while Google Drive for desktop appears to be in use. The Google Drive hint is the presence
@@ -60,7 +60,7 @@ Keep the state directory outside synced folders. The default `~/.opencodex` is n
 
 1. Stop opencodex.
 2. Move or copy the state directory to an unsynced location, for example `~/.opencodex-trial`.
-3. Set `OPENCODEX_HOME` to that location, or unset it to use the default, and start opencodex
+3. Set `OPENCODEX_HOME` to that location, or unset it to use the default, and start OpenRelay
    again.
 
 Do not delete the journal, relax its permissions, or remove the check to make the error go away.

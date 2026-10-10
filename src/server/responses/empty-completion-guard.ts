@@ -33,7 +33,7 @@ export const EMPTY_COMPLETION_RETRY_ENV = "OCX_EMPTY_COMPLETION_RETRY";
 export function emptyCompletionNotice(providerName: unknown, modelId: unknown): string {
   const provider = sanitizeLogMetadataString(providerName) ?? "unknown";
   const model = sanitizeLogMetadataString(modelId) ?? "unknown";
-  return `[opencodex] ${provider}/${model} completed with no output text and no tool call. `
+  return `[openrelay] ${provider}/${model} completed with no output text and no tool call. `
     + "Set \"emptyCompletionRetry\": true to retry such turns once.";
 }
 

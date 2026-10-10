@@ -1,9 +1,9 @@
 ---
 title: 路由配置文件编辑器
-description: 在 OpenCodex 仪表盘中创建、编辑、验证、试运行和删除路由策略配置文件。
+description: 在 OpenRelay 仪表盘中创建、编辑、验证、试运行和删除路由策略配置文件。
 ---
 
-OpenCodex 仪表盘中的 **Models → Routing** 标签页可以管理 `config.routingProfiles`，无须手动编辑 `config.json`。
+OpenRelay 仪表盘中的 **Models → Routing** 标签页可以管理 `config.routingProfiles`，无须手动编辑 `config.json`。
 
 ## 创建配置文件
 

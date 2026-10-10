@@ -59,18 +59,18 @@ function assignChapters(): Map<Capability, string> {
 
 // These existing discoverable names return plaintext credentials. Preserve their anchors
 // as prose handoffs, never turn them into executable-looking recipes.
-const SECRET_HANDOFFS = new Set(["ocx link issue", "ocx hub invite", "ocx config export"]);
+const SECRET_HANDOFFS = new Set(["orl link issue", "orl hub invite", "orl config export"]);
 function capabilityHeading(invocation: string): string {
   return SECRET_HANDOFFS.has(invocation) ? `### ${invocation}` : `### \`${invocation}\``;
 }
 
 function renderIndex(assignments: Map<Capability, string>): string {
-  const lines = [PREAMBLE, "# The `ocx` management surface", "",
+  const lines = [PREAMBLE, "# The `orl` management surface", "",
     "Declared capabilities, grouped by operating task. This index is not every CLI verb.",
     "Read the chapter for routes, flags and mutation notes; use the running binary when versions differ.", "",
-    "```bash", "ocx capabilities --json                 # the declared table",
-    "ocx capabilities --mutating-only --json  # declared state-changing verbs",
-    "ocx capabilities --route /api/logs       # declarations for one route", "```", "",
+    "```bash", "orl capabilities --json                 # the declared table",
+    "orl capabilities --mutating-only --json  # declared state-changing verbs",
+    "orl capabilities --route /api/logs       # declarations for one route", "```", "",
     "## Resolved before dispatch", "",
     "These answer in the CLI head and never reach the proxy, so they work with nothing running.", "",
     "| Invocation | Purpose |", "|---|---|"];

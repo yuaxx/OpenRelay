@@ -210,9 +210,9 @@ jobs:
           set -euo pipefail
           cd "dist/standalone/$STANDALONE_TARGET"
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            powershell -NoProfile -Command 'Compress-Archive -Path ocx.exe,gui,keyring -DestinationPath ("../../ocx-{0}-{1}.zip" -f $env:RELEASE_VERSION,$env:STANDALONE_TARGET) -Force'
+            powershell -NoProfile -Command 'Compress-Archive -Path orl.exe,ocx.exe,opencodex.exe,gui,keyring,RTK-NOTICE.md -DestinationPath ("../../ocx-{0}-{1}.zip" -f $env:RELEASE_VERSION,$env:STANDALONE_TARGET) -Force'
           else
-            tar -czf "../../ocx-${RELEASE_VERSION}-${STANDALONE_TARGET}.tar.gz" ocx gui keyring
+            tar -czf "../../ocx-${RELEASE_VERSION}-${STANDALONE_TARGET}.tar.gz" orl ocx opencodex gui keyring RTK-NOTICE.md
           fi
           cd ../..
           # The pre-publication verifier resolves every recorded checksum from

@@ -4,12 +4,12 @@ export const HEAD_CAPABILITIES: readonly HeadCapability[] = [
   {
     invocations: ["--version", "-v", "version"],
     summary: "Print the CLI version and exit.",
-    bannerLine: "ocx --version | -v          Print version",
+    bannerLine: "orl --version | -v          Print version",
   },
   {
     invocations: ["help", "--help", "-h"],
-    summary: "Print the command list, or one command's usage with `ocx help <command>`.",
-    bannerLine: "ocx help [command]          Show help for a command",
+    summary: "Print the command list, or one command's usage with `orl help <command>`.",
+    bannerLine: "orl help [command]          Show help for a command",
   },
 ];
 
@@ -23,7 +23,7 @@ export const CAPABILITIES: readonly Capability[] = [
     command: ["chatgpt"],
     summary: "Experimental ChatGPT app-server shim: launch, restore or status (macOS only).",
     routes: [], flags: [], mutates: true, json: "none",
-    bannerLines: ["ocx chatgpt <sub>          Experimental app-server shim: launch|restore|status (macOS)"],
+    bannerLines: ["orl chatgpt <sub>          Experimental app-server shim: launch|restore|status (macOS)"],
     details: ["Default off; launch requires chatgptDesktop.appServerShim: true. Restore removes the generated launcher."],
   },
   {
@@ -33,7 +33,7 @@ export const CAPABILITIES: readonly Capability[] = [
     flags: [{"name":"--json","value":"boolean","summary":"Emit the selected port as JSON."}],
     mutates: false,
     json: "envelope",
-    usage: "ocx link port [--json]",
+    usage: "orl link port [--json]",
     details: ["Local temporary loopback socket allocation; no management API request.","Always emits a CLI-shaped {port} JSON object, even without --json."],
   },
   {
@@ -52,7 +52,7 @@ export const CAPABILITIES: readonly Capability[] = [
     flags: [{"name":"--json","value":"boolean","summary":"Emit the K16 status payload as JSON."}],
     mutates: false,
     json: "payload",
-    usage: "ocx link status [--json]",
+    usage: "orl link status [--json]",
     details: ["Reads live listener/tunnel metadata; when no proxy is found, falls back to the local link store. Always emits JSON."],
   },
   {
@@ -62,8 +62,8 @@ export const CAPABILITIES: readonly Capability[] = [
     flags: [{"name":"--link-id","value":"string","required":true,"summary":"Link id to revoke."},{"name":"--json","value":"boolean","summary":"Emit the revoked link id as JSON."},{"name":"--force","value":"boolean","summary":"Explicitly skip remote disconnect while retiring the local link; requires --yes."},{"name":"--yes","value":"boolean","summary":"Confirms force only; refused without --force."}],
     mutates: true,
     json: "envelope",
-    details: ["Requires a valid link ID and loopback admin authority. Explicit force additionally requires --yes.","Ordinary revoke always emits {linkId} JSON; forced revoke has human output or a JSON cleanup receipt. Already-revoked link_not_found is idempotent success.","Ordinary revoke retains its no-body and idempotent behavior. Forced success reports remoteCleanup:skipped from invocation intent; already-missing link reports unverified. Neither proves the remote client disconnected.","If forced cleanup was needed, run ocx disconnect on the remote client. No new enrollment, SSH trust or credential action is implied."],
-    usage: "ocx link revoke --link-id <id> [--force --yes] [--json]",
+    details: ["Requires a valid link ID and loopback admin authority. Explicit force additionally requires --yes.","Ordinary revoke always emits {linkId} JSON; forced revoke has human output or a JSON cleanup receipt. Already-revoked link_not_found is idempotent success.","Ordinary revoke retains its no-body and idempotent behavior. Forced success reports remoteCleanup:skipped from invocation intent; already-missing link reports unverified. Neither proves the remote client disconnected.","If forced cleanup was needed, run orl disconnect on the remote client. No new enrollment, SSH trust or credential action is implied."],
+    usage: "orl link revoke --link-id <id> [--force --yes] [--json]",
   },
   {
     command: ["remote-workspace","pair"],
@@ -73,7 +73,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["Executor-local state/control; no Hub management API routes.","Pairing consumes a human-provided one-time code from stdin and persists enrollment; approved roots and platform confinement determine capabilities."],
-    usage: "ocx remote-workspace pair <hub-url> --pairing-code-stdin --root <absolute-path> [--root <absolute-path> ...] [--toolchain-root <absolute-directory> ...] [--executor-helper <absolute-file>] [--name <device-name>] [--json]",
+    usage: "orl remote-workspace pair <hub-url> --pairing-code-stdin --root <absolute-path> [--root <absolute-path> ...] [--toolchain-root <absolute-directory> ...] [--executor-helper <absolute-file>] [--name <device-name>] [--json]",
   },
   {
     command: ["remote-workspace","agent"],
@@ -83,7 +83,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "none",
     details: ["Executor-local state/control; no Hub management API routes.","Maintains the enrolled executor connection to the Hub until interrupted."],
-    usage: "ocx remote-workspace agent",
+    usage: "orl remote-workspace agent",
   },
   {
     command: ["remote-workspace","status"],
@@ -93,7 +93,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "payload",
     details: ["Executor-local state/control; no Hub management API routes.","Reports local enrollment and platform/helper capabilities without credentials; not Hub device/runtime/session inventory."],
-    usage: "ocx remote-workspace status [--json]",
+    usage: "orl remote-workspace status [--json]",
   },
   {
     command: ["models","price"],
@@ -103,7 +103,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "envelope",
     details: ["The provider must be configured; everything after the first slash is the exact upstream model ID."],
-    usage: "ocx models price <provider/model> [--json]",
+    usage: "orl models price <provider/model> [--json]",
   },
   {
     command: ["models","set-price"],
@@ -113,7 +113,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "envelope",
     details: ["Uses the exact upstream model ID after the first slash. Omitted cache rates default to zero; sibling model prices are preserved."],
-    usage: "ocx models set-price <provider/model> (--input <N> --output <N> [--cache-read <N>] [--cache-write <N>]|--auto) [--json]",
+    usage: "orl models set-price <provider/model> (--input <N> --output <N> [--cache-read <N>] [--cache-write <N>]|--auto) [--json]",
   },
   {
     command: ["models","set"],
@@ -123,7 +123,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "envelope",
     details: ["Only routed provider/model selectors are supported. At least one option or --reset is required.","Context 0 or - and modalities/default effort - clear to null; reasoning efforts - restores inheritance while an empty string stores an empty ladder.","--reset clears all four overrides with null and cannot be combined with other settings. A saved-but-catalog-refresh-failed receipt must not be mistaken for an unsaved change."],
-    usage: "ocx models set <provider/model> [--context-window <tokens|0|->] [--modalities <text,image,audio|->] [--reasoning-efforts <levels|->] [--default-reasoning-effort <level|->] [--reset] [--json]",
+    usage: "orl models set <provider/model> [--context-window <tokens|0|->] [--modalities <text,image,audio|->] [--reasoning-efforts <levels|->] [--default-reasoning-effort <level|->] [--reset] [--json]",
   },
   {
     command: ["status"],
@@ -154,12 +154,12 @@ export const CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["hub","invite"],
-    summary: "Mint a single-use pairing code on a hub and print the exact `ocx connect` line for one more machine.",
+    summary: "Mint a single-use pairing code on a hub and print the exact `orl connect` line for one more machine.",
     routes: [],
     flags: [{"name":"--json","value":"boolean","summary":"Emit code, expiresAt, dataUrl, managementUrl, and command."},{"name":"--data-url","value":"string","summary":"Advertise this data origin instead of hub.dataPublicOrigin or the bind address."},{"name":"--management-url","value":"string","summary":"Confirm the management origin; it must equal hub.managementPublicOrigin."},{"name":"--clients","value":"string","summary":"Pre-select codex and/or claude in the printed connect command."}],
     mutates: true,
     json: "envelope",
-    details: ["Hub only: refuses when runtimeRole is not hub, and requires a running attested proxy.","The code is secret, single-use and short-lived; it is bound to hub.managementPublicOrigin and to the connecting machine's loopback browser origin.","The bound browser origin is always printed; when it is not http://localhost:10100 the warning names the port the connecting machine must use.","Refuses when the advertised data origin would be loopback (a loopback or wildcard bind with no hub.dataPublicOrigin and no --data-url) rather than printing a line that dials the other machine itself.","Prints no data-plane token. Remote machines receive their own revocable per-client key from the exchange.","Mints through the attested local pairing-grant route, the same one ocx gui pair uses; no admin token is read."],
+    details: ["Hub only: refuses when runtimeRole is not hub, and requires a running attested proxy.","The code is secret, single-use and short-lived; it is bound to hub.managementPublicOrigin and to the connecting machine's loopback browser origin.","The bound browser origin is always printed; when it is not http://localhost:10100 the warning names the port the connecting machine must use.","Refuses when the advertised data origin would be loopback (a loopback or wildcard bind with no hub.dataPublicOrigin and no --data-url) rather than printing a line that dials the other machine itself.","Prints no data-plane token. Remote machines receive their own revocable per-client key from the exchange.","Mints through the attested local pairing-grant route, the same one orl gui pair uses; no admin token is read."],
   },
   {
     command: ["connect", "rotate"],
@@ -195,7 +195,7 @@ export const CAPABILITIES: readonly Capability[] = [
     ],
     mutates: false,
     json: "envelope",
-    details: ["Start here when driving ocx programmatically: it is the declared surface index, not a complete verb list."],
+    details: ["Start here when driving orl programmatically: it is the declared surface index, not a complete verb list."],
   },
   {
     command: ["provider","list"],
@@ -205,7 +205,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "envelope",
     details: ["Local config and registry read, not GET /api/providers. --json and --jsonl are mutually exclusive."],
-    usage: "ocx provider list [--json|--jsonl]",
+    usage: "orl provider list [--json|--jsonl]",
   },
   {
     command: ["provider","resets"],
@@ -214,7 +214,7 @@ export const CAPABILITIES: readonly Capability[] = [
     flags: [{"name":"--json","value":"boolean","summary":"Emit reset events as JSON."},{"name":"--limit","value":"number","summary":"Limit returned events; defaults to 20, capped at 100."}],
     mutates: false,
     json: "payload",
-    usage: "ocx provider resets [--limit <n>] [--json]",
+    usage: "orl provider resets [--limit <n>] [--json]",
     details: [],
   },
   {
@@ -225,7 +225,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["status reads by provider name; store/restore POST {name,action}. These move an existing secret between config and OS keychain; keep credential material out of transcripts."],
-    usage: "ocx provider keychain <name> [status|store|restore] [--json]",
+    usage: "orl provider keychain <name> [status|store|restore] [--json]",
   },
   {
     command: ["companion"],
@@ -235,7 +235,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["show/default reads settings; set key=value and reset write settings. Values parse as JSON when valid.","usage reads today and 30-day totals using saved display filters; partial range failure returns exit1 and keeps available results.","timeline is a separate read of the usage timeline with explicit model selection/provider exclusion and completeness metadata; it does not change settings."],
-    usage: "ocx companion show [--json] | ocx companion set <key>=<value> [...] [--json] | ocx companion reset [--json]",
+    usage: "orl companion show [--json] | orl companion set <key>=<value> [...] [--json] | orl companion reset [--json]",
   },
   {
     command: ["account","login"],
@@ -244,7 +244,7 @@ export const CAPABILITIES: readonly Capability[] = [
     flags: [{"name":"--id","value":"string","summary":"Account ID; provider OAuth requires --reauth when supplied."},{"name":"--reauth","value":"boolean","summary":"Reauthenticate an existing account."},{"name":"--device","value":"boolean","summary":"Codex device flow; accepted for already-device-native kimi, nous and github-copilot."},{"name":"--method","value":"string","summary":"Kiro only: builder-id, google or github; add-only and incompatible with --reauth, --id, --device or --code."},{"name":"--code","value":"string","summary":"Use - to read authorization material from stdin."},{"name":"--no-wait","value":"boolean","summary":"Return after flow start."},{"name":"--json","value":"boolean","summary":"Emit the command result as JSON."},{"name":"--open-browser","value":"string","summary":"on or off for browser-capable login; rejected for explicit/native device flows."},{"name":"--add-account","value":"string","summary":"Fresh generic OAuth login only: on forces a fresh flow, off permits existing import preference. Not supported with reauth/Codex/Kiro method."}],
     mutates: true,
     json: "payload",
-    usage: "ocx account login <provider> [--id <account-id>] [--reauth] [--device] [--method <builder-id|google|github>] [--code -] [--no-wait] [--open-browser <on|off>] [--add-account <on|off>] [--json]",
+    usage: "orl account login <provider> [--id <account-id>] [--reauth] [--device] [--method <builder-id|google|github>] [--code -] [--no-wait] [--open-browser <on|off>] [--add-account <on|off>] [--json]",
     details: ["openai, codex and chatgpt address the Codex pool. Native main uses the separate account main reauth flow.","Login is a human authorization handoff. Codes, verification material and credentials must not be copied into agent transcripts. Legacy argv code input warns about exposure; use stdin.","No --live flag is implemented. Provider OAuth --id requires --reauth; --method is Kiro add-only.","Omitted options preserve each flow's existing defaults. Explicit browser flags are refused for Codex device, known native-device providers and native Kiro method; add-account is refused for reauth/Codex/Kiro method.","Start/code/poll are pinned; human verification remains required. Only public handoff/flow/state fields are printed. Completed-but-validation/catalog-pending outcomes remain visible and nonzero."],
   },
   {
@@ -255,7 +255,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "payload",
     details: ["Use account history openai <pool-account-id>. Reads cached observations only; no refresh or warmup. Native main is not included."],
-    usage: "ocx account history openai <pool-account-id> [--limit <1-200>] [--json]",
+    usage: "orl account history openai <pool-account-id> [--limit <1-200>] [--json]",
   },
   {
     command: ["account","main","reauth"],
@@ -265,7 +265,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["Same-identity native main device reauthentication; pool login endpoints are separate. Human authorization is required and credentials are never printed.","Start requires --device; --no-wait returns a flow handle. Follow with account main reauth status --flow <id> or account main reauth cancel --flow <id>. Status/cancel require --flow and reject --device/--no-wait.","Returned verification URLs and device codes are human handoff material; keep them out of agent transcripts."],
-    usage: "ocx account main reauth --device [--no-wait] [--json]",
+    usage: "orl account main reauth --device [--no-wait] [--json]",
   },
   {
     command: ["account","list"],
@@ -275,7 +275,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "envelope",
     details: ["Omitting provider discovers OAuth providers and includes configured families. JSON is {accounts,notes}, not a raw server account array.","Default listing is observational. --quota can probe provider quotas; --refresh is only acted on together with --quota. A refresh observation is not pending-account validation consent."],
-    usage: "ocx account list [provider] [--all] [--quota [--refresh]] [--json]",
+    usage: "orl account list [provider] [--all] [--quota [--refresh]] [--json]",
   },
   {
     command: ["account","import-orca"],
@@ -285,7 +285,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "envelope",
     details: ["Local files only; never copies refresh tokens or changes Orca authentication files.","Skips existing ChatGPT identities. New accounts remain pending until dashboard validation.","Orca must keep the source login available and refreshed; a missing or expired source fails closed.","Mixed eligible and invalid entries exit successfully; an all-invalid result exits nonzero."],
-    usage: "ocx account import-orca --source <orca-data-directory> --registry <orca-data.json> [--apply] [--json]",
+    usage: "orl account import-orca --source <orca-data-directory> --registry <orca-data.json> [--apply] [--json]",
   },
   {
     command: ["account","refresh"],
@@ -295,7 +295,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "envelope",
     details: ["CLI/admin-token refreshes only observe usage. After quota recovery, a human must click Refresh quotas in the dashboard to authorize model validation. Do not mint a GUI session to work around this consent boundary."],
-    usage: "ocx account refresh <provider> [--json]",
+    usage: "orl account refresh <provider> [--json]",
   },
   {
     command: ["account","grok-reset-coupons"],
@@ -305,7 +305,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["Without --consume this is a read: remaining coupons and their validity windows.","The operation is journaled before the upstream call, so retrying the same --operation-id replays the recorded outcome instead of spending a second coupon."],
-    usage: "ocx account grok-reset-coupons [account-id] [--consume --yes [--token-id <token-id>] [--operation-id <uuid>]] [--json]",
+    usage: "orl account grok-reset-coupons [account-id] [--consume --yes [--token-id <token-id>] [--operation-id <uuid>]] [--json]",
   },
   {
     command: ["usage"],
@@ -315,7 +315,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "payload",
     details: ["Alias of observe usage. Connected clients read only their enrolled-key Hub report through /v1/usage; caller --api-key-id is refused before key read/transport and never grants management authority.","Nonclient --api-key-id uses /api/usage and requires matching filter acknowledgment. An unknown acknowledged key is empty/matched:false, not404. Custom-window acknowledgment remains required.","--search filters only returned model rows after scope acknowledgment. Blank search selects the top100 model rows; modelView reports match/return counts without recomputing totals."],
-    usage: "ocx usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--since <epoch-ms|ISO-datetime>] [--until <epoch-ms|ISO-datetime>] [--provider <name>] [--model <id>] [--api-key-id <id>] [--search <text>] [--json]",
+    usage: "orl usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--since <epoch-ms|ISO-datetime>] [--until <epoch-ms|ISO-datetime>] [--provider <name>] [--model <id>] [--api-key-id <id>] [--search <text>] [--json]",
   },
   {
     command: ["account","pause"],
@@ -325,7 +325,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "envelope",
     details: ["Codex pause unbinds pinned threads and selects a fallback when possible; with no fallback, a paused-but-selected Codex account still receives requests. Anthropic and generic OAuth pause exclude the account from new requests, failover and refresh, and an all-paused pool answers 403. Credentials and health are preserved; already-sent turns are not cancelled."],
-    usage: "ocx account pause <provider> <account-id|alias|main> [--json]",
+    usage: "orl account pause <provider> <account-id|alias|main> [--json]",
   },
   {
     command: ["account","resume"],
@@ -334,7 +334,7 @@ export const CAPABILITIES: readonly Capability[] = [
     flags: [{"name":"--json","value":"boolean","summary":"Emit the resume result as JSON."}],
     mutates: true,
     json: "envelope",
-    usage: "ocx account resume <provider> <account-id|alias|main> [--json]",
+    usage: "orl account resume <provider> <account-id|alias|main> [--json]",
     details: [],
   },
   {
@@ -345,7 +345,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "envelope",
     details: ["Only Codex account pools are supported. Refreshes quota and may partially fail; nonzero failedAccountCount exits 1 and sets ok:false."],
-    usage: "ocx account pause-exhausted <provider> [--json]",
+    usage: "orl account pause-exhausted <provider> [--json]",
   },
   {
     command: ["account","strategy"],
@@ -355,7 +355,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "envelope",
     details: ["A bare invocation reads and never writes.","The APPLIED value is echoed, not the requested one, so a server-side normalization stays visible.","Values are not re-validated in the CLI: the server owns the strategy names and the 1-100 sticky bound.","One route answers for every pool kind and declares which fields that kind honours in `supported`, so an unsupported field is a stated null rather than an absence. `anthropic` alone carries `quotaWindow`. Generic-provider settings steer selection only while `pool.kernel` is on. The legacy per-pool paths still work and are unchanged."],
-    usage: "ocx account strategy <provider> [quota|round-robin|fill-first|least-loaded|reset-first] [--json]",
+    usage: "orl account strategy <provider> [quota|round-robin|fill-first|least-loaded|reset-first] [--json]",
   },
   {
     command: ["account","sticky"],
@@ -365,7 +365,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "envelope",
     details: ["Only meaningful under the sticky-capable strategies; the pool strategy is the other half of this setting."],
-    usage: "ocx account sticky <provider> [1-100] [--json]",
+    usage: "orl account sticky <provider> [1-100] [--json]",
   },
   {
     command: ["account","routes"],
@@ -375,7 +375,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["Only anthropic is supported. Omitted --file/--clear reads. --clear sends routes:null; file and clear are mutually exclusive. The local JSON file must be a regular file of at most 64 KiB; the server validates its route array."],
-    usage: "ocx account routes anthropic [--file <json-file>|--clear] [--json]",
+    usage: "orl account routes anthropic [--file <json-file>|--clear] [--json]",
   },
   {
     command: ["account","auto-switch"],
@@ -385,7 +385,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "envelope",
     details: ["Without --account the existing pool-wide operation remains. OpenAI per-account status reads override plus effective threshold; on writes80, off0, inherit null, threshold a validated0–100 integer.","New OpenAI policy writes require successful unambiguous roster evidence and never fall back to a raw unresolved selector. These are routing thresholds, not pool enablement or paid-credit permission."],
-    usage: "ocx account auto-switch <provider> <status|on|off|threshold <0-100>|inherit> [--account <id>] [--json]",
+    usage: "orl account auto-switch <provider> <status|on|off|threshold <0-100>|inherit> [--account <id>] [--json]",
   },
   {
     command: ["logs"],
@@ -395,7 +395,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "payload",
     details: ["Follow uses the server cursor and a bounded ordered window, preserving same-ID amendments and repeated row occurrences. It never enables logging.","--events emits version1 snapshots/appends with cursor and limit for observed-window reconstruction. Legacy row JSONL cannot express removals or resets exactly; neither mode promises lossless history between polls.","Follow limit is1–2000, default200. Polling is serial and cancellable; SIGINT exits130 and SIGTERM143. Malformed/oversized/unavailable responses stop without a fabricated empty snapshot or retry.","Nested explain reads recorded decisions; rebuild-index and index-status touch the local derived index and retain separate declarations."],
-    usage: "ocx logs [--provider <name>] [--model <id>] [--status <code>] [--conversation <id>] [--account <label>] [--limit <n>] [--follow] [--json|--jsonl]; ocx logs --follow --events [--limit <1-2000>]",
+    usage: "orl logs [--provider <name>] [--model <id>] [--status <code>] [--conversation <id>] [--account <label>] [--limit <n>] [--follow] [--json|--jsonl]; orl logs --follow --events [--limit <1-2000>]",
   },
   {
     command: ["storage","report"],
@@ -404,8 +404,8 @@ export const CAPABILITIES: readonly Capability[] = [
     flags: [{"name":"--json","value":"boolean","summary":"Emit the storage report as JSON."}],
     mutates: false,
     json: "payload",
-    bannerLines: ["ocx storage                 Storage report (default subcommand)"],
-    usage: "ocx storage report [--json]",
+    bannerLines: ["orl storage                 Storage report (default subcommand)"],
+    usage: "orl storage report [--json]",
     details: [],
   },
   {
@@ -416,7 +416,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["Without `--yes` it prints what WOULD be freed and exits 0 having changed nothing.","There is no interactive confirmation: a prompt an agent can answer is not a safety boundary.","`--mode quarantine` moves files to trash, so `storage trash restore` can undo it; `permanent` cannot be undone."],
-    usage: "ocx storage cleanup --percent <0-100> [--mode <quarantine|permanent>] [--yes] [--json]",
+    usage: "orl storage cleanup --percent <0-100> [--mode <quarantine|permanent>] [--yes] [--json]",
   },
   {
     command: ["storage","trash"],
@@ -426,7 +426,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["Restore fails with a named 409 when the destination already exists, rather than overwriting it.","Mixed family: list/default reads quarantine batches; restore moves files and reconciles database rows only with --yes."],
-    usage: "ocx storage trash [list] [--json] | ocx storage trash restore <entry-id> --yes [--json]",
+    usage: "orl storage trash [list] [--json] | orl storage trash restore <entry-id> --yes [--json]",
   },
   {
     command: ["storage","policy"],
@@ -436,7 +436,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["`policy set` never enables implicitly: omitting `--enabled` keeps the stored value.","`policy run` forces a run regardless of schedule, so it needs `--yes`.","Mixed family: show/default reads; set persists submitted fields; run requires --yes and starts immediate cleanup. At least one setting is required by set."],
-    usage: "ocx storage policy [show] [--json] | ocx storage policy set [--enabled <true|false>] [--percent <1-100>] [--mode <quarantine|permanent>] [--schedule <startup|daily|weekly|manual>] [--json] | ocx storage policy run --yes [--json]",
+    usage: "orl storage policy [show] [--json] | orl storage policy set [--enabled <true|false>] [--percent <1-100>] [--mode <quarantine|permanent>] [--schedule <startup|daily|weekly|manual>] [--json] | orl storage policy run --yes [--json]",
   },
   {
     command: ["inspect", "config"],
@@ -535,7 +535,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "payload",
     details: ["The GUI reads this state directly; without a verb an agent could not tell whether the Codex app-server was reachable at all."],
-    usage: "ocx system codex-app-server [--json]",
+    usage: "orl system codex-app-server [--json]",
   },
   {
     command: ["system","codex-cli-update","check"],
@@ -545,7 +545,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "envelope",
     details: ["Proof-bound published-launcher context authenticates the configured candidate snapshot, not successful Codex execution; this check does not attest or admit a selected runtime.","On Windows this first slice performs no candidate or configuration filesystem I/O: only a proof-captured absolute environment candidate can receive lexical app-bundle or version-manager labels; every other Windows candidate fails closed.","Makes no package-registry request.","Does not execute Codex or npm, install or repair software, control a process, or write configuration or cache state."],
-    usage: "ocx system codex-cli-update check [--json]",
+    usage: "orl system codex-cli-update check [--json]",
   },
   {
     command: ["system","codex-cli-update","attest"],
@@ -554,8 +554,8 @@ export const CAPABILITIES: readonly Capability[] = [
     flags: [{"name":"--candidate","value":"string","summary":"Absolute npm codex.cmd or package bin/codex.js path; all four paths are all-or-none."},{"name":"--npm-prefix","value":"string","summary":"Absolute prefix containing node_modules/@openai/codex."},{"name":"--npm-cli","value":"string","summary":"Absolute node_modules/npm/bin/npm-cli.js path."},{"name":"--node","value":"string","summary":"Absolute node.exe path; observed, never executed."},{"name":"--json","value":"boolean","summary":"Emit the path-free installation identity observation."}],
     mutates: false,
     json: "envelope",
-    details: ["Opt-in Windows x64 local-volume inspection using held native file handles; refuses reparse points, active writers and unsupported layouts.","Without explicit paths, the proof-bound launcher snapshot identifies the selected candidate: the configured CODEX_CLI_PATH or the first codex on the captured PATH, with an OpenCodex wrapper resolving to its codex.opencodex-real backing. Discovery only proposes paths; the held-handle observation remains the authority.","Success binds observed file identities and bytes, not selected-runtime admission or installer ownership.","selectionAttested, managed and applyAllowed remain false. The digest is an observation, not a durable update permit.","Does not run the named Codex/npm/Node files, query a registry, install software, control processes or persist state."],
-    usage: "ocx system codex-cli-update attest [--candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path>] [--json]",
+    details: ["Opt-in Windows x64 local-volume inspection using held native file handles; refuses reparse points, active writers and unsupported layouts.","Without explicit paths, the proof-bound launcher snapshot identifies the selected candidate: the configured CODEX_CLI_PATH or the first codex on the captured PATH, with an OpenRelay wrapper resolving to its codex.opencodex-real backing. Discovery only proposes paths; the held-handle observation remains the authority.","Success binds observed file identities and bytes, not selected-runtime admission or installer ownership.","selectionAttested, managed and applyAllowed remain false. The digest is an observation, not a durable update permit.","Does not run the named Codex/npm/Node files, query a registry, install software, control processes or persist state."],
+    usage: "orl system codex-cli-update attest [--candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path>] [--json]",
   },
   {
     command: ["system","codex-restart"],
@@ -565,7 +565,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["`sync --restart-codex` is not a substitute: it restarts only as a side effect after a catalog or cache write, so it cannot restart a healthy install on request.","Restarts the Codex desktop app as well as the app-servers, through the same module the CLI uses. When the proxy itself runs inside the Codex app it refuses instead, because restarting the app would kill the request.","--yes is mandatory because this interrupts a running editor session and may discard unsaved composer drafts, model-picker selections, and pending approval prompts; it must never happen because an agent guessed a subcommand."],
-    usage: "ocx system codex-restart --yes [--json]",
+    usage: "orl system codex-restart --yes [--json]",
   },
   {
     command: ["claude","config"],
@@ -575,7 +575,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["At least one setting is required. --first-party must be set alone and writes Claude settings immediately.","Clear both helper model and backend with - to restore inheritance. Preserve shared_proxy_retained warnings."],
-    usage: "ocx claude config status [--json]; ocx claude config set [--enabled <on|off>] [--auth-mode <auto|proxy|subscription>] [--system-env <on|off>] [--fast-mode <on|off>] [--auto-context <on|off>] [--compact-window <tokens|default>] [--context-accounting <1m|200k>] [--inject-agents <on|off>] [--small-fast-model <id|->] [--model-map <from=to,...|->] [--blocked-skills <name,name|->] [--web-model <id|->] [--web-backend <openai|anthropic|xai|gemini|exa|->] [--vision-model <id|->] [--vision-backend <openai|anthropic|->] [--json]; or ocx claude config set --first-party <on|off> [--json]",
+    usage: "orl claude config status [--json]; orl claude config set [--enabled <on|off>] [--auth-mode <auto|proxy|subscription>] [--system-env <on|off>] [--fast-mode <on|off>] [--auto-context <on|off>] [--compact-window <tokens|default>] [--context-accounting <1m|200k>] [--inject-agents <on|off>] [--small-fast-model <id|->] [--model-map <from=to,...|->] [--blocked-skills <name,name|->] [--web-model <id|->] [--web-backend <openai|anthropic|xai|gemini|exa|->] [--vision-model <id|->] [--vision-backend <openai|anthropic|->] [--json]; or orl claude config set --first-party <on|off> [--json]",
   },
   {
     command: ["claude","intercept","start"],
@@ -584,7 +584,7 @@ export const CAPABILITIES: readonly Capability[] = [
     flags: [{"name":"--json","value":"boolean","summary":"Emit the management response as JSON."}],
     mutates: true,
     json: "payload",
-    usage: "ocx claude intercept start [--json]",
+    usage: "orl claude intercept start [--json]",
     details: [],
   },
   {
@@ -595,7 +595,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "payload",
     details: ["Distinct from `claude desktop show`, which reports what this machine WOULD write; this reports what is actually in effect, which only the running proxy knows."],
-    usage: "ocx claude desktop status [--json]",
+    usage: "orl claude desktop status [--json]",
   },
   {
     command: ["claude","desktop","bind"],
@@ -604,8 +604,8 @@ export const CAPABILITIES: readonly Capability[] = [
     flags: [],
     mutates: true,
     json: "none",
-    details: ["Takes a picker model id (claude-sonnet-4-6) and a route in the Desktop route vocabulary (provider/model or native/<slug>); the route must be one the Desktop profile can offer.","Only Claude Code traffic that reaches the proxy through the first-party intercept (Desktop's Code tab, the claude CLI) honours it; ocx claude and the public Messages endpoint are unaffected.","The Desktop picker keeps Anthropic's label; the binding changes which model answers, starting with the next request."],
-    usage: "ocx claude desktop bind <picker-model-id> <provider/model|native/slug>",
+    details: ["Takes a picker model id (claude-sonnet-4-6) and a route in the Desktop route vocabulary (provider/model or native/<slug>); the route must be one the Desktop profile can offer.","Only Claude Code traffic that reaches the proxy through the first-party intercept (Desktop's Code tab, the claude CLI) honours it; orl claude and the public Messages endpoint are unaffected.","The Desktop picker keeps Anthropic's label; the binding changes which model answers, starting with the next request."],
+    usage: "orl claude desktop bind <picker-model-id> <provider/model|native/slug>",
   },
   {
     command: ["claude","desktop","unbind"],
@@ -615,7 +615,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "none",
     details: ["Removing an id that is not bound is a no-op; the remaining bindings are printed."],
-    usage: "ocx claude desktop unbind <picker-model-id>",
+    usage: "orl claude desktop unbind <picker-model-id>",
   },
   {
     command: ["claude","desktop","picker","status"],
@@ -625,7 +625,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "payload",
     details: ["Reads the live picker when available; otherwise reports local offline picker state. JSON emits the picker DTO, not the enclosing API response. No trust mutation."],
-    usage: "ocx claude desktop picker status [--json]",
+    usage: "orl claude desktop picker status [--json]",
   },
   {
     command: ["claude","desktop","picker","on"],
@@ -634,8 +634,8 @@ export const CAPABILITIES: readonly Capability[] = [
     flags: [],
     mutates: true,
     json: "none",
-    details: ["Needs a running proxy, first-party mode and macOS. The first time, macOS asks to trust a local certificate authority limited to claude.ai; when the server cannot show that prompt the command runs the trust step in this terminal.","Claude Desktop then reaches the network through opencodex; fully quit and reopen Desktop afterwards."],
-    usage: "ocx claude desktop picker on",
+    details: ["Needs a running proxy, first-party mode and macOS. The first time, macOS asks to trust a local certificate authority limited to claude.ai; when the server cannot show that prompt the command runs the trust step in this terminal.","Claude Desktop then reaches the network through OpenRelay; fully quit and reopen Desktop afterwards."],
+    usage: "orl claude desktop picker on",
   },
   {
     command: ["claude","desktop","picker","off"],
@@ -645,7 +645,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "none",
     details: ["Works without a running proxy: the preference is saved and the picker profile and trust are removed locally."],
-    usage: "ocx claude desktop picker off",
+    usage: "orl claude desktop picker off",
   },
   {
     command: ["claude","desktop","picker","trust"],
@@ -655,7 +655,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "none",
     details: ["The server removes trust this command added if the enable is refused; if the request is lost, trust is left alone and picker status tells what happened."],
-    usage: "ocx claude desktop picker trust",
+    usage: "orl claude desktop picker trust",
   },
   {
     command: ["integration","native"],
@@ -665,7 +665,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["Each toggle writes the selected client configuration through its runtime owner. Refused disables remain failures. Cursor status and local-installer are separate read-only subcommands; they do not toggle or install Cursor."],
-    usage: "ocx integration native [list] [--json]; ocx integration native <claude|claude-desktop|codex|grok> <on|off> [--json]",
+    usage: "orl integration native [list] [--json]; orl integration native <claude|claude-desktop|codex|grok> <on|off> [--json]",
   },
   {
     command: ["integration","client"],
@@ -675,7 +675,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["status/show/list reads all clients, one client or Aside profiles. history/journal reads rollback records; expired snapshots stay visible.","enable/disable requires --client; an omitted Aside --profile toggles all profiles. --overwrite-conflict applies only to enable.","restore requires --op (alias --op-id); --client requires --profile and only Aside supports that profile selector. --confirm-drift is an explicit user waiver, never auto-retried. Use client preview or restore --preview to inspect a change, history remove --op ID --yes to retire a journal row, and sync --client aside to refresh managed profiles."],
-    usage: "ocx integration client status [--client <id>] [--profile <id>] [--json]; ocx integration client history [--client <id>] [--profile <id>] [--json]; ocx integration client enable --client <id> [--profile <id>] [--overwrite-conflict] [--json]; ocx integration client disable --client <id> [--profile <id>] [--json]; ocx integration client restore --op <opId> [--client aside --profile <id>] [--confirm-drift] [--json]",
+    usage: "orl integration client status [--client <id>] [--profile <id>] [--json]; orl integration client history [--client <id>] [--profile <id>] [--json]; orl integration client enable --client <id> [--profile <id>] [--overwrite-conflict] [--json]; orl integration client disable --client <id> [--profile <id>] [--json]; orl integration client restore --op <opId> [--client aside --profile <id>] [--confirm-drift] [--json]",
   },
   {
     command: ["sync"],
@@ -698,7 +698,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["Requires Claude Code 2.1.257+. Plain claude, forks, inherit skills, the main model and small-fast sidecars are unaffected."],
-    usage: "ocx agent subagents force <model|-> [--json]",
+    usage: "orl agent subagents force <model|-> [--json]",
   },
   {
     command: ["agent","request-user-input"],
@@ -708,7 +708,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["A bare invocation reads and never writes."],
-    usage: "ocx agent request-user-input [on|off] [--json]",
+    usage: "orl agent request-user-input [on|off] [--json]",
   },
   {
     command: ["agent","roles"],
@@ -718,17 +718,17 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["A bare invocation reads and never writes.","Requires Codex-based omo (LazyCodex): the omo@sisyphuslabs Codex plugin enabled in config.toml and installed; otherwise status lists no roles, and set and suggest are refused.","set rewrites only the root model value of $CODEX_HOME/agents/<role>.toml, plus model_reasoning_effort with --effort; omo.jsonc gets the same model and, when LazyCodex has that level, the effort as reasoning; it is skipped when absent or when it contains comments.","suggest sizes every role with one model call and prints proposals without writing; --apply writes each proposed model, and its effort when the role file already sets model_reasoning_effort."],
-    usage: "ocx agent roles [status] [--json]; ocx agent roles set <role> <model> [--effort <level>] [--json]; ocx agent roles suggest [--model <id>] [--apply] [--json]",
+    usage: "orl agent roles [status] [--json]; orl agent roles set <role> <model> [--effort <level>] [--json]; orl agent roles suggest [--model <id>] [--apply] [--json]",
   },
   {
     command: ["agent","injection"],
     summary: "Show or set the delegation model and effort, or suggest both for a described piece of delegated work.",
     routes: [{"method":"GET","path":"/api/injection-model"},{"method":"PUT","path":"/api/injection-model"},{"method":"POST","path":"/api/injection-model/suggest"}],
-    flags: [{"name":"--json","value":"boolean","summary":"Emit the delegation settings, the write result or the proposal as JSON."},{"name":"--model","value":"string","summary":"set: the delegation model, - clears it. suggest: size the work with this model instead of the Codex default model."},{"name":"--effort","value":"string","summary":"set: the delegation reasoning effort, - clears it."},{"name":"--prompt","value":"string","summary":"set: a custom guidance prompt, - clears it."},{"name":"--guidance","value":"string","summary":"set: on or off for OpenCodex delegation guidance."},{"name":"--apply","value":"boolean","summary":"suggest: write the proposed model and effort through the delegation settings write."},{"name":"--sync-codex-defaults","value":"string","summary":"set only: enable/disable the existing model-dependent default-sync policy."}],
+    flags: [{"name":"--json","value":"boolean","summary":"Emit the delegation settings, the write result or the proposal as JSON."},{"name":"--model","value":"string","summary":"set: the delegation model, - clears it. suggest: size the work with this model instead of the Codex default model."},{"name":"--effort","value":"string","summary":"set: the delegation reasoning effort, - clears it."},{"name":"--prompt","value":"string","summary":"set: a custom guidance prompt, - clears it."},{"name":"--guidance","value":"string","summary":"set: on or off for OpenRelay delegation guidance."},{"name":"--apply","value":"boolean","summary":"suggest: write the proposed model and effort through the delegation settings write."},{"name":"--sync-codex-defaults","value":"string","summary":"set only: enable/disable the existing model-dependent default-sync policy."}],
     mutates: true,
     json: "payload",
     details: ["guidance aliases injection. Bare invocation reads; use explicit status before --json. set requires at least one setting and - clears model, effort or prompt.","suggest may spend a model call; it writes no settings unless --apply is explicitly supplied. Preserve unsized/unassigned/already-set outcomes.","Default-sync edits return actual normalized model/effort/prompt/guidance/default-sync state; they do not promise a client catalog rewrite. Clearing a model also clears dependent settings under server validation."],
-    usage: "ocx agent injection status [--json]; ocx agent injection set [--model <id|->] [--effort <level|->] [--prompt <text|->] [--guidance <on|off>] [--sync-codex-defaults <on|off>] [--json]; ocx agent injection suggest <work description> [--model <id>] [--apply] [--json]",
+    usage: "orl agent injection status [--json]; orl agent injection set [--model <id|->] [--effort <level|->] [--prompt <text|->] [--guidance <on|off>] [--sync-codex-defaults <on|off>] [--json]; orl agent injection suggest <work description> [--model <id>] [--apply] [--json]",
   },
   {
     command: ["api","protocols"],
@@ -737,7 +737,7 @@ export const CAPABILITIES: readonly Capability[] = [
     flags: [{"name":"--provider","value":"string","summary":"Add one configured provider's upstream wire and who decided it."},{"name":"--json","value":"boolean","summary":"Emit the GET /api/protocols body."}],
     mutates: false,
     json: "payload",
-    usage: "ocx api protocols [--provider <name>] [--json]",
+    usage: "orl api protocols [--provider <name>] [--json]",
     details: [],
   },
   {
@@ -748,7 +748,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["--combo without an explicit decision override reads the saved combo first. The synthetic decision probe may spend a backend call; a failed-open receipt is not an applied decision."],
-    usage: "ocx combo test [--combo <id>] [--decision-provider <provider|jev> | --decision-model <route>] [--decision-timeout <ms>] [--json]",
+    usage: "orl combo test [--combo <id>] [--decision-provider <provider|jev> | --decision-model <route>] [--decision-timeout <ms>] [--json]",
   },
   {
     command: ["combo","discover"],
@@ -758,7 +758,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "payload",
     details: ["Read-only: nothing is probed and no provider row is created."],
-    usage: "ocx combo discover [--query <text>] [--json]",
+    usage: "orl combo discover [--query <text>] [--json]",
   },
   {
     command: ["api","explain"],
@@ -768,7 +768,7 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: false,
     json: "payload",
     details: ["A read-only POST: nothing is sent upstream, no combo state advances and the input is not logged."],
-    usage: "ocx api explain --model <id> --inbound <responses|chat|messages> [--feature <key>[,<key>]]... [--json]",
+    usage: "orl api explain --model <id> --inbound <responses|chat|messages> [--feature <key>[,<key>]]... [--json]",
   },
   {
     command: ["api","policy"],
@@ -778,6 +778,6 @@ export const CAPABILITIES: readonly Capability[] = [
     mutates: true,
     json: "payload",
     details: ["A bare invocation reads and never writes.","A setting flag changes the operator's config; run it only when the operator asks for that change."],
-    usage: "ocx api policy [--messages <on|off>] [--unrepresentable <legacy|reject>] [--rollout <switch>=<on|off>]... [--json]",
+    usage: "orl api policy [--messages <on|off>] [--unrepresentable <legacy|reject>] [--rollout <switch>=<on|off>]... [--json]",
   },
 ];

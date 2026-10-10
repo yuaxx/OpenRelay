@@ -10,7 +10,7 @@ description: 在使用非 OpenAI 供應商時，將 image_generation hosted-tool
 ## 前置條件
 
 - 在設定中設定 `images.bridgeEnabled: true` 以**啟用 bridge**（預設關閉以避免非預期的 xAI 費用 — 見下方[設定](#設定)）。
-- 一個帶有 **API key** 的 `xai` 供應商項目。Bridge 將履行釘選到 registry 的 xAI Images 端點（`https://api.x.ai/v1`）；任何已設定的 `baseUrl` 覆寫在圖片呼叫時會被忽略。單靠 OAuth / `ocx login xai` **不會**啟用 bridge（Grok CLI 的 OAuth transport 是聊天導向的，不用於 `/images/*`）。
+- 一個帶有 **API key** 的 `xai` 供應商項目。Bridge 將履行釘選到 registry 的 xAI Images 端點（`https://api.x.ai/v1`）；任何已設定的 `baseUrl` 覆寫在圖片呼叫時會被忽略。單靠 OAuth / `orl login xai` **不會**啟用 bridge（Grok CLI 的 OAuth transport 是聊天導向的，不用於 `/images/*`）。
 
   ```json
   {
@@ -53,9 +53,9 @@ Image Bridge 選項位於 `~/.opencodex/config.json` 的 `images` 之下。Bridg
 
 Image Bridge 僅在選取了**非 OpenAI** 模型、且 **Responses** 回合的 `/v1/responses` tools 陣列中包含 hosted `image_generation` 工具時啟用。它**不會**攔截 Codex 內建的 `image_gen` 工具，該工具直接 POST 到 `/v1/images/generations`（或 `/images/edits`）— 該路徑另見 [Codex 整合](/zh-tw/guides/codex-integration/#內建圖像生成image_gen)。
 
-1. 當 Responses 請求在 `tools` 中列出 `image_generation` 時，OpenCodex 在請求前處理期間偵測到它。
+1. 當 Responses 請求在 `tools` 中列出 `image_generation` 時，OpenRelay 在請求前處理期間偵測到它。
 2. Hosted tool 被替換為一個路由模型可正常呼叫的**合成函式工具** — 模型看到的是一個可呼叫的工具，而非一個它無法執行的不透明 hosted tool。
-3. 當模型呼叫該工具時，OpenCodex 攔截呼叫並將 prompt 送往 xAI 的圖片生成 API。
+3. 當模型呼叫該工具時，OpenRelay 攔截呼叫並將 prompt 送往 xAI 的圖片生成 API。
 4. 生成的圖片儲存到 `~/.opencodex/artifacts/`，**本機檔案路徑**作為工具結果回傳給模型。
 5. 模型帶著對生成圖片及其位置的認知繼續對話。
 

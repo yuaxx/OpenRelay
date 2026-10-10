@@ -1,11 +1,11 @@
 ---
 title: opencode
-description: opencode içerisinden yönlendirilen herhangi bir modeli kullanın — opencodex bir çalışma zamanı sağlayıcı bloğu enjekte eder ve kendi opencode yapılandırmanıza dokunmaz.
+description: opencode içerisinden yönlendirilen herhangi bir modeli kullanın — OpenRelay bir çalışma zamanı sağlayıcı bloğu enjekte eder ve kendi opencode yapılandırmanıza dokunmaz.
 ---
 
 opencode, sağlayıcılarını ortam değişkenleri yerine birleştirilmiş JSON
 yapılandırma katmanlarından okur, bu nedenle enjekte edilecek
-`ANTHROPIC_BASE_URL` tarzı bir yuva yoktur. `ocx opencode` bu boşluğu doldurur:
+`ANTHROPIC_BASE_URL` tarzı bir yuva yoktur. `orl opencode` bu boşluğu doldurur:
 proxy'nin çalıştığından emin olur, görünür katalogdan bir sağlayıcı bloğu
 oluşturur ve bunu OpenCode'un satır içi çalışma zamanı katmanı
 (`OPENCODE_CONFIG_CONTENT`) aracılığıyla enjekte eder.
@@ -13,12 +13,12 @@ oluşturur ve bunu OpenCode'un satır içi çalışma zamanı katmanı
 ## Hızlı Başlangıç
 
 ```bash
-ocx opencode
+orl opencode
 ```
 
 Bu, proxy'nin çalıştığından emin olur ve bu süreç için oluşturulan
 `provider.opencodex` ve `providers.opencodex` blokları enjekte edilmiş olarak opencode'u başlatır. Fazladan
-argümanlar doğrudan iletilir: `ocx opencode run "hello"`.
+argümanlar doğrudan iletilir: `orl opencode run "hello"`.
 
 Yönlendirilen modeller seçicide `opencodex` sağlayıcısı altında görünür:
 
@@ -36,24 +36,24 @@ veya proje yapılandırmasını okuyabilir, mevcut sağlayıcılarınız, ajanla
 tuş atamalarınız, MCP girdileriniz ve göreli `{file:…}` referanslarınız orijinal
 dosyalarından çözümlenmeye devam eder.
 
-Yalnızca bu başlatma için opencodex, oluşturulan `provider.opencodex` ve `providers.opencodex` bloklarını
+Yalnızca bu başlatma için OpenRelay, oluşturulan `provider.opencodex` ve `providers.opencodex` bloklarını
 OpenCode'un satır içi çalışma zamanı katmanı aracılığıyla ekler. Bu katman,
 genel/özel/proje yapılandırmasından sonra birleşir ve alt süreç için yalnızca
 çakışan anahtarları geçersiz kılar.
 
-| Katman | `ocx opencode` ile Davranış |
+| Katman | `orl opencode` ile Davranış |
 | --- | --- |
 | Genel / özel / proje yapılandırması | Tam olarak yazdığınız gibi diskte bırakılır |
 | Satır içi çalışma zamanı (`OPENCODE_CONFIG_CONTENT`) | Oluşturulan `provider.opencodex` ve `providers.opencodex` bloklarını alır (devralınan satır içi yapılandırmayla birleştirilir) |
 | Göreli `{file:…}` yolları | Yine de bunları ilk tanımlayan yapılandırma dosyasına göre çözümlenir |
 
 Bir genel veya proje yapılandırması da `provider.opencodex` veya `providers.opencodex` tanımlıyorsa,
-başlatıcı bilgilendirici bir not yazdırır: `ocx opencode`'dan gelen çalışma
+başlatıcı bilgilendirici bir not yazdırır: `orl opencode`'dan gelen çalışma
 zamanı katmanı bu başlatma için onu geçersiz kılar.
 
 ## Bloğu kendi yapılandırmanıza yerleştirme
 
-`ocx opencode`, sağlayıcı bloğunu yalnızca bir başlatma için enjekte eder; bu da
+`orl opencode`, sağlayıcı bloğunu yalnızca bir başlatma için enjekte eder; bu da
 düz `opencode`'un proxy hakkında hala hiçbir şey bilmediği anlamına gelir.
 Yönlendirilen modellerin düz `opencode`'dan — veya başlatıcıdan asla geçmeyen
 bir düzenleyici uzantısından — kullanılabilir olmasını istediğinizde, `ocx
@@ -61,7 +61,7 @@ export` kendi yapılandırmanızla birleştirmeniz için aynı sağlayıcı blo�
 yazdırır:
 
 ```bash
-ocx export --client opencode
+orl export --client opencode
 ```
 
 Proxy çalışıyor olmalıdır. Komut yapılandırmayı, kurallı hedefi
@@ -73,18 +73,18 @@ yapılandırmanıza taşımak sizin açık eyleminizdir.
 :::caution[Birleştirin, asla üzerine yazmayın]
 İki bloğu da — `provider.opencodex` ve `providers.opencodex` — mevcut yapılandırmanızla birleştirin. Tüm dosyanın
 dışa aktarılanla değiştirilmesi diğer sağlayıcılarınızı, ajanlarınızı, tuş
-atamalarınızı ve MCP girdilerinizi yok eder. `ocx export --out` tam olarak bu
+atamalarınızı ve MCP girdilerinizi yok eder. `orl export --out` tam olarak bu
 nedenle mevcut bir dosyanın üzerine yazmayı reddeder, bu nedenle `--out`'u
 geçici bir yola yönlendirin ve blokları kopyalayın:
 
 ```bash
-ocx export --client opencode --out ~/opencodex-opencode.json
+orl export --client opencode --out ~/opencodex-opencode.json
 ```
 :::
 
 Başlatıcının çalışma zamanı bloğunun aksine, birleştirilmiş bir blok statik bir
 anlık görüntüdür: kataloğunuzu takip etmez. Bir sağlayıcı ekledikten veya model
-görünürlüğünü değiştirdikten sonra `ocx export`'u yeniden çalıştırın.
+görünürlüğünü değiştirdikten sonra `orl export`'u yeniden çalıştırın.
 
 Birleştirildikten sonra opencode'u başlatmadan önce kabul anahtarını dışa
 aktarın — proxy'nin geri döngüde olduğu durumlar hariç (orada hiçbir anahtar
@@ -132,7 +132,7 @@ Bir geri döngü bağlantısı (`127.0.0.1`, varsayılan) hiçbir şeyi doğrula
 nedenle `{env:…}` referansı etkisizdir ve değişkeni ayarlanmamış
 bırakabilirsiniz. Yalnızca `hostname` geri döngünün ötesine ayarlandığında
 önemlidir; bkz. [Uzaktan erişim](/tr/reference/configuration/server/#uzaktan-erişim). Bu
-kabul anahtarı opencodex'in kendisine aittir ve
+kabul anahtarı OpenRelay'in kendisine aittir ve
 [Sağlayıcılar](/tr/guides/providers/) altında yapılandırılan yukarı akış
 sağlayıcı anahtarlarıyla ilgisizdir.
 

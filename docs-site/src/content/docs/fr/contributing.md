@@ -1,6 +1,6 @@
 ---
 title: Contribuer
-description: Développez opencodex — installation, structure, conventions et ajout d’un fournisseur ou d’un adaptateur.
+description: Développez OpenRelay — installation, structure, conventions et ajout d’un fournisseur ou d’un adaptateur.
 ---
 
 ## Configuration
@@ -190,14 +190,14 @@ Tous les sélecteurs de fournisseurs et les graines proviennent du registre cano
 },
 ```
 
-`src/providers/derive.ts` alimente cette entrée dans `ocx init`, `ocx provider`, les préréglages du tableau de bord,
+`src/providers/derive.ts` alimente cette entrée dans `orl init`, `orl provider`, les préréglages du tableau de bord,
 les connexions par clé API et les configurations OAuth initiales. `enrichProviderFromCatalog()` copie les métadonnées
 de modèle et les classifications de capacités dans la configuration enregistrée du fournisseur. Les implémentations
 des protocoles OAuth résident toujours dans `src/oauth/` ; les seules métadonnées du registre ne créent pas un flux OAuth.
 
 ### Preuve requise pour un préréglage canonique
 
-Une entrée du registre est une promesse entretenue : opencodex fournit la destination à laquelle sera envoyée
+Une entrée du registre est une promesse entretenue : OpenRelay fournit la destination à laquelle sera envoyée
 la clé API d’un utilisateur. Un préréglage exige donc des preuves de source primaire, pas seulement un chemin
 de code fonctionnel. Toute pull request qui ajoute ou promeut un fournisseur doit fournir dans sa description :
 
@@ -223,7 +223,7 @@ en compte. Une affiliation n’est pas un motif de rejet et ne réduit pas non p
 Lorsque les preuves sont incomplètes, l’emplacement honnête est une entrée de référence dans
 `src/providers/free-directory.ts`, et non le registre canonique. Les entrées du répertoire portent un niveau
 `verification` explicite (`official`, `primary`, `unverified`) et restent inertes : les utilisateurs peuvent
-toujours accéder au service par le flux personnalisé compatible avec OpenAI, sans qu’opencodex annonce un
+toujours accéder au service par le flux personnalisé compatible avec OpenAI, sans qu’OpenRelay annonce un
 préréglage qu’il ne peut garantir. Promouvez l’entrée dans le registre lorsque toutes les preuves ci-dessus existent.
 
 ## Ajout d'un adaptateur

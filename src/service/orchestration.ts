@@ -49,11 +49,11 @@ export function platformOps(backend: ServiceBackend = "scheduler", deps: { platf
   }
   if (platform === "linux") {
     if (existsSync("/.dockerenv")) {
-      console.error("Docker detected. Run 'ocx start' directly instead of using the service manager.");
+      console.error("Docker detected. Run 'orl start' directly instead of using the service manager.");
       process.exit(1);
     }
     if (!isSystemd() && !existsSync(unitPath())) {
-      console.error("systemd not found. Run 'ocx start' under your process supervisor.");
+      console.error("systemd not found. Run 'orl start' under your process supervisor.");
       if (isWslRuntime()) {
         console.error("WSL detected: enable systemd by adding [boot] systemd=true to /etc/wsl.conf, then run 'wsl --shutdown' from Windows and reopen the distro (WSL 0.67.6+).");
       }

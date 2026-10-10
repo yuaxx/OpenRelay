@@ -1,6 +1,6 @@
 # Responses Transport
 
-Native result continuations and function-result injection follow [the mode-specific result and control contract](streaming-health.md#experimental-native-function-result-injection); this surface does not infer upstream support or alter its defaults.
+Opt-in terminal-result compression prepares outbound copies after routing and admission, including native Responses WebSocket turns; original parsed inputs and replay state remain unchanged. See [RTK](rtk.md) for protocol eligibility, retry reuse and excluded transports. Native result continuations and function-result injection follow [the mode-specific result and control contract](streaming-health.md#experimental-native-function-result-injection); this surface does not infer upstream support or alter its defaults.
 
 Native steering follows [the shared WebSocket contract](streaming-health.md#experimental-native-mid-turn-steering); this surface's defaults remain unchanged.
 

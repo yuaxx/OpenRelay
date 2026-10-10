@@ -9,7 +9,7 @@ export type V2ParsedCommand = V2Controls & (
   | { verb: "mode-hint"; value: string | null }
 );
 
-export const V2_USAGE = "Usage: ocx v2 [status|on|off|mode <v1|default|v2>|keep-native-v1 <on|off>|threads <n>|mode-hint <text|--clear>] [--live] [--json]\nFor literal reserved hint text: ocx v2 mode-hint [--live] [--json] -- <text>\nOnly live mode accepts --acknowledge-surface-advisory.";
+export const V2_USAGE = "Usage: orl v2 [status|on|off|mode <v1|default|v2>|keep-native-v1 <on|off>|threads <n>|mode-hint <text|--clear>] [--live] [--json]\nFor literal reserved hint text: orl v2 mode-hint [--live] [--json] -- <text>\nOnly live mode accepts --acknowledge-surface-advisory.";
 
 /** Parse all controls before touching native/config state. A terminator protects literal hints. */
 export function parseV2Command(argv: readonly string[]): V2ParsedCommand {

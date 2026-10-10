@@ -1,9 +1,9 @@
 ---
 title: Codex App model picker
-description: How opencodex models appear in Codex App, Codex CLI, and Codex TUI through the shared Codex catalog.
+description: How OpenRelay models appear in Codex App, Codex CLI, and Codex TUI through the shared Codex catalog.
 ---
 
-opencodex does not patch Codex App. It writes the same Codex configuration and model catalog that
+OpenRelay does not patch Codex App. It writes the same Codex configuration and model catalog that
 Codex CLI/TUI use. The app-server reads that shared state, but some Codex Desktop releases apply a
 second remote model allowlist in the renderer and can still remove routed rows from the picker.
 
@@ -12,22 +12,22 @@ OpenAI entries use two credential routes: native Codex login and the namespaced
 itself does not change picker ids. When account-qualified picker rows are enabled by
 `codexAccountPickerEnabled` and `codexAccountNamespaces` has eligible selectors whose
 mapped accounts still exist, however,
-opencodex adds separate `<selector>/<native-openai-model>` rows for the mapped accounts and hides
+OpenRelay adds separate `<selector>/<native-openai-model>` rows for the mapped accounts and hides
 the bare native rows from the Codex picker. Selector labels are user-chosen public names with no
 built-in account-role meaning. Selecting a qualified row uses only its mapped account, does not
 change the active Pool account, and fails closed instead of switching accounts when the target is
 unavailable. If Codex's account-scoped catalog contains a visible, API-supported OpenAI-family id
-that is not yet in opencodex's static set, the exact id is preserved as a selector-qualified row
+that is not yet in OpenRelay's static set, the exact id is preserved as a selector-qualified row
 for eligible main-account selectors; it is not copied to an unrelated account and is not added to
 the bare or API-key model list. The row is matched on the field shape a real catalog row has,
 which filters malformed entries — it does not prove the id came from an upstream response, since
 the cache is a user-owned file. See [Exact Codex account selectors](/reference/configuration/routing/#exact-codex-account-selectors).
 
-`gpt-daybreak-blue-latest` is account-gated. opencodex checks each authenticated ChatGPT account's
+`gpt-daybreak-blue-latest` is account-gated. OpenRelay checks each authenticated ChatGPT account's
 own Codex model roster before advertising or routing it. In Pool mode, the bare row exists only when
 at least one eligible Pool account reports the slug. In Direct mode, the bare row follows the main
 account used by the local catalog, and each request also checks the forwarded caller credential (or
-the stored main credential when an OpenCodex admission bearer is substituted). A
+the stored main credential when an OpenRelay admission bearer is substituted). A
 `<selector>/gpt-daybreak-blue-latest` row exists only when that selector's mapped account reports it.
 Pool routing excludes unentitled accounts. If no roster can be confirmed, the gated row fails closed
 instead of spending a prompt on an upstream 400.
@@ -59,7 +59,7 @@ A separate, explicit `customModels` entry can expose the same wire id as
 
 Only that exact provider, endpoint, and model id receive the pinned Sol capability snapshot:
 922,000 context, 829,800 automatic compaction, the native reasoning ladder, and native Codex tool
-metadata. The request still sends `gpt-daybreak-blue-latest`; opencodex does not rewrite it to Sol
+metadata. The request still sends `gpt-daybreak-blue-latest`; OpenRelay does not rewrite it to Sol
 or grant account entitlement. The separately billed
 `openai-apikey/daybreak-blue-latest` API row is a different route and its 1,050,000 / 922,000 limits
 are never copied into the Codex-login row.
@@ -126,7 +126,7 @@ remote `use_hidden_models` policy active, Desktop can keep only ids in its nativ
 `available_models` list and can also display native rows whose catalog visibility is `hide`.
 Catalog refreshes and proxy restarts alone cannot change that renderer policy.
 
-For an equivalent routed model, opencodex provides an explicit, default-off native-alias combo mode.
+For an equivalent routed model, OpenRelay provides an explicit, default-off native-alias combo mode.
 It publishes an allowlisted bare slug with an honest custom display label and routes that exact slug
 through the configured combo before canonical OpenAI routing. It also omits disabled bare native
 rows from the effective catalog while compatibility aliases exist, so Desktop cannot resurrect
@@ -152,13 +152,13 @@ than hidden, configure a `nativeAlias` combo: while one exists, disabled bare na
 omitted from the effective catalog entirely.
 
 If Codex's `config.toml` pins a root `model` that this proxy does not expose — a disabled model
-among them — every new session starts on a model opencodex does not serve. `ocx doctor` reports
+among them — every new session starts on a model OpenRelay does not serve. `orl doctor` reports
 that under **Codex default model exposure**, as a warning rather than a failure, and says when it
 could not determine the exposed set at all.
 
 ## Integration path
 
-`ocx init`, `ocx start`, and `ocx sync` wire the shared Codex config and catalog into the proxy; see
+`orl init`, `orl start`, and `orl sync` wire the shared Codex config and catalog into the proxy; see
 [Codex Integration](/guides/codex-integration/) for config injection, catalog sync, shims, WebSocket
 fallback, and restore mechanics.
 
@@ -167,10 +167,10 @@ fallback, and restore mechanics.
 When the Codex app exhausts its native five-hour quota it can switch to a reserve
 fallback model and grey out the other rows in its picker. Reported in
 [#2813](https://github.com/lidge-jun/opencodex/issues/2813), that gating also hides routed
-opencodex rows, even though those use unrelated provider credentials and consume none of the
+OpenRelay rows, even though those use unrelated provider credentials and consume none of the
 ChatGPT quota.
 
-This gate is applied by the client before a request reaches the proxy, so opencodex cannot lift
+This gate is applied by the client before a request reaches the proxy, so OpenRelay cannot lift
 it. Routed rows are written with `visibility: "list"`, catalog filtering consults only
 `disabledModels` and each provider's `selectedModels`, and no quota value takes part in routed
 visibility.
@@ -185,20 +185,20 @@ model = "anthropic/claude-sonnet-5"
 or send it directly:
 
 ```bash
-ocx access test anthropic/claude-sonnet-5 --protocol responses
+orl access test anthropic/claude-sonnet-5 --protocol responses
 ```
 
 Both paths route correctly **once the request reaches the proxy** — that part is covered by
 tests. The Codex desktop app, however, does not send the configured model while reserve mode is
 active: it decides reserve from its own `wham/usage` poll (`luna_reserve` upsell plus an allowed
 `gpt-reserve` additional limit) and forces the model setting to `gpt-reserve` before the request
-leaves, so the `config.toml` route is overridden in the app. Use `ocx access test`, Claude Code
-through the proxy (`ocx claude`), or any direct `/v1` client until the window resets. See
+leaves, so the `config.toml` route is overridden in the app. Use `orl access test`, Claude Code
+through the proxy (`orl claude`), or any direct `/v1` client until the window resets. See
 [Routed models during Codex reserve mode](/guides/codex-integration/#routed-models-during-codex-reserve-mode).
 
 ## Why routed models show up
 
-Codex's model picker expects Codex-shaped catalog entries. opencodex builds routed entries by cloning
+Codex's model picker expects Codex-shaped catalog entries. OpenRelay builds routed entries by cloning
 a native Codex model template, then replacing the routed model identity:
 
 ```text
@@ -208,13 +208,13 @@ visibility = "list"
 ```
 
 The clone keeps strict-parser fields such as reasoning levels, shell type, API support flags, and
-base instructions. opencodex then removes native-only capabilities that the route cannot honor,
+base instructions. OpenRelay then removes native-only capabilities that the route cannot honor,
 including OpenAI service-tier metadata.
 
 ## Current stable model coverage
 
 The native fallback set includes `gpt-5.5` and GPT-5.6 Sol/Terra/Luna.
-For the GPT-5.5 family, opencodex preserves
+For the GPT-5.5 family, OpenRelay preserves
 the installed Codex catalog's richer live entries and only synthesizes a missing entry. The bundled
 upstream snapshot is used only for GPT-5.6, where it supplies the real per-model identity and
 metadata instead of an older-template approximation.
@@ -279,12 +279,12 @@ On the wire, routed adapters map or clamp unsupported tiers. For older native mo
 ladder stops at `xhigh`, `nativeEffortClamp` maps a direct `max` or an `ultra` selection to `xhigh`
 (for example, GPT-5.5). Sol, Terra, and Luna have a real `max` rung.
 
-Catalog advertisement of the two top tiers is unconditional: `ocx sync` no longer removes `max` or
+Catalog advertisement of the two top tiers is unconditional: `orl sync` no longer removes `max` or
 `ultra` when the installed Codex binary is too old to offer them — Codex versions without those
 rungs are out of support, and hiding them from current clients costs more than it buys. Other
 rungs are still intersected with the observed runtime ladder, and a clamp diagnostic recorded by a
 previous binary stops applying once the binary at that path reports a different version (the
-in-place upgrade case), so `ocx status` and `ocx doctor` stop warning about a clamp the upgraded
+in-place upgrade case), so `orl status` and `orl doctor` stop warning about a clamp the upgraded
 runtime no longer needs.
 Catalog visibility is not entitlement: advertising `max`/`ultra` does not guarantee the upstream
 account or provider accepts the tier, and for older native models whose real ladder stops at
@@ -301,7 +301,7 @@ service_tier = "fast"
 fast_mode = true
 ```
 
-But the model catalog and runtime request tier id use `priority`. opencodex preserves that split.
+But the model catalog and runtime request tier id use `priority`. OpenRelay preserves that split.
 Native OpenAI passthrough models keep fast support; routed providers are capability-gated —
 `service_tier` is stripped only when the provider declares `supportsServiceTier: false` (the registry
 classifies canonical OpenAI as `true`, DeepSeek and Volcengine Ark as `false`), while unclassified
@@ -320,7 +320,7 @@ Codex sorts picker-visible catalog entries by ascending `priority` and advertise
 `spawn_agent` model overrides. The dashboard Subagents page can select and save up to five bare
 native ids or routed `provider/model` ids. Manually configured `subagentModels` also accepts
 account-qualified `<selector>/<native-openai-model>` ids, but the dashboard does not offer those
-exact ids; saving the page replaces the list with dashboard-visible choices. opencodex assigns low
+exact ids; saving the page replaces the list with dashboard-visible choices. OpenRelay assigns low
 catalog priorities in the selected order; when account-qualified picker rows are enabled, bare native selections
 expand into selector-qualified groups. Other models remain callable by exact id.
 
@@ -350,10 +350,10 @@ Until Desktop exposes a control for the allowlist:
 If the picker still shows stale entries, refresh the catalog and restart the target Codex surface:
 
 ```bash
-ocx sync
+orl sync
 ```
 
-opencodex rewrites `models_cache.json` with a deliberately stale cache wrapper whenever catalog
+OpenRelay rewrites `models_cache.json` with a deliberately stale cache wrapper whenever catalog
 visibility, priority, or metadata changes, so the next Codex model refresh reads the new catalog.
 
-After a catalog or model-cache write, OpenCodex invalidates its cached app-server observation so the next request checks process freshness again. A configuration sync also invalidates the observation when catalog contents are unchanged. This refresh does not restart Codex processes.
+After a catalog or model-cache write, OpenRelay invalidates its cached app-server observation so the next request checks process freshness again. A configuration sync also invalidates the observation when catalog contents are unchanged. This refresh does not restart Codex processes.

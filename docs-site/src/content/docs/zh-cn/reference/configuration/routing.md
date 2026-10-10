@@ -14,7 +14,7 @@ description: 默认提供方选择、模型解析顺序、组合别名、目标�
 
 ## 模型解析顺序
 
-opencodex 按以下顺序解析请求的模型：
+OpenRelay 按以下顺序解析请求的模型：
 
 1. 已配置的 `policy/<id>` 或路由策略配置文件别名，会执行策略评估器并路由到选定的候选。
    未解析的 `policy/<id>` 会继续按后续规则进行常规解析。
@@ -59,7 +59,7 @@ selector 校验、冲突规则和隐私说明见[提供方配置](/reference/con
 Codex Auth 页面将此 picker 行为作为选择加入项。关闭它会隐藏生成的 selector-qualified picker
 行并恢复普通 GPT 行，但不会移除映射，也不会改变精确 `<selector>/<model>` 路由。因此再次
 启用时会恢复相同的公开标签。账号和设置变更会在有界 catalog refresh 前持久化；出现
-`ocx sync` 警告只表示 picker 目录仍需收敛，并不表示路由变更丢失。
+`orl sync` 警告只表示 picker 目录仍需收敛，并不表示路由变更丢失。
 
 ## Combos (`config.combos`)
 
@@ -101,7 +101,7 @@ Codex Auth 页面将此 picker 行为作为选择加入项。关闭它会隐藏�
 
 ### 目录可列出性
 
-即使某个 combo 不能被列出，它仍然可以直接路由。只有当所有目标都暴露出可以交集的能力时，`ocx sync`、`/v1/models` 和 Codex 选择器才会列出它：
+即使某个 combo 不能被列出，它仍然可以直接路由。只有当所有目标都暴露出可以交集的能力时，`orl sync`、`/v1/models` 和 Codex 选择器才会列出它：
 
 - 一个正的 `contextWindow`，来源可以是实时元数据、注册表提示、提供方的
   `modelContextWindows` / `contextWindow`、成员行上已知的正 `maxInputTokens`，或者——当提供方已知且启用但所有来源仍未给出窗口时——
@@ -116,7 +116,7 @@ Codex Auth 页面将此 picker 行为作为选择加入项。关闭它会隐藏�
 
 显式请求的 `policy/<id>`（或配置的别名）会在固定的候选白名单中，根据硬性能力要求与确定性、可解释的评分进行选择。现有模型 ID 永远不会隐式经过配置文件。支持 `candidates`（显式白名单）、可选 `alias`、`require`（`minContextWindow`、`minQuotaHeadroom`、`tools`、`imageInput`、`structuredOutput`、`localOnly`、`remoteAllowed`、`encryptedCodexTasks`、`reasoningEffort`、`serviceTier`）、`optimize`（latency/health/cost/quota 权重）、`limits.maxEstimatedCostUsd`、`unknownEvidence`（allow/penalize/exclude）。未知不会被当作零或免费。
 
-CLI：`ocx route policy list`、`ocx route policy show <id>`、`ocx route policy dry-run <id> --model-context <tokens> --tools`、`ocx route policy evaluate <id>`。
+CLI：`orl route policy list`、`orl route policy show <id>`、`orl route policy dry-run <id> --model-context <tokens> --tools`、`orl route policy evaluate <id>`。
 
 组合是采用可选策略的显式目标路由（有序 `failover`、平滑加权的 `round-robin` 或 `random` 均衡、`least-used`，以及 `reset-window`）：由配置的策略决定目标，可重试失败则沿列表继续尝试；策略配置文件是基于证据在候选之间进行选择。
 
@@ -129,7 +129,7 @@ CLI：`ocx route policy list`、`ocx route policy show <id>`、`ocx route policy
 
 返回的历史记录与路由决策负载仅暴露已脱敏的请求元数据（例如不透明的 `apiKeyId` 标签）。不包含凭证、原始提示正文或提供商密钥。
 
-CLI：`ocx logs explain <request-id>`、`ocx logs rebuild-index`、`ocx logs index-status`。
+CLI：`orl logs explain <request-id>`、`orl logs rebuild-index`、`orl logs index-status`。
 
 ## 迁移
 

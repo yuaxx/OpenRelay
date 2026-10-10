@@ -1,9 +1,9 @@
 ---
 title: Справочник конфигурации
-description: Где opencodex хранит конфигурацию, как применяются правки и где искать ссылки на все домены настроек.
+description: Где OpenRelay хранит конфигурацию, как применяются правки и где искать ссылки на все домены настроек.
 ---
 
-opencodex хранит постоянную конфигурацию в `$OPENCODEX_HOME/config.json`, обычно в
+OpenRelay хранит постоянную конфигурацию в `$OPENCODEX_HOME/config.json`, обычно в
 `~/.opencodex/config.json`. На Windows путь по умолчанию —
 `%USERPROFILE%\.opencodex\config.json`.
 
@@ -13,8 +13,8 @@ opencodex хранит постоянную конфигурацию в `$OPENCO
 
 - **Dashboard:** используйте web UI для пошаговой настройки провайдеров, моделей, агентов,
   доступа и хранилища.
-- **CLI:** `ocx init` создаёт исходный файл, а команды вроде `ocx provider`, `ocx models`,
-  `ocx combo`, `ocx agent` и `ocx config` обновляют или показывают принадлежащие им настройки.
+- **CLI:** `orl init` создаёт исходный файл, а команды вроде `orl provider`, `orl models`,
+  `orl combo`, `orl agent` и `orl config` обновляют или показывают принадлежащие им настройки.
 - **File:** редактируйте `config.json` напрямую для полей, у которых нет отдельной UI- или
   CLI-команды. Файл должен оставаться корректным JSON.
 
@@ -25,7 +25,7 @@ Dashboard, management API и mutating-команды CLI записывают в
 `claudeCode` и listener binding там, где для этих путей есть явная защита конфликтов, но эта
 защита покрывает не все поддеревья.
 
-Если файл не удаётся распарсить, opencodex сохраняет его резервную копию как
+Если файл не удаётся распарсить, OpenRelay сохраняет его резервную копию как
 `config.json.invalid-<timestamp>`, пишет предупреждение в консоль и стартует с настройками по
 умолчанию. Если файла нет, используется тот же свежий дефолт: один forward-провайдер `openai`.
 
@@ -61,8 +61,8 @@ Dashboard, management API и mutating-команды CLI записывают в
 возможно, используйте публичные alias для селекторов.
 
 :::note[Atomic writes]
-opencodex записывает управляемые файлы `config.toml` и `opencodex-catalog.json` через временный
+OpenRelay записывает управляемые файлы `config.toml` и `opencodex-catalog.json` через временный
 файл с последующим rename (`atomicWriteFile`).
 Это предотвращает частично записанные файлы, когда одновременно срабатывают несколько writer'ов,
-например `ocx stop` и shutdown handler самого прокси, оба восстанавливающие Codex.
+например `orl stop` и shutdown handler самого прокси, оба восстанавливающие Codex.
 :::

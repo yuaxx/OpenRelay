@@ -14,7 +14,7 @@ créer des automatisations. Les valeurs persistantes obéissent en dernier resso
 ## Modèle d'authentification
 
 L'API de gestion possède son propre identifiant d'administrateur, indépendant des clés API du plan de données. Au démarrage,
-opencodex le détermine dans l'ordre suivant :
+OpenRelay le détermine dans l'ordre suivant :
 
 1. `OPENCODEX_ADMIN_AUTH_TOKEN`, lorsqu'il est défini.
 2. Un jeton `ocx_admin_*` généré dans un fichier secret renforcé.
@@ -34,7 +34,7 @@ Authorization: Bearer <admin-token>
 ```
 
 :::caution
-Le jeton d'administrateur doit différer de tout identifiant du plan de données. Au démarrage, opencodex rejette un
+Le jeton d'administrateur doit différer de tout identifiant du plan de données. Au démarrage, OpenRelay rejette un
 identifiant de gestion qui entre en conflit avec une clé d'admission du proxy. Ne transmettez pas le jeton d'administrateur à Codex,
 Claude Code ou à un autre client de modèle : il autorise les modifications du plan de contrôle.
 :::
@@ -92,7 +92,7 @@ ligne de compte connecté porte un badge de ticket indiquant le nombre de coupon
 badge ouvre une boîte de dialogue qui liste les fenêtres de validité et échange le coupon le plus
 proche de l'expiration. La boîte de dialogue envoie un `operationId` émis par le client, et cesse
 d'envoyer après un délai d'attente au lieu de réessayer, car un échange dont l'enregistrement du
-journal est encore ouvert s'exécuterait de nouveau. `ocx account grok-reset-coupons` reste l'équivalent
+journal est encore ouvert s'exécuterait de nouveau. `orl account grok-reset-coupons` reste l'équivalent
 en terminal.
 
 Les réinitialisations de l’utilisation de Claude fonctionnent de la même manière depuis **Providers > Anthropic > Accounts**. Chaque ligne de compte connecté porte un badge de ticket indiquant le nombre de réinitialisations restantes, et la boîte de dialogue en utilise une après une seconde confirmation. Une réinitialisation recharge les limites sur 5 heures et sur une semaine sans déplacer le jour de réinitialisation hebdomadaire. Si une demande ne reçoit pas de réponse, la boîte de dialogue conserve son `operationId` et propose de réessayer avec le même identifiant pendant dix minutes, comme le fait le client Claude Code pour reprendre une demande ; toute nouvelle opération pour la même attribution est refusée jusque-là. L’utilisation est réservée au tableau de bord : le jeton administrateur seul reçoit `403 session_required`.
@@ -351,7 +351,7 @@ lui-même s'il souhaite ajouter une étoile au dépôt.
 | --- | --- | --- |
 | `GET /api/system/memory` | Renvoyer les mesures scalaires du processus, du tas, des flux, de l'état des réponses, du mécanisme de surveillance et des tours actifs | — |
 | `POST /api/system/restart` | Amorcer un redémarrage du processus qui attend l'évacuation des requêtes, sans retirer l'injection du client | Renvoie 202 ; les appels répétés signalent l'évacuation déjà en cours |
-| `POST /api/stop` | Arrêter le service, restaurer Codex en mode natif, retirer l'injection Grok gérée et évacuer les requêtes du proxy | 409 conflit de propriété du service; 409 `respawnable_service` lorsqu'un wrapper du Planificateur de tâches Windows pourrait relancer le proxy et que l'appelant n'est pas `ocx stop` (rien n'est modifié) ; 409 lorsque le gestionnaire installé refuse de s'arrêter ; 409 `service_state_unknown` lorsque l'état du Planificateur de tâches ne peut pas être lu (rien n'est modifié ; réparez la requête puis réessayez) |
+| `POST /api/stop` | Arrêter le service, restaurer Codex en mode natif, retirer l'injection Grok gérée et évacuer les requêtes du proxy | 409 conflit de propriété du service; 409 `respawnable_service` lorsqu'un wrapper du Planificateur de tâches Windows pourrait relancer le proxy et que l'appelant n'est pas `orl stop` (rien n'est modifié) ; 409 lorsque le gestionnaire installé refuse de s'arrêter ; 409 `service_state_unknown` lorsque l'état du Planificateur de tâches ne peut pas être lu (rien n'est modifié ; réparez la requête puis réessayez) |
 | `GET /api/system/codex-app-server` | Indiquer si les serveurs d'application Codex en cours d'exécution sont antérieurs au catalogue de modèles actuel | — |
 | `POST /api/system/codex-restart` | Actualiser le catalogue, puis redémarrer les serveurs d'application Codex obsolètes et quitter puis relancer entièrement l'application Codex Desktop afin que le sélecteur de modèles se recharge. Lorsque le proxy lui-même s'exécute dans l'application Codex, le redémarrage Desktop est refusé plutôt que transféré. | Renvoie 200 avec `code: partially_stopped` lorsqu'une cible ne s'arrête pas |
 
@@ -429,7 +429,7 @@ HTTP: 400 invalid/unsupported; 404 missing account; `oauth_mutation_busy` on loc
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

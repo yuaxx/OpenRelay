@@ -31,15 +31,15 @@ import {
 import type { StorageCleanupPolicy } from "../types/config";
 
 const USAGE = `Usage:
-  ocx storage report [--json]
-  ocx storage cleanup --percent <0-100> [--mode <quarantine|permanent>] [--yes] [--json]
-  ocx storage trash [list] [--json]
-  ocx storage trash restore <entry-id> [--yes] [--json]
-  ocx storage policy [show] [--json]
-  ocx storage policy set [--enabled <true|false>] [--archived-bytes-over <bytes>]
+  orl storage report [--json]
+  orl storage cleanup --percent <0-100> [--mode <quarantine|permanent>] [--yes] [--json]
+  orl storage trash [list] [--json]
+  orl storage trash restore <entry-id> [--yes] [--json]
+  orl storage policy [show] [--json]
+  orl storage policy set [--enabled <true|false>] [--archived-bytes-over <bytes>]
       [--reduce-to-bytes <bytes> | --remove-oldest-percent <1-100> | --percent <1-100>]
       [--mode <quarantine|permanent>] [--schedule <startup|daily|weekly|manual>] [--json]
-  ocx storage policy run [--yes] [--json]
+  orl storage policy run [--yes] [--json]
 
 Cleanup and restore MUTATE operator data and require --yes.
 Without --yes, cleanup prints the preview and changes nothing.`;

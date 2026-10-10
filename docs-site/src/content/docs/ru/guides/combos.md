@@ -4,7 +4,7 @@ description: Направляйте одну виртуальную модель
 ---
 
 **Combo** — это одна виртуальная модель, за которой стоит упорядоченный список реальных целей
-provider/model. Клиент запрашивает `combo/<id>`, opencodex выбирает цель, переписывает запрос на
+provider/model. Клиент запрашивает `combo/<id>`, OpenRelay выбирает цель, переписывает запрос на
 конкретный `provider/model` и при сбое, допускающем повтор, может попробовать следующую цель.
 
 Это полезно, если вам нужно одно из двух:
@@ -22,11 +22,11 @@ Combo работают поверх обычной маршрутизации п
 должны существовать и быть включены.
 
 ```bash
-ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
+orl combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 ```
 
 Стратегия по умолчанию — failover, поэтому обычный запрос уйдёт в
-`anthropic/claude-opus-4-8`. Если эта попытка завершится retryable-сбоем, opencodex сможет
+`anthropic/claude-opus-4-8`. Если эта попытка завершится retryable-сбоем, OpenRelay сможет
 переключиться на `openai/gpt-5.6-sol`.
 
 Используйте виртуальную модель везде, где вы обычно передаёте id модели:
@@ -41,7 +41,7 @@ ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 Проверьте сохранённое определение:
 
 ```bash
-ocx combo show main
+orl combo show main
 ```
 
 :::tip
@@ -51,7 +51,7 @@ ocx combo show main
 
 ## Как работают имена combo
 
-Идентификатор combo в `ocx combo set <id>` должен начинаться с буквы или цифры. Дальше он может
+Идентификатор combo в `orl combo set <id>` должен начинаться с буквы или цифры. Дальше он может
 содержать буквы, цифры, `.`, `_` или `-`, общей длиной до 64 символов. Канонический id модели
 всегда имеет вид `combo/<id>`; например, id `main` превращается в `combo/main`.
 
@@ -106,7 +106,7 @@ retryable-сбой OpenAI может перевести его на Google. Term
 Создайте combo 2:1 с партиями по два успешных запроса:
 
 ```bash
-ocx combo set balanced \
+orl combo set balanced \
   --targets anthropic/claude-opus-4-8:2,openai/gpt-5.6-sol:1 \
   --strategy round-robin \
   --sticky 2
@@ -137,7 +137,7 @@ ocx combo set balanced \
 
 ### `least-used`: в пользу цели с наименьшим числом успешных запросов
 
-`least-used` направляет каждый запрос к подходящей цели, для которой этот процесс opencodex
+`least-used` направляет каждый запрос к подходящей цели, для которой этот процесс OpenRelay
 зарегистрировал меньше всего успешных запросов. После перезапуска счётчики начинают с нуля, а при
 равенстве сохраняется порядок конфигурации. Значения `weight` и `stickyLimit` не влияют на эту
 стратегию.
@@ -203,7 +203,7 @@ Failover намеренно ограничен. Он помогает при п�
 провайдер не может прочитать эту нагрузку.
 
 Для такого запроса combo фильтрует подходящие цели до канонических нативных маршрутов ChatGPT, в
-том числе после retryable-сбоя. Если в combo нет цели, способной расшифровать задачу, opencodex
+том числе после retryable-сбоя. Если в combo нет цели, способной расшифровать задачу, OpenRelay
 останавливается ещё до dispatch и возвращает HTTP 400:
 
 ```json
@@ -244,17 +244,17 @@ Failover намеренно ограничен. Он помогает при п�
 Основные команды:
 
 ```bash
-ocx combo list
-ocx combo show <id>
-ocx combo set <id> --targets provider/model[:weight],...
-ocx combo remove <id> --yes
+orl combo list
+orl combo show <id>
+orl combo set <id> --targets provider/model[:weight],...
+orl combo remove <id> --yes
 ```
 
 `set` также принимает `--strategy`, `--sticky`, `--effort`, `--alias`, `--native-alias`,
 `--display-name` и `--rename-from`. Значение `-` у `--effort`, `--alias` или `--display-name`
 очищает соответствующее поле. Для `--native-alias` нужны поддерживаемый сейчас bare native
 alias и непустой display name. `create` и `update` — alias для `set`, а `delete` — alias для `remove`;
-те же подкоманды доступны через `ocx route combo`.
+те же подкоманды доступны через `orl route combo`.
 
 ### Management API
 
@@ -306,9 +306,9 @@ Combo хранятся в объекте верхнего уровня `combos`,
 
 ### Почему `combo/<id>` возвращает 404?
 
-Id combo неизвестен. Ответ — HTTP 404 с типом `invalid_request_error`. Запустите `ocx combo list`,
+Id combo неизвестен. Ответ — HTTP 404 с типом `invalid_request_error`. Запустите `orl combo list`,
 проверьте написание и регистр, а также убедитесь, что management-команда записывала в тот же
-запущенный экземпляр opencodex, который принимает запросы к моделям.
+запущенный экземпляр OpenRelay, который принимает запросы к моделям.
 
 ### Почему я получаю `combo_unavailable`?
 

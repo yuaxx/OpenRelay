@@ -9,7 +9,7 @@ Reclaim n’est **jamais planifié automatiquement** et ne s’exécute pas simp
 
 ## Fonctionnement de Reclaim
 
-OpenCodex effectue une séquence de maintenance hors ligne et bornée :
+OpenRelay effectue une séquence de maintenance hors ligne et bornée :
 
 1. résoudre le chemin canonique de `logs_2.sqlite` à partir du `sqlite_home` effectif de Codex ;
 2. vérifier l’identité du fichier et le schéma connu des journaux Codex ;
@@ -42,29 +42,29 @@ Reclaim ne fait délibérément **pas** les actions suivantes :
 - continuer avec un futur schéma de journaux inconnu ; ou
 - continuer après l’échec d’un contrôle d’intégrité SQLite.
 
-Un verrou Log Guard occupé, un accès SQLite en écriture occupé ou un checkpoint initial occupé entraîne un refus explicite, sans nouvelle tentative en arrière-plan. Si la contention du checkpoint apparaît seulement après la validation d’un lot de compactage incrémental, OpenCodex signale le travail déjà effectué comme un résultat partiel réussi avec `stopReason: "busy"`, au lieu de prétendre qu’aucun changement n’a eu lieu.
+Un verrou Log Guard occupé, un accès SQLite en écriture occupé ou un checkpoint initial occupé entraîne un refus explicite, sans nouvelle tentative en arrière-plan. Si la contention du checkpoint apparaît seulement après la validation d’un lot de compactage incrémental, OpenRelay signale le travail déjà effectué comme un résultat partiel réussi avec `stopReason: "busy"`, au lieu de prétendre qu’aucun changement n’a eu lieu.
 
 ## CLI
 
 Examinez d’abord l’espace récupérable :
 
 ```bash
-ocx storage codex-logs status
+orl storage codex-logs status
 ```
 
 Exécutez une passe de maintenance bornée :
 
 ```bash
-ocx storage codex-logs compact
+orl storage codex-logs compact
 ```
 
 Pour obtenir des mesures avant/après lisibles par machine :
 
 ```bash
-ocx storage codex-logs compact --json
+orl storage codex-logs compact --json
 ```
 
-Si le résultat indique qu’il reste de l’espace récupérable, arrêtez-vous là, sauf si vous souhaitez explicitement une autre passe bornée. OpenCodex ne boucle pas indéfiniment et ne planifie pas de passe supplémentaire à votre place.
+Si le résultat indique qu’il reste de l’espace récupérable, arrêtez-vous là, sauf si vous souhaitez explicitement une autre passe bornée. OpenRelay ne boucle pas indéfiniment et ne planifie pas de passe supplémentaire à votre place.
 
 ## API de gestion
 

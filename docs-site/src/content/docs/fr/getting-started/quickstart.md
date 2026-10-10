@@ -1,6 +1,6 @@
 ---
 title: Démarrage rapide
-description: Configurez votre premier fournisseur et acheminez OpenAI Codex via opencodex en trois commandes.
+description: Configurez votre premier fournisseur et acheminez OpenAI Codex via OpenRelay en trois commandes.
 ---
 
 Ce guide part d’une installation neuve et vous conduit jusqu’à l’exécution de Codex sur un modèle autre qu’OpenAI.
@@ -8,20 +8,20 @@ Ce guide part d’une installation neuve et vous conduit jusqu’à l’exécuti
 ## 1. Exécutez l'assistant de configuration
 
 ```bash
-ocx init
+orl init
 ```
 
-`ocx init` vous accompagne dans les étapes suivantes :
+`orl init` vous accompagne dans les étapes suivantes :
 
 1. **Choix d’un fournisseur** — sélectionnez l’un des 103 préréglages intégrés au registre, ou `custom` pour saisir une
    URL de base et un adaptateur.
 2. **Clé API** — collez une clé ou référencez une variable d’environnement telle que `${ANTHROPIC_API_KEY}`.
 3. **Modèle par défaut** — pour les fournisseurs clés, locaux et personnalisés, acceptez le préréglage ou saisissez un identifiant de modèle.
 4. **Port proxy** — la valeur par défaut est `10100`.
-5. **Injecter dans Codex ?** — avec une configuration de bouclage normale, opencodex ajoute une valeur racine `openai_base_url` à
+5. **Injecter dans Codex ?** — avec une configuration de bouclage normale, OpenRelay ajoute une valeur racine `openai_base_url` à
    `$CODEX_HOME/config.toml` (`~/.codex/config.toml` par défaut) donc le fournisseur `openai` intégré de Codex
    cible le proxy. Les liaisons distantes ou LAN utilisent à la place une entrée de fournisseur dédiée avec un en-tête d’authentification API.
-6. **Installer le shim de démarrage automatique ?** — lorsqu’il est activé, le lancement de `codex` exécute d’abord `ocx ensure`.
+6. **Installer le shim de démarrage automatique ?** — lorsqu’il est activé, le lancement de `codex` exécute d’abord `orl ensure`.
 
 Le résultat est enregistré dans `$OPENCODEX_HOME/config.json` (par défaut `~/.opencodex/config.json`).
 
@@ -35,32 +35,32 @@ annoncent une fenêtre de contexte utilisable de 372 000 jetons ; Cursor con
 ## 2. Démarrez le proxy
 
 ```bash
-ocx start            # utilise le port 10100 par défaut
-ocx start --port 8080
+orl start            # utilise le port 10100 par défaut
+orl start --port 8080
 ```
 
-Au démarrage, opencodex :
+Au démarrage, OpenRelay :
 
 - écrit son PID à `~/.opencodex/ocx.pid` (et refuse de démarrer deux fois),
 - découvre les modèles en direct lorsque le fournisseur le permet et **synchronise les entrées natives et routées dans
   le catalogue de modèles de Codex**,
 - écoute sur `http://localhost:<port>/v1`.
 
-Si le port demandé est occupé, `ocx start` s’arrête et indique ce qui l’occupe : exécutez d’abord
-`ocx stop` si un processus opencodex y répond, ou démarrez sur un port libre avec
-`ocx start --port <port>`. La commande ne change jamais de port d’elle-même : auparavant, ce
+Si le port demandé est occupé, `orl start` s’arrête et indique ce qui l’occupe : exécutez d’abord
+`orl stop` si un processus OpenRelay y répond, ou démarrez sur un port libre avec
+`orl start --port <port>`. La commande ne change jamais de port d’elle-même : auparavant, ce
 comportement laissait deux proxys en cours d’exécution et redirigeait Codex vers le plus récent.
 
 Vérifiez-le :
 
 ```bash
-ocx status
-ocx gui       # ouvre le tableau de bord sur le port actif
+orl status
+orl gui       # ouvre le tableau de bord sur le port actif
 ```
 
 ## 3. Utiliser Codex
 
-Codex parle maintenant à opencodex de manière transparente :
+Codex parle maintenant à OpenRelay de manière transparente :
 
 ```bash
 codex "Refactor this function for readability"
@@ -76,7 +76,7 @@ codex -m "ollama-cloud/glm-5.2"      "Write a SQL migration"
 ## Choisissez des modèles de sous-agents (facultatif)
 
 Une nouvelle configuration propose cinq modèles natifs dans le sélecteur de sous-agents de Codex : `gpt-5.5`,
-`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna` et `gpt-6-astra`. Ouvrez `ocx gui` pour remplacer ou
+`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna` et `gpt-6-astra`. Ouvrez `orl gui` pour remplacer ou
 réorganiser jusqu’à cinq modèles natifs ou routés. Le tableau de bord peut également définir un modèle de sous-agent
 préféré et un effort de raisonnement. Consultez [Interface des sous-agents](/fr/guides/sub-agent-surface/)
 pour choisir v1, base ou v2 et comprendre quand s’appliquent les instructions, les valeurs natives par défaut et les replis.
@@ -86,8 +86,8 @@ pour choisir v1, base ou v2 et comprendre quand s’appliquent les instructions,
 Certains fournisseurs prennent en charge la connexion à un compte réel (OAuth, actualisation automatique) :
 
 ```bash
-ocx login xai          # ou : anthropic, kimi, kiro, google-antigravity, cursor
-ocx logout xai
+orl login xai          # ou : anthropic, kimi, kiro, google-antigravity, cursor
+orl logout xai
 ```
 
 OpenAI lui-même ne nécessite **aucune clé** : le fournisseur par défaut transfère directement les informations
@@ -96,9 +96,9 @@ d’identification de votre `codex login` existant (consultez [Fournisseurs](/fr
 ## Arrêt et restauration
 
 ```bash
-ocx stop          # arrête le proxy et restaure Codex natif
-ocx restore       # restaure Codex natif sans arrêter le proxy (alias : ocx eject)
-ocx restore back  # route de nouveau Codex par le proxy toujours actif
+orl stop          # arrête le proxy et restaure Codex natif
+orl restore       # restaure Codex natif sans arrêter le proxy (alias : orl eject)
+orl restore back  # route de nouveau Codex par le proxy toujours actif
 ```
 
 ## Suivant

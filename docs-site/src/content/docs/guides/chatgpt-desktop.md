@@ -7,7 +7,7 @@ This experiment is **macOS only and off by default**. It filters the bundled Cha
 app-server's JSON-RPC stdout to open known plain-quota gates. It does not increase
 an account's quota or make an upstream service accept a request it refuses.
 
-Enable it in your OpenCodex `config.json`:
+Enable it in your OpenRelay `config.json`:
 
 ```json
 {
@@ -18,22 +18,22 @@ Enable it in your OpenCodex `config.json`:
 Then run:
 
 ```bash
-ocx chatgpt launch
-ocx chatgpt status
+orl chatgpt launch
+orl chatgpt status
 ```
 
-`launch` creates an executable launcher under the OpenCodex config directory,
+`launch` creates an executable launcher under the OpenRelay config directory,
 quits ChatGPT if it is running, and relaunches it with
 `open -a <bundle> --env CODEX_CLI_PATH=<launcher>`. The app is found by its bundle
 identifier, `com.openai.codex`, so an install in `~/Applications` or on another
 volume works, and another app that shares the "ChatGPT" name is never quit or
 opened. Save ongoing work first: this
-restarts the app. It does not require a running OpenCodex proxy.
+restarts the app. It does not require a running OpenRelay proxy.
 
 To remove the launcher and relaunch without the override:
 
 ```bash
-ocx chatgpt restore
+orl chatgpt restore
 ```
 
 Restore leaves the config flag as configured. Set `chatgptDesktop.appServerShim`
@@ -63,10 +63,10 @@ exit status retain their direct connection to the app.
 
 ## Executable and environment security
 
-The generated launcher has mode `0755` and embeds the current OpenCodex executable
+The generated launcher has mode `0755` and embeds the current OpenRelay executable
 and, for source installs, the CLI entry path. `CODEX_CLI_PATH` tells ChatGPT to
 execute this launcher instead of its bundled binary directly. Keep the launcher,
-its config directory, and the OpenCodex installation under your control: changing
+its config directory, and the OpenRelay installation under your control: changing
 these executable paths changes code the app runs. The launcher still `exec`s the
 bundled binary of the discovered bundle; if that bundle has no app-server binary,
 `launch` refuses instead of writing a launcher.
@@ -97,7 +97,7 @@ the running ChatGPT bundle process carries the expected launcher override.
 
 ## Failure behavior and known limits
 
-When the platform is not macOS, the OpenCodex runtime is missing, or the filter
+When the platform is not macOS, the OpenRelay runtime is missing, or the filter
 self-test fails, the launcher runs the original binary with untouched stdout. A
 missing bundled app-server binary is the exception: there is nothing to fall back
 to, so the launcher exits with an error (see below).
@@ -110,11 +110,11 @@ remaining stream to raw bytes.
 
 The experiment depends on the bundled binary path, the app honoring
 `CODEX_CLI_PATH`, and current RPC field shapes. Updates may change these. A moved
-or removed OpenCodex installation fails the launcher preflight and runs the
-original binary. Run `ocx chatgpt launch` again after relocating the installation.
+or removed OpenRelay installation fails the launcher preflight and runs the
+original binary. Run `orl chatgpt launch` again after relocating the installation.
 If an app update moves or removes the bundled app-server binary itself, the
-launcher cannot start it: it prints a message naming `ocx chatgpt launch` and
-`ocx chatgpt restore` on stderr and exits, and Desktop cannot start its
+launcher cannot start it: it prints a message naming `orl chatgpt launch` and
+`orl chatgpt restore` on stderr and exits, and Desktop cannot start its
 app-server until you run one of them. A single output line longer than 8 MiB is
 passed through unparsed rather than buffered.
 

@@ -3,7 +3,7 @@ import { REMOTE_WORKSPACE_CAPABILITIES, isRemoteWorkspaceToolName } from "../rem
 import { runCatalogAction } from "./catalog-command-result";
 import { CliUsageError, RuntimeApiError, printData, rejectArgs, runtimeRequest, takeFlag, type RuntimeApiDeps } from "./runtime-api";
 
-export const REMOTE_WORKSPACE_HUB_USAGE = "Usage: ocx remote-workspace hub [status|runtimes|sessions] [--json]";
+export const REMOTE_WORKSPACE_HUB_USAGE = "Usage: orl remote-workspace hub [status|runtimes|sessions] [--json]";
 const UNAVAILABLE = "Remote Workspace requires Hub mode and OCX_REMOTE_WORKSPACE_ENABLED=1. Run this command on the intended Hub.";
 const identity = z.string().min(1);
 const capabilities = z.array(z.enum(REMOTE_WORKSPACE_CAPABILITIES));

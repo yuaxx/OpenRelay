@@ -139,7 +139,7 @@ export async function syncModelsToCodex(
     // service-definition paths, so the log carries the authority only; POST /api/sync
     // returns the specific reason to an authenticated operator.
     log?.error(
-      "[opencodex] Codex write refused (service-home): this proxy could not prove it owns the "
+      "[openrelay] Codex write refused (service-home): this proxy could not prove it owns the "
         + "installed service homes, so catalog sync and Codex config injection were skipped. "
         + "POST /api/sync returns the specific reason.",
     );
@@ -282,7 +282,7 @@ export async function syncModelsToCodex(
         ? FOREIGN_CODEX_HOME_OWNER_MESSAGE
         : cat.skippedReason === "owner_unknown" ? UNKNOWN_CODEX_HOME_OWNER_MESSAGE
         : unbackedRoutedRemovalMessage(cat.protectedRoutedNamespaces ?? 1);
-      log?.error(`[opencodex] ${warning}`);
+      log?.error(`[openrelay] ${warning}`);
     } else if (cat.added > 0) {
       log?.log(`   + ${cat.added} models appended to Codex catalog (${cat.path})`);
     } else if (!cat.catalogExists) {
@@ -389,7 +389,7 @@ async function refreshCatalogForSync(
         ? FOREIGN_CODEX_HOME_OWNER_MESSAGE
         : cat.skippedReason === "owner_unknown" ? UNKNOWN_CODEX_HOME_OWNER_MESSAGE
         : unbackedRoutedRemovalMessage(cat.protectedRoutedNamespaces ?? 1);
-      log?.error(`[opencodex] ${warning}`);
+      log?.error(`[openrelay] ${warning}`);
     } else if (cat.added > 0) {
       log?.log(`   + ${cat.added} models appended to Codex catalog (${cat.path})`);
     } else if (!cat.catalogExists) {

@@ -8,7 +8,7 @@ export interface DesktopProfileCliDeps extends RuntimeApiDeps {
   runtimeRequestImpl?: typeof runtimeRequest;
 }
 
-const USAGE = "Usage: ocx claude desktop profile show [--json]\n       ocx claude desktop profile import FILE|- [--json]";
+const USAGE = "Usage: orl claude desktop profile show [--json]\n       orl claude desktop profile import FILE|- [--json]";
 
 function record(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid Desktop state");
@@ -93,7 +93,7 @@ export async function handleClaudeDesktopProfileCommand(argv: string[], deps: De
       action === "import" ? "Desktop profile saved on the selected proxy. It has not been applied by this command." : "Desktop profile on the selected proxy.",
       `Models: ${state.models.length}; available: ${state.models.filter(model => model.available).length}; port: ${state.port}`,
       ...DESKTOP_FAMILIES.map(family => `${family}: ${state.profile.defaults[family] ?? "none"}`),
-      ...(action === "import" ? ["Next: review with ocx claude desktop profile show; apply separately with ocx claude desktop apply."] : []),
+      ...(action === "import" ? ["Next: review with orl claude desktop profile show; apply separately with orl claude desktop apply."] : []),
     ]);
     return 0;
   });

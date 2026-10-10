@@ -22,6 +22,11 @@ import "./styles/star-onboarding.css";
 import "./styles/sidebar-zoom.css";
 import "./styles/protocol-evidence.css";
 import "./pages/tray.css";
+import "./styles/tailwind.css";
+import "./styles/openrelay-theme.css";
+import "./styles/openrelay-shell.css";
+import "./styles/openrelay-dashboard.css";
+import "./styles/openrelay-providers.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

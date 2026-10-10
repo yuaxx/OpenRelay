@@ -45,11 +45,11 @@ describe("CLI help navigation", () => {
   test("compact root fits 28 lines and provides the three discovery escapes", () => {
     const output = capture(printUsage);
     expect(output.split("\n").length).toBeLessThanOrEqual(28);
-    expect(output).toContain("Usage: ocx <command> [options]");
+    expect(output).toContain("Usage: orl <command> [options]");
     expect(output).toContain("Read or follow request logs");
     expect(output).toContain("Report token usage and estimated cost");
     for (const heading of ["Start here:", "Common tasks:", "Explore:", "More help:"]) expect(output).toContain(heading);
-    for (const invocation of ["ocx help --all", "ocx help <command>", "ocx capabilities --json"]) expect(output).toContain(invocation);
+    for (const invocation of ["orl help --all", "orl help <command>", "orl capabilities --json"]) expect(output).toContain(invocation);
   });
 
   test("all root forms agree in narrow and normal redirected terminals", () => {
@@ -65,7 +65,7 @@ describe("CLI help navigation", () => {
 
   test("root groups reference public registry entries and preserve their summaries", () => {
     const output = capture(printUsage);
-    const actions = [...output.matchAll(/^  ocx (setup|start|status|doctor|logs|usage)\s/gm)].map(match => match[1]);
+    const actions = [...output.matchAll(/^  orl (setup|start|status|doctor|logs|usage)\s/gm)].map(match => match[1]);
     expect(actions).toEqual(["setup", "start", "status", "doctor", "logs", "usage"]);
     for (const name of actions) {
       const entry = findCommand(name);
@@ -90,10 +90,10 @@ describe("CLI help navigation", () => {
       expect(result.canonicalName).toBe(name);
       expect(result.children).toEqual(CAPABILITIES.filter(cap => cap.command[0] === name && cap.command.length > 1));
       const output = capture(() => printSubcommandUsage(name));
-      for (const child of result.children) expect(output).toContain(`ocx help ${child.command.join(" ")}`);
+      for (const child of result.children) expect(output).toContain(`orl help ${child.command.join(" ")}`);
     }
     expect(CAPABILITIES.some(cap => cap.command.join(" ") === "models context")).toBe(false);
-    expect(capture(() => printSubcommandUsage("models"))).toContain("Context cap help: ocx help models context");
+    expect(capture(() => printSubcommandUsage("models"))).toContain("Context cap help: orl help models context");
   });
 
   test("provider examples use real command names and no credential-shaped samples", () => {
@@ -102,23 +102,23 @@ describe("CLI help navigation", () => {
     expect(examples.length).toBeGreaterThan(0);
     for (const example of examples) {
       const tokens = example.trim().split(/\s+/);
-      expect(tokens.slice(0, 2)).toEqual(["ocx", "provider"]);
+      expect(tokens.slice(0, 2)).toEqual(["orl", "provider"]);
       expect(["list", "presets", "add", "show", "set-default", "edit", "remove", "pacing", "snapshot"]).toContain(tokens[2]);
       expect(example).not.toMatch(/sk-[a-z]|Bearer [A-Za-z0-9]/);
     }
     expect(output).toContain("--api-key <key>");
-    expect(output).toContain("ocx help provider list");
-    expect(output).not.toContain("ocx help provider\n");
+    expect(output).toContain("orl help provider list");
+    expect(output).not.toContain("orl help provider\n");
   });
 
   test("family help preserves alias usage and adds canonical declared topics", () => {
     const output = capture(() => printSubcommandUsage("model"));
-    expect(output.startsWith("Usage: ocx model <subcommand>\n\nAlias of ocx models.")).toBe(true);
-    expect(output).toContain("Canonical help: ocx help models");
-    expect(output).toContain("ocx help models context");
+    expect(output.startsWith("Usage: orl model <subcommand>\n\nAlias of orl models.")).toBe(true);
+    expect(output).toContain("Canonical help: orl help models");
+    expect(output).toContain("orl help models context");
     const account = capture(() => printSubcommandUsage("account"));
     expect(account).toContain("Declared commands (incomplete)");
-    expect(account).toContain("ocx help account list");
+    expect(account).toContain("orl help account list");
     expect(account).not.toContain("/api/");
   });
 
@@ -127,9 +127,9 @@ describe("CLI help navigation", () => {
       const result = run(args);
       expect(result.status).toBe(0);
       expect(result.stderr).toBe("");
-      expect(result.stdout).toContain("ocx provider list --jsonl");
-      expect(result.stdout).toContain("ocx provider presets --json");
-      expect(result.stdout).not.toContain("ocx provider --help");
+      expect(result.stdout).toContain("orl provider list --jsonl");
+      expect(result.stdout).toContain("orl provider presets --json");
+      expect(result.stdout).not.toContain("orl provider --help");
       return result.stdout;
     });
     expect(new Set(outputs).size).toBe(1);
@@ -148,6 +148,6 @@ describe("CLI help navigation", () => {
       fallbackToParent: true, write: value => { lines.push(value); },
     }));
     expect(stdout).toBe("");
-    expect(lines.join("\n")).toContain("ocx models context provider <provider> <on|off>");
+    expect(lines.join("\n")).toContain("orl models context provider <provider> <on|off>");
   });
 });

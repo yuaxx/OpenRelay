@@ -3,6 +3,7 @@ import { IconAlert } from "../icons";
 import { Trans } from "../i18n/provider";
 import { navigateHash } from "../hash-routing";
 import { EmptyState, Notice } from "../ui";
+import { Button, Tabs, Tab } from "../components/ui/controls";
 import { DashboardDialogs } from "./dashboard-dialogs";
 import { DashboardModelsSection } from "./dashboard-models-section";
 import { DashboardOverviewSection } from "./dashboard-overview-section";
@@ -36,7 +37,7 @@ export default function Dashboard({ apiBase, connected = false, authenticationPe
         title={<span style={{ color: "var(--red)" }}>{t(d.connectionFailure === "denied"
           ? "dash.permissionDenied" : d.connectionFailure === "auth" ? "dash.authRequired" : "dash.dataUnavailable")}</span>}>
         {!connected && d.connectionFailure === "unavailable" && <Trans k="dash.runStart" cmd="ocx start" />}
-        <button className="btn btn-ghost" type="button" onClick={() => d.refreshDashboard()}>{t("common.retry")}</button>
+        <Button onClick={() => d.refreshDashboard()}>{t("common.retry")}</Button>
       </EmptyState>
     );
   }
@@ -79,31 +80,29 @@ export default function Dashboard({ apiBase, connected = false, authenticationPe
   };
 
   return (
-    <div className="dashboard-workspace-shell">
+    <div className="dashboard-workspace-shell or-redesign or:flex or:flex-col or:gap-6">
       {error && <Notice tone="warn">{t("dash.staleData")} <button className="btn btn-ghost" type="button"
         onClick={() => d.refreshDashboard()}>{t("common.retry")}</button></Notice>}
-      <div className="page-head">
-        <h2>{t("nav.dashboard")}</h2>
+      <div className="or-page-intro">
+        <div className="page-head"><h2>{t("nav.dashboard")}</h2></div>
+        <p className="page-sub">{t("dash.subtitle")}</p>
       </div>
-      <p className="page-sub">{t("dash.subtitle")}</p>
-      <div className="page-tabs" role="tablist" aria-label={t("dash.workspace.sections")}>
+      <Tabs aria-label={t("dash.workspace.sections")}>
         {sections.map(s => (
-          <button
+          <Tab
             key={s.id}
             type="button"
-            role="tab"
             id={`dashboard-tab-${s.id}`}
-            aria-selected={selectedSection === s.id}
+            active={selectedSection === s.id}
             aria-controls={`dashboard-panel-${s.id}`}
             tabIndex={selectedSection === s.id ? 0 : -1}
-            className={`page-tab${selectedSection === s.id ? " page-tab--active" : ""}`}
             onClick={() => selectTab(s.id)}
             onKeyDown={onTabKeyDown}
           >
             {s.label}
-          </button>
+          </Tab>
         ))}
-      </div>
+      </Tabs>
       <section
         className="dashboard-workspace-main"
         role="tabpanel"

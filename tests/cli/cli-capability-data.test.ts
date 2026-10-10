@@ -216,7 +216,7 @@ describe("checked capability dependency boundary", () => {
   });
 });
 
-const completeUsage = "ocx models set-price <provider/model> (--auto | --input <rate> --output <rate>) [--cache-read <rate>] [--cache-write <rate>] [--json]";
+const completeUsage = "orl models set-price <provider/model> (--auto | --input <rate> --output <rate>) [--cache-read <rate>] [--cache-write <rate>] [--json]";
 const warning = "Capability metadata is incomplete; this is not the full operand grammar.";
 
 type Discovery = {
@@ -234,7 +234,7 @@ type Discovery = {
 function discovery(mode: "absent" | "present" | "undefined" | "empty"): Discovery {
   const home = mkdtempSync(join(tmpdir(), "ocx-capability-data-"));
   const codex = join(home, "codex");
-  const ocx = join(home, "ocx");
+  const orl = join(home, "ocx");
   mkdirSync(codex);
   mkdirSync(ocx);
   // Only this child mutates a real row. No synthetic shipped command, shared global
@@ -314,7 +314,7 @@ describe("capability facade and optional usage consumers", () => {
     ]);
     expect(facade.HEAD_CAPABILITIES).toBe(base.HEAD_CAPABILITIES);
     const matches = facade.capabilitiesForRoute("/api/providers/{provider}/model-costs");
-    expect(matches.map(facade.capabilityInvocation)).toEqual(["ocx models price", "ocx models set-price"]);
+    expect(matches.map(facade.capabilityInvocation)).toEqual(["orl models price", "orl models set-price"]);
     for (const row of matches) expect(base.CAPABILITIES.includes(row)).toBe(true);
     expect(facade.capabilityRouteKeys().has("PUT /api/providers/{provider}/model-costs")).toBe(true);
     expect(facade.CAPABILITIES.some(row => Object.hasOwn(row, "usage"))).toBe(true);
@@ -325,18 +325,18 @@ describe("capability facade and optional usage consumers", () => {
     expect(result.all.schemaVersion).toBe(1);
     expect(result.all.headCapabilities).toEqual(base.HEAD_CAPABILITIES);
     expect(result.all.capabilities).toEqual(facade.CAPABILITIES.map(cap => ({
-      command: cap.command, invocation: `ocx ${cap.command.join(" ")}`, summary: cap.summary,
+      command: cap.command, invocation: `orl ${cap.command.join(" ")}`, summary: cap.summary,
       routes: cap.routes, flags: cap.flags, mutates: cap.mutates, json: cap.json,
       ...(cap.details ? { details: cap.details } : {}),
     })));
     expect(result.legacy).toBe([
-      "Command: ocx models price\n\nRead the saved manual price for an exact provider/model selector.",
+      "Command: orl models price\n\nRead the saved manual price for an exact provider/model selector.",
       "\nDeclared flags:",
       "  --json  Emit provider, modelId, and cost (null for automatic pricing).",
       "\nThe provider must be configured; everything after the first slash is the exact upstream model ID.",
-      `\n${warning}`, "\nParent help: ocx help models",
+      `\n${warning}`, "\nParent help: orl help models",
     ].join("\n"));
-    expect(result.help).toStartWith("Command: ocx models set-price\n\n");
+    expect(result.help).toStartWith("Command: orl models set-price\n\n");
     expect(result.help).toContain(warning);
     expect(result.alias).toBe(result.help);
   }, SPAWN_BUDGET_MS);
@@ -344,21 +344,21 @@ describe("capability facade and optional usage consumers", () => {
   test("present usage reaches real full/filtered JSON and leaf/alias/fallback help only", () => {
     const before = discovery("absent");
     const after = discovery("present");
-    const target = after.all.capabilities.find(cap => cap.invocation === "ocx models set-price");
+    const target = after.all.capabilities.find(cap => cap.invocation === "orl models set-price");
     expect(target?.usage).toBe(completeUsage);
     expect(after.filtered.capabilities).toEqual([target!]);
     expect(after.filtered).not.toHaveProperty("headCapabilities");
     expect(after.all.capabilities.filter(cap => Object.hasOwn(cap, "usage"))).toHaveLength(1);
     expect(after.all.capabilities.map(({ usage: _usage, ...cap }) => cap)).toEqual(before.all.capabilities);
     expect(after.help).toBe(before.help
-      .replace("Command: ocx models set-price", `Usage: ${completeUsage}`)
+      .replace("Command: orl models set-price", `Usage: ${completeUsage}`)
       .replace(`\n\n${warning}`, ""));
     expect(after.alias).toBe(after.help);
     expect(after.fallback).toBe(after.help);
     expect(after.legacy).toBe(before.legacy);
     expect(after.parent).toBe(before.parent);
     expect(after.human).toBe(before.human);
-    expect(after.invocation).toBe("ocx models set-price");
+    expect(after.invocation).toBe("orl models set-price");
   }, SPAWN_BUDGET_MS);
 
   test("undefined remains absent while a defined empty string follows the defined-value contract", () => {

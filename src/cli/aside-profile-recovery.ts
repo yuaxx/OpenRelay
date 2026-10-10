@@ -8,9 +8,9 @@
  */
 export const ASIDE_SYNC_EMPTY_LINES: readonly string[] = [
   "No eligible Aside profiles to synchronize. Sync refreshes only profiles whose sync preference is on.",
-  "List profiles with: ocx integration client status --client aside",
-  "For a profile shown as off (stale), review: ocx integration client preview --client aside --operation apply --profile <N>",
-  "Then, if the preview permits the change and you accept it: ocx integration client enable --client aside --profile <N>",
+  "List profiles with: orl integration client status --client aside",
+  "For a profile shown as off (stale), review: orl integration client preview --client aside --operation apply --profile <N>",
+  "Then, if the preview permits the change and you accept it: orl integration client enable --client aside --profile <N>",
 ];
 
 function recoveryProfileId(row: unknown): number | null {
@@ -26,8 +26,8 @@ function recoveryProfileId(row: unknown): number | null {
 export function asideProfileRecoveryLines(rows: readonly unknown[]): string[] {
   const ids = [...new Set(rows.map(recoveryProfileId).filter((id): id is number => id !== null))];
   return ids.flatMap(id => [
-    `Aside profile ${id} is off (stale). To reconnect it, review: ocx integration client preview --client aside --operation apply --profile ${id}`,
-    `Then, if the preview permits the change and you accept it: ocx integration client enable --client aside --profile ${id}`,
+    `Aside profile ${id} is off (stale). To reconnect it, review: orl integration client preview --client aside --operation apply --profile ${id}`,
+    `Then, if the preview permits the change and you accept it: orl integration client enable --client aside --profile ${id}`,
   ]);
 }
 

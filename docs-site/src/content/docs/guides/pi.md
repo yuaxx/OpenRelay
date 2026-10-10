@@ -4,7 +4,7 @@ description: Use any routed model from Pi — ocx export writes a custom provide
 ---
 
 Pi reads its providers from a single global JSON file rather than environment variables, so
-opencodex does not launch it. Instead, `ocx export` serializes the `opencodex` provider block —
+OpenRelay does not launch it. Instead, `orl export` serializes the `opencodex` provider block —
 base URL, model list, and the env reference Pi interpolates — and you merge it into your own
 config.
 
@@ -13,8 +13,8 @@ config.
 Start the proxy, then print the config:
 
 ```bash
-ocx start
-ocx export --client pi
+orl start
+orl export --client pi
 ```
 
 The output leads with the JSON, then prints the destination path, the merge warning, the env
@@ -45,7 +45,7 @@ export line, and how many models carry authoritative context limits.
 }
 ```
 
-Generated Pi providers enable `compat.sendSessionAffinityHeaders`. Keep this flag when merging or manually editing the provider: Pi supplies a stable session identity and OpenCodex derives canonical OpenCode Go affinity from it. Pi may omit the identity when `cacheRetention` is `none`.
+Generated Pi providers enable `compat.sendSessionAffinityHeaders`. Keep this flag when merging or manually editing the provider: Pi supplies a stable session identity and OpenRelay derives canonical OpenCode Go affinity from it. Pi may omit the identity when `cacheRetention` is `none`.
 
 Generated Pi providers also set `compat.supportsDeveloperRole` to `false`, so Pi sends its system prompt as `system` instead of `developer`. OpenCodex forwards Chat Completions roles as sent, and several OpenAI-compatible upstreams reject `developer` with a 400; every upstream accepts `system`.
 
@@ -63,17 +63,17 @@ Pi's global model config is:
 ```
 
 :::caution[Merge, never replace]
-`ocx export` never writes that file. Merge the `providers.opencodex` block into it — replacing the
+`orl export` never writes that file. Merge the `providers.opencodex` block into it — replacing the
 file destroys every other provider you have configured there. `--out` exists for a scratch path
 and refuses to overwrite an existing file without `--force`:
 
 ```bash
-ocx export --client pi --out ~/opencodex-pi-models.json
-ocx export --client pi --json > ~/opencodex-pi-models.json   # or redirect the byte-exact JSON
+orl export --client pi --out ~/opencodex-pi-models.json
+orl export --client pi --json > ~/opencodex-pi-models.json   # or redirect the byte-exact JSON
 ```
 :::
 
-The exported block is a static snapshot, not a live view. Re-run `ocx export` after adding a
+The exported block is a static snapshot, not a live view. Re-run `orl export` after adding a
 provider or changing model visibility, and merge the new block over the old one.
 
 ## The admission key
@@ -82,8 +82,8 @@ Two different keys are easy to confuse here, and only the first one appears in t
 
 | Key | What it is | Where it lives |
 | --- | --- | --- |
-| Proxy admission key | opencodex's own credential, generated on the dashboard's **API** tab | referenced by `apiKey` as `$OPENCODEX_API_KEY`; the value stays in your environment |
-| Provider key | your Anthropic / OpenAI / OpenRouter key | opencodex's own config, per [Providers](/guides/providers/) |
+| Proxy admission key | OpenRelay's own credential, generated on the dashboard's **API** tab | referenced by `apiKey` as `$OPENCODEX_API_KEY`; the value stays in your environment |
+| Provider key | your Anthropic / OpenAI / OpenRouter key | OpenRelay's own config, per [Providers](/guides/providers/) |
 
 The exported config carries only the reference, never a secret. Pi interpolates a bare `$NAME`, so
 the variable is:
@@ -95,7 +95,7 @@ export OPENCODEX_API_KEY=<your key>
 That name is Pi's alone. opencode uses a different variable
 (`OPENCODEX_OPENCODE_API_KEY`, in `{env:…}` form) — see the [opencode guide](/guides/opencode/).
 
-**A loopback proxy needs no key at all.** opencodex binds `127.0.0.1` by default and authenticates
+**A loopback proxy needs no key at all.** OpenRelay binds `127.0.0.1` by default and authenticates
 nothing there, so the `$OPENCODEX_API_KEY` reference is inert and you can leave the variable unset.
 It matters only when `hostname` is set beyond loopback, which is also the case where the proxy
 refuses to start without a token — see [Remote access](/reference/configuration/server/#remote-access).
@@ -104,11 +104,11 @@ refuses to start without a token — see [Remote access](/reference/configuratio
 
 `contextWindow` and `maxTokens` are emitted only when the catalog reports an authoritative context
 window. When it does not, both fields are omitted for that model and Pi applies its own defaults;
-`ocx export` prints how many rows fell into that case.
+`orl export` prints how many rows fell into that case.
 
 Output limits use the model’s known maximum from catalog or generated metadata. Only unknown limits fall back to `32000`. The output limit is always clamped to the context window, including known limits below `32000`.
 
-Two fields are deliberately absent. `cost` requires all four price fields and opencodex has no
+Two fields are deliberately absent. `cost` requires all four price fields and OpenRelay has no
 price data for routed models — emitting zeros would assert that every model is free.
 
 `reasoning` is the one field that used to be absent and now is not: Pi stores a boolean while the
@@ -116,7 +116,7 @@ catalog carries an effort ladder, and mapping one onto the other used to be a gu
 catalog's ladder is the proxy's own statement about whether a model accepts reasoning parameters
 (adapters honor `reasoning_effort`), an export row with a **non-empty** ladder now emits
 `"reasoning": true`, and a row without one (or with an explicitly empty ladder) stays
-reasoning-free. Pi then offers its effort control for exactly the models opencodex will accept it
+reasoning-free. Pi then offers its effort control for exactly the models OpenRelay will accept it
 on. The export also emits a `thinkingLevelMap` that hides every pi level with no declared target
 (`null`), so pi never offers — and never sends — an effort the ladder does not contain. One
 fallback keeps the model usable: when `ultra` is declared without `max`, pi's `max` level maps
@@ -137,7 +137,7 @@ The provider-parity changes described here are on the development PR stack; an o
 release may still have the previous conversion behavior.
 :::
 
-OpenCodex normalizes Pi/MCP and Anthropic-shaped user images before choosing the native Chat
+OpenRelay normalizes Pi/MCP and Anthropic-shaped user images before choosing the native Chat
 or translated route. Images returned by tools use a translated user-message carrier after the
 paired tool results; ordinary user images and text-only tool results can keep the native path.
 Use modern `tool_calls` and `role: "tool"` with `tool_call_id`: legacy `function`-result image
@@ -170,5 +170,5 @@ block, the mismatch is on our side — please
 
 ## Requirements
 
-A running opencodex proxy (`ocx start`) and Pi installed. `ocx export` reads the live catalog
+A running OpenRelay proxy (`orl start`) and Pi installed. `orl export` reads the live catalog
 through the proxy's management API, so a config can never be emitted with an empty model list.

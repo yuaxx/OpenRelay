@@ -1,9 +1,9 @@
 ---
 title: Desktop App
-description: Install and use the OpenCodex desktop app on macOS, Windows, and Linux.
+description: Install and use the OpenRelay desktop app on macOS, Windows, and Linux.
 ---
 
-The OpenCodex desktop app combines a native tray with the web dashboard. Its bundled CLI
+The OpenRelay desktop app combines a native tray with the web dashboard. Its bundled CLI
 resolves an existing local proxy; the app starts its bundled runtime only when absence is proven.
 
 The dashboard is served from the resolved local proxy endpoint (port `10100` by default).
@@ -49,7 +49,7 @@ The tray icon requires an AppIndicator-capable desktop environment.
 
 ## First launch
 
-The app asks its bundled CLI to run `ocx resolve --json` and attaches to a reachable local
+The app asks its bundled CLI to run `orl resolve --json` and attaches to a reachable local
 proxy if one is already running. It starts the bundled runtime only when the CLI proves
 absence; an uncertain result is shown as a startup failure. The dashboard then opens in
 the app's webview at the resolved loopback endpoint. A login launch that starts hidden in the
@@ -64,7 +64,7 @@ runtime to stop safely, ownership to transfer, and the bundled runtime to start.
 deciding at the prompt does not count toward this limit. Keep the app open while it finishes;
 if it fails, use **Retry** to resolve the current runtime again.
 
-On macOS, closing the dashboard keeps the app running in the menu bar. Open OpenCodex again from Dock or Finder to restore the dashboard without restarting the proxy.
+On macOS, closing the dashboard keeps the app running in the menu bar. Open OpenRelay again from Dock or Finder to restore the dashboard without restarting the proxy.
 
 On Windows, **Start at Login** quotes the executable path in the current-user startup
 registration, including installations under `Program Files`. Previously enabled
@@ -89,7 +89,7 @@ A command in the Windows system `Path` can still take precedence; Desktop report
 conflict as partial configuration and does not change the system `Path`.
 
 After enabling or repairing, open a new terminal. Check `type -a ocx` on macOS/Linux,
-or `Get-Command ocx -All` and `where.exe ocx` on Windows. Existing shells, aliases,
+or `Get-Command orl -All` and `where.exe ocx` on Windows. Existing shells, aliases,
 absolute commands and later PATH changes can still select another executable.
 Configuration persists after Desktop quits. If the bundle is missing, the POSIX shim
 fails with repair/removal guidance instead of silently selecting another `ocx`.
@@ -98,9 +98,9 @@ On POSIX, the shim preserves shell-exported Anthropic settings when launch-proof
 are available. If proof generation fails, and for Windows direct execution, the bundled
 CLI retains its existing stripping of untrusted Anthropic environment settings.
 
-On macOS and Linux, `ocx status` shows `Runtime supervisor: OpenCodex Desktop` when
+On macOS and Linux, `orl status` shows `Runtime supervisor: OpenCodex Desktop` when
 it verifies that the desktop app runs its bundled proxy, even without recorded ownership.
-Turn on **Start at Login** in the OpenCodex menu instead of installing a background
+Turn on **Start at Login** in the OpenRelay menu instead of installing a background
 service. Startup safety credits the app only when its login registration is verified;
 if it cannot be verified, follow the Desktop guidance in status.
 
@@ -108,20 +108,20 @@ The bundled CLI is `/Applications/OpenCodex.app/Contents/MacOS/ocx` on macOS and
 `/usr/bin/ocx` for the Linux deb package. Run that executable with `status` to check
 the app's proxy. Windows supervision detection is unsupported.
 
-While the CLI detects Desktop supervising the proxy, `ocx service install`, `repair`,
+While the CLI detects Desktop supervising the proxy, `orl service install`, `repair`,
 `start`, and `restart` refuse before changing the service, even without recorded ownership
-or verified login registration. Quit OpenCodex, then run `ocx service install` to move
-startup management to the CLI. A duplicate `ocx start` names the Desktop supervisor.
+or verified login registration. Quit OpenRelay, then run `orl service install` to move
+startup management to the CLI. A duplicate `orl start` names the Desktop supervisor.
 
-Use **Check for Updates…** in the tray to update the app's bundle. `ocx update` refuses
+Use **Check for Updates…** in the tray to update the app's bundle. `orl update` refuses
 package replacement while Desktop supervises the proxy, even for a separate npm/Bun install;
-quit OpenCodex first to update that install. An accepted `ocx restart` reports that Desktop
+quit OpenRelay first to update that install. An accepted `orl restart` reports that Desktop
 starts the replacement and waits for it to become healthy. A newer PATH CLI cannot use
-`ocx restart` to replace the app's proxy with its own runtime.
+`orl restart` to replace the app's proxy with its own runtime.
 
-Terminal `ocx stop` still stops the proxy, but Desktop may start it again after a short
+Terminal `orl stop` still stops the proxy, but Desktop may start it again after a short
 backoff. Use **Stop proxy** or **Quit** in the tray to keep it stopped. Ordinary stop prints
-this reminder on stderr; `ocx stop --json` skips the supervision probe and reminder.
+this reminder on stderr; `orl stop --json` skips the supervision probe and reminder.
 
 These guards are early warnings in current CLIs and runtimes; older versions can lack them,
 and Windows does not support the supervision probe. A probe that saw Desktop but could not
@@ -152,9 +152,9 @@ AppImage installations remain **At risk**: the autostart backend registers the o
 AppImage path, while the live desktop process runs inside its mount. Startup safety
 cannot verify that relationship and does not credit AppImage protection.
 A missing or stale check remains **At risk**. If the desktop app owns the proxy but
-protection cannot be verified, reopen OpenCodex and check **Start at Login**. Service
+protection cannot be verified, reopen OpenRelay and check **Start at Login**. Service
 and launcher installation or repair stays disabled while that ownership remains;
-`ocx restore` is still available to undo Codex routing.
+`orl restore` is still available to undo Codex routing.
 
 Normal desktop updates replace the bundled CLI with the fixed startup probe. No local
 patch needs to be preserved across an update.
@@ -177,7 +177,7 @@ The app keeps the proxy it started running. When that proxy restarts itself — 
 starts the new proxy on the same port, usually within about a second (a few seconds when the proxy
 already restarted in the last two minutes), and reloads the open dashboard, so the
 tray's Stop still reaches it and Quit still ends it. If the proxy exits without being asked (a
-crash, or `ocx stop` from a terminal), the app starts it again after a short delay that grows from
+crash, or `orl stop` from a terminal), the app starts it again after a short delay that grows from
 3 to 30 seconds while the proxy keeps failing. If the proxy stops answering on its port, the app
 notices within about 15 seconds and recovers the same way; for a proxy it did not start (a
 background service, or one you started yourself), it first waits about a minute for that proxy to
@@ -249,7 +249,7 @@ requires all four platforms to be signed.
 
 ## Widget
 
-The macOS app includes the OpenCodex WidgetKit extension. See the
+The macOS app includes the OpenRelay WidgetKit extension. See the
 [macOS Menu Bar App guide](/guides/macos-menu-bar/) for widget setup and the
 local snapshot details.
 
@@ -262,7 +262,7 @@ issues before deleting the app. Uninstalling the app directly does not guarantee
 of shell files or the user `Path`.
 
 On macOS, drag `OpenCodex.app` from Applications to the Trash. On Windows, remove
-OpenCodex from **Installed apps**. On Debian-based Linux systems, run:
+OpenRelay from **Installed apps**. On Debian-based Linux systems, run:
 
 ```bash
 sudo apt remove opencodex

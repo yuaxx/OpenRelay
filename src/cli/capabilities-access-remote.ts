@@ -4,7 +4,7 @@ import type { Capability } from "./capability-types";
 export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   {
     command: ["access", "key"], summary: "Manage API access keys and inspect masked metadata.",
-    usage: "ocx access key list [--json]",
+    usage: "orl access key list [--json]",
     routes: [{"method": "GET", "path": "/api/keys"}, {"method": "POST", "path": "/api/keys"}, {"method": "PATCH", "path": "/api/keys"}, {"method": "DELETE", "path": "/api/keys"}, {"method": "POST", "path": "/api/keys/rotate"}, {"method": "POST", "path": "/api/keys/rotate/commit"}, {"method": "DELETE", "path": "/api/keys/rotate"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -12,7 +12,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["access", "key", "list"], summary: "List masked access keys, usage, endpoints and pending rotations.",
-    usage: "ocx access key list [--json]",
+    usage: "orl access key list [--json]",
     routes: [{"method": "GET", "path": "/api/keys"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -20,7 +20,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["access", "key", "get"], summary: "Read one masked key and its access scope.",
-    usage: "ocx access key get <id-or-name> [--json]",
+    usage: "orl access key get <id-or-name> [--json]",
     routes: [{"method": "GET", "path": "/api/keys"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -28,7 +28,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["access", "key", "set"], summary: "Replace selected provider/model scope dimensions.",
-    usage: "ocx access key set <id-or-name> [--allow-provider <name>]... [--allow-model <id>]... [--clear] [--json]",
+    usage: "orl access key set <id-or-name> [--allow-provider <name>]... [--allow-model <id>]... [--clear] [--json]",
     routes: [{"method": "GET", "path": "/api/keys"}, {"method": "PATCH", "path": "/api/keys"}],
     flags: [{"name": "--allow-provider", "value": "string", "summary": "Provider scope; repeatable, replaces that dimension."}, {"name": "--allow-model", "value": "string", "summary": "Model scope; repeatable, replaces that dimension."}, {"name": "--clear", "value": "boolean", "summary": "Clear both dimensions; submitted allow options then override their dimension."}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -36,7 +36,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["access", "key", "rotate", "commit"], summary: "Commit a pending key rotation.",
-    usage: "ocx access key rotate commit <id> <rotation-id> [--json]",
+    usage: "orl access key rotate commit <id> <rotation-id> [--json]",
     routes: [{"method": "POST", "path": "/api/keys/rotate/commit"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -44,7 +44,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["access", "key", "rotate", "abort"], summary: "Abort a pending key rotation.",
-    usage: "ocx access key rotate abort <id> <rotation-id> [--json]",
+    usage: "orl access key rotate abort <id> <rotation-id> [--json]",
     routes: [{"method": "DELETE", "path": "/api/keys/rotate"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -52,7 +52,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["access", "key", "remove"], summary: "Revoke one API access key.",
-    usage: "ocx access key remove <id> --yes [--json]",
+    usage: "orl access key remove <id> --yes [--json]",
     routes: [{"method": "DELETE", "path": "/api/keys"}],
     flags: [{"name": "--yes", "value": "boolean", "summary": "Required confirmation before revoking the key.", "required": true}, {"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: true, json: "payload",
@@ -60,7 +60,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["access", "endpoints"], summary: "Read endpoint URLs from the access-key metadata.",
-    usage: "ocx access endpoints [--json]",
+    usage: "orl access endpoints [--json]",
     routes: [{"method": "GET", "path": "/api/keys"}],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "envelope",
@@ -68,7 +68,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["access", "models"], summary: "Read the public external-model catalog.",
-    usage: "ocx access models [--json]",
+    usage: "orl access models [--json]",
     routes: [],
     flags: [{"name": "--json", "value": "boolean", "summary": "Emit the result as JSON."}],
     mutates: false, json: "payload",
@@ -77,7 +77,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   {
     command: ["access","test"],
     summary: "Send a small inference request through the selected protocol.",
-    usage: "ocx access test <model> [--protocol <chat|responses|messages>] [--api-key-stdin] [--json]",
+    usage: "orl access test <model> [--protocol <chat|responses|messages>] [--api-key-stdin] [--json]",
     routes: [],
     flags: [{"name":"--protocol","value":"string","summary":"chat | responses | messages; default chat."},{"name":"--json","value":"boolean","summary":"Emit the result as JSON."},{"name":"--api-key-stdin","value":"boolean","summary":"Read one explicit data key from bounded piped stdin; no secret argv/env or management/enrolled-key fallback."}],
     mutates: true,
@@ -86,7 +86,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["remote-workspace","hub","status"],
-    usage: "ocx remote-workspace hub status [--json]",
+    usage: "orl remote-workspace hub status [--json]",
     summary: "Read Hub devices, runtime availability and sessions.",
     routes: [{"method":"GET","path":"/api/remote-workspace"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit one validated task result as JSON."}],
@@ -96,7 +96,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["remote-workspace","hub","runtimes"],
-    usage: "ocx remote-workspace hub runtimes [--json]",
+    usage: "orl remote-workspace hub runtimes [--json]",
     summary: "Read Codex, Claude and Pi availability on the Hub.",
     routes: [{"method":"GET","path":"/api/remote-workspace/runtimes"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit one validated task result as JSON."}],
@@ -106,7 +106,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["remote-workspace","hub","sessions"],
-    usage: "ocx remote-workspace hub sessions [--json]",
+    usage: "orl remote-workspace hub sessions [--json]",
     summary: "Read Hub sessions and their public recent events.",
     routes: [{"method":"GET","path":"/api/remote-workspace/sessions"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit one validated task result as JSON."}],
@@ -116,7 +116,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["access","key","rename"],
-    usage: "ocx access key rename <id-or-name> <name> [--json]",
+    usage: "orl access key rename <id-or-name> <name> [--json]",
     summary: "Rename an unambiguously selected API key while preserving its scopes.",
     routes: [{"method":"GET","path":"/api/keys"},{"method":"PATCH","path":"/api/keys"}],
     flags: [{"name":"--json","value":"boolean","summary":"Emit the command result as JSON."}],
@@ -126,7 +126,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["access","audio","transcribe"],
-    usage: "ocx access audio transcribe <file> --model <gpt-4o-transcribe|gpt-4o-mini-transcribe|whisper-1> --api-key-stdin [--json]",
+    usage: "orl access audio transcribe <file> --model <gpt-4o-transcribe|gpt-4o-mini-transcribe|whisper-1> --api-key-stdin [--json]",
     summary: "Transcribe an explicitly chosen bounded audio file with a supplied data key.",
     routes: [],
     flags: [{"name":"--model","value":"string","summary":"Required supported transcription model; no silent model fallback.","required":true},{"name":"--api-key-stdin","value":"boolean","summary":"Required bounded explicit data key on piped stdin; no management/enrolled-key substitution.","required":true},{"name":"--json","value":"boolean","summary":"Emit the command result as JSON."}],
@@ -136,7 +136,7 @@ export const ACCESS_REMOTE_CAPABILITIES: readonly Capability[] = [
   },
   {
     command: ["access","audio","live-check"],
-    usage: "ocx access audio live-check --model <id> --api-key-stdin [--json]",
+    usage: "orl access audio live-check --model <id> --api-key-stdin [--json]",
     summary: "Check actual live-session readiness, then close the connection.",
     routes: [],
     flags: [{"name":"--model","value":"string","summary":"Required live model; sent to the existing live route.","required":true},{"name":"--api-key-stdin","value":"boolean","summary":"Required bounded printableASCII key, encoded only in the established audio subprotocol.","required":true},{"name":"--json","value":"boolean","summary":"Emit the command result as JSON."}],

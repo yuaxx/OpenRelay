@@ -108,7 +108,7 @@ export function concreteComboRequestBody(
     const key = `${target.provider}/${target.model}:${defaultEffort}`;
     if (!warnedUnsupportedDefaults.has(key)) {
       warnedUnsupportedDefaults.add(key);
-      console.debug("[opencodex] combo default effort omitted", {
+      console.debug("[openrelay] combo default effort omitted", {
         provider: target.provider,
         model: target.model,
         requestedEffort: defaultEffort,

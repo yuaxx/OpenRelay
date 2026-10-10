@@ -173,6 +173,9 @@ function quotaFromUnknown(quota: unknown, fallbackUpdatedAt?: number): AccountQu
       }
     : undefined;
   const out: AccountQuota = {
+    ...(finite(q.shortPercent) !== undefined ? { shortPercent: q.shortPercent as number } : {}),
+    ...(finite(q.shortResetAt) !== undefined ? { shortResetAt: q.shortResetAt as number } : {}),
+    ...(finite(q.shortWindowSeconds) !== undefined ? { shortWindowSeconds: q.shortWindowSeconds as number } : {}),
     ...(finite(q.fiveHourPercent) !== undefined ? { fiveHourPercent: q.fiveHourPercent as number } : {}),
     ...(finite(q.fiveHourResetAt) !== undefined ? { fiveHourResetAt: q.fiveHourResetAt as number } : {}),
     ...(finite(q.weeklyPercent) !== undefined ? { weeklyPercent: q.weeklyPercent as number } : {}),
@@ -183,7 +186,8 @@ function quotaFromUnknown(quota: unknown, fallbackUpdatedAt?: number): AccountQu
     ...(creditsUsd ? { creditsUsd } : {}),
     updatedAt: finite(q.updatedAt) ?? fallbackUpdatedAt ?? Date.now(),
   };
-  return out.fiveHourPercent !== undefined
+  return out.shortPercent !== undefined
+    || out.fiveHourPercent !== undefined
     || out.weeklyPercent !== undefined
     || out.monthlyPercent !== undefined
     || (out.customWindows?.length ?? 0) > 0

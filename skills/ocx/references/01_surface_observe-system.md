@@ -10,9 +10,9 @@ Non-mutating probes may still contact providers, consume quota or refresh caches
 
 Declared capabilities: 92.
 
-### `ocx companion`
+### `orl companion`
 
-Usage: `ocx companion show [--json] | ocx companion set <key>=<value> [...] [--json] | ocx companion reset [--json]`
+Usage: `orl companion show [--json] | orl companion set <key>=<value> [...] [--json] | orl companion reset [--json]`
 
 Inspect companion settings, filtered usage and timeline, and configure preferences.
 
@@ -33,9 +33,9 @@ JSON mode: `payload`.
 - usage reads today and 30-day totals using saved display filters; partial range failure returns exit1 and keeps available results.
 - timeline is a separate read of the usage timeline with explicit model selection/provider exclusion and completeness metadata; it does not change settings.
 
-### `ocx usage`
+### `orl usage`
 
-Usage: `ocx usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--since <epoch-ms|ISO-datetime>] [--until <epoch-ms|ISO-datetime>] [--provider <name>] [--model <id>] [--api-key-id <id>] [--search <text>] [--json]`
+Usage: `orl usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--since <epoch-ms|ISO-datetime>] [--until <epoch-ms|ISO-datetime>] [--provider <name>] [--model <id>] [--api-key-id <id>] [--search <text>] [--json]`
 
 Token and estimated-cost report over a time range.
 
@@ -63,9 +63,9 @@ JSON mode: `payload`.
 - Nonclient --api-key-id uses /api/usage and requires matching filter acknowledgment. An unknown acknowledged key is empty/matched:false, not404. Custom-window acknowledgment remains required.
 - --search filters only returned model rows after scope acknowledgment. Blank search selects the top100 model rows; modelView reports match/return counts without recomputing totals.
 
-### `ocx logs`
+### `orl logs`
 
-Usage: `ocx logs [--provider <name>] [--model <id>] [--status <code>] [--conversation <id>] [--account <label>] [--limit <n>] [--follow] [--json|--jsonl]; ocx logs --follow --events [--limit <1-2000>]`
+Usage: `orl logs [--provider <name>] [--model <id>] [--status <code>] [--conversation <id>] [--account <label>] [--limit <n>] [--follow] [--json|--jsonl]; orl logs --follow --events [--limit <1-2000>]`
 
 Recent request log rows, filterable by provider, model, conversation, account, and status.
 
@@ -97,9 +97,9 @@ JSON mode: `payload`.
 - Follow limit is1–2000, default200. Polling is serial and cancellable; SIGINT exits130 and SIGTERM143. Malformed/oversized/unavailable responses stop without a fabricated empty snapshot or retry.
 - Nested explain reads recorded decisions; rebuild-index and index-status touch the local derived index and retain separate declarations.
 
-### `ocx storage report`
+### `orl storage report`
 
-Usage: `ocx storage report [--json]`
+Usage: `orl storage report [--json]`
 
 Disk usage under CODEX_HOME, with the log-guard protection report.
 
@@ -115,9 +115,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx storage cleanup`
+### `orl storage cleanup`
 
-Usage: `ocx storage cleanup --percent <0-100> [--mode <quarantine|permanent>] [--yes] [--json]`
+Usage: `orl storage cleanup --percent <0-100> [--mode <quarantine|permanent>] [--yes] [--json]`
 
 Preview or delete the oldest archived sessions by percentage.
 
@@ -141,9 +141,9 @@ JSON mode: `payload`.
 - There is no interactive confirmation: a prompt an agent can answer is not a safety boundary.
 - `--mode quarantine` moves files to trash, so `storage trash restore` can undo it; `permanent` cannot be undone.
 
-### `ocx storage trash`
+### `orl storage trash`
 
-Usage: `ocx storage trash [list] [--json] | ocx storage trash restore <entry-id> --yes [--json]`
+Usage: `orl storage trash [list] [--json] | orl storage trash restore <entry-id> --yes [--json]`
 
 List quarantined cleanup batches, or restore one.
 
@@ -164,9 +164,9 @@ JSON mode: `payload`.
 - Restore fails with a named 409 when the destination already exists, rather than overwriting it.
 - Mixed family: list/default reads quarantine batches; restore moves files and reconciles database rows only with --yes.
 
-### `ocx storage policy`
+### `orl storage policy`
 
-Usage: `ocx storage policy [show] [--json] | ocx storage policy set [--enabled <true|false>] [--percent <1-100>] [--mode <quarantine|permanent>] [--schedule <startup|daily|weekly|manual>] [--json] | ocx storage policy run --yes [--json]`
+Usage: `orl storage policy [show] [--json] | orl storage policy set [--enabled <true|false>] [--percent <1-100>] [--mode <quarantine|permanent>] [--schedule <startup|daily|weekly|manual>] [--json] | orl storage policy run --yes [--json]`
 
 Show, change, or run the automatic archived-session cleanup policy.
 
@@ -193,7 +193,7 @@ JSON mode: `payload`.
 - `policy run` forces a run regardless of schedule, so it needs `--yes`.
 - Mixed family: show/default reads; set persists submitted fields; run requires --yes and starts immediate cleanup. At least one setting is required by set.
 
-### `ocx inspect config`
+### `orl inspect config`
 
 The effective merged configuration the proxy is running.
 
@@ -209,7 +209,7 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx inspect catalog`
+### `orl inspect catalog`
 
 The generated model catalog served to clients.
 
@@ -225,7 +225,7 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx inspect routing-analytics`
+### `orl inspect routing-analytics`
 
 Aggregate routing outcomes per provider and model.
 
@@ -241,7 +241,7 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx inspect pacing`
+### `orl inspect pacing`
 
 Request-pacing state for one provider or all of them.
 
@@ -260,7 +260,7 @@ JSON mode: `payload`.
 
 - An unknown provider name is a 404 rather than an empty result.
 
-### `ocx inspect key-providers`
+### `orl inspect key-providers`
 
 Providers that authenticate with an API key rather than OAuth.
 
@@ -276,7 +276,7 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx inspect codex-prompt`
+### `orl inspect codex-prompt`
 
 The Codex system prompt state, or the prompt text itself.
 
@@ -296,7 +296,7 @@ JSON mode: `payload`.
 
 - Read-only by design: the six mutating prompt routes require a dashboard session.
 
-### `ocx inspect client-config`
+### `orl inspect client-config`
 
 The generated configuration snippet for a supported client.
 
@@ -313,7 +313,7 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx inspect star`
+### `orl inspect star`
 
 Whether this repository is starred by the signed-in GitHub account.
 
@@ -331,7 +331,7 @@ JSON mode: `payload`.
 
 - Starring is never available from the CLI; the verb says so rather than offering a flag that cannot work.
 
-### `ocx inspect windows-tray`
+### `orl inspect windows-tray`
 
 Windows tray helper state.
 
@@ -347,9 +347,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx system codex-app-server`
+### `orl system codex-app-server`
 
-Usage: `ocx system codex-app-server [--json]`
+Usage: `orl system codex-app-server [--json]`
 
 Codex app-server reachability and process state, as the dashboard sees it.
 
@@ -367,9 +367,9 @@ JSON mode: `payload`.
 
 - The GUI reads this state directly; without a verb an agent could not tell whether the Codex app-server was reachable at all.
 
-### `ocx system codex-cli-update check`
+### `orl system codex-cli-update check`
 
-Usage: `ocx system codex-cli-update check [--json]`
+Usage: `orl system codex-cli-update check [--json]`
 
 Inspect a configured Codex CLI candidate and its ownership provenance.
 
@@ -388,9 +388,9 @@ JSON mode: `envelope`.
 - Makes no package-registry request.
 - Does not execute Codex or npm, install or repair software, control a process, or write configuration or cache state.
 
-### `ocx system codex-cli-update attest`
+### `orl system codex-cli-update attest`
 
-Usage: `ocx system codex-cli-update attest [--candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path>] [--json]`
+Usage: `orl system codex-cli-update attest [--candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path>] [--json]`
 
 Observe the selected or explicitly named Windows npm Codex installation files without enabling updates.
 
@@ -409,14 +409,14 @@ Drives no management route.
 JSON mode: `envelope`.
 
 - Opt-in Windows x64 local-volume inspection using held native file handles; refuses reparse points, active writers and unsupported layouts.
-- Without explicit paths, the proof-bound launcher snapshot identifies the selected candidate: the configured CODEX_CLI_PATH or the first codex on the captured PATH, with an OpenCodex wrapper resolving to its codex.opencodex-real backing. Discovery only proposes paths; the held-handle observation remains the authority.
+- Without explicit paths, the proof-bound launcher snapshot identifies the selected candidate: the configured CODEX_CLI_PATH or the first codex on the captured PATH, with an OpenRelay wrapper resolving to its codex.opencodex-real backing. Discovery only proposes paths; the held-handle observation remains the authority.
 - Success binds observed file identities and bytes, not selected-runtime admission or installer ownership.
 - selectionAttested, managed and applyAllowed remain false. The digest is an observation, not a durable update permit.
 - Does not run the named Codex/npm/Node files, query a registry, install software, control processes or persist state.
 
-### `ocx system codex-restart`
+### `orl system codex-restart`
 
-Usage: `ocx system codex-restart --yes [--json]`
+Usage: `orl system codex-restart --yes [--json]`
 
 Restart the Codex desktop app and app-servers.
 
@@ -437,45 +437,9 @@ JSON mode: `payload`.
 - Restarts the Codex desktop app as well as the app-servers, through the same module the CLI uses. When the proxy itself runs inside the Codex app it refuses instead, because restarting the app would kill the request.
 - --yes is mandatory because this interrupts a running editor session and may discard unsaved composer drafts, model-picker selections, and pending approval prompts; it must never happen because an agent guessed a subcommand.
 
-### `ocx logs filter`
+### `orl logs filter`
 
-Usage: `ocx logs filter [--surface <all|codex|claude|grok>] [--model <id>] [--provider <name>] [--status <all|success|errors>] [--time-window <all|15m|1h|24h>] [--min-tok-per-sec <n>] [--max-tok-per-sec <n>] [--intercepted-only] [--protocol-mode <all|native|translated|legacy-bridge|blocked|none>] [--conversation <id>] [--scan-limit <1-2000>] [--limit <1-2000>] [--json|--jsonl]`
-
-Select a bounded log snapshot with dashboard filters.
-
-State-changing: no.
-
-| Method | Route |
-|---|---|
-| GET | `/api/logs` |
-
-| Flag | Value | Meaning |
-|---|---|---|
-| `--surface` | string | all \| codex \| claude \| grok. |
-| `--model` | string | Case-insensitive exact identity across requested, resolved, served and attempted models. |
-| `--provider` | string | Case-insensitive provider or failover attempt identity. |
-| `--status` | string | all \| success (200-299) \| errors (400-599). |
-| `--time-window` | string | all \| 15m \| 1h \| 24h, relative to observation time. |
-| `--min-tok-per-sec` | number | Inclusive minimum observed token speed. |
-| `--max-tok-per-sec` | number | Exclusive maximum observed token speed. |
-| `--intercepted-only` | boolean | Rows carrying an observed rewrite marker. |
-| `--protocol-mode` | string | all \| native \| translated \| legacy-bridge \| blocked \| none. |
-| `--conversation` | string | Conversation ID or stored hash. |
-| `--conversationId` | string | Alias of --conversation. |
-| `--scan-limit` | number | 1-2000 raw rows inspected; default 2000. |
-| `--limit` | number | 1-2000 matching rows returned; default 200. |
-| `--json` | boolean | Versioned view with filters, cursor and observed-window counts. |
-| `--jsonl` | boolean | Matching rows only; exclusive with --json. |
-
-JSON mode: `envelope`.
-
-- One snapshot: filters run locally over the raw server window before the output limit. No follow/events; existing logs behavior remains available.
-- JSON schemaVersion1 reports scanLimit, loaded, matched, returned and limit for this observed window only. Cursor is not a resumable filter token.
-- Empty matches succeed; malformed, refused, oversized or unavailable responses fail. SIGINT130/SIGTERM143 preserve cancellation.
-
-### `ocx observe logs filter`
-
-Usage: `ocx observe logs filter [--surface <all|codex|claude|grok>] [--model <id>] [--provider <name>] [--status <all|success|errors>] [--time-window <all|15m|1h|24h>] [--min-tok-per-sec <n>] [--max-tok-per-sec <n>] [--intercepted-only] [--protocol-mode <all|native|translated|legacy-bridge|blocked|none>] [--conversation <id>] [--scan-limit <1-2000>] [--limit <1-2000>] [--json|--jsonl]`
+Usage: `orl logs filter [--surface <all|codex|claude|grok>] [--model <id>] [--provider <name>] [--status <all|success|errors>] [--time-window <all|15m|1h|24h>] [--min-tok-per-sec <n>] [--max-tok-per-sec <n>] [--intercepted-only] [--protocol-mode <all|native|translated|legacy-bridge|blocked|none>] [--conversation <id>] [--scan-limit <1-2000>] [--limit <1-2000>] [--json|--jsonl]`
 
 Select a bounded log snapshot with dashboard filters.
 
@@ -509,9 +473,45 @@ JSON mode: `envelope`.
 - JSON schemaVersion1 reports scanLimit, loaded, matched, returned and limit for this observed window only. Cursor is not a resumable filter token.
 - Empty matches succeed; malformed, refused, oversized or unavailable responses fail. SIGINT130/SIGTERM143 preserve cancellation.
 
-### `ocx companion usage`
+### `orl observe logs filter`
 
-Usage: `ocx companion usage [--json]`
+Usage: `orl observe logs filter [--surface <all|codex|claude|grok>] [--model <id>] [--provider <name>] [--status <all|success|errors>] [--time-window <all|15m|1h|24h>] [--min-tok-per-sec <n>] [--max-tok-per-sec <n>] [--intercepted-only] [--protocol-mode <all|native|translated|legacy-bridge|blocked|none>] [--conversation <id>] [--scan-limit <1-2000>] [--limit <1-2000>] [--json|--jsonl]`
+
+Select a bounded log snapshot with dashboard filters.
+
+State-changing: no.
+
+| Method | Route |
+|---|---|
+| GET | `/api/logs` |
+
+| Flag | Value | Meaning |
+|---|---|---|
+| `--surface` | string | all \| codex \| claude \| grok. |
+| `--model` | string | Case-insensitive exact identity across requested, resolved, served and attempted models. |
+| `--provider` | string | Case-insensitive provider or failover attempt identity. |
+| `--status` | string | all \| success (200-299) \| errors (400-599). |
+| `--time-window` | string | all \| 15m \| 1h \| 24h, relative to observation time. |
+| `--min-tok-per-sec` | number | Inclusive minimum observed token speed. |
+| `--max-tok-per-sec` | number | Exclusive maximum observed token speed. |
+| `--intercepted-only` | boolean | Rows carrying an observed rewrite marker. |
+| `--protocol-mode` | string | all \| native \| translated \| legacy-bridge \| blocked \| none. |
+| `--conversation` | string | Conversation ID or stored hash. |
+| `--conversationId` | string | Alias of --conversation. |
+| `--scan-limit` | number | 1-2000 raw rows inspected; default 2000. |
+| `--limit` | number | 1-2000 matching rows returned; default 200. |
+| `--json` | boolean | Versioned view with filters, cursor and observed-window counts. |
+| `--jsonl` | boolean | Matching rows only; exclusive with --json. |
+
+JSON mode: `envelope`.
+
+- One snapshot: filters run locally over the raw server window before the output limit. No follow/events; existing logs behavior remains available.
+- JSON schemaVersion1 reports scanLimit, loaded, matched, returned and limit for this observed window only. Cursor is not a resumable filter token.
+- Empty matches succeed; malformed, refused, oversized or unavailable responses fail. SIGINT130/SIGTERM143 preserve cancellation.
+
+### `orl companion usage`
+
+Usage: `orl companion usage [--json]`
 
 Read today and 30-day totals using saved companion filters.
 
@@ -532,9 +532,9 @@ JSON mode: `envelope`.
 - Preserves null/default/corrupt settings provenance, missing measurements and incomplete reports. Filters follow saved model and hidden-provider preferences.
 - Any unavailable range yields partial:true and exit1 while preserving the other result. Both available yields exit0 even when incomplete. SIGINT130/SIGTERM143 emit no late report.
 
-### `ocx observe logs`
+### `orl observe logs`
 
-Usage: `ocx observe logs [--provider <name>] [--model <id>] [--status <code>] [--conversation <id>] [--account <label>] [--limit <n>] [--follow] [--json|--jsonl]; ocx observe logs --follow --events [--limit <1-2000>]`
+Usage: `orl observe logs [--provider <name>] [--model <id>] [--status <code>] [--conversation <id>] [--account <label>] [--limit <n>] [--follow] [--json|--jsonl]; orl observe logs --follow --events [--limit <1-2000>]`
 
 Read or follow request logs.
 
@@ -565,9 +565,9 @@ JSON mode: `payload`.
 - --events emits version1 snapshots/appends with cursor and limit for observed-window reconstruction. Legacy row JSONL cannot express removals or resets exactly; neither mode promises lossless history between polls.
 - Follow limit is1–2000, default200. Polling is serial and cancellable; SIGINT exits130 and SIGTERM143. Malformed/oversized/unavailable responses stop without a fabricated empty snapshot or retry.
 
-### `ocx logs explain`
+### `orl logs explain`
 
-Usage: `ocx logs explain <request-id> [--json]`
+Usage: `orl logs explain <request-id> [--json]`
 
 Explain the recorded routing decision for one request.
 
@@ -586,9 +586,9 @@ JSON mode: `payload`.
 - The request ID is URI-encoded; this reads an existing decision and sends no model request.
 - Also accepted after observe logs.
 
-### `ocx logs rebuild-index`
+### `orl logs rebuild-index`
 
-Usage: `ocx logs rebuild-index [--json]`
+Usage: `orl logs rebuild-index [--json]`
 
 Rebuild the local request-history index.
 
@@ -605,9 +605,9 @@ JSON mode: `payload`.
 - Local derived SQLite index rebuild from the canonical ledger; no management API request.
 - Also accepted after observe logs.
 
-### `ocx logs index-status`
+### `orl logs index-status`
 
-Usage: `ocx logs index-status [--json]`
+Usage: `orl logs index-status [--json]`
 
 Read and refresh local request-history index metadata.
 
@@ -624,9 +624,9 @@ JSON mode: `payload`.
 - Local index open may create, ingest or rebuild the derived SQLite index; this is not a write-free file inspection.
 - Also accepted after observe logs.
 
-### `ocx observe usage`
+### `orl observe usage`
 
-Usage: `ocx observe usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--since <epoch-ms|ISO-datetime>] [--until <epoch-ms|ISO-datetime>] [--provider <name>] [--model <id>] [--api-key-id <id>] [--search <text>] [--json]`
+Usage: `orl observe usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--since <epoch-ms|ISO-datetime>] [--until <epoch-ms|ISO-datetime>] [--provider <name>] [--model <id>] [--api-key-id <id>] [--search <text>] [--json]`
 
 Read token and estimated-cost usage.
 
@@ -650,13 +650,13 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-- Also available as ocx usage. Connected clients read only their enrolled-key Hub report through /v1/usage; caller --api-key-id is refused before key read/transport and never grants management authority.
+- Also available as orl usage. Connected clients read only their enrolled-key Hub report through /v1/usage; caller --api-key-id is refused before key read/transport and never grants management authority.
 - Nonclient --api-key-id uses /api/usage and requires matching filter acknowledgment. An unknown acknowledged key is empty/matched:false, not404. Custom-window acknowledgment remains required.
 - --search filters only returned model rows after scope acknowledgment. Blank search selects the top100 model rows; modelView reports match/return counts without recomputing totals.
 
-### `ocx observe storage`
+### `orl observe storage`
 
-Usage: `ocx observe storage [--limit <n>] [--json]`
+Usage: `orl observe storage [--limit <n>] [--json]`
 
 Read storage diagnostics.
 
@@ -675,9 +675,9 @@ JSON mode: `payload`.
 
 - Reads the running proxy management API.
 
-### `ocx observe memory`
+### `orl observe memory`
 
-Usage: `ocx observe memory [--limit <n>] [--json]`
+Usage: `orl observe memory [--limit <n>] [--json]`
 
 Read memory diagnostics.
 
@@ -696,9 +696,9 @@ JSON mode: `payload`.
 
 - Reads the running proxy management API.
 
-### `ocx observe debug`
+### `orl observe debug`
 
-Usage: `ocx observe debug [--limit <n>] [--json]`
+Usage: `orl observe debug [--limit <n>] [--json]`
 
 Read debug diagnostics.
 
@@ -717,9 +717,9 @@ JSON mode: `payload`.
 
 - Reads the running proxy management API.
 
-### `ocx observe claude-inbound`
+### `orl observe claude-inbound`
 
-Usage: `ocx observe claude-inbound [--limit <n>] [--json]`
+Usage: `orl observe claude-inbound [--limit <n>] [--json]`
 
 Read claude-inbound diagnostics.
 
@@ -738,9 +738,9 @@ JSON mode: `payload`.
 
 - Snapshot read; no follow or cursor option.
 
-### `ocx observe injection`
+### `orl observe injection`
 
-Usage: `ocx observe injection [--limit <n>] [--json]; ocx observe injection --follow [--limit <1-2000>] [--jsonl]`
+Usage: `orl observe injection [--limit <n>] [--json]; orl observe injection --follow [--limit <1-2000>] [--jsonl]`
 
 Read or follow the existing injection diagnostic buffer.
 
@@ -763,9 +763,9 @@ JSON mode: `payload`.
 - The API has no epoch or gap marker. Detected runtime changes stop with restart-follow guidance; undetected restarts and burst/ring loss cannot be excluded. No settings writes or automatic reconnect.
 - SIGINT130/SIGTERM143 cancel request/body/wait and release invocation resources.
 
-### `ocx storage codex-logs status`
+### `orl storage codex-logs status`
 
-Usage: `ocx storage codex-logs status [--json]`
+Usage: `orl storage codex-logs status [--json]`
 
 Inspect Codex Log Guard state.
 
@@ -783,9 +783,9 @@ JSON mode: `payload`.
 
 - Also accepted after observe storage codex-logs. Omitted action defaults to status.
 
-### `ocx storage codex-logs protect`
+### `orl storage codex-logs protect`
 
-Usage: `ocx storage codex-logs protect [--mode <compat|quiet>] [--json]`
+Usage: `orl storage codex-logs protect [--mode <compat|quiet>] [--json]`
 
 Protect Codex logs in compat or quiet mode.
 
@@ -804,9 +804,9 @@ JSON mode: `payload`.
 
 - Also accepted after observe storage codex-logs. Mutates logs or their protection immediately; this handler has no --yes option.
 
-### `ocx storage codex-logs unprotect`
+### `orl storage codex-logs unprotect`
 
-Usage: `ocx storage codex-logs unprotect [--json]`
+Usage: `orl storage codex-logs unprotect [--json]`
 
 Remove Codex log protection.
 
@@ -824,9 +824,9 @@ JSON mode: `payload`.
 
 - Also accepted after observe storage codex-logs. Mutates logs or their protection immediately; this handler has no --yes option.
 
-### `ocx storage codex-logs repair`
+### `orl storage codex-logs repair`
 
-Usage: `ocx storage codex-logs repair [--json]`
+Usage: `orl storage codex-logs repair [--json]`
 
 Repair Codex log protection.
 
@@ -844,9 +844,9 @@ JSON mode: `payload`.
 
 - Also accepted after observe storage codex-logs. Mutates logs or their protection immediately; this handler has no --yes option.
 
-### `ocx storage codex-logs compact`
+### `orl storage codex-logs compact`
 
-Usage: `ocx storage codex-logs compact [--json]`
+Usage: `orl storage codex-logs compact [--json]`
 
 Compact Codex logs.
 
@@ -864,9 +864,9 @@ JSON mode: `payload`.
 
 - Also accepted after observe storage codex-logs. Mutates logs or their protection immediately; this handler has no --yes option.
 
-### `ocx storage trash list`
+### `orl storage trash list`
 
-Usage: `ocx storage trash list [--json]`
+Usage: `orl storage trash list [--json]`
 
 Read quarantine batches.
 
@@ -882,9 +882,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx storage policy show`
+### `orl storage policy show`
 
-Usage: `ocx storage policy show [--json]`
+Usage: `orl storage policy show [--json]`
 
 Read cleanup policy and job state.
 
@@ -900,9 +900,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx storage trash restore`
+### `orl storage trash restore`
 
-Usage: `ocx storage trash restore <entry-id> --yes [--json]`
+Usage: `orl storage trash restore <entry-id> --yes [--json]`
 
 Restore one quarantined session batch.
 
@@ -921,9 +921,9 @@ JSON mode: `payload`.
 
 - Moves files and reconciles database rows; partial outcomes remain in the response.
 
-### `ocx storage policy set`
+### `orl storage policy set`
 
-Usage: `ocx storage policy set [--enabled <true|false>] [--archived-bytes-over <bytes>] [--reduce-to-bytes <bytes> | --remove-oldest-percent <1-100> | --percent <1-100>] [--mode <quarantine|permanent>] [--schedule <startup|daily|weekly|manual>] [--json]`
+Usage: `orl storage policy set [--enabled <true|false>] [--archived-bytes-over <bytes>] [--reduce-to-bytes <bytes> | --remove-oldest-percent <1-100> | --percent <1-100>] [--mode <quarantine|permanent>] [--schedule <startup|daily|weekly|manual>] [--json]`
 
 Save submitted cleanup policy fields.
 
@@ -949,9 +949,9 @@ JSON mode: `payload`.
 - Only supplied fields are written. Omitted enabled/mode/schedule remain unchanged; setting a policy does not run cleanup or implicitly enable it.
 - Both percentage spellings use integer CLI grammar and server range validation. The alias cannot be combined with the canonical percentage flag.
 
-### `ocx storage policy run`
+### `orl storage policy run`
 
-Usage: `ocx storage policy run --yes [--json]`
+Usage: `orl storage policy run --yes [--json]`
 
 Run the stored cleanup policy immediately.
 
@@ -970,9 +970,9 @@ JSON mode: `payload`.
 
 - Run acceptance is not completion; inspect storage policy show for job state.
 
-### `ocx debug provider`
+### `orl debug provider`
 
-Usage: `ocx debug provider [status|on|off|reset]`
+Usage: `orl debug provider [status|on|off|reset]`
 
 Read or change the provider debug override.
 
@@ -988,9 +988,9 @@ JSON mode: `none`.
 - Mixed family: omitted action/status reads; on/off/reset change runtime overrides. No JSON mode.
 - Reset follows the environment default. Logs have a separate child command.
 
-### `ocx debug provider status`
+### `orl debug provider status`
 
-Usage: `ocx debug provider status`
+Usage: `orl debug provider status`
 
 Read provider debug state.
 
@@ -1004,9 +1004,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug provider on`
+### `orl debug provider on`
 
-Usage: `ocx debug provider on`
+Usage: `orl debug provider on`
 
 Set provider debug override on.
 
@@ -1020,9 +1020,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug provider off`
+### `orl debug provider off`
 
-Usage: `ocx debug provider off`
+Usage: `orl debug provider off`
 
 Set provider debug override off.
 
@@ -1036,9 +1036,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug provider reset`
+### `orl debug provider reset`
 
-Usage: `ocx debug provider reset`
+Usage: `orl debug provider reset`
 
 Set provider debug override reset.
 
@@ -1052,9 +1052,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug provider logs`
+### `orl debug provider logs`
 
-Usage: `ocx debug provider logs [-f|--follow]`
+Usage: `orl debug provider logs [-f|--follow]`
 
 Read or follow provider debug log lines.
 
@@ -1073,9 +1073,9 @@ JSON mode: `none`.
 
 - Text lines only; initial limit 500, then sequence-based polling.
 
-### `ocx debug usage`
+### `orl debug usage`
 
-Usage: `ocx debug usage [status|on|off|reset]`
+Usage: `orl debug usage [status|on|off|reset]`
 
 Read or change the usage debug override.
 
@@ -1091,9 +1091,9 @@ JSON mode: `none`.
 - Mixed family: omitted action/status reads; on/off/reset change runtime overrides. No JSON mode.
 - Reset follows the environment default. Logs have a separate child command.
 
-### `ocx debug usage status`
+### `orl debug usage status`
 
-Usage: `ocx debug usage status`
+Usage: `orl debug usage status`
 
 Read usage debug state.
 
@@ -1107,9 +1107,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug usage on`
+### `orl debug usage on`
 
-Usage: `ocx debug usage on`
+Usage: `orl debug usage on`
 
 Set usage debug override on.
 
@@ -1123,9 +1123,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug usage off`
+### `orl debug usage off`
 
-Usage: `ocx debug usage off`
+Usage: `orl debug usage off`
 
 Set usage debug override off.
 
@@ -1139,9 +1139,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug usage reset`
+### `orl debug usage reset`
 
-Usage: `ocx debug usage reset`
+Usage: `orl debug usage reset`
 
 Set usage debug override reset.
 
@@ -1155,9 +1155,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug usage logs`
+### `orl debug usage logs`
 
-Usage: `ocx debug usage logs [-f|--follow]`
+Usage: `orl debug usage logs [-f|--follow]`
 
 Read or follow usage debug log lines.
 
@@ -1176,9 +1176,9 @@ JSON mode: `none`.
 
 - Text lines only; initial limit 500, then sequence-based polling.
 
-### `ocx debug injection`
+### `orl debug injection`
 
-Usage: `ocx debug injection [status|on|off|reset]`
+Usage: `orl debug injection [status|on|off|reset]`
 
 Read or change the injection debug override.
 
@@ -1194,9 +1194,9 @@ JSON mode: `none`.
 - Mixed family: omitted action/status reads; on/off/reset change runtime overrides. No JSON mode.
 - Reset follows the environment default. Buffered reads use observe injection.
 
-### `ocx debug injection status`
+### `orl debug injection status`
 
-Usage: `ocx debug injection status`
+Usage: `orl debug injection status`
 
 Read injection debug state.
 
@@ -1210,9 +1210,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug injection on`
+### `orl debug injection on`
 
-Usage: `ocx debug injection on`
+Usage: `orl debug injection on`
 
 Set injection debug override on.
 
@@ -1226,9 +1226,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug injection off`
+### `orl debug injection off`
 
-Usage: `ocx debug injection off`
+Usage: `orl debug injection off`
 
 Set injection debug override off.
 
@@ -1242,9 +1242,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug injection reset`
+### `orl debug injection reset`
 
-Usage: `ocx debug injection reset`
+Usage: `orl debug injection reset`
 
 Set injection debug override reset.
 
@@ -1258,9 +1258,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug claude`
+### `orl debug claude`
 
-Usage: `ocx debug claude [status|on|off|reset]`
+Usage: `orl debug claude [status|on|off|reset]`
 
 Read or change the claude debug override.
 
@@ -1276,9 +1276,9 @@ JSON mode: `none`.
 - Mixed family: omitted action/status reads; on/off/reset change runtime overrides. No JSON mode.
 - Reset follows the environment default. Buffered reads use observe claude-inbound.
 
-### `ocx debug claude status`
+### `orl debug claude status`
 
-Usage: `ocx debug claude status`
+Usage: `orl debug claude status`
 
 Read claude debug state.
 
@@ -1292,9 +1292,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug claude on`
+### `orl debug claude on`
 
-Usage: `ocx debug claude on`
+Usage: `orl debug claude on`
 
 Set claude debug override on.
 
@@ -1308,9 +1308,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug claude off`
+### `orl debug claude off`
 
-Usage: `ocx debug claude off`
+Usage: `orl debug claude off`
 
 Set claude debug override off.
 
@@ -1324,9 +1324,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx debug claude reset`
+### `orl debug claude reset`
 
-Usage: `ocx debug claude reset`
+Usage: `orl debug claude reset`
 
 Set claude debug override reset.
 
@@ -1340,9 +1340,9 @@ JSON mode: `none`.
 
 - Requires a running proxy; legacy text output only.
 
-### `ocx system status`
+### `orl system status`
 
-Usage: `ocx system status [--json]`
+Usage: `orl system status [--json]`
 
 Read settings, startup health and memory together.
 
@@ -1362,9 +1362,9 @@ JSON mode: `envelope`.
 
 - Default system action. The CLI bundles three payloads; this does not call /api/system/health.
 
-### `ocx system settings`
+### `orl system settings`
 
-Usage: `ocx system settings [--auto-start <on|off>] [--stream-mode <auto|legacy-tee|eager-relay>] [--desktop-authless <on|off>] [--client-compaction <on|off>] [--show-codex-credits <on|off>] [--account-picker <on|off>] [--main-account-hard-lock <on|off>] [--ultra-fast-tier <on|off>] [--fast-rows <on|off>] [--json]`
+Usage: `orl system settings [--auto-start <on|off>] [--stream-mode <auto|legacy-tee|eager-relay>] [--desktop-authless <on|off>] [--client-compaction <on|off>] [--show-codex-credits <on|off>] [--account-picker <on|off>] [--main-account-hard-lock <on|off>] [--ultra-fast-tier <on|off>] [--fast-rows <on|off>] [--json]`
 
 Read or update supported runtime settings.
 
@@ -1394,9 +1394,9 @@ JSON mode: `envelope`.
 - New-option writes use narrow fields and actual observed values. ultraFastTier is read back because the PUT response omits it; missing/mismatching evidence stays saved-but-unverified and nonzero.
 - catalogRefreshPending is not a full catalog disposition. Native apply can remain deferred/refused separately. Old no-new-option settings output remains compatible.
 
-### `ocx system startup health`
+### `orl system startup health`
 
-Usage: `ocx system startup health [--json]`
+Usage: `orl system startup health [--json]`
 
 Read startup protection.
 
@@ -1414,9 +1414,9 @@ JSON mode: `payload`.
 
 - health is the default; status is its alias.
 
-### `ocx system startup install-service`
+### `orl system startup install-service`
 
-Usage: `ocx system startup install-service [--json]`
+Usage: `orl system startup install-service [--json]`
 
 Request startup install-service.
 
@@ -1434,9 +1434,9 @@ JSON mode: `payload`.
 
 - The server invokes the platform-local service repair or shim installation and reports its outcome.
 
-### `ocx system startup install-shim`
+### `orl system startup install-shim`
 
-Usage: `ocx system startup install-shim [--json]`
+Usage: `orl system startup install-shim [--json]`
 
 Request startup install-shim.
 
@@ -1454,9 +1454,9 @@ JSON mode: `payload`.
 
 - The server invokes the platform-local service repair or shim installation and reports its outcome.
 
-### `ocx system diagnostics`
+### `orl system diagnostics`
 
-Usage: `ocx system diagnostics [--json]`
+Usage: `orl system diagnostics [--json]`
 
 Read project-config diagnostics.
 
@@ -1474,9 +1474,9 @@ JSON mode: `payload`.
 
 - Runs against the serving proxy; inspect the returned saved/applied or failure result.
 
-### `ocx system sync`
+### `orl system sync`
 
-Usage: `ocx system sync [--json]`
+Usage: `orl system sync [--json]`
 
 Synchronize client catalogs and configuration.
 
@@ -1494,9 +1494,9 @@ JSON mode: `payload`.
 
 - Runs against the serving proxy; inspect the returned saved/applied or failure result.
 
-### `ocx system update check`
+### `orl system update check`
 
-Usage: `ocx system update check [--channel <latest|preview>] [--json]`
+Usage: `orl system update check [--channel <latest|preview>] [--json]`
 
 Check the package update channel.
 
@@ -1515,9 +1515,9 @@ JSON mode: `payload`.
 
 - Checks registry availability; does not install.
 
-### `ocx system update run`
+### `orl system update run`
 
-Usage: `ocx system update run [--channel <latest|preview>] [--restart <on|off>] --yes [--json]`
+Usage: `orl system update run [--channel <latest|preview>] [--restart <on|off>] --yes [--json]`
 
 Start a package update job.
 
@@ -1538,9 +1538,9 @@ JSON mode: `payload`.
 
 - Installs software and may restart the proxy. Acceptance is not completion; inspect system update status with the returned job ID.
 
-### `ocx system update status`
+### `orl system update status`
 
-Usage: `ocx system update status <job-id> [--json]`
+Usage: `orl system update status <job-id> [--json]`
 
 Read one package update job.
 
@@ -1556,9 +1556,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx config show`
+### `orl config show`
 
-Usage: `ocx config show [--json] [--source]`
+Usage: `orl config show [--json] [--source]`
 
 Local configuration show.
 
@@ -1577,9 +1577,9 @@ JSON mode: `envelope`.
 - Displayed credential values are masked.
 - Always emits JSON; --source wraps config with source/error/warnings. Default action when omitted.
 
-### `ocx config get`
+### `orl config get`
 
-Usage: `ocx config get <dot.path> [--json]`
+Usage: `orl config get <dot.path> [--json]`
 
 Local configuration get.
 
@@ -1596,9 +1596,9 @@ JSON mode: `payload`.
 - Local config/file operation; no management API request or automatic live convergence.
 - Displayed credential values are masked.
 
-### `ocx config set`
+### `orl config set`
 
-Usage: `ocx config set <dot.path> <json-or-string> [--json]`
+Usage: `orl config set <dot.path> <json-or-string> [--json]`
 
 Local configuration set.
 
@@ -1615,9 +1615,9 @@ JSON mode: `envelope`.
 - Local config/file operation; no management API request or automatic live convergence.
 - Displayed credential values are masked.
 
-### `ocx config unset`
+### `orl config unset`
 
-Usage: `ocx config unset <dot.path> [--json]`
+Usage: `orl config unset <dot.path> [--json]`
 
 Local configuration unset.
 
@@ -1633,9 +1633,9 @@ JSON mode: `envelope`.
 
 - Local config/file operation; no management API request or automatic live convergence.
 
-### `ocx config validate`
+### `orl config validate`
 
-Usage: `ocx config validate [path|-] [--json]`
+Usage: `orl config validate [path|-] [--json]`
 
 Local configuration validate.
 
@@ -1651,7 +1651,7 @@ JSON mode: `envelope`.
 
 - Local config/file operation; no management API request or automatic live convergence.
 
-### ocx config export
+### orl config export
 
 Human-only handoff: ask the operator to perform this in their own terminal or dashboard; do not capture the secret-bearing result.
 
@@ -1670,9 +1670,9 @@ JSON mode: `payload`.
 - Local config/file operation; no management API request or automatic live convergence.
 - Human-only secret-bearing export: raw credentials are included. Keep the file and stdout out of agent transcripts. --json emits {ok:true,path} for a file destination; export to - always emits the raw config.
 
-### `ocx config import`
+### `orl config import`
 
-Usage: `ocx config import <path|-> --yes [--json]`
+Usage: `orl config import <path|-> --yes [--json]`
 
 Local configuration import.
 
@@ -1690,9 +1690,9 @@ JSON mode: `envelope`.
 - Local config/file operation; no management API request or automatic live convergence.
 - Replaces local configuration after schema validation; requires --yes. Restart or explicitly sync if needed.
 
-### `ocx companion show`
+### `orl companion show`
 
-Usage: `ocx companion show [--json]`
+Usage: `orl companion show [--json]`
 
 Read companion settings, defaults and presence.
 
@@ -1710,9 +1710,9 @@ JSON mode: `payload`.
 
 - Settings only; no usage timeline request.
 
-### `ocx companion set`
+### `orl companion set`
 
-Usage: `ocx companion set <key>=<value> [...] [--json]`
+Usage: `orl companion set <key>=<value> [...] [--json]`
 
 Save selected companion settings.
 
@@ -1730,9 +1730,9 @@ JSON mode: `payload`.
 
 - Values are parsed as JSON when valid, otherwise as strings.
 
-### `ocx companion reset`
+### `orl companion reset`
 
-Usage: `ocx companion reset [--json]`
+Usage: `orl companion reset [--json]`
 
 Restore companion defaults.
 
@@ -1750,9 +1750,9 @@ JSON mode: `payload`.
 
 - Settings only; no usage timeline request.
 
-### `ocx tray install`
+### `orl tray install`
 
-Usage: `ocx tray install [--no-start] [--json]`
+Usage: `orl tray install [--no-start] [--json]`
 
 Windows tray install.
 
@@ -1770,9 +1770,9 @@ JSON mode: `envelope`.
 - Local Windows-only tray lifecycle; no management API. Status on other platforms reports unsupported.
 - Lifecycle writes require Windows.
 
-### `ocx tray start`
+### `orl tray start`
 
-Usage: `ocx tray start [--json]`
+Usage: `orl tray start [--json]`
 
 Windows tray start.
 
@@ -1789,9 +1789,9 @@ JSON mode: `envelope`.
 - Local Windows-only tray lifecycle; no management API. Status on other platforms reports unsupported.
 - Lifecycle writes require Windows.
 
-### `ocx tray stop`
+### `orl tray stop`
 
-Usage: `ocx tray stop [--json]`
+Usage: `orl tray stop [--json]`
 
 Windows tray stop.
 
@@ -1808,9 +1808,9 @@ JSON mode: `envelope`.
 - Local Windows-only tray lifecycle; no management API. Status on other platforms reports unsupported.
 - Lifecycle writes require Windows.
 
-### `ocx tray status`
+### `orl tray status`
 
-Usage: `ocx tray status [--json]`
+Usage: `orl tray status [--json]`
 
 Windows tray status.
 
@@ -1827,9 +1827,9 @@ JSON mode: `envelope`.
 - Local Windows-only tray lifecycle; no management API. Status on other platforms reports unsupported.
 - Lifecycle writes require Windows.
 
-### `ocx tray uninstall`
+### `orl tray uninstall`
 
-Usage: `ocx tray uninstall [--json]`
+Usage: `orl tray uninstall [--json]`
 
 Windows tray uninstall.
 
@@ -1846,9 +1846,9 @@ JSON mode: `envelope`.
 - Local Windows-only tray lifecycle; no management API. Status on other platforms reports unsupported.
 - remove aliases uninstall.
 
-### `ocx system health`
+### `orl system health`
 
-Usage: `ocx system health [--json]`
+Usage: `orl system health [--json]`
 
 Read authenticated service health and spend-ledger diagnostics.
 
@@ -1866,9 +1866,9 @@ JSON mode: `payload`.
 
 - Distinct from root health liveness and system status aggregation. An ok endpoint can have a degraded ledger; this is an observation, not an all-subsystems health certificate.
 
-### `ocx companion timeline`
+### `orl companion timeline`
 
-Usage: `ocx companion timeline [--hours <6|24|72|168>] [--bucket-minutes <1-1440>] [--metric <total|input|output|cached>] [--aggregation <sum|average|max>] [--grouping <model|modelAccount>] [--model <provider/model> ...] [--hide-provider <name> ...] [--json]`
+Usage: `orl companion timeline [--hours <6|24|72|168>] [--bucket-minutes <1-1440>] [--metric <total|input|output|cached>] [--aggregation <sum|average|max>] [--grouping <model|modelAccount>] [--model <provider/model> ...] [--hide-provider <name> ...] [--json]`
 
 Read usage timeline buckets with explicit completeness and filter metadata.
 

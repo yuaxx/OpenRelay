@@ -20,7 +20,7 @@ sorunsuz bir şekilde görsel üretmeye devam edebilir.
 - **API anahtarına** sahip bir `xai` sağlayıcı kaydı. Köprü, istekleri doğrudan
   xAI Images uç noktasına (`https://api.x.ai/v1`) gönderir; yapılandırılmış
   herhangi bir `baseUrl` geçersiz kılma ayarı görsel çağrıları için yok sayılır.
-  Yalnızca OAuth / `ocx login xai` köprüyü **etkinleştirmez** (Grok CLI OAuth
+  Yalnızca OAuth / `orl login xai` köprüyü **etkinleştirmez** (Grok CLI OAuth
   aktarımı sohbet odaklıdır ve `/images/*` için kullanılmaz).
 
   ```json
@@ -78,11 +78,11 @@ atan yerleşik `image_gen` aracına müdahale **etmez** — bu yol [Codex
 Entegrasyonu](/tr/guides/codex-integration/#yerleşik-görsel-oluşturma-image_gen)
 kılavuzunda ayrı olarak ele alınmıştır.
 
-1. Bir Responses isteği `tools` içinde `image_generation` içerdiğinde, OpenCodex
+1. Bir Responses isteği `tools` içinde `image_generation` içerdiğinde, OpenRelay
    bunu istek ön işleme sırasında tespit eder.
 2. Barındırılan araç, yönlendirilen modelin normal şekilde çağırabileceği
    **sentetik bir fonksiyon aracı (synthetic function tool)** ile değiştirilir.
-3. Model bu aracı çağırdığında, OpenCodex çağrıyı yakalar ve prompt'u xAI'ın
+3. Model bu aracı çağırdığında, OpenRelay çağrıyı yakalar ve prompt'u xAI'ın
    görsel üretim API'sine iletir.
 4. Üretilen görseller `~/.opencodex/artifacts/` dizinine kaydedilir ve **yerel
    dosya yolu** araç sonucu olarak modele döndürülür.

@@ -1,3 +1,4 @@
+import { rtkSettings } from "./rtk-routes";
 import { MAIN_ACCOUNT_HARD_LOCK_MIN_PERCENT } from "../../codex/quota-types";
 import { resolveMainAccountHardLockThresholds } from "../../codex/main-account-hard-lock";
 import { getMainAccountExternalUsageWarning } from "../../codex/main-account-external-usage";
@@ -406,6 +407,7 @@ export async function handleConfigRoutes(ctx: ManagementContext): Promise<Respon
       );
     }
     return jsonResponse({
+      rtk: rtkSettings(config),
       // The dashboard renders request-log timestamps. Without this it formats them in the
       // BROWSER's zone, so a KST proxy viewed from a UTC browser reports every request nine
       // hours off (#725). Carried on settings rather than /api/logs because that route's

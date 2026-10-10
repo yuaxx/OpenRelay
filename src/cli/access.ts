@@ -14,20 +14,20 @@ import { handleSelectedKeyTest, type SelectedKeyTestDeps } from "./access-data-p
 import { handleAccessAudioCommand } from "./access-audio";
 
 const USAGE = `Usage:
-  ocx access key [list] [--json]
-  ocx access key create [name] [--json]
-  ocx access key get <id-or-name> [--json]
-  ocx access key rename <id-or-name> <name> [--json]
-  ocx access key set <id-or-name> [--allow-provider <name>]... [--allow-model <id>]... [--clear] [--json]
-  ocx access key rotate <id> [--json]
-  ocx access key rotate commit <id> <rotation-id> [--json]
-  ocx access key rotate abort <id> <rotation-id> [--json]
-  ocx access key remove <id> --yes [--json]
-  ocx access endpoints [--json]
-  ocx access models [--json]
-  ocx access test <model> [--protocol <chat|responses|messages>] [--api-key-stdin] [--json]
-  ocx access audio transcribe <file> --model <id> --api-key-stdin [--json]
-  ocx access audio live-check --model <id> --api-key-stdin [--json]`;
+  orl access key [list] [--json]
+  orl access key create [name] [--json]
+  orl access key get <id-or-name> [--json]
+  orl access key rename <id-or-name> <name> [--json]
+  orl access key set <id-or-name> [--allow-provider <name>]... [--allow-model <id>]... [--clear] [--json]
+  orl access key rotate <id> [--json]
+  orl access key rotate commit <id> <rotation-id> [--json]
+  orl access key rotate abort <id> <rotation-id> [--json]
+  orl access key remove <id> --yes [--json]
+  orl access endpoints [--json]
+  orl access models [--json]
+  orl access test <model> [--protocol <chat|responses|messages>] [--api-key-stdin] [--json]
+  orl access audio transcribe <file> --model <id> --api-key-stdin [--json]
+  orl access audio live-check --model <id> --api-key-stdin [--json]`;
 
 const UTC_ISO_INSTANT_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/;
 

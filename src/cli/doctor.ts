@@ -157,12 +157,12 @@ function actionForDoctorEntry(entry: OAuthHealthEntry): string {
     return CODEX_REAUTH_ACTION;
   }
   if (entry.health.status === "warning" && entry.health.reason === "stale_credentials") {
-    return `run \`ocx login ${entry.provider}\``;
+    return `run \`orl login ${entry.provider}\``;
   }
   if (entry.health.status === "warning" && entry.health.reason === "metadata_mismatch") {
-    return `run \`ocx login ${entry.provider}\` to refresh credentials`;
+    return `run \`orl login ${entry.provider}\` to refresh credentials`;
   }
-  return `run \`ocx doctor\` again after fixing OAuth state for ${entry.provider}`;
+  return `run \`orl doctor\` again after fixing OAuth state for ${entry.provider}`;
 }
 
 function describeDoctorHealth(entry: OAuthHealthEntry): string {
@@ -227,9 +227,9 @@ export function dataPlaneCredentialCollisionCheck(
     message:
       "The data-plane secret (OPENCODEX_API_AUTH_TOKEN or the service token file) holds the "
       + "management (admin) token, so the proxy fences the whole management API closed and "
-      + "every ocx management command fails with 503. "
+      + "every orl management command fails with 503. "
       + "Action: unset OPENCODEX_API_AUTH_TOKEN, replace the service token file with a distinct "
-      + "data-plane key, then re-run `ocx service install` and restart the proxy",
+      + "data-plane key, then re-run `orl service install` and restart the proxy",
   };
 }
 
@@ -251,7 +251,7 @@ export async function collectOAuthDoctorChecks(
     checks.push({
       level: "WARN",
       message:
-        "OAuth credential storage directory is not writable. Action: fix permissions on OPENCODEX_HOME so ocx can create temp files and rename auth.json",
+        "OAuth credential storage directory is not writable. Action: fix permissions on OPENCODEX_HOME so orl can create temp files and rename auth.json",
     });
   }
 
@@ -261,7 +261,7 @@ export async function collectOAuthDoctorChecks(
     checks.push({
       level: "WARN",
       message:
-        "Token refresh single-flight is unavailable. Action: fix permissions on OPENCODEX_HOME so ocx can create refresh lock files",
+        "Token refresh single-flight is unavailable. Action: fix permissions on OPENCODEX_HOME so orl can create refresh lock files",
     });
   }
 
@@ -270,19 +270,19 @@ export async function collectOAuthDoctorChecks(
     checks.push({
       level: "WARN",
       message:
-        "Codex account health unavailable (proxy not running). Action: start the proxy and re-run `ocx doctor` to inspect live cooldown/reauth",
+        "Codex account health unavailable (proxy not running). Action: start the proxy and re-run `orl doctor` to inspect live cooldown/reauth",
     });
   } else if (report.codexHealthSource === "management-auth-failed") {
     checks.push({
       level: "WARN",
       message:
-        "Codex account health unavailable (proxy running; management authentication failed). Action: verify the admin token configuration, restart the proxy, and re-run `ocx doctor`",
+        "Codex account health unavailable (proxy running; management authentication failed). Action: verify the admin token configuration, restart the proxy, and re-run `orl doctor`",
     });
   } else if (report.codexHealthSource === "management-api-unavailable") {
     checks.push({
       level: "WARN",
       message:
-        "Codex account health unavailable (proxy running; management API response failed). Action: inspect the proxy service log, restart the proxy if needed, and re-run `ocx doctor`",
+        "Codex account health unavailable (proxy running; management API response failed). Action: inspect the proxy service log, restart the proxy if needed, and re-run `orl doctor`",
     });
   }
   for (const entry of report.entries) {
@@ -513,12 +513,12 @@ export function collectCodexEnvKeyReadiness(
   return {
     envName,
     shimState,
-    detail: `Codex uses env_key ${envName}, but that variable is unset and the OpenCodex shim is ${shimState}; the service token file exists but plain Codex does not load it`,
+    detail: `Codex uses env_key ${envName}, but that variable is unset and the OpenRelay shim is ${shimState}; the service token file exists but plain Codex does not load it`,
     action: shimState === "inactive"
       ? shimActivationShown
         ? `Activate the PATH shim as shown under Codex restart safety, or export ${envName} in the process that starts Codex`
         : `${overlayActivationHint()} Or export ${envName} in the process that starts Codex`
-      : `Run 'ocx codex-shim install' to repair launch-time token injection, or export ${envName} in the process that starts Codex`,
+      : `Run 'orl codex-shim install' to repair launch-time token injection, or export ${envName} in the process that starts Codex`,
   };
 }
 
@@ -871,7 +871,7 @@ export function formatResponseTempLines(
   const lines = [
     `  !!  ${result.eligible} abandoned response-state temp file(s), ${mb(result.eligibleBytes)} reclaimable.`,
     "      These are interrupted snapshot writes (continuation cache only) and are safe to remove.",
-    "      Reclaim them with: ocx doctor --reclaim-response-temps",
+    "      Reclaim them with: orl doctor --reclaim-response-temps",
   ];
   // The dry run skips the cleanup budget but is still bounded by the entry cap, so a large
   // enough backlog makes this a floor rather than a total. Say so instead of letting an
@@ -927,7 +927,7 @@ export function formatCoordinatorDoctorLines(diagnostic: CodexCoordinatorDiagnos
         "  !!     native-write coordinator is a zero-byte remnant and has no authority",
         ...pathLine,
         ...evidenceLines,
-        `       Action: stop the OpenCodex proxy/service, then run ocx doctor ${RECOVER_ZERO_BYTE_COORDINATOR_FLAG} --yes`,
+        `       Action: stop the OpenRelay proxy/service, then run orl doctor ${RECOVER_ZERO_BYTE_COORDINATOR_FLAG} --yes`,
       ];
     case "unversioned-empty":
       return [
@@ -954,7 +954,7 @@ export function formatCoordinatorDoctorLines(diagnostic: CodexCoordinatorDiagnos
         ...evidenceLines,
       ];
     case "changed":
-      return ["  --     native-write coordinator changed during diagnosis; re-run ocx doctor", ...pathLine];
+      return ["  --     native-write coordinator changed during diagnosis; re-run orl doctor", ...pathLine];
     case "unsafe":
       return [`  !!     native-write coordinator path is unsafe: ${diagnostic.reason}`, ...pathLine];
     case "unreadable":
@@ -967,7 +967,7 @@ export function formatServiceMemoryLines(report: ServiceMemoryReport): string[] 
   const lines: string[] = [];
   lines.push(`  --     doctor process Bun ${Bun.version} (this is NOT the service process)`);
   if (report.status === "unauthorized") {
-    lines.push("  --     local diagnostic capability unavailable — restart the running proxy with this OpenCodex version");
+    lines.push("  --     local diagnostic capability unavailable — restart the running proxy with this OpenRelay version");
     return lines;
   }
   if (report.status === "unreachable") {
@@ -1011,7 +1011,7 @@ export function formatServiceMemoryLines(report: ServiceMemoryReport): string[] 
       lines.push(`         OPENCODEX_BUN_PATH is already active for this service — the override runtime is itself an affected version (unvalidated — own risk).`);
       lines.push("         Options: point the override at a different runtime, or opt into streamMode \"eager-relay\" via PUT /api/settings (crash risk on this runtime; see docs).");
     } else if (d.bunRuntimeSource === undefined) {
-      lines.push("         this service records no runtime origin (installed before provenance tracking), so OpenCodex cannot tell whether an override is already active.");
+      lines.push("         this service records no runtime origin (installed before provenance tracking), so OpenRelay cannot tell whether an override is already active.");
       lines.push("         Reinstall the service to record it, or opt into streamMode \"eager-relay\" via PUT /api/settings (crash risk on this runtime; see docs).");
     } else {
       const origin = d.bunRuntimeSource === "process" ? "the runtime that launched it" : "the bundled runtime";
@@ -1047,14 +1047,14 @@ export function proxyDownRestartHint(input: {
   // still needs uninstall-then-install, which repairService() refuses outright.
   const installedButBroken = input.serviceInstalled === true && input.serviceConflict !== true;
   const restart = input.serviceViable
-    ? "Restart it with 'ocx service start' (service installed) or 'ocx start'."
+    ? "Restart it with 'orl service start' (service installed) or 'orl start'."
     : installedButBroken
-      ? "Restart it with 'ocx start', or refresh the installed service: 'ocx service repair'."
-      : "Restart it with 'ocx start', or install the persistent service: 'ocx service install'.";
+      ? "Restart it with 'orl start', or refresh the installed service: 'orl service repair'."
+      : "Restart it with 'orl start', or install the persistent service: 'orl service install'.";
   const uncleanExit = input.staleProcessState === true
     ? "Stale process records remain, so the previous run may have exited unexpectedly. "
     : "";
-  return `The ocx proxy is not running. ${uncleanExit}Codex/Claude clients pinned to 127.0.0.1:${input.port} fail with errors like "error sending request for url (http://127.0.0.1:${input.port}/v1/responses)". ${restart}`;
+  return `The orl proxy is not running. ${uncleanExit}Codex/Claude clients pinned to 127.0.0.1:${input.port} fail with errors like "error sending request for url (http://127.0.0.1:${input.port}/v1/responses)". ${restart}`;
 }
 
 /** Explain the expected channel and latency trade-off for native ChatGPT routing. */
@@ -1223,7 +1223,7 @@ export async function collectDefaultModelExposure(
       model,
       source: null,
       detail: `could not read the exposed model set, so Codex \`model = "${model}"\` was not checked`,
-      action: "Start the proxy with 'ocx start', or run 'ocx sync' to write the Codex catalog, then re-run 'ocx doctor'",
+      action: "Start the proxy with 'orl start', or run 'orl sync' to write the Codex catalog, then re-run 'orl doctor'",
     };
   }
 
@@ -1252,7 +1252,7 @@ export async function collectDefaultModelExposure(
     model,
     source,
     detail: `Codex \`model = "${model}"\` is NOT exposed by this install (checked ${checked}), so every new Codex session starts on a model this proxy does not serve`,
-    action: "Expose that model (enable it in the dashboard or drop it from 'disabledModels') and run 'ocx sync', or pin an exposed id as 'model' in CODEX_HOME/config.toml",
+    action: "Expose that model (enable it in the dashboard or drop it from 'disabledModels') and run 'orl sync', or pin an exposed id as 'model' in CODEX_HOME/config.toml",
   };
 }
 
@@ -1268,7 +1268,7 @@ export async function runDoctor(args: string[] = []): Promise<void> {
     if (resolved.runtime.source === "environment") {
       console.log("CODEX_CLI_PATH currently overrides configured runtimes.");
       console.log(`Unset or update CODEX_CLI_PATH to use ${displayCodexRuntimePath(resolved.newerAvailable.command)} (${resolved.newerAvailable.version ?? "unknown"}).`);
-      console.log("Then run ocx sync.");
+      console.log("Then run orl sync.");
       return;
     }
     persistCodexRuntime({
@@ -1277,13 +1277,13 @@ export async function runDoctor(args: string[] = []): Promise<void> {
       source: "configured",
     });
     console.log(`Updated Codex runtime to ${displayCodexRuntimePath(resolved.newerAvailable.command)} (${resolved.newerAvailable.version ?? "unknown"}).`);
-    console.log("Run ocx sync to refresh the catalog against this runtime.");
+    console.log("Run orl sync to refresh the catalog against this runtime.");
     return;
   }
 
   if (args.includes(RECOVER_ZERO_BYTE_COORDINATOR_FLAG)) {
     if (!args.includes("--yes")) {
-      console.log(`Recovery is explicit and creates a same-directory backup. Re-run: ocx doctor ${RECOVER_ZERO_BYTE_COORDINATOR_FLAG} --yes`);
+      console.log(`Recovery is explicit and creates a same-directory backup. Re-run: orl doctor ${RECOVER_ZERO_BYTE_COORDINATOR_FLAG} --yes`);
       process.exitCode = 1;
       return;
     }
@@ -1292,7 +1292,7 @@ export async function runDoctor(args: string[] = []): Promise<void> {
       configFn: () => ({ port: diagnostics.port, hostname: diagnostics.hostname }),
     });
     if (live) {
-      console.log(`Recovery refused: OpenCodex proxy pid ${live.pid} is still running. Stop the proxy/service and retry.`);
+      console.log(`Recovery refused: OpenRelay proxy pid ${live.pid} is still running. Stop the proxy/service and retry.`);
       process.exitCode = 1;
       return;
     }
@@ -1303,12 +1303,12 @@ export async function runDoctor(args: string[] = []): Promise<void> {
       return;
     }
     console.log(`Moved the non-authoritative coordinator to ${recovered.backupPath}`);
-    console.log("Run `ocx sync` to retry Codex config injection. The backup was preserved and no Codex config/catalog file was changed by recovery.");
+    console.log("Run `orl sync` to retry Codex config injection. The backup was preserved and no Codex config/catalog file was changed by recovery.");
     process.exitCode = 0;
     return;
   }
 
-  console.log("opencodex doctor\n");
+  console.log("OpenRelay doctor\n");
   // Reset per pass: the suite drives runDoctor several times in one process, and a sticky
   // flag would fail the second call because the first saw a problem.
   doctorSawFailure = false;
@@ -1413,8 +1413,8 @@ export async function runDoctor(args: string[] = []): Promise<void> {
     if (resolved.newerAvailable) {
       console.log(`  !!  Multiple Codex installations found.`);
       console.log(`  ok  Newer usable runtime found: ${displayCodexRuntimePath(resolved.newerAvailable.command)} (${resolved.newerAvailable.version ?? "unknown"})`);
-      console.log("       Suggested: set CODEX_CLI_PATH to the desired binary and run ocx sync.");
-      console.log("       Optional: ocx doctor --fix-codex-runtime");
+      console.log("       Suggested: set CODEX_CLI_PATH to the desired binary and run orl sync.");
+      console.log("       Optional: orl doctor --fix-codex-runtime");
     }
     // Doctor used to warn on any non-empty `removedEfforts`, while `ocx status` asked
     // `effortClampAppliesToRuntime` — so the two could disagree about the same file, and doctor
@@ -1424,7 +1424,7 @@ export async function runDoctor(args: string[] = []): Promise<void> {
     if (effortClampAppliesToRuntime(lastClamp, resolved.runtime)) {
       const live = liveRemovedEfforts(lastClamp);
       console.log(`  !!  ${live.join(" and ")} were removed during catalog sync.`);
-      console.log("       Suggested: set CODEX_CLI_PATH to a newer Codex binary and run ocx sync.");
+      console.log("       Suggested: set CODEX_CLI_PATH to a newer Codex binary and run orl sync.");
     }
   }
 
@@ -1438,7 +1438,7 @@ export async function runDoctor(args: string[] = []): Promise<void> {
     if (skew.skewed && skew.warning) {
       console.log(`!! ${skew.warning}`);
     } else if (isConfirmedVersionMatch(skew)) {
-      console.log(`ok ocx ${skew.cliVersion} matches the running proxy`);
+      console.log(`ok orl ${skew.cliVersion} matches the running proxy`);
     }
   }
 
@@ -1479,12 +1479,12 @@ export async function runDoctor(args: string[] = []): Promise<void> {
     console.log(`  !!     ${codexEnvKeyReadiness.detail}`);
     console.log(`         Action: ${codexEnvKeyReadiness.action}`);
   } else {
-    console.log("  ok     no broken OpenCodex env_key launch path detected");
+    console.log("  ok     no broken OpenRelay env_key launch path detected");
   }
 
   console.log("\nRunning proxy process proxy env (presence only)");
   if (runningProxyEnv.status === "not_running") {
-    console.log("  --     no running ocx proxy process found");
+    console.log("  --     no running orl proxy process found");
   } else if (runningProxyEnv.status === "unavailable") {
     console.log(`  --     pid ${runningProxyEnv.pid}: ${runningProxyEnv.reason}`);
   } else {
@@ -1498,7 +1498,7 @@ export async function runDoctor(args: string[] = []): Promise<void> {
   {
     if (!live) {
       console.log(`  --     doctor process Bun ${Bun.version} (this is NOT the service process)`);
-      console.log("  --     no running ocx proxy found (no live pid/runtime record)");
+      console.log("  --     no running orl proxy found (no live pid/runtime record)");
     } else {
       const report = await fetchServiceMemory(live);
       for (const line of formatServiceMemoryLines(report)) console.log(line);
@@ -1654,7 +1654,7 @@ export async function runDoctor(args: string[] = []): Promise<void> {
   const { collectCodexAppServerCatalogState } = await import("../codex/app-server-processes");
   const catalogState = collectCodexAppServerCatalogState();
   if (catalogState.state === "stale") {
-    console.log(`  [WARN] Codex app-server (PID(s): ${catalogState.processes.map(p => p.pid).join(", ")}) started before the on-disk catalog changed; its in-memory model list disagrees with ocx. Action: run \`ocx sync --restart-codex\`, which restarts the app-servers and the Codex desktop app`);
+    console.log(`  [WARN] Codex app-server (PID(s): ${catalogState.processes.map(p => p.pid).join(", ")}) started before the on-disk catalog changed; its in-memory model list disagrees with ocx. Action: run \`orl sync --restart-codex\`, which restarts the app-servers and the Codex desktop app`);
   } else if (catalogState.state === "unknown") {
     console.log("  [WARN] Could not verify whether the running Codex app-server's model catalog is current (start time or catalog unreadable). Action: if the model list looks stale, restart Codex");
   } else if (catalogState.state === "fresh") {
@@ -1695,7 +1695,7 @@ export async function runDoctor(args: string[] = []): Promise<void> {
   const noProxy = currentProxyEnv.every(p => !p.present) && !configuredProxy.present;
   if (!startup.rebootSafe) {
     if (startup.recommendedAction || startup.desktop?.supervisor) {
-      hints.push(`Codex is pinned to the local proxy without persistent startup protection. ${startup.recommendedAction ?? "Reopen OpenCodex and check Start at Login."}`);
+      hints.push(`Codex is pinned to the local proxy without persistent startup protection. ${startup.recommendedAction ?? "Reopen OpenRelay and check Start at Login."}`);
     } else {
       const command = startup.recommendedCommand ?? startup.commands.restoreNative;
       hints.push(`Codex is pinned to the local proxy without persistent startup protection. After restart, requests can reconnect indefinitely. Run '${command}'.`);
@@ -1708,25 +1708,25 @@ export async function runDoctor(args: string[] = []): Promise<void> {
     if (probe.classification === "timeout" || probe.classification === "connect_error") {
       hints.push("WHAM probe could not reach chatgpt.com. On WSL2 this is often NAT/DNS/VPN. Quota cannot prime, so auto-switch stays on unknown scores.");
       if (noProxy) {
-        hints.push("No proxy is visible to this doctor process and config.proxy is unset or unresolved. If Windows uses a proxy/VPN, set config.proxy or start ocx from a shell with HTTP(S)_PROXY.");
+        hints.push("No proxy is visible to this doctor process and config.proxy is unset or unresolved. If Windows uses a proxy/VPN, set config.proxy or start orl from a shell with HTTP(S)_PROXY.");
       }
     }
   }
   if (pending.failed && pending.failureReason === "busy") {
-    hints.push("Backed-up history metadata is pending or its state is unreadable. The running proxy retries exact restoration automatically; to force it now, close the Codex app and run 'ocx sync'. Untracked routed history is not relabeled.");
+    hints.push("Backed-up history metadata is pending or its state is unreadable. The running proxy retries exact restoration automatically; to force it now, close the Codex app and run 'orl sync'. Untracked routed history is not relabeled.");
   } else if (pending.failed && pending.failureReason === "permission") {
-    hints.push("Backed-up history metadata could not be inspected because access was denied. Fix access to the reported Codex history paths, then run 'ocx sync'; repeated retries do not repair permissions.");
+    hints.push("Backed-up history metadata could not be inspected because access was denied. Fix access to the reported Codex history paths, then run 'orl sync'; repeated retries do not repair permissions.");
   } else if (pending.failed) {
-    hints.push("The history manifest or its target is invalid or changed. Preserve both, inspect the manifest/database/rollout identity, and do not repeatedly run 'ocx sync' until the mismatch is understood. Untracked routed history is not relabeled.");
+    hints.push("The history manifest or its target is invalid or changed. Preserve both, inspect the manifest/database/rollout identity, and do not repeatedly run 'orl sync' until the mismatch is understood. Untracked routed history is not relabeled.");
   } else if (pending.backupEntries > 0) {
-    hints.push("Backed-up history metadata is pending. The running proxy retries exact restoration automatically; to force it now, close the Codex app and run 'ocx sync'. Untracked routed history is not relabeled.");
+    hints.push("Backed-up history metadata is pending. The running proxy retries exact restoration automatically; to force it now, close the Codex app and run 'orl sync'. Untracked routed history is not relabeled.");
   }
   if (dual.dualInstall && !dual.effectiveIsWindowsMount) {
-    hints.push(`Codex is installed on BOTH WSL and Windows. Each side keeps its own ~/.codex (logins, config, catalog are separate); ocx here manages the Linux one. To share a single home, set CODEX_HOME=${dual.windowsCodexHomes[0] ?? `${dual.automountRoot}/c/Users/<you>/.codex`} in WSL (drvfs file locking is less reliable).`);
+    hints.push(`Codex is installed on BOTH WSL and Windows. Each side keeps its own ~/.codex (logins, config, catalog are separate); orl here manages the Linux one. To share a single home, set CODEX_HOME=${dual.windowsCodexHomes[0] ?? `${dual.automountRoot}/c/Users/<you>/.codex`} in WSL (drvfs file locking is less reliable).`);
     hints.push("localhost is one-way in WSL2 NAT mode: Windows-side codex reaches this WSL proxy via localhost (localhostForwarding, on by default), but a Windows-side proxy is NOT reachable from WSL via localhost — use networkingMode=mirrored in .wslconfig for both directions.");
   }
   if (dual.interopCodexOnPath) {
-    hints.push("The `codex` found on PATH is the Windows launcher reached through WSL interop; ocx will not shim it (a WSL shim breaks Windows invocations). Install codex inside WSL (npm i -g @openai/codex) or run 'ocx ensure' from Windows.");
+    hints.push("The `codex` found on PATH is the Windows launcher reached through WSL interop; orl will not shim it (a WSL shim breaks Windows invocations). Install codex inside WSL (npm i -g @openai/codex) or run 'orl ensure' from Windows.");
   }
   if (hints.length > 0) {
     console.log("\nHints");

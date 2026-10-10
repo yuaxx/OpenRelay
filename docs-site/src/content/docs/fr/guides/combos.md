@@ -4,7 +4,7 @@ description: Acheminez un modèle virtuel vers plusieurs fournisseurs pour un ba
 ---
 
 Un **combo** est un modèle virtuel placé devant une liste ordonnée de cibles fournisseur/modèle réelles. Le client
-demande `combo/<id>` ; opencodex choisit une cible, réécrit la requête vers le sélecteur concret
+demande `combo/<id>` ; OpenRelay choisit une cible, réécrit la requête vers le sélecteur concret
 `provider/model` et peut essayer une autre cible si la première rencontre un échec autorisant une nouvelle tentative.
 
 Ceci est utile lorsque vous souhaitez :
@@ -21,11 +21,11 @@ Cet exemple crée `combo/main`, avec Anthropic en premier et OpenAI en second. L
 déjà exister et être activés.
 
 ```bash
-ocx combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
+orl combo set main --targets anthropic/claude-opus-4-8,openai/gpt-5.6-sol
 ```
 
 La stratégie par défaut est le basculement, donc une requête normale est envoyée à
-`anthropic/claude-opus-4-8`. Si cette tentative rencontre un échec autorisant une nouvelle tentative, opencodex peut basculer vers
+`anthropic/claude-opus-4-8`. Si cette tentative rencontre un échec autorisant une nouvelle tentative, OpenRelay peut basculer vers
 `openai/gpt-5.6-sol`.
 
 Utilisez le modèle virtuel partout où vous fourniriez normalement un identifiant de modèle :
@@ -40,7 +40,7 @@ Utilisez le modèle virtuel partout où vous fourniriez normalement un identifia
 Confirmez la définition enregistrée :
 
 ```bash
-ocx combo show main
+orl combo show main
 ```
 
 :::tip
@@ -50,7 +50,7 @@ répartir le trafic, et n’ajoutez des pondérations que si une distribution un
 
 ## Comment fonctionnent les noms de combos
 
-L'identifiant du combo dans `ocx combo set <id>` doit commencer par une lettre ou un chiffre. Il peut alors contenir
+L'identifiant du combo dans `orl combo set <id>` doit commencer par une lettre ou un chiffre. Il peut alors contenir
 lettres, chiffres, `.`, `_` ou `-`, jusqu'à 64 caractères au total. Son identifiant de modèle canonique est toujours
 `combo/<id>` ; par exemple, id `main` devient `combo/main`.
 
@@ -80,12 +80,12 @@ Certaines versions de Codex Desktop appliquent une liste d’autorisation `avail
 le serveur d’application a déjà chargé `model_catalog_json`. Des identifiants routés normaux tels que
 `Nova1/codex-gpt-5.6-sol` restent alors utilisables dans la CLI, mais sont absents du sélecteur Desktop. Il s’agit du
 [bogue de Codex Desktop](https://github.com/openai/codex/issues/19694) en amont, suivi dans
-[opencodex #241](https://github.com/lidge-jun/opencodex/issues/241).
+[OpenRelay #241](https://github.com/lidge-jun/opencodex/issues/241).
 
 Lorsque vous contrôlez une cible routée équivalente, un combo peut explicitement reprendre un identifiant natif :
 
 ```bash
-ocx combo set nova-sol \
+orl combo set nova-sol \
   --targets Nova1/codex/gpt-5.6-sol \
   --alias gpt-5.6-sol \
   --native-alias \
@@ -149,7 +149,7 @@ les demandes réussies restent sur la cible sélectionnée avant la prochaine s�
 Créez un combo 2:1 avec des lots de deux requêtes réussies :
 
 ```bash
-ocx combo set balanced \
+orl combo set balanced \
   --targets anthropic/claude-opus-4-8:2,openai/gpt-5.6-sol:1 \
   --strategy round-robin \
   --sticky 2
@@ -179,7 +179,7 @@ la persistance de `round-robin`. `stickyLimit` n’affecte pas cette stratégie.
 
 ### `least-used` : privilégier la cible ayant le moins de réussites
 
-`least-used` achemine chaque requête vers la cible éligible pour laquelle ce processus opencodex a enregistré le moins
+`least-used` achemine chaque requête vers la cible éligible pour laquelle ce processus OpenRelay a enregistré le moins
 de requêtes réussies. Les compteurs repartent de zéro au redémarrage et, en cas d’égalité, l’ordre de configuration est
 conservé. `weight` et `stickyLimit` n’affectent pas cette stratégie.
 
@@ -206,7 +206,7 @@ Les échecs d’un combo se répartissent entre ceux qui entraînent un **bascul
 | Toute autre erreur non classifiée | Arrêtez et renvoyez l'erreur. |
 
 Une cible sautée utilise par défaut un temps de recharge en amont : 5 secondes pour les codes de limitation de débit `1302`/`1305`, 10 minutes pour une fenêtre d’utilisation épuisée (quel que soit le statut HTTP, y compris 502) ou pour un échec d’identifiants ou de facturation, et 60 secondes dans les autres cas. Si la réponse en amont inclut une
-valeur `Retry-After` valide, opencodex l’utilise à la place ; les en-têtes de réinitialisation Codex viennent ensuite, puis le `cooldownMs` configuré. Les secondes numériques et les valeurs de date HTTP sont
+valeur `Retry-After` valide, OpenRelay l’utilise à la place ; les en-têtes de réinitialisation Codex viennent ensuite, puis le `cooldownMs` configuré. Les secondes numériques et les valeurs de date HTTP sont
 acceptées, et un délai explicite `Retry-After` est plafonné à 24 heures ; les autres temps de recharge restent plafonnés à 10 minutes.
 
 La requête actuelle ne réessaye jamais la même cible tentée. Les demandes ultérieures l'ignorent jusqu'à ce qu'il soit
@@ -247,7 +247,7 @@ Un parent natif peut envoyer la tâche d'un travailleur nouvellement généré u
 ChatGPT back-end. Un fournisseur externe ne peut pas lire cette charge utile.
 
 Pour une telle requête, un combo filtre ses cibles éligibles sur les routes ChatGPT natives canoniques,
-y compris après un échec autorisant une nouvelle tentative. Si le combo ne comporte aucune cible capable de déchiffrer la tâche, opencodex s’arrête
+y compris après un échec autorisant une nouvelle tentative. Si le combo ne comporte aucune cible capable de déchiffrer la tâche, OpenRelay s’arrête
 avant expédition et retours HTTP 400 :
 
 ```json
@@ -287,17 +287,17 @@ L’éditeur bloque Enregistrer et Créer pour une raison de quota uniquement lo
 Les commandes principales sont :
 
 ```bash
-ocx combo list
-ocx combo show <id>
-ocx combo set <id> --targets provider/model[:weight],...
-ocx combo remove <id> --yes
+orl combo list
+orl combo show <id>
+orl combo set <id> --targets provider/model[:weight],...
+orl combo remove <id> --yes
 ```
 
 `set` accepte également `--strategy`, `--sticky`, `--effort`, `--alias`, `--native-alias`,
 `--display-name` et `--rename-from`. Utilisez `-` comme valeur de `--effort`, `--alias` ou
 `--display-name` pour effacer ce champ. `--native-alias` exige un alias de modèle natif non qualifié actuellement
 pris en charge et un nom d’affichage non vide. `create` et `update` sont des alias pour `set` ; `delete` est un alias pour
-`remove` ; et les mêmes sous-commandes sont disponibles sous `ocx route combo`.
+`remove` ; et les mêmes sous-commandes sont disponibles sous `orl route combo`.
 
 ### Gestion API
 
@@ -347,8 +347,8 @@ Les combos sont stockés dans l'objet `combos` de niveau supérieur, saisi par l
 ### Pourquoi `combo/<id>` renvoie 404 ?
 
 L'identifiant du combo est inconnu. La réponse est HTTP 404 de type `invalid_request_error`. Courir
-`ocx combo list`, vérifiez l'orthographe et la casse, et confirmez que votre commande de gestion a écrit sur le même
-exécution d'une instance opencodex qui reçoit des requêtes de modèle.
+`orl combo list`, vérifiez l'orthographe et la casse, et confirmez que votre commande de gestion a écrit sur le même
+exécution d'une instance OpenRelay qui reçoit des requêtes de modèle.
 
 ### Pourquoi est-ce que je reçois `combo_unavailable` ?
 

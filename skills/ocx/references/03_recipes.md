@@ -6,8 +6,8 @@ Choose a task first with offline root, family and leaf help, then read its gener
 chapter. For live management sequences, check the target before the first call:
 
 ```bash
-ocx ready --json
-ocx status --json
+orl ready --json
+orl status --json
 ```
 
 Inspect readiness and `versionSkew.relation`. Local configuration and local Lab
@@ -17,9 +17,9 @@ supported output flags; mutation examples require authority for that task.
 ## 1. Audit the account pool and pause an exhausted account
 
 ```bash
-ocx account list openai --json --quota
-ocx account pause openai <account-id> --json
-ocx account list openai --json
+orl account list openai --json --quota
+orl account pause openai <account-id> --json
+orl account list openai --json
 ```
 
 Read `accounts[]`; each row carries `id`, `paused`, `selected`, and — only under `--quota` — the
@@ -34,7 +34,7 @@ and if it was active a fallback is chosen. The CLI prints this on stderr.
 To pause everything that is spent in one call:
 
 ```bash
-ocx account pause-exhausted openai --json
+orl account pause-exhausted openai --json
 ```
 
 Read `pausedAccountIds`, but also `failedAccountCount`: that route refreshes quota per account and
@@ -44,11 +44,11 @@ not the same as "not exhausted".
 ## 2. Change pool strategy and sticky limit
 
 ```bash
-ocx account strategy openai --json          # read
-ocx account strategy openai round-robin --json
-ocx account sticky openai 5 --json
-ocx account strategy openai --json
-ocx account sticky openai --json
+orl account strategy openai --json          # read
+orl account strategy openai round-robin --json
+orl account sticky openai 5 --json
+orl account strategy openai --json
+orl account sticky openai --json
 ```
 
 A bare invocation reads and never writes. The response echoes the **applied** value, not the one
@@ -57,7 +57,7 @@ you sent, because the server normalizes — compare them if you care whether you
 Both pools have these settings, and the same verbs steer both:
 
 ```bash
-ocx account strategy anthropic --json
+orl account strategy anthropic --json
 ```
 
 `--json` uses pool-neutral keys (`strategy`, `stickyLimit`) for both, so you do not branch on which
@@ -69,11 +69,11 @@ returns a `reason` you can read.
 ## 3. Trace one conversation end to end
 
 ```bash
-ocx logs --conversation <conversation-id> --jsonl
-ocx logs explain <request-id>
+orl logs --conversation <conversation-id> --jsonl
+orl logs explain <request-id>
 ```
 
-**There is no `ocx request-history` command.** `ocx logs explain <request-id>` is the route-decision
+**There is no `orl request-history` command.** `orl logs explain <request-id>` is the route-decision
 view; it returns `routeDecision` with `routeKind`, every `candidates[]` entry with its `eligible`
 flag and `exclusions`, and `selected` naming the winner and the `reason` it won.
 
@@ -87,7 +87,7 @@ actually served it, not only the one requested.
 ## 4. Attribute spend per account
 
 ```bash
-ocx usage --range 7d --json
+orl usage --range 7d --json
 ```
 
 Read `accounts[]`. Two things to respect:
@@ -98,7 +98,7 @@ Read `accounts[]`. Two things to respect:
 For the per-REQUEST view of the same identity, filter the log by the account label:
 
 ```bash
-ocx logs --account p3f9a1 --jsonl
+orl logs --account p3f9a1 --jsonl
 ```
 
 The label is the stable non-PII digest the proxy already persists — `main` and `p<hex6>` for Codex
@@ -115,7 +115,7 @@ log rows tells you why (for example `usage_estimated`, `expected_price_overlay`)
 ## 5. Prepare an access-key rotation without exposing the new key
 
 ```bash
-ocx access key list --json
+orl access key list --json
 ```
 
 Creating a key or starting a rotation returns a one-time plaintext credential in both text and
@@ -132,19 +132,19 @@ approval for that exact revocation remains valid; do not ask again for the same 
 For an in-place rotation, commit the pending replacement on the same ID:
 
 ```bash
-ocx access key rotate commit <id> <rotation-id> --json
+orl access key rotate commit <id> <rotation-id> --json
 ```
 
 For a separately created replacement, remove only the old ID:
 
 ```bash
-ocx access key remove <old-id> --yes --json
+orl access key remove <old-id> --yes --json
 ```
 
 After the command succeeds, inspect the matching result:
 
 ```bash
-ocx access key list --json
+orl access key list --json
 ```
 
 For an in-place rotation, the same ID remains and `pendingRotation` disappears. For a separately
@@ -155,7 +155,7 @@ positional, not `--id`, and refuses without `--yes`.
 To cancel a pending rotation, with authority to discard the replacement:
 
 ```bash
-ocx access key rotate abort <id> <rotation-id> --json
+orl access key rotate abort <id> <rotation-id> --json
 ```
 
 Abort retains the old credential and removes the pending replacement. Re-list to inspect pending
@@ -176,10 +176,10 @@ exist for them — do not attribute usage to either.
 Discover the installed grammar without starting a proxy:
 
 ```bash
-ocx provider --help
-ocx provider add --help
-ocx provider pacing --help
-ocx provider apply --help
+orl provider --help
+orl provider add --help
+orl provider pacing --help
+orl provider apply --help
 ```
 
 Local `list`, `show`, `add`, `remove`, and `set-default` need no running proxy.
@@ -188,13 +188,13 @@ Registry providers are seeded by name; custom providers need `--adapter` and
 stdin handoff, never by putting a key in an agent transcript.
 
 ```bash
-ocx provider list --json
-ocx provider add <name> --json
-ocx provider show <name> --json
+orl provider list --json
+orl provider add <name> --json
+orl provider show <name> --json
 ```
 
 Without `--sync`, the add receipt has `needsSync: true`. When synchronization is
-requested, `ocx provider add <name> --sync --json` actually attempts it after
+requested, `orl provider add <name> --sync --json` actually attempts it after
 saving. Inspect `sync.status`, `sync.ok`, `needsSync`, and the exit code. A stopped
 proxy yields `not-running` and exit 1 while preserving the save. Only `applied`
 with `ok: true` clears `needsSync`; policy skips and catalog-only outcomes do not.
@@ -202,12 +202,12 @@ with `ok: true` clears `needsSync`; policy skips and catalog-only outcomes do no
 For an authorized change to the running proxy, first confirm the intended target:
 
 ```bash
-ocx ready --json
-ocx status --json
-ocx provider snapshot --json
-ocx provider add <name> --live --json
-ocx provider set-default <name> --live --json
-ocx provider snapshot --json
+orl ready --json
+orl status --json
+orl provider snapshot --json
+orl provider add <name> --live --json
+orl provider set-default <name> --live --json
+orl provider snapshot --json
 ```
 
 These are separate operations; promote only when requested. Live add uses the
@@ -217,8 +217,8 @@ check: a concurrent add can race with the server's upsert. `--live --sync` is
 invalid. Live removal requires explicit deletion authority:
 
 ```bash
-ocx provider remove <name> --live --yes --json
-ocx provider snapshot --json
+orl provider remove <name> --live --yes --json
+orl provider snapshot --json
 ```
 
 The server checks dependencies, reassigns the default when needed, and performs
@@ -232,7 +232,7 @@ last provider. A receipt's `success: true` means persisted; inspect
 Existing `provider edit` is live; do not append `--live`. Its added settings are:
 
 ```bash
-ocx provider edit <name> --upstream-http-version http1.1 --fast on --context-window 128000 --json
+orl provider edit <name> --upstream-http-version http1.1 --fast on --context-window 128000 --json
 ```
 
 `--upstream-http-version -` and `--context-window -` clear their overrides;
@@ -240,9 +240,9 @@ ocx provider edit <name> --upstream-http-version http1.1 --fast on --context-win
 Read configured pacing rules and separate runtime observations before editing:
 
 ```bash
-ocx provider pacing <name> --json
-ocx provider pacing <name> --enabled on --rpm 30 --min-interval-ms 1000 --max-concurrent 2 --json
-ocx provider pacing <name> --json
+orl provider pacing <name> --json
+orl provider pacing <name> --enabled on --rpm 30 --min-interval-ms 1000 --max-concurrent 2 --json
+orl provider pacing <name> --json
 ```
 
 `rules: null` means no rules are configured. Numeric flags alone do not enable a
@@ -255,7 +255,7 @@ For complete rules, including per-model rules, prepare a non-secret JSON object
 such as `{"enabled":true,"requestsPerMinute":30}` and use:
 
 ```bash
-ocx provider pacing <name> --file pacing.json --json
+orl provider pacing <name> --file pacing.json --json
 ```
 
 The file replaces the entire pacing block and cannot be combined with scalar
@@ -269,7 +269,7 @@ cross-invocation target token; target pinning only lasts within one invocation.
 Take a redacted editor snapshot and keep its baseline unchanged:
 
 ```bash
-ocx provider snapshot --json > providers.baseline.json
+orl provider snapshot --json > providers.baseline.json
 cp providers.baseline.json providers.next.json
 ```
 
@@ -282,8 +282,8 @@ not raw config export; raw export can disclose credentials and remains a human
 handoff outside the agent session.
 
 ```bash
-ocx provider apply --baseline providers.baseline.json --file providers.next.json --json
-ocx provider snapshot --json
+orl provider apply --baseline providers.baseline.json --file providers.next.json --json
+orl provider snapshot --json
 ```
 
 Add `--yes` only when the reviewed next document removes or renames providers
@@ -307,9 +307,9 @@ Provider discovery testing is a separate, potentially upstream operation:
 ## 7. Diagnose "management API is unreachable"
 
 ```bash
-ocx ready --json     # is it up at all?
-ocx status --json    # is it the build you think, on the port you think?
-ocx doctor           # what is structurally wrong (human; `--json` is refused with exit 2)
+orl ready --json     # is it up at all?
+orl status --json    # is it the build you think, on the port you think?
+orl doctor           # what is structurally wrong (human; `--json` is refused with exit 2)
 ```
 
 `ready` false distinguishes `pending`, `failed` and `unreachable`; only pending
@@ -326,22 +326,22 @@ A credential-conflict reason is the case where retrying is pointless — the ins
 ## 8. Preview, then run, a storage cleanup
 
 ```bash
-ocx storage report --json
-ocx storage cleanup --percent 25 --json      # PREVIEW: deletes nothing, exits 0
+orl storage report --json
+orl storage cleanup --percent 25 --json      # PREVIEW: deletes nothing, exits 0
 ```
 
 Read `count`, `bytes`, and `candidates[]`. **Report those to the user and get approval before**
 adding `--yes`:
 
 ```bash
-ocx storage cleanup --percent 25 --mode quarantine --yes --json
+orl storage cleanup --percent 25 --mode quarantine --yes --json
 ```
 
 `quarantine` is recoverable:
 
 ```bash
-ocx storage trash list --json
-ocx storage trash restore <entry-id> --yes --json
+orl storage trash list --json
+orl storage trash restore <entry-id> --yes --json
 ```
 
 `--mode permanent` is not recoverable. There is no undo, no trash entry, and no confirmation prompt
@@ -356,7 +356,7 @@ and rejects a stale one with 409. So the two invocations agree about what is bei
 you can conclude from it.
 
 ```bash
-ocx account list meta-muse --json --quota
+orl account list meta-muse --json --quota
 ```
 
 Each row's `quota` carries the 5-hour and weekly windows plus `updatedAt`. **Read `updatedAt`, not
@@ -365,7 +365,7 @@ response and is cached, so it is as old as the last streaming turn through this 
 hours or days.
 
 ```bash
-ocx account refresh meta-muse
+orl account refresh meta-muse
 ```
 
 This reports that there is nothing to refresh, and that is correct rather than a failure. A fresh
@@ -380,7 +380,7 @@ Two absences are also expected and are not defects:
 - A turn that goes through request translation rather than passthrough reports no usage, so a
   client on a translated wire will never move this number.
 
-`ocx provider test meta-muse` answers `applicable: false` with reason `static_catalog`. The
+`orl provider test meta-muse` answers `applicable: false` with reason `static_catalog`. The
 provider sets `liveModels: false` deliberately — its authenticated roster includes image and voice
 models this Responses-agent provider cannot drive — so the absence of a live probe is a design
 decision, not a broken connection.
@@ -390,10 +390,10 @@ decision, not a broken connection.
 Inspect non-secret state on the **hub** first:
 
 ```bash
-ocx status                 # read the Hub: block first -- origins, listener, token source
+orl status                 # read the Hub: block first -- origins, listener, token source
 ```
 
-Have the operator run `ocx hub invite` in a human-operated terminal outside the agent session.
+Have the operator run `orl hub invite` in a human-operated terminal outside the agent session.
 Both output modes expose a plaintext pairing grant or the command embedding it; `--json`
 is not a safe agent-output alternative. The operator transfers the generated command directly
 to the other machine. It already carries both origins and `--pairing-code-stdin`, so do not
@@ -406,9 +406,9 @@ be running on that port or the exchange is refused and the code is spent.
 Three refusals are normal and none of them burns a code:
 
 - `No loopback browser origin is admitted for pairing` — run the
-  `ocx config set corsAllowOrigins '["http://localhost:10100"]'` line the error prints, as
+  `orl config set corsAllowOrigins '["http://localhost:10100"]'` line the error prints, as
   printed (it preserves the hub's existing entries) and with the **joining** machine's proxy
-  port. Grants are origin-bound and `ocx connect` presents its own `http://localhost:<port>`.
+  port. Grants are origin-bound and `orl connect` presents its own `http://localhost:<port>`.
 - A data origin that would be this machine's own loopback — the bind is loopback-only or a
   wildcard and `hub.dataPublicOrigin` is unset, so there is nothing honest to advertise. Set
   `hub.dataPublicOrigin`, or pass `--data-url` for one invite. Do not work around it by
@@ -416,21 +416,21 @@ Three refusals are normal and none of them burns a code:
 - A rejected `--management-url` — on `invite` that flag confirms
   `hub.managementPublicOrigin` rather than overriding it. Drop the flag, or change the config.
 
-Full context: [05_remote_hub.md](05_remote_hub.md#inviting-a-machine-ocx-hub-invite).
+Full context: [05_remote_hub.md](05_remote_hub.md#inviting-a-machine-orl-hub-invite).
 
 ## Aside profiles
 
-These commands and the Aside refresh in `ocx sync` require a compatible running ocx proxy.
+These commands and the Aside refresh in `orl sync` require a compatible running orl proxy.
 There is no local profile-file fallback when the server is unavailable or too old. Follow
 the [proxy upgrade, restart, and retry sequence](https://opencodex.me/guides/integrations/#aside-profile-controls),
 then fully quit and reopen Aside after its profile files update successfully.
 
 ```bash
-ocx integration client status --client aside --json
-ocx integration client enable --client aside
-ocx integration client disable --client aside --profile 1
-ocx integration client history --client aside --profile 1
-ocx integration client restore --client aside --profile 1 --op <opId>
+orl integration client status --client aside --json
+orl integration client enable --client aside
+orl integration client disable --client aside --profile 1
+orl integration client history --client aside --profile 1
+orl integration client restore --client aside --profile 1 --op <opId>
 ```
 
 Read `profiles[]` to find numeric profile IDs. No profile selector means a bulk toggle; an
@@ -443,15 +443,15 @@ for a partial refusal. Never use the overwrite or drift flags merely to suppress
 These are live management operations. Start with the saved preset and selection:
 
 ```bash
-ocx models preset show --provider anthropic --json
-ocx models selected anthropic --json
+orl models preset show --provider anthropic --json
+orl models selected anthropic --json
 ```
 
 When asked to select the curated roster:
 
 ```bash
-ocx models preset apply anthropic --json
-ocx models selected anthropic --json
+orl models preset apply anthropic --json
+orl models selected anthropic --json
 ```
 
 `fallback: "preset-empty"` preserves the existing selection; do not report an
@@ -462,10 +462,10 @@ Read the discovery policy before changing it. This example disables automatic
 exposure of newly discovered models for one provider, then reads it back:
 
 ```bash
-ocx models new-policy --provider anthropic --json
-ocx models new-policy off --provider anthropic --json
-ocx models new-policy --provider anthropic --json
-ocx models new-arrivals --json
+orl models new-policy --provider anthropic --json
+orl models new-policy off --provider anthropic --json
+orl models new-policy --provider anthropic --json
+orl models new-arrivals --json
 ```
 
 The provider read may report `inherit`; omission of `--provider` selects global
@@ -476,9 +476,9 @@ policy. Recent arrivals show recorded discovery state, not a fresh upstream prob
 Use an ID returned by the list (here `reliable` is an example saved ID):
 
 ```bash
-ocx route policy list --json
-ocx route policy show reliable --json
-ocx route policy dry-run reliable --model-context 128000 --tools --image --structured-output --json
+orl route policy list --json
+orl route policy show reliable --json
+orl route policy dry-run reliable --model-context 128000 --tools --image --structured-output --json
 ```
 
 Only run this evaluation with authority to activate Lab on the target. The management POST can activate Lab and start automation that is already enabled there, including upstream probes. Use list/show for observation without that activation effect.
@@ -493,11 +493,11 @@ a different resource. A missing profile returns exit 4; a missing operand return
 No live management preflight is needed for these local reads:
 
 ```bash
-ocx lab status --json
-ocx lab catalog --json
-ocx lab automation status --json
-ocx lab automation runs --limit 10 --json
-ocx lab public community --json
+orl lab status --json
+orl lab catalog --json
+orl lab automation status --json
+orl lab automation runs --limit 10 --json
+orl lab public community --json
 ```
 
 Use `lab subjects`, `lab subject <id>`, `lab observations --subject <id>`,
@@ -507,7 +507,7 @@ read the local projection, not a connected hub's database.
 For a requested evidence transfer, preview selected events before export:
 
 ```bash
-ocx lab public preview --event <event-id> --json
+orl lab public preview --event <event-id> --json
 ```
 
 The public family also supports export, file verification and import; export and
@@ -521,27 +521,27 @@ policy persistence does not prove another running proxy's scheduler adopted it.
 Inspect installed grammar offline first, then verify the live target when needed:
 
 ```bash
-ocx models add --help
-ocx models order --help
-ocx ready --json
-ocx status --json
-ocx models live --json
+orl models add --help
+orl models order --help
+orl ready --json
+orl status --json
+orl models live --json
 ```
 
 Use a provider configured on that target and its raw upstream model ID. For an
 explicitly requested live addition:
 
 ```bash
-ocx models add <provider> <raw-model-id> --live --display-name 'Research model' --context-window 128000 --modalities text --json
-ocx models live --json
+orl models add <provider> <raw-model-id> --live --display-name 'Research model' --context-window 128000 --modalities text --json
+orl models live --json
 ```
 
 Keep the returned custom `id` for later edits/removal. Live removal resolves on
 that same target and requires deletion authority:
 
 ```bash
-ocx models remove <complete-stored-id> --live --yes --json
-ocx models live --json
+orl models remove <complete-stored-id> --live --yes --json
+orl models live --json
 ```
 
 A provider/model selector is also accepted when unambiguous. Do not substitute a
@@ -564,9 +564,9 @@ first slash. Preserve further slashes. Do not pass a picker alias or guess how
 to decode an encoded public ID:
 
 ```bash
-ocx models display-name <provider>/<raw-model-id> --set 'Research model' --json
-ocx models live --json
-ocx models display-name <provider>/<raw-model-id> --clear --json
+orl models display-name <provider>/<raw-model-id> --set 'Research model' --json
+orl models live --json
+orl models display-name <provider>/<raw-model-id> --clear --json
 ```
 
 Setting and clearing are alternative writes, not a sequence to run automatically.
@@ -577,8 +577,8 @@ instead of treating it as rollback.
 ### Order the picker without dropping identities
 
 ```bash
-ocx models order status --json
-ocx models live --json
+orl models order status --json
+orl models live --json
 ```
 
 Use `pickerAvailable` public IDs for a manual full permutation, including every
@@ -587,8 +587,8 @@ required leading order; ambiguous, missing, extra or duplicate IDs are refused.
 The placeholder below stands for the complete reviewed comma-separated list:
 
 ```bash
-ocx models order set --models '<complete-public-id-permutation>' --json
-ocx models order status --json
+orl models order set --models '<complete-public-id-permutation>' --json
+orl models order status --json
 ```
 
 The command re-reads settings and model identities immediately before writing;
@@ -611,9 +611,9 @@ on the target: create/update may activate it, including upstream probes. Reads
 below do not require that activation. Discover grammar and inspect the chosen ID:
 
 ```bash
-ocx route policy update --help
-ocx route policy list --json
-ocx route policy show reliable --json > profile.observed.json
+orl route policy update --help
+orl route policy list --json
+orl route policy show reliable --json > profile.observed.json
 jq 'del(.id, .model, .revision) | if .alias == null then del(.alias) else . end' profile.observed.json > profile.next.json
 ```
 
@@ -624,23 +624,23 @@ their supported nested fields. The show-only `id`, `model`, `revision` and a nul
 alias are not writable input. Keep `profile.observed.json` unchanged.
 
 ```bash
-ocx route policy update reliable --file profile.next.json --expected-revision '<exact-revision-from-observed-show>' --json
-ocx route policy show reliable --json
+orl route policy update reliable --file profile.next.json --expected-revision '<exact-revision-from-observed-show>' --json
+orl route policy show reliable --json
 ```
 
 Copy the opaque revision from the original observation. Never fetch a fresh
 revision silently, change update into create, or automatically retry 409/exit 5.
 On conflict, read show again, review concurrent changes and prepare a new edit.
-For an authorized new ID, use `ocx route policy create <new-id> --file profile.next.json --json`
+For an authorized new ID, use `orl route policy create <new-id> --file profile.next.json --json`
 without a revision. For authorized deletion use
-`ocx route policy remove <id> --yes --json`; deletion is not revision-protected.
+`orl route policy remove <id> --yes --json`; deletion is not revision-protected.
 Files (or `--file -` piped stdin) use the 4 MiB/30-second bounded input contract.
 Server validation remains authoritative for candidates, aliases and policy semantics.
 
 ## 16. Edit combo targets and inspect actual decision observations
 
-Start with `ocx combo set --help`, `ocx combo list --json` and
-`ocx combo show <stored-id> --json`. A targets file is a nonempty ordered array,
+Start with `orl combo set --help`, `orl combo list --json` and
+`orl combo show <stored-id> --json`. A targets file is a nonempty ordered array,
 not the complete show object. Use actual configured provider/raw model pairs;
 this is the file shape:
 
@@ -655,8 +655,8 @@ semantics do not apply here. File input follows the same 4 MiB/30-second limits.
 For the requested edit, use:
 
 ```bash
-ocx combo set <stored-id> --targets-file targets.json --image-input auto --reasoning-effort-mode strict --json
-ocx combo show <stored-id> --json
+orl combo set <stored-id> --targets-file targets.json --image-input auto --reasoning-effort-mode strict --json
+orl combo show <stored-id> --json
 ```
 
 `--targets-file` and `--targets` conflict. Omit both to preserve complete target
@@ -671,7 +671,7 @@ an upsert without CAS; re-read instead of assuming a concurrent edit was protect
 Statistics are observation only and do not run a decision probe:
 
 ```bash
-ocx combo stats <stored-id> --range 30d --json
+orl combo stats <stored-id> --range 30d --json
 ```
 
 Use the exact stored combo ID from list/show, not its public model or alias.
@@ -685,12 +685,12 @@ monetary cost or comparative savings baseline; do not invent either from tokens.
 Discover syntax offline, then confirm the intended live target:
 
 ```bash
-ocx account pool --help
-ocx account quota-activation --help
-ocx ready --json
-ocx status --json
-ocx account pool openai --json
-ocx account pool anthropic --json
+orl account pool --help
+orl account quota-activation --help
+orl ready --json
+orl status --json
+orl account pool openai --json
+orl account pool anthropic --json
 ```
 
 The target's `supported` list decides which fields can be written. Preserve null,
@@ -701,16 +701,16 @@ is OpenAI-only; `least-loaded` is Kiro-only. Anthropic pool windows are
 `five-hour`, `weekly`, `max-utilization`. For a requested supported policy edit:
 
 ```bash
-ocx account pool anthropic --threshold 80 --quota-window five-hour --json
-ocx account pool anthropic --json
+orl account pool anthropic --threshold 80 --quota-window five-hour --json
+orl account pool anthropic --json
 ```
 
 Only supplied fields change. For one OpenAI account use an explicit selector:
 
 ```bash
-ocx account auto-switch openai status --account <id-or-alias-or-main> --json
-ocx account auto-switch openai inherit --account <id-or-alias-or-main> --json
-ocx account auto-switch openai status --account <id-or-alias-or-main> --json
+orl account auto-switch openai status --account <id-or-alias-or-main> --json
+orl account auto-switch openai inherit --account <id-or-alias-or-main> --json
+orl account auto-switch openai status --account <id-or-alias-or-main> --json
 ```
 
 `inherit` writes null, `on` writes 80, `off` writes 0, and `threshold N` accepts
@@ -724,13 +724,13 @@ the included limit. `account credits openai <id> on|off --json` targets one acco
 plus main when enabling, and clears the policy list when disabling. These selectors
 are exclusive. `showCodexCredits` is only a display preference and never supplies
 that intent. Do not enable credits as login/quota recovery. Read back the roster
-with `ocx account list openai --json` and retain the actual returned IDs.
+with `orl account list openai --json` and retain the actual returned IDs.
 
 Quota activation is another policy, not grant redemption. For an authorized edit:
 
 ```bash
-ocx account quota-activation openai <id-or-alias-or-main> --window fiveHour off --json
-ocx account list openai --json
+orl account quota-activation openai <id-or-alias-or-main> --window fiveHour off --json
+orl account list openai --json
 ```
 
 Its window spelling is `fiveHour` or `weekly`, unlike Anthropic pool `five-hour`.
@@ -739,7 +739,7 @@ disabling remains allowed. The receipt's `available` is observed availability,
 not a claim that a refresh already completed.
 
 ```bash
-ocx account anthropic-reset-grants --json
+orl account anthropic-reset-grants --json
 ```
 
 An optional exact Anthropic account ID selects the read; this is not the Codex
@@ -749,7 +749,7 @@ nullable dates/reasons and journal state. Spending remains a human GUI handoff.
 
 ## 18. Choose login options for the actual flow
 
-Use `ocx account login --help` for grammar. Ordinary fresh provider OAuth accepts
+Use `orl account login --help` for grammar. Ordinary fresh provider OAuth accepts
 `--add-account on|off`; omission preserves `addAccount: !reauth`. Off permits the
 existing import preference and does not delete an account. Either explicit value
 is rejected for reauth and Codex login. `--open-browser on|off` is supported for
@@ -764,7 +764,7 @@ code separate, and preserve pending/expired/cancelled or validation-pending stat
 Do not restart login automatically, capture credentials, or perform verification
 for the operator. `--no-wait --json` is a public handoff, not completed login.
 
-Live OAuth logout is `ocx logout <public-oauth-provider> --live --json`; use only
+Live OAuth logout is `orl logout <public-oauth-provider> --live --json`; use only
 when logout on that target is requested. It does not sign out Codex/native-main,
 remove one selected account, or fall back to local credential deletion on failure.
 No-live logout retains local removed/not-found behavior (exit 0/4). Re-read the
@@ -773,17 +773,17 @@ appropriate account roster instead of inventing a live `removed` result.
 ## 19. Replace memory or compaction overrides deliberately
 
 ```bash
-ocx agent memory-models --help
-ocx agent memory-models show --json
-ocx agent compaction-routing show --json
+orl agent memory-models --help
+orl agent memory-models show --json
+orl agent compaction-routing show --json
 ```
 
 Each set replaces its entire block. A memory file contains only `extract` and/or
 `consolidation`, each with `model` and optional `reasoningEffort`. Scalars are:
 
 ```bash
-ocx agent memory-models set --extract-model <route> --extract-effort high --consolidation-model <route> --json
-ocx agent memory-models show --json
+orl agent memory-models set --extract-model <route> --extract-effort high --consolidation-model <route> --json
+orl agent memory-models show --json
 ```
 
 Omitted phases use their existing/default route; they do not stop. Effort requires
@@ -793,8 +793,8 @@ null remain distinct saved values, neither disables the memory pipeline. File
 mode and scalar flags conflict; the 4 MiB/30-second input limits apply.
 
 ```bash
-ocx agent compaction-routing set --model <route> --effort high --triggers manual,auto --sources '<exact-source>,<provider>/*' --json
-ocx agent compaction-routing show --json
+orl agent compaction-routing set --model <route> --effort high --triggers manual,auto --sources '<exact-source>,<provider>/*' --json
+orl agent compaction-routing show --json
 ```
 
 Use exact unique source selectors or provider/* patterns, not guessed aliases.
@@ -807,9 +807,9 @@ model call. Inspect `catalogRefreshPending`; true or unverified status is nonzer
 ## 20. Change runtime settings and v2 with explicit targets
 
 ```bash
-ocx system settings --json
-ocx agent injection status --json
-ocx agent sidecar status --json
+orl system settings --json
+orl agent injection status --json
+orl agent sidecar status --json
 ```
 
 System boolean options are `--show-codex-credits`, `--account-picker`,
@@ -822,11 +822,11 @@ unverified read-back or deferred/refused native apply must be reported as such.
 For requested injection/sidecar edits, with read-back:
 
 ```bash
-ocx agent injection set --sync-codex-defaults off --json
-ocx agent injection status --json
-ocx agent sidecar web --stream-routed-output on --json
-ocx agent sidecar vision --timeout-ms 30000 --json
-ocx agent sidecar status --json
+orl agent injection set --sync-codex-defaults off --json
+orl agent injection status --json
+orl agent sidecar web --stream-routed-output on --json
+orl agent sidecar vision --timeout-ms 30000 --json
+orl agent sidecar status --json
 ```
 
 Injection preserves omitted model/effort/prompt/guidance; `-` clears the first
@@ -837,17 +837,17 @@ sidecar writes preserve siblings. Its `codexWebSearch` report distinguishes save
 settings from native apply; ownership refusal is not repaired by blind retry.
 
 ```bash
-ocx v2 --help
-ocx v2 status --json
-ocx v2 status --live --json
+orl v2 --help
+orl v2 status --json
+orl v2 status --live --json
 ```
 
 No-live operates on local native/config state; `--live` uses the selected proxy
 with no local fallback. Both support JSON. For an authorized live mode change:
 
 ```bash
-ocx v2 mode v1 --live --json
-ocx v2 status --live --json
+orl v2 mode v1 --live --json
+orl v2 status --live --json
 ```
 
 Only an explicitly requested live `mode` may include
@@ -855,7 +855,7 @@ Only an explicitly requested live `mode` may include
 mode reject it. To save literal reserved hint text, quote one operand after `--`:
 
 ```bash
-ocx v2 mode-hint --live --json -- '--clear'
+orl v2 mode-hint --live --json -- '--clear'
 ```
 
 That saves the text `--clear`; without the terminator `mode-hint --clear` clears
@@ -871,9 +871,9 @@ retain full catalog disposition; read back after partial/unknown outcomes.
 Discover syntax offline; these operations need the intended running proxy:
 
 ```bash
-ocx integration client preview --help
-ocx integration client status --client hermes --json
-ocx integration client preview --client hermes --operation apply --json > hermes-preview.json
+orl integration client preview --help
+orl integration client status --client hermes --json
+orl integration client preview --client hermes --operation apply --json > hermes-preview.json
 ```
 
 Review `changes`, `state`, `foreignEdit`, `canApply` and `willChange`. A refused
@@ -886,8 +886,8 @@ Only after reviewing an applicable plan and choosing to apply it:
 
 ```bash
 PLAN_FINGERPRINT="$(jq -er 'select(.canApply == true) | .fingerprint' hermes-preview.json)"
-ocx integration client enable --client hermes --plan-fingerprint "$PLAN_FINGERPRINT" --json
-ocx integration client status --client hermes --json
+orl integration client enable --client hermes --plan-fingerprint "$PLAN_FINGERPRINT" --json
+orl integration client status --client hermes --json
 ```
 
 The token is concurrency evidence, not authorization. Commits accept `pN:` plus
@@ -903,23 +903,23 @@ empty and exits 5. Never adopt a replacement token or retry automatically.
 The following operation/profile IDs are examples; select actual IDs from history:
 
 ```bash
-ocx integration client history --client aside --profile 1 --json
-ocx integration client restore --op op-example --client aside --profile 1 --preview --json
+orl integration client history --client aside --profile 1 --json
+orl integration client restore --op op-example --client aside --profile 1 --preview --json
 ```
 
 If drift is refused, inspect the changes first. Only when replacing the later edits
 is intended, preview that explicit intent and review the resulting plan:
 
 ```bash
-ocx integration client restore --op op-example --client aside --profile 1 --preview --confirm-drift --json > restore-preview.json
+orl integration client restore --op op-example --client aside --profile 1 --preview --confirm-drift --json > restore-preview.json
 ```
 
 Then, if authorized, repeat the same op/profile/drift choice in the bound write:
 
 ```bash
 RESTORE_FINGERPRINT="$(jq -er 'select(.canApply == true) | .fingerprint' restore-preview.json)"
-ocx integration client restore --op op-example --client aside --profile 1 --confirm-drift --plan-fingerprint "$RESTORE_FINGERPRINT" --json
-ocx integration client status --client aside --profile 1 --json
+orl integration client restore --op op-example --client aside --profile 1 --confirm-drift --plan-fingerprint "$RESTORE_FINGERPRINT" --json
+orl integration client status --client aside --profile 1 --json
 ```
 
 Aside preview and bound writes require one profile; there is no aggregate preview.
@@ -934,15 +934,15 @@ Use exact, case-sensitive namespaced IDs and efforts supported by the target.
 The example model below is fictional; substitute a supported connected model.
 
 ```bash
-ocx integration client preview --client droid --operation apply --reasoning-default example/model-a=high --json > droid-preview.json
+orl integration client preview --client droid --operation apply --reasoning-default example/model-a=high --json > droid-preview.json
 ```
 
 After review and an explicit apply decision:
 
 ```bash
 DROID_FINGERPRINT="$(jq -er 'select(.canApply == true) | .fingerprint' droid-preview.json)"
-ocx integration client enable --client droid --reasoning-default example/model-a=high --plan-fingerprint "$DROID_FINGERPRINT" --json
-ocx integration client status --client droid --json
+orl integration client enable --client droid --reasoning-default example/model-a=high --plan-fingerprint "$DROID_FINGERPRINT" --json
+orl integration client status --client droid --json
 ```
 
 Repeat every map entry in the commit. Omission preserves existing defaults;
@@ -954,14 +954,14 @@ another client, disable or restore. The server validates model-specific efforts.
 For a requested complete clear, first inspect:
 
 ```bash
-ocx integration client preview --client droid --operation apply --clear-reasoning-defaults --json > droid-clear-preview.json
+orl integration client preview --client droid --operation apply --clear-reasoning-defaults --json > droid-clear-preview.json
 ```
 
 After reviewing that applicable plan and choosing the clear:
 
 ```bash
 DROID_CLEAR_FINGERPRINT="$(jq -er 'select(.canApply == true) | .fingerprint' droid-clear-preview.json)"
-ocx integration client enable --client droid --clear-reasoning-defaults --plan-fingerprint "$DROID_CLEAR_FINGERPRINT" --json
+orl integration client enable --client droid --clear-reasoning-defaults --plan-fingerprint "$DROID_CLEAR_FINGERPRINT" --json
 ```
 
 ## 22. Retire recovery history or refresh Aside profiles
@@ -971,9 +971,9 @@ it is not restore or disable. Inspect history, confirm that losing that recovery
 point is intended, then use its exact opId (the ID here is fictional):
 
 ```bash
-ocx integration client history --client aside --profile 1 --json
-ocx integration client history remove --op op-example --client aside --profile 1 --yes --json
-ocx integration client history --client aside --profile 1 --json
+orl integration client history --client aside --profile 1 --json
+orl integration client history remove --op op-example --client aside --profile 1 --yes --json
+orl integration client history --client aside --profile 1 --json
 ```
 
 No selector means the global journal; `--client aside` means aggregate Aside
@@ -982,8 +982,8 @@ removal. The newest row is protected. `snapshotRemoved:false` exits 1 after the
 record was retired: cleanup is incomplete, not rolled back. Do not replay deletion.
 
 ```bash
-ocx integration client sync --client aside --json
-ocx integration client status --client aside --json
+orl integration client sync --client aside --json
+orl integration client status --client aside --json
 ```
 
 Sync uses the existing attested Aside owner, with no profile selector or broad
@@ -995,7 +995,7 @@ the refusal before another sync. Reopen Aside after verified profile-file change
 ## 23. Save a runtime Desktop profile or inspect Cursor
 
 ```bash
-ocx claude desktop profile show --json > desktop-observed.json
+orl claude desktop profile show --json > desktop-observed.json
 jq '.profile' desktop-observed.json > desktop-profile.json
 ```
 
@@ -1005,8 +1005,8 @@ accepts bounded regular JSON files or explicit piped stdin, with the existing
 4 MiB/30-second input contract. For the requested save:
 
 ```bash
-ocx claude desktop profile import desktop-profile.json --json
-ocx claude desktop profile show --json
+orl claude desktop profile import desktop-profile.json --json
+orl claude desktop profile show --json
 ```
 
 This saves on the selected runtime only. It does not apply to native Desktop;
@@ -1016,8 +1016,8 @@ local fallback. Existing `claude desktop show/import` remain local and existing
 before choosing it. Runtime profile reads can gather model inventory.
 
 ```bash
-ocx integration native cursor status --json
-ocx integration native cursor local-installer --json
+orl integration native cursor status --json
+orl integration native cursor local-installer --json
 ```
 
 Cursor status can gather model inventory; installer lookup can fetch a public
@@ -1029,9 +1029,9 @@ the displayed placeholder is not one. Do not fetch a key to complete this read.
 ## 24. Observe the Hub and change maintenance policy deliberately
 
 ```bash
-ocx remote-workspace hub status --json
-ocx remote-workspace hub runtimes --json
-ocx remote-workspace hub sessions --json
+orl remote-workspace hub status --json
+orl remote-workspace hub runtimes --json
+orl remote-workspace hub sessions --json
 ```
 
 These read the selected management Hub; ordinary `remote-workspace status` stays
@@ -1044,9 +1044,9 @@ activation configured; do not enable it or pair/start/revoke a session as recove
 Runtime reads can probe executable availability.
 
 ```bash
-ocx storage policy show --json
-ocx storage policy set --archived-bytes-over 1073741824 --reduce-to-bytes 536870912 --json
-ocx storage policy show --json
+orl storage policy show --json
+orl storage policy set --archived-bytes-over 1073741824 --reduce-to-bytes 536870912 --json
+orl storage policy show --json
 ```
 
 This saves nested `trigger.archivedBytesOver` and `target.reduceToBytes` without
@@ -1060,13 +1060,13 @@ append `--enabled true` or run cleanup unless that additional effect is intended
 Only when revocation without remote cleanup is explicitly requested:
 
 ```bash
-ocx link revoke --link-id lnk_0123456789abcdef --force --yes --json
+orl link revoke --link-id lnk_0123456789abcdef --force --yes --json
 ```
 
 The link ID is fictional; use the selected actual ID. A successful forced revoke
 reports `remoteCleanup:"skipped"`, derived from force intent. Idempotent not-found
 reports `remoteCleanup:"unverified"`; neither proves a remote disconnect attempt.
-Both can exit 0. Follow the receipt's `ocx disconnect` recovery on the remote
+Both can exit 0. Follow the receipt's `orl disconnect` recovery on the remote
 client when authorized. `--force` requires `--yes`; `--yes` alone is invalid.
 Ordinary revoke remains unchanged.
 
@@ -1075,9 +1075,9 @@ Ordinary revoke remains unchanged.
 Discover the installed flags, then choose a one-shot view or follow:
 
 ```bash
-ocx logs --help
-ocx logs --limit 200 --json
-ocx logs --follow --events --limit 200
+orl logs --help
+orl logs --limit 200 --json
+orl logs --follow --events --limit 200
 ```
 
 `--events` requires follow, implies JSONL and permits redundant `--jsonl`; `--json`
@@ -1092,7 +1092,7 @@ between polls or evicted from the ring.
 If a row feed is required instead:
 
 ```bash
-ocx logs --follow --jsonl --limit 200
+orl logs --follow --jsonl --limit 200
 ```
 
 This preserves the legacy row shape but re-emits changed occurrences, including
@@ -1101,9 +1101,9 @@ request ID. Row output cannot represent removals, resets or exact window order;
 use events for that. Log follow limit is 1–2000 (default 200).
 
 ```bash
-ocx observe injection --help
-ocx observe injection --limit 500 --json
-ocx observe injection --follow --jsonl --limit 500
+orl observe injection --help
+orl observe injection --limit 500 --json
+orl observe injection --follow --jsonl --limit 500
 ```
 
 Injection follow emits ordered `{seq,at,line}` rows, advancing its internal `after`;
@@ -1122,10 +1122,10 @@ exit status and retained observations; a stopped follow is not a completed histo
 ## 26. Read timeline, ledger health and one key's usage
 
 ```bash
-ocx companion timeline --help
-ocx companion timeline --hours 24 --bucket-minutes 60 --metric total --aggregation sum --grouping model --model example/model-a --hide-provider excluded-provider --json
-ocx health --json
-ocx system health --json
+orl companion timeline --help
+orl companion timeline --hours 24 --bucket-minutes 60 --metric total --aggregation sum --grouping model --model example/model-a --hide-provider excluded-provider --json
+orl health --json
+orl system health --json
 ```
 
 Timeline models/providers above are fictional. Repeat `--model` once per exact
@@ -1146,8 +1146,8 @@ that every subsystem is healthy. `system status` remains a separate aggregate.
 On a standalone/Hub management host, use a non-secret key ID from masked listing:
 
 ```bash
-ocx access key list --json
-ocx usage --api-key-id key-example --range 7d --json
+orl access key list --json
+orl usage --api-key-id key-example --range 7d --json
 ```
 
 Replace the fictional ID. Require matching `filter.apiKeyId` in the result; an
@@ -1160,8 +1160,8 @@ on the Hub. A data key cannot grant management access.
 Rename only the label of an authorized key, then re-list:
 
 ```bash
-ocx access key rename key-example 'Research client' --json
-ocx access key list --json
+orl access key rename key-example 'Research client' --json
+orl access key list --json
 ```
 
 Use a unique ID or unambiguous name. The narrow write sends only ID/name, retains
@@ -1175,9 +1175,9 @@ retrying. `api-key rename` shares this command family.
 First discover grammar without contacting a model:
 
 ```bash
-ocx access test --help
-ocx access audio transcribe --help
-ocx access audio live-check --help
+orl access test --help
+orl access audio transcribe --help
+orl access audio live-check --help
 ```
 
 These tasks may contact upstream services and spend quota; transcription also
@@ -1185,13 +1185,13 @@ uploads the chosen file. Obtain explicit operator authorization for the particul
 model request, file upload or live readiness check. The operator then uses a
 private terminal outside the agent session and attaches an already-approved
 secret source to stdin. Never ask for the key in chat, read it into agent tools,
-or put it in argv/environment. The following are the **ocx side** of that private
+or put it in argv/environment. The following are the **orl side** of that private
 stdin pipe, not commands for the agent to run or direct interactive key prompts:
 
 ```bash
-ocx access test example/model --protocol responses --api-key-stdin --json
-ocx access audio transcribe sample.wav --model gpt-4o-mini-transcribe --api-key-stdin --json
-ocx access audio live-check --model gpt-live-1-codex --api-key-stdin --json
+orl access test example/model --protocol responses --api-key-stdin --json
+orl access audio transcribe sample.wav --model gpt-4o-mini-transcribe --api-key-stdin --json
+orl access audio live-check --model gpt-live-1-codex --api-key-stdin --json
 ```
 
 These are alternative tasks, not a batch to execute. Model/file examples must be
@@ -1250,9 +1250,9 @@ reconnect, and no promise that opening the upstream session costs nothing.
 ## 28. Select a bounded log window and search usage model rows
 
 ```bash
-ocx logs filter --help
-ocx logs filter --surface claude --status errors --time-window 1h --scan-limit 2000 --limit 50 --json
-ocx usage --range 7d --search 'model-a' --json
+orl logs filter --help
+orl logs filter --surface claude --status errors --time-window 1h --scan-limit 2000 --limit 50 --json
+orl usage --range 7d --search 'model-a' --json
 ```
 
 `logs filter` fetches one recent snapshot, selects within it, then returns the
@@ -1285,8 +1285,8 @@ search stays inside self-only Hub usage; it cannot select another key's records.
 ## 29. Read the saved companion usage view
 
 ```bash
-ocx companion show --json
-ocx companion usage --json
+orl companion show --json
+orl companion usage --json
 ```
 
 Run on the machine serving the intended management API. Usage captures saved
@@ -1307,9 +1307,9 @@ these separate reads as one atomic snapshot.
 ## 30. Read one API-key pool's quota
 
 ```bash
-ocx account list example --json
-ocx account list example --quota --json
-ocx account list example --quota --refresh --json
+orl account list example --json
+orl account list example --quota --json
+orl account list example --quota --refresh --json
 ```
 
 Replace `example` with a configured API-key provider. The first command lists

@@ -1,9 +1,9 @@
 ---
 title: Platform desteği
-description: OpenCodex'in macOS, Windows ve Linux'ta yapabildikleri ve bazı yeteneklerin neden platforma özgü kaldığı.
+description: OpenRelay'in macOS, Windows ve Linux'ta yapabildikleri ve bazı yeteneklerin neden platforma özgü kaldığı.
 ---
 
-OpenCodex macOS, Windows ve Linux'ta çalışır. Büyük bölümü üçünde de aynı
+OpenRelay macOS, Windows ve Linux'ta çalışır. Büyük bölümü üçünde de aynı
 şekilde davranır; birkaç yetenek işletim sisteminin sağladığı mekanizmalara
 bağlıdır. Bu sayfa hangilerini ve nedenini açıklar.
 
@@ -21,7 +21,7 @@ bağlıdır. Bu sayfa hangilerini ve nedenini açıklar.
 Üç platformda da **kilidi açık bir işletim sistemi kimlik bilgisi servisi
 bulunduğunda** desteklenir: macOS'ta Keychain, Windows'ta Credential Manager,
 Linux'ta libsecret. Kilitli bir anahtarlıkta veya başsız oturumda kilidi açık
-bir servis yoktur; bu nedenle depo kullanılamaz ve OpenCodex sessizce başka
+bir servis yoktur; bu nedenle depo kullanılamaz ve OpenRelay sessizce başka
 bir yola geçmek yerine bunu bildirir. Saklama kuralları için
 [Sağlayıcılar](/tr/reference/configuration/providers/) bölümüne bakın.
 
@@ -47,18 +47,18 @@ gerektirir.
 
 Claude Code'un ihtiyaç duyduğu diğer her şey tüm platformlarda çalışır. Aynı
 değişkenleri kendiniz ayarlayabilir veya onları doğrudan alt sürece ileten
-`ocx claude` komutunu çalıştırabilirsiniz.
+`orl claude` komutunu çalıştırabilirsiniz.
 
 ## İçe aktarma ve yapıştırma
 
 ### Meta Muse Code
 
-macOS'ta OpenCodex, `muse login` sonrasında Muse Code CLI'ın zaten sakladığı API
+macOS'ta OpenRelay, `muse login` sonrasında Muse Code CLI'ın zaten sakladığı API
 anahtarını içe aktarır; böylece ikinci bir anahtar sağlamanız istenmez.
 
 Diğer platformlarda anahtarı yapıştırmanız istenir. Meta yerel bir Windows CLI
 sunmaz. Linux'ta CLI vardır ancak kimlik bilgisini nerede sakladığı
-doğrulanmamıştır; OpenCodex bu yüzden kimlik bilgisi deposunu tahmin etmez.
+doğrulanmamıştır; OpenRelay bu yüzden kimlik bilgisi deposunu tahmin etmez.
 Aynı anahtar [Meta geliştirici konsolunda](https://dev.meta.ai) görünür;
 yapıştırılan anahtar da içe aktarılanla aynı biçim denetiminden ve Model API
 üzerinden aynı canlı doğrulamadan geçer.
@@ -66,17 +66,17 @@ yapıştırılan anahtar da içe aktarılanla aynı biçim denetiminden ve Model
 ## Windows notları
 
 Windows servisi Görev Zamanlayıcı altında veya yerel WinSW servisi olarak
-çalışabilir; bu iki seçenek birbirini dışlar. `ocx service repair`, ikisinin
+çalışabilir; bu iki seçenek birbirini dışlar. `orl service repair`, ikisinin
 de durumunu bulursa devam etmeyi reddeder. Hangisinin amaçlandığını tahmin
 etmek, aynı port için yarışan iki proxy'ye yol açabilir.
 
 İngilizce olmayan bir Windows kurulumunda konsol çıktısı UTF-8 yerine sistemin
-kod sayfasıyla gelir. OpenCodex buna göre çözer; böylece ASCII dışı karakterli
+kod sayfasıyla gelir. OpenRelay buna göre çözer; böylece ASCII dışı karakterli
 hesap adları doğru bulunur.
 
 ## Bir şey kullanılamadığında
 
-OpenCodex bir denetimi sessizce devre dışı bırakmak yerine gerçek nedeni
+OpenRelay bir denetimi sessizce devre dışı bırakmak yerine gerçek nedeni
 bildirir. Bir yetenek platformunuzda kullanılamıyorsa hata veya kontrol
 paneli, eksik mekanizmayı ve desteklenen alternatifi gösterir. Bunu yapmayan
 bir durumla karşılaşırsanız bildirilmesi gereken bir hatadır.

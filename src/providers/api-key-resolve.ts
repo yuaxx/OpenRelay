@@ -90,7 +90,7 @@ function readKeychain(account: string): string | undefined {
   }
   if (!warnedAccounts.has(account)) {
     warnedAccounts.add(account);
-    console.warn(`[opencodex] provider key reference keychain:${account} could not be read from the OS keychain; requests for this provider have no credential until the keychain is available (no plaintext fallback)`);
+    console.warn("[openrelay] Provider key reference could not be read from the OS keychain; requests for this provider have no credential until the keychain is available (no plaintext fallback)");
   }
   return undefined;
 }

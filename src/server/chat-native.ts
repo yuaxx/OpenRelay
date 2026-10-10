@@ -1,6 +1,7 @@
 import { createPhysicalSendReporter } from "../lib/request-execution-budget";
 import { createInferenceSendBudget } from "./inference/context";
 import { buildOpenAIChatPassthroughRequest, createOpenAIChatAdapter } from "../adapters/openai-chat";
+import { createRtkTransport } from "../compression/rtk/transport";
 import type { AdapterRequest, ProviderAdapter } from "../adapters/base";
 import { isNativeChatRouteEligible } from "./chat-native-eligibility";
 import {
@@ -332,11 +333,12 @@ export async function runNativeChatAttempt(
     translatorBudget.chargeRetained(bytes, { kind: "request_copies" });
     retainedRequestBytes = bytes;
   };
+  const rtkBody = createRtkTransport(config.rtk?.enabled === true, translatorBudget, false, { signal: req.signal }).prepareBody(execution.chatBody, "chat");
   const buildActiveRequest = () => {
     recordAttemptCredentialSource(attempt, route.providerName, activeProvider, activeAdapter.name);
     return buildOpenAIChatPassthroughRequest(
       activeProvider,
-      execution.chatBody,
+      rtkBody,
       route.modelId,
       requestedStream,
       fastPolicyForModel(activeProvider, route.modelId, route.providerName, "chat"),

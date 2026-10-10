@@ -19,12 +19,12 @@ import {
 } from "./runtime-api";
 
 export const LINK_USAGE = `Usage:
-  ocx link port [--json]
-  ocx link issue --alias <alias> --tunnel-port <port> [--json]
-  ocx link status [--json]
-  ocx link revoke --link-id <id> [--force --yes] [--json]
+  orl link port [--json]
+  orl link issue --alias <alias> --tunnel-port <port> [--json]
+  orl link status [--json]
+  orl link revoke --link-id <id> [--force --yes] [--json]
 
-Forced revoke skips remote cleanup. Run ocx disconnect on the remote client.`;
+Forced revoke skips remote cleanup. Run orl disconnect on the remote client.`;
 
 type LinkState = "connecting" | "connected" | "reconnecting" | "failed" | "idle";
 type ListenerState = "off" | "listening" | "failed";
@@ -293,7 +293,7 @@ async function runRevoke(args: string[], deps: LinkCliDeps): Promise<void> {
     remoteCleanup = "unverified";
   }
   if (force) {
-    const recovery = "Run ocx disconnect on the remote client.";
+    const recovery = "Run orl disconnect on the remote client.";
     printData({ linkId, remoteCleanup, recovery }, wantsJson, [
       remoteCleanup === "skipped" ? `Revoked ${linkId}; remote cleanup was skipped.` : `Link ${linkId} is already absent; remote cleanup is unverified.`,
       recovery,

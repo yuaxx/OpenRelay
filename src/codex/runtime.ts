@@ -403,7 +403,7 @@ export function clearPersistedCodexRuntime(deps: ResolveCodexRuntimeDeps = {}): 
     const code = (error as NodeJS.ErrnoException | null)?.code;
     if (code === "ENOENT") return;
     console.warn(
-      `[opencodex] Could not remove the stale Codex runtime pin at ${displayCodexRuntimePath(codexRuntimeStatePath(configDir))}`
+      `[openrelay] Could not remove the stale Codex runtime pin at ${displayCodexRuntimePath(codexRuntimeStatePath(configDir))}`
       + ` (${code ?? "unknown error"}). It will be re-probed until the file is removed.`,
     );
   }
@@ -1199,7 +1199,7 @@ function persistResolvedCodexRuntime(
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       const persistError = redactUserPath(redactSecretString(message)).slice(0, 200);
-      console.warn(`[opencodex] Failed to persist Codex runtime selection: ${persistError}`);
+      console.warn(`[openrelay] Failed to persist Codex runtime selection: ${persistError}`);
       return cloneAndDeepFreeze({ ...result, persistError });
     }
   }
@@ -1225,13 +1225,13 @@ function persistResolvedCodexRuntime(
 
 export function formatRuntimeLogLine(runtime: ResolvedCodexRuntime): string {
   const path = displayCodexRuntimePath(runtime.command);
-  return `[opencodex] Codex runtime: ${path} (version=${runtime.version ?? "unknown"}, source=${runtime.source})`;
+  return `[openrelay] Codex runtime: ${path} (version=${runtime.version ?? "unknown"}, source=${runtime.source})`;
 }
 
 export function formatClampLogLines(diagnostic: EffortClampDiagnostic): string[] {
   const efforts = diagnostic.removedEfforts.join(", ");
   return [
-    `[opencodex] Removed unsupported reasoning efforts: ${efforts}`,
-    "[opencodex] Run ocx doctor for diagnosis and recovery.",
+    `[openrelay] Removed unsupported reasoning efforts: ${efforts}`,
+    "[openrelay] Run ocx doctor for diagnosis and recovery.",
   ];
 }

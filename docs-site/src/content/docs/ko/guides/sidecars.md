@@ -3,7 +3,7 @@ title: "사이드카: 웹 검색 및 비전"
 description: 네이티브 ChatGPT 사이드카를 통해 라우팅 모델에 실제 웹 검색을, 텍스트 전용 모델에 이미지 이해 기능을 제공합니다.
 ---
 
-라우팅 모델마다 호스팅 **웹 검색**이나 네이티브 **이미지 입력** 지원 범위가 다릅니다. opencodex는
+라우팅 모델마다 호스팅 **웹 검색**이나 네이티브 **이미지 입력** 지원 범위가 다릅니다. OpenRelay는
 ChatGPT 로그인(`forward`) 프로바이더나 저장된 Anthropic OAuth 프로바이더를 사용하는 두
 사이드카로 부족한 기능을 보완하며, 웹 검색은 명시적인 `xai` 백엔드로 저장된 Grok OAuth도 사용할 수
 있습니다. 사이드카 오류는 턴 전체를 실패시키지 않고 길이가 제한된 도구
@@ -18,7 +18,7 @@ ChatGPT 로그인(`forward`) 프로바이더나 저장된 Anthropic OAuth 프로
 
 ## 웹 검색 사이드카
 
-Codex가 패스스루가 아닌 라우팅 모델에 호스팅 `web_search`를 요청하면 opencodex는 다음 순서로
+Codex가 패스스루가 아닌 라우팅 모델에 호스팅 `web_search`를 요청하면 OpenRelay는 다음 순서로
 처리합니다.
 
 1. 호스팅 `web_search` 도구를 **제거하고** 라우팅 모델에는 합성 `web_search(query)` 함수 도구를
@@ -32,7 +32,7 @@ Codex가 패스스루가 아닌 라우팅 모델에 호스팅 `web_search`를 �
    **반복**합니다. 한도에 닿으면 검색 도구를 제거하고 최종 답변을 강제합니다. `apply_patch`나 shell
    같은 실제 클라이언트 도구가 나오면 턴을 끝내 해당 호출이 Codex에 전달되게 합니다.
 
-라우팅 모델의 모든 반복은 업스트림에 `stream: true`를 요청하지만, opencodex는 검색 여부나 최종
+라우팅 모델의 모든 반복은 업스트림에 `stream: true`를 요청하지만, OpenRelay는 검색 여부나 최종
 답변을 결정하기 전에 의미 있는 event를 내부에서 전부 버퍼링합니다. 첫 번째 반복의 최종
 header/status와 429 key rotation만 미리 가져옵니다. 따라서 합성 검색 호출과 중간 출력은 클라이언트에
 모델 출력으로 노출되지 않습니다.
@@ -72,7 +72,7 @@ stall은 전체 생성 timeout이 아닙니다. SSE가 시작되기 전 실패�
 ## 비전 사이드카
 
 라우팅 모델이 해당 프로바이더의 `noVisionModels`에 있거나 해당 모델이 `modelInputModalities`에서
-텍스트 전용으로 선언되어 있고 요청에 이미지가 들어오면, opencodex는 사용 가능한 비전 사이드카 계획이 있을 때에만
+텍스트 전용으로 선언되어 있고 요청에 이미지가 들어오면, OpenRelay는 사용 가능한 비전 사이드카 계획이 있을 때에만
 메인 호출 **전에** 각 이미지를 설명한 텍스트로 바꿉니다. 사용 가능한 계획이 없으면 원본 이미지는 텍스트 전용
 백엔드로 전달되지 않고 제거됩니다. 모델 카탈로그는 사이드카로 처리되는 모든 모델에 image input을 알립니다.
 콤보는 모든 멤버가 네이티브로 또는 사이드카를 통해 이미지를 수용하고 콤보의 `imageInput` 설정이 비활성화되지 않은
@@ -140,13 +140,13 @@ OpenAI 실행 경로, Dashboard, 관리 API는 `gpt-5.6-luna`를 폴백으로 �
 `PUT /api/sidecar-settings`는 같은 필드를 받습니다. 부분 업데이트는 보내지 않은 키를 유지합니다. `timeoutMs`는 런타임 정수 범위(1–2147483647 ms)를 사용합니다.
 
 웹 검색 사이드카 카드도 같은 구성입니다. 모델 선택기의 첫 행은 **끔 (Off)** 행입니다. 끄면
-OpenCodex가 `web_search` 가로채기를 멈추고 Codex 통합이 `~/.codex/config.toml`에
+OpenRelay가 `web_search` 가로채기를 멈추고 Codex 통합이 `~/.codex/config.toml`에
 `web_search = "disabled"`를 씁니다. Codex는 자체 모드가 그렇게 될 때까지 네이티브 호스팅
 `web_search` 도구를 계속 광고하므로, MCP 검색 서버만 유일한 검색 경로가 되어야 할 때
 필요합니다. 다시 켜면 이 줄이 제거되고 Codex 저널에 기록된 운영자가 작성한 루트
 `web_search` 줄이 복원됩니다. 이 쓰기에는 관리되는 `~/.codex/config.toml`
-(`ocx sync`)이 필요하며, 쓰기가 일어나지 않으면 대시보드 카드가 경고하고
-`ocx agent sidecar web --enabled off`가 결과를 보고합니다.
+(`orl sync`)이 필요하며, 쓰기가 일어나지 않으면 대시보드 카드가 경고하고
+`orl agent sidecar web --enabled off`가 결과를 보고합니다.
 
 파일을 직접 고치고 싶다면 이전처럼 `config.json`에서 `enabled`를 `false`로 두면 됩니다. Anthropic OAuth 검색과 이미지 설명은 기존 Claude Code OAuth
 fingerprint 선례를 따르지만, 실제 계정과 작업량으로 충분히 soak test하는 편이 좋습니다. 전체

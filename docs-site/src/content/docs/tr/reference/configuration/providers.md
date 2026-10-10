@@ -3,7 +3,7 @@ title: Sağlayıcı Yapılandırması
 description: Sağlayıcı girdileri, kimlik doğrulama, uç noktalar, model katalogları, kotalar, bağlam sınırları ve sağlayıcıya özgü seçenekler.
 ---
 
-Bir sağlayıcı, opencodex'e bir modelin nerede yaşadığını, hangi hat adaptörünü
+Bir sağlayıcı, OpenRelay'e bir modelin nerede yaşadığını, hangi hat adaptörünü
 konuştuğunu ve isteklerin nasıl doğrulandığını söyler.
 
 ## İlk kayıtta model seçimi
@@ -13,13 +13,13 @@ Yeni OAuth dışı bağlantılar, modelleri göstermeden önce güvenilir bir mo
 Bu kural yalnızca yeni sağlayıcı kaydında uygulanır. Güncellemeler, yeniden giriş ve anahtar değişimi mevcut seçimleri sıfırlamaz. İlk ayardan sonra gerekli modelleri Models üzerinden veya aşağıdaki CLI komutlarıyla açın. Sonradan gelen yeni modellerin ayrı politikası değişmez. `<model-id>` yerine listedeki bir ID yazın.
 
 ```sh
-ocx models live --provider openrouter
-ocx models enable '<model-id>'
-ocx models disable '<model-id>'
-ocx models provider openrouter on
+orl models live --provider openrouter
+orl models enable '<model-id>'
+orl models disable '<model-id>'
+orl models provider openrouter on
 ```
 
-Arayüzde kayıt veya OAuth girişi tamamlanınca Models sayfasını açan bir bilgilendirme penceresi gösterilir. CLI model yönetimi komutlarını yazdırır; JSON sonraki adımları içerir. `--no-wait` tamamlanmış değil, bekleyen girişi bildirir. Canlı model komutlarından önce proxy’yi `ocx start` ile başlatın.
+Arayüzde kayıt veya OAuth girişi tamamlanınca Models sayfasını açan bir bilgilendirme penceresi gösterilir. CLI model yönetimi komutlarını yazdırır; JSON sonraki adımları içerir. `--no-wait` tamamlanmış değil, bekleyen girişi bildirir. Canlı model komutlarından önce proxy’yi `orl start` ile başlatın.
 
 ## Sağlayıcı ile ilgili üst düzey alanlar
 
@@ -36,7 +36,7 @@ Arayüzde kayıt veya OAuth girişi tamamlanınca Models sayfasını açan bir b
 | `codexAccountNamespaces?` | `Record<string, string>` | — | İsteğe bağlı olarak rastgele bir genel model seçiciden saklanan bir Codex hesap hedefine eşleme. Hesap nitelikli seçici satırları etkinleştirildiğinde, hedefi mevcut olan her seçici, Codex seçicisine ayrı `<seçici>/<yerel-openai-modeli>` satırları ekler; her satır yalnızca o hesabı kullanır. Herhangi bir seçici etkinken, yalın yerel satırlar seçicide gizlenir, ancak açıkça devre dışı bırakılmadıkça kimlikleri yönlendirilebilir kalır ve ham `/v1/models` tarafından listelenir. |
 | `codexAccountPickerEnabled?` | `boolean` | harita boşken kapalı | Uygun `codexAccountNamespaces` eşlemelerinin hesap nitelikli Codex seçici satırları oluşturup oluşturmayacağını denetler. `true`, eşlenen satırların görünmesine izin verir. Boş olmayan bir haritayla atlanırsa, geriye dönük uyumluluk için etkin olarak değerlendirilir; harita boşsa kapalıdır. `false`, eşlemeleri silmeden veya tam `<seçici>/<yerel-openai-modeli>` yönlendirmesini devre dışı bırakmadan oluşturulan satırları gizler ve yalın yerel seçici satırlarını geri yükler. |
 | `activeCodexAccountId?` | `string` | — | Sonraki istek için manuel olarak seçilen Havuz hesabı. Seçim iş parçacığı bağlılığını temizler; devam eden istekler yakalanan kimlik bilgilerini korur. |
-| `codexAccountPriorities?` | `Record<string, number>` | — | Codex havuzu için hesap başına seçim sırası: hesap kimliği → `-100` ile `100` arası tam sayı, **daha yüksek olan daha önce kullanılır**, yoksa `0` anlamına gelir. Bu bir öncelik sırası sınırıdır, bir uygunluk sınırı değildir: seçim, zaten uygun olan hesapları hala kota payı bulunan en yüksek katmana daraltır ve `accountPoolStrategy` daha sonra bu katman içinde seçim yapar. Bir katman, yalnızca her üye sıfırdan farklı kendi etkin eşiğine (hesaba özel değer veya genel varsayılan) ulaştığında, soğumada olduğunda, yumuşak kaçınıldığında, duraklatıldığında veya yeniden kimlik doğrulama gerektiğinde atlanır — bilinmeyen kota asla bir katmanı boşaltmaz. Sıralama asla uygun olmayan bir hesabı seçilebilir yapmaz ve zaten bir hesabı olan bir iş parçacığını asla yeniden bağlamaz. Ana `__main__` hesap eşit şartlarda katılır, bu sayede Codex Desktop girişi en son tükenecek şekilde ayarlanabilir. Hiçbir girdi olmadığında havuz tam olarak eskisi gibi davranır. Hatalı biçimlendirilmiş bir harita bir konsol uyarısıyla yok sayılır (sıralama kapalı, yapılandırma onarımı yok). `ocx account priority` ve Codex Auth sayfası tarafından yönetilir. |
+| `codexAccountPriorities?` | `Record<string, number>` | — | Codex havuzu için hesap başına seçim sırası: hesap kimliği → `-100` ile `100` arası tam sayı, **daha yüksek olan daha önce kullanılır**, yoksa `0` anlamına gelir. Bu bir öncelik sırası sınırıdır, bir uygunluk sınırı değildir: seçim, zaten uygun olan hesapları hala kota payı bulunan en yüksek katmana daraltır ve `accountPoolStrategy` daha sonra bu katman içinde seçim yapar. Bir katman, yalnızca her üye sıfırdan farklı kendi etkin eşiğine (hesaba özel değer veya genel varsayılan) ulaştığında, soğumada olduğunda, yumuşak kaçınıldığında, duraklatıldığında veya yeniden kimlik doğrulama gerektiğinde atlanır — bilinmeyen kota asla bir katmanı boşaltmaz. Sıralama asla uygun olmayan bir hesabı seçilebilir yapmaz ve zaten bir hesabı olan bir iş parçacığını asla yeniden bağlamaz. Ana `__main__` hesap eşit şartlarda katılır, bu sayede Codex Desktop girişi en son tükenecek şekilde ayarlanabilir. Hiçbir girdi olmadığında havuz tam olarak eskisi gibi davranır. Hatalı biçimlendirilmiş bir harita bir konsol uyarısıyla yok sayılır (sıralama kapalı, yapılandırma onarımı yok). `orl account priority` ve Codex Auth sayfası tarafından yönetilir. |
 | `activeCodexAccountPinned?` | `string` | — | Operatörün en son elle seçtiği hesap kimliği. Ayarlandığı sürece, pin tükenme, hariç tutma, silme veya açık bir yük devretme/yükseltme ile serbest bırakılana kadar daha yüksek bir `codexAccountPriorities` katmanı onu öncelikleyemez. Sınırlı katman içindeki sıradan round-robin hareketi onu serbest bırakmaz. Herhangi bir `codexAccountPriorities` girdisi yazmak da pini serbest bırakır, böylece bir sıra var olmadan önce yapılan bir pin daha sonra ayarlanan bir pinin önüne geçemez. `GET /api/codex-auth/active`, hem geçerli hesabın sabitlenip sabitlenmediğini (`pinned`) hem de tavanı taşıyan hesabı (`pinnedAccountId`) bildirir. |
 | `autoSwitchThreshold?` | `number` | `80` | Proaktif geçiş için kullanım eşiği. `quota`, bağımsız görevlerin bir sonraki isteğini yeniden değerlendirebilir. Bağlı görevler varsayılan olarak (`pool.cacheAffinity`) eşiğin ötesinde hesabını korur; hesap tükenene veya hizmet veremez hale gelene kadar kalır ve o zaman yalnızca kullanımı kesin olarak daha düşük ve gerçek kota payı olan bir hesaba geçer. `pool.cacheAffinity: false` ile bağlı görevler de bu eşikte yeniden değerlendirilir. `fill-first` bunu yalnızca bağımsız atama için tükenme noktası olarak kullanır; normal `round-robin` seçimi bunu kullanmaz. Puan, bilinen en sıcak 5 saatlik, haftalık veya 30 günlük kota penceresini kullanır. `0`, yalnızca kullanıma dayalı proaktif geçişi devre dışı bırakır, bağımsız atamayı veya arıza kurtarmayı devre dışı bırakmaz. |
 | `codexAccountAutoSwitchThresholds?` | `Record<string, number>` | — | Hesap başına `autoSwitchThreshold` geçersiz kılmaları: hesap kimliği → `0`–`100` tam sayısı. Kayıt yoksa genel değer devralınır; `0` yalnızca bu hesaptan kullanıma dayalı geçişi kapatır. Ana `__main__` hesabı desteklenir. Codex Auth hesap kartından yönetilir. Hesaba özel değeri etkinleştirmek, mevcut genel eşiği sabit bir hesap değerine kopyalar. `0` dahil bu değer, genel eşik daha sonra değişse de önceliğini korur. Devre dışı bırakmak `threshold: null` gönderir, kaydı siler ve mevcut genel eşikle gelecekteki değişikliklerini devralmayı yeniden etkinleştirir. |
@@ -54,7 +54,7 @@ Arayüzde kayıt veya OAuth girişi tamamlanınca Models sayfasını açan bir b
 
 Bu stratejilerde her hesabın etkin eşiği, varsa `codexAccountAutoSwitchThresholds` girdisi, yoksa genel `autoSwitchThreshold` değeridir. Sıfır yalnızca kullanıma dayalı proaktif geçişi kapatır; başlangıç bağlaması, kesin kilit, bekleme süresi, model erişim denetimleri ve hata kurtarma uygulanmaya devam eder.
 
-Seçici adları kullanıcı tarafından seçilen genel etiketlerdir; opencodex bunlara
+Seçici adları kullanıcı tarafından seçilen genel etiketlerdir; OpenRelay bunlara
 hiçbir hesap rolü anlambilimi atamaz. `codexAccountNamespaces` anahtarları 1–64
 karakterdir, başında ve sonunda bir ASCII harf veya rakam bulunur, içinde
 harfler, rakamlar, `.`, `_` veya `-` yer alır. Ayrılmış JavaScript nesne adları
@@ -89,7 +89,7 @@ kullanın; rotalar arası kimlik bilgisi geri dönüşü yoktur. API GPT-5.6 sat
 kimlikleri `reasoning.mode: "pro"` ile temel hat modeline yeniden yazılır.
 
 `openaiProviderTierVersion: 2`, geçerli tek sağlayıcılı projeksiyonu işaretler.
-opencodex, sevk edilen bir v1 yapılandırmasını geçirmeden önce farklı bir yedeği
+OpenRelay, sevk edilen bir v1 yapılandırmasını geçirmeden önce farklı bir yedeği
 değiştirmeden `config.json.pre-openai-tiers-v2.bak` oluşturur ve bilinen eski ad
 alanlı seçilmiş kimlikleri yalın kimliklere yeniden yazar.
 
@@ -174,7 +174,7 @@ alanlı seçilmiş kimlikleri yalın kimliklere yeniden yazar.
 Sağlayıcı kaydı ve değiştirme (`POST /api/providers`), bellekteki veya diskteki yapılandırmayı değiştirmeden önce `responsesPath` ve `chatCompletionsPath` değerlerini doğrular. `PATCH /api/providers?name=<provider>`, istek gövdesini kayıtlı sağlayıcıyla birleştirir; `disabled` dışındaki alanlara dokunan güncellemeler (yalnızca `requestPacing` içeren güncellemeler hariç), kaydetmeden önce birleştirilmiş sağlayıcının yollarını aynı şekilde doğrular ve geçersiz bir korunmuş yol `400` döndürüp yapılandırmayı değiştirmez. Aynı yol kuralları yapılandırma dosyası yüklenirken de uygulanır.
 
 API anahtarı sağlayıcıları değişmez bir anahtar veya bir ortam referansı
-tutabilir. OAuth sağlayıcıları `ocx login` tarafından doldurulan kimlik bilgisi
+tutabilir. OAuth sağlayıcıları `orl login` tarafından doldurulan kimlik bilgisi
 deposunu kullanır; abonelik destekli Claude Code başlatma davranışı
 [`claudeCode.authMode`](/tr/reference/configuration/server/#claude-code-claudecode) altında
 yapılandırılır.
@@ -196,16 +196,16 @@ Hedef; bağdaştırıcı, temel URL (şema ve ana makine büyük/küçük harf g
 ## Sağlayıcı teşhis giden güvenliği
 
 Kontrol paneli bağlantı testleri ve canlı model keşfi sınırlı bir yalnızca GET
-aktarımı kullanır. Giden bir proxy olmadan opencodex ana bilgisayar adını bir
+aktarımı kullanır. Giden bir proxy olmadan OpenRelay ana bilgisayar adını bir
 kez çözer ve yalnızca bu doğrulanmış adrese bağlanır. HTTPS orijinal Host, SNI
 ve sertifika doğrulamasını korur; sağlayıcı yapılandırması sertifika
 denetimlerini devre dışı bırakamaz.
 
 Bu işlemler [sunucunun yapılandırılmış giden fetch yolunu](/tr/reference/configuration/server/)
 kullanır. `config.proxy` ile ayarlanan veya SOCKS5 `ALL_PROXY`'den devralınan sunucu SOCKS5 proxy'si,
-hedef `NO_PROXY` ile eşleşmediğinde OpenCodex'in yerleşik tünelini kullanır. `HTTP_PROXY` ve `HTTPS_PROXY`, Bun'ın yerel HTTP(S) işlemesini korur; SOCKS olmayan bir
+hedef `NO_PROXY` ile eşleşmediğinde OpenRelay'in yerleşik tünelini kullanır. `HTTP_PROXY` ve `HTTPS_PROXY`, Bun'ın yerel HTTP(S) işlemesini korur; SOCKS olmayan bir
 `ALL_PROXY` ise yerel HTTP fetch rotası değildir. URL ve değişmez adres denetimleri hâlâ çalışır,
-ancak seçilen proxy son rotayı, DNS yanıtını ve eşi belirler; bu nedenle opencodex bu eşi
+ancak seçilen proxy son rotayı, DNS yanıtını ve eşi belirler; bu nedenle OpenRelay bu eşi
 sabitleyemez veya doğrulayamaz. Bu açık bir güvenlik sınırlamasıdır.
 
 Özel/yerel hedefler `allowPrivateNetwork: true` ve giden bir proxy etkin
@@ -238,7 +238,7 @@ istem önbelleği yeniden kullanımı garanti edilmez ve önbelleğin tekrar ıs
 gerekebilir.
 
 Bir **401/403** durumunda App girişi bu hesabın işleme özel bağlılığını temizler
-ve yeniden kimlik doğrulama gerektirir. Bir **429** durumunda opencodex
+ve yeniden kimlik doğrulama gerektirir. Bir **429** durumunda OpenRelay
 `Retry-After`'ı dikkate alır, hesap soğuma süresini başlatır, bağlılığı temizler
 ve isteği başka bir uygun Havuz hesabına döndürebilir. Bu arıza geçişleri
 `autoSwitchThreshold: 0` ile etkin kalır; bu ayar yalnızca kullanıma dayalı
@@ -284,14 +284,14 @@ kimlik doğrulama hatası değil, bilindiğinde `Retry-After` ile 429 alır.
 
 :::caution[Deneysel]
 Anthropic hesap politikası riskini anlamadığınız sürece bunu devre dışı bırakın.
-Emin olmadığınızda manuel `ocx account use anthropic <id>` geçişini tercih edin.
+Emin olmadığınızda manuel `orl account use anthropic <id>` geçişini tercih edin.
 :::
 
 ### Anthropic · Pool 2 (`anthropic2`)
 
 `anthropic2` ("Anthropic · Pool 2"), kendi hesap havuzuna sahip ikinci yerleşik Anthropic OAuth sağlayıcısıdır. `anthropic` ile aynı Anthropic uygulamasını çalıştırır: aynı giriş akışı, istek biçimi, yerel Messages ve Responses köprüsü ile aynı model meta verileri. Yalnızca hesaplar ve onları çevreleyen havuz ayrıdır. Havuzu model önekiyle seçersiniz: `anthropic/claude-sonnet-5` birincil havuzu, `anthropic2/claude-sonnet-5` ise Pool 2'yi kullanır.
 
-Pool 2 siz ekleyene kadar etkin değildir. `ocx login anthropic2` ile giriş yapın veya dashboard Sağlayıcılar sayfasında **Anthropic · Havuz 2** ekleyin. İlk başarılı giriş, `"anthropicOAuthInstance": "anthropic2"` işaretiyle `providers.anthropic2` oluşturur. Pool 2 hiçbir zaman varsayılan sağlayıcı olmaz: öneksiz `claude-*` model adları, varsayılan model ve Claude Code çağıran yönlendirmesi `anthropic` olarak çözümlenmeye devam eder. Daha önce kendiniz oluşturduğunuz işaretsiz bir `anthropic2` girdisi özel anlamını korur; giriş ad çakışmasını reddeder ve ne girdiyi ne de kimlik bilgilerinizi yeniden yazar.
+Pool 2 siz ekleyene kadar etkin değildir. `orl login anthropic2` ile giriş yapın veya dashboard Sağlayıcılar sayfasında **Anthropic · Havuz 2** ekleyin. İlk başarılı giriş, `"anthropicOAuthInstance": "anthropic2"` işaretiyle `providers.anthropic2` oluşturur. Pool 2 hiçbir zaman varsayılan sağlayıcı olmaz: öneksiz `claude-*` model adları, varsayılan model ve Claude Code çağıran yönlendirmesi `anthropic` olarak çözümlenmeye devam eder. Daha önce kendiniz oluşturduğunuz işaretsiz bir `anthropic2` girdisi özel anlamını korur; giriş ad çakışmasını reddeder ve ne girdiyi ne de kimlik bilgilerinizi yeniden yazar.
 
 Pool 2 havuz ayarlarını kendi sağlayıcı girdisinden okur. Anahtarlar, varsayılanlar ve davranış yukarıdaki üst düzey `anthropicAccountPool` ile aynıdır ve birincil havuzdan hiçbir şey devralınmaz. `providers.anthropic.anthropicAccountPool` veya bu alanın başka herhangi bir sağlayıcıdaki karşılığı reddedilir.
 
@@ -310,7 +310,7 @@ Pool 2 havuz ayarlarını kendi sağlayıcı girdisinden okur. Anahtarlar, varsa
 }
 ```
 
-İki havuz opencodex içinde yalıtılmıştır:
+İki havuz OpenRelay içinde yalıtılmıştır:
 
 - **Kimlik bilgileri:** Pool 2 hesapları korumalı kimlik bilgisi deposunda kendi `anthropic2` anahtarı altında saklanır. Belirteci veya doğrulanmış Anthropic hesabı diğer havuzda zaten saklı olan bir giriş reddedilir.
 - **Havuz ayarları ve çalışma durumu:** seçim, oturum bağlılığı, soğuma süreleri, duraklatmalar, model rotaları ve hesap başına eşikler tek bir havuza aittir. Rotadaki `fallback: true` yalnızca aynı havuz içinde genişletir.
@@ -318,11 +318,11 @@ Pool 2 havuz ayarlarını kendi sağlayıcı girdisinden okur. Anahtarlar, varsa
 - **Sıfırlama hakları:** Pool 2, birincil havuzun değişmeyen günlüğünün yanında kendi günlüğünü (`anthropic2-reset-grant-ledger.json`) tutar.
 - **Kurtarma:** doğrudan bir `anthropic2/<model>` isteği hiçbir zaman birincil havuza düşmez ve Pool 2'deki bir hız sınırı veya ret birincil havuzdaki bir hesabı soğumaya almaz. İki havuzu da adlandıran açık bir combo, bildirdiğiniz hedefleri korur.
 
-Bu ayrım opencodex içindeki bir yönlendirme sınırıdır. Anthropic'in hesaplarınıza nasıl davrandığını ve yukarıda açıklanan hesap politikası riskini değiştirmez.
+Bu ayrım OpenRelay içindeki bir yönlendirme sınırıdır. Anthropic'in hesaplarınıza nasıl davrandığını ve yukarıda açıklanan hesap politikası riskini değiştirmez.
 
 Pool 2 hesapları yalnızca tarayıcı OAuth ile eklenir. `anthropic` sağlayıcısından farklı olarak Pool 2, Claude Code CLI belirtecini hiçbir zaman içe aktarmaz, benimsemez veya geri yazmaz; bu fark kasıtlıdır. Pool 2 boş başlar ve kullanılabilir Pool 2 hesabı olmayan bir Pool 2 isteği, birincil havuzdan veya Claude Code'dan kimlik bilgisi ödünç almak yerine kimlik doğrulama hatasıyla başarısız olur.
 
-Hesap komutları ve yönetim API'leri havuzu adıyla belirtir: `ocx account pool anthropic2 …`, `ocx account auto-switch anthropic2 …`, `ocx account routes anthropic2 …` ve `ocx account anthropic-reset-grants --provider anthropic2`. Havuz ayarları ve sıfırlama hakları uç noktaları `provider: "anthropic2"` kabul eder; belirtilmezse birincil havuz kullanılmaya devam eder.
+Hesap komutları ve yönetim API'leri havuzu adıyla belirtir: `orl account pool anthropic2 …`, `orl account auto-switch anthropic2 …`, `orl account routes anthropic2 …` ve `orl account anthropic-reset-grants --provider anthropic2`. Havuz ayarları ve sıfırlama hakları uç noktaları `provider: "anthropic2"` kabul eder; belirtilmezse birincil havuz kullanılmaya devam eder.
 
 #### Yardımcı havuz seçimi (`anthropicInstance`)
 
@@ -387,7 +387,7 @@ Adaptörler çözümlenen URL'yi daha sonra ayarlayabilir. Örneğin Kiro, kural
 `runtime.{region}.kiro.dev` için içe aktarılan kimlik bilgisinin API bölgesini
 takip eder. Bkz. [Adaptörler](/tr/reference/adapters/).
 
-Yönlendirme `baseUrl`'i attığında opencodex kayıt defteri uç noktasını ve
+Yönlendirme `baseUrl`'i attığında OpenRelay kayıt defteri uç noktasını ve
 yalnızca yapılandırılmış kaynağı günlüğe kaydeder; yapılandırılmış bir yolun
 kendisi bir kimlik bilgisi içerebilir. Kullanılmayan URL'yi kaldırın veya
 hedeflenen bölgeyle eşleşen sağlayıcı girdisini seçin. `alibaba-token-plan`
@@ -420,7 +420,7 @@ aynı kalır.
 
 ## Cursor sağlayıcısı (`adapter: "cursor"`)
 
-Cursor köprüsü deneyseldir. `ocx login cursor` komutundan sonra
+Cursor köprüsü deneyseldir. `orl login cursor` komutundan sonra
 `providers.cursor`'ı ekleyin veya düzenleyin. Cursor Router'ın optimizasyon
 merdiveni ayrı Codex kimlikleri olarak sunulur çünkü seçici Cursor'a özgü model
 parametrelerini işleyemez:
@@ -487,7 +487,7 @@ yürütmeyi kapalı bırakın.
 
 Grok 4.7, OAuth üzerinde Fast ile `low` / `medium` / `high` / `xhigh` düzeylerini ve 500.000 tokenlık bağlam penceresini destekler. [xAI standart fiyatı](https://docs.x.ai/developers/models/grok-4.7) milyon token başına giriş için $2,00, önbellekli giriş için $0,50 ve çıkış için $6,00; 200.000 token ve üzeri bağlamda sırasıyla $4,00 / $1,00 / $12,00’dır.
 
-Sağlayıcı için açık bir `fastWire` yapılandırılmadığında, `allowedModels` ile sınırlandırılmış bir opencodex API anahtarının OAuth Fast istekleri için `xai/grok-4.7-build-fast` (veya sağlayıcı öneki olmayan model kimliği) iznine sahip olması gerekir. Yalnızca `xai/grok-4.7` izni bu Fast modeline erişim sağlamaz. Yalnızca Fast modeline izin veren anahtar bu modeli kullanabilir; normal istekler veya Fast kapalıyken yapılan istekler yine `xai/grok-4.7` izni gerektirir. Açık bir `fastWire` yapılandırılmışsa gerçekten gönderilen modele izin verin: örneğin, `service-tier` türü `xai/grok-4.7` modelini korur ve bu modelin iznini gerektirir. Sağlayıcı kısıtlamaları geçerliliğini korur.
+Sağlayıcı için açık bir `fastWire` yapılandırılmadığında, `allowedModels` ile sınırlandırılmış bir OpenRelay API anahtarının OAuth Fast istekleri için `xai/grok-4.7-build-fast` (veya sağlayıcı öneki olmayan model kimliği) iznine sahip olması gerekir. Yalnızca `xai/grok-4.7` izni bu Fast modeline erişim sağlamaz. Yalnızca Fast modeline izin veren anahtar bu modeli kullanabilir; normal istekler veya Fast kapalıyken yapılan istekler yine `xai/grok-4.7` izni gerektirir. Açık bir `fastWire` yapılandırılmışsa gerçekten gönderilen modele izin verin: örneğin, `service-tier` türü `xai/grok-4.7` modelini korur ve bu modelin iznini gerektirir. Sağlayıcı kısıtlamaları geçerliliğini korur.
 
 ## OpenRouter sağlayıcı yönlendirmesi
 
@@ -523,7 +523,7 @@ verir. `only` her zaman bir izin listesidir.
 }
 ```
 
-Model anahtarları, dış opencodex sağlayıcı öneki olmadan tam yerel OpenRouter
+Model anahtarları, dış OpenRelay sağlayıcı öneki olmadan tam yerel OpenRouter
 kimlikleridir. `openrouter/anthropic-claude-sonnet-5` seçimi model kuralını
 uygulamadan önce yerel `anthropic/claude-sonnet-5`'i geri yükler.
 
@@ -561,10 +561,10 @@ varsayılan dinamik yönlendirme davranışını korur.
 }
 ```
 
-Model anahtarları, dış OpenCodex sağlayıcı öneki olmadan herkese açık Vercel
+Model anahtarları, dış OpenRelay sağlayıcı öneki olmadan herkese açık Vercel
 model seçicileridir. `vercel-ai-gateway/zai-glm-5.2` seçimi, model kuralını
 uygulamadan önce yerel `zai/glm-5.2` kimliğini geri yükler. Aynı eşleme yerel bir
-`vercel/<model-id>` seçicisi için de geçerlidir: OpenCodex'te kodlanmış
+`vercel/<model-id>` seçicisi için de geçerlidir: OpenRelay'te kodlanmış
 `vercel-ai-gateway/vercel-<model-id>` seçicisini kullanın ve model anahtarı olarak
 `vercel/<model-id>` değerini koruyun.
 

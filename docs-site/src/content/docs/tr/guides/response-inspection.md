@@ -3,7 +3,7 @@ title: Yanıt incelemesi ve büyük yanıtlar
 description: Sınırlı tanılama saklama ve akış incelemesinin yanıt teslimiyle nasıl etkileştiği.
 ---
 
-OpenCodex, günlük sınırını istemcinize teslim edilen baytların sınırı haline
+OpenRelay, günlük sınırını istemcinize teslim edilen baytların sınırı haline
 getirmeden yanıt tanılamasını sınırlar. Diğer sağlayıcı, istek ve aktarım
 sınırları bağımsız olarak geçerlidir.
 

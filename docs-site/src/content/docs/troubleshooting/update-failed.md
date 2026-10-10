@@ -1,9 +1,9 @@
 ---
 title: Update Failed on Windows
-description: What state an OpenCodex install is in after ocx update fails during the npm install step, how to finish the update safely, and which leftover folders you may delete.
+description: What state an OpenRelay install is in after ocx update fails during the npm install step, how to finish the update safely, and which leftover folders you may delete.
 ---
 
-This page is for an `ocx update` or dashboard update that stops partway, most often on Windows,
+This page is for an `orl update` or dashboard update that stops partway, most often on Windows,
 with a result like this (reported as issue
 [#5624](https://github.com/lidge-jun/opencodex/issues/5624)):
 
@@ -25,31 +25,31 @@ previous proxy) before it exits. You do not need to reinstall to get back to a w
 Check that with:
 
 ```bash
-ocx --version
-ocx status
+orl --version
+orl status
 ```
 
 The dashboard job only records the exit status, because the installer's own output can contain local
-paths. Running `ocx update` in a terminal shows the step that failed and the next step to take.
+paths. Running `orl update` in a terminal shows the step that failed and the next step to take.
 
 ## Finish the update
 
-1. Close anything that may still run OpenCodex files: the Codex app, terminals that started
-   `ocx` or `bunx`, and the OpenCodex tray. A running `bun.exe` or `bunx.exe` keeps its files
+1. Close anything that may still run OpenRelay files: the Codex app, terminals that started
+   `ocx` or `bunx`, and the OpenRelay tray. A running `bun.exe` or `bunx.exe` keeps its files
    locked on Windows.
-2. Run `ocx update` again from a terminal.
-3. If it fails the same way, run `ocx status` and let any in-progress recovery finish. If the
-   updater restarted the proxy, stop it through its owner (`ocx stop`, its service, or the desktop
+2. Run `orl update` again from a terminal.
+3. If it fails the same way, run `orl status` and let any in-progress recovery finish. If the
+   updater restarted the proxy, stop it through its owner (`orl stop`, its service, or the desktop
    app) and confirm it has stopped. Reinstall with the same package manager that owns the install;
-   for an npm install managed by the OpenCodex service:
+   for an npm install managed by the OpenRelay service:
 
    ```bash
-   ocx stop
+   orl stop
    npm install -g --allow-scripts=bun @bitkyc08/opencodex@latest
-   ocx service restart
+   orl service restart
    ```
 
-   Restart through the owning service or desktop app after installation completes; use `ocx start`
+   Restart through the owning service or desktop app after installation completes; use `orl start`
    when unmanaged. Replace `latest` with `preview` if you follow the preview channel.
 
 ## Leftover folders
@@ -59,15 +59,15 @@ They sit next to the package in npm's global folder, usually
 
 | Folder | Created by | What to do |
 |---|---|---|
-| `.opencodex-<random>` | npm itself, while replacing the package during a direct `npm install -g` | Delete it once no OpenCodex process runs from it |
-| `.ocx-staging-<timestamp>` | the OpenCodex updater's staging install | A marked stage older than half an hour is reported but left in place; delete it by hand once no OpenCodex process runs from it. A stage without an `.ocx-update-owner.json` marker has an unverified origin — an interrupted update can leave one, but so can anything else that chose the prefix — so confirm it belongs to OpenCodex before deleting it |
+| `.opencodex-<random>` | npm itself, while replacing the package during a direct `npm install -g` | Delete it once no OpenRelay process runs from it |
+| `.ocx-staging-<timestamp>` | the OpenRelay updater's staging install | A marked stage older than half an hour is reported but left in place; delete it by hand once no OpenRelay process runs from it. A stage without an `.ocx-update-owner.json` marker has an unverified origin — an interrupted update can leave one, but so can anything else that chose the prefix — so confirm it belongs to OpenRelay before deleting it |
 | `.ocx-backup-<timestamp>` | the updater's copy of the previous version | Leave it; it is removed automatically after the new version starts healthy, and restored if it does not |
 
 None of these folders blocks the next update by pathname: every attempt stages into a new folder.
 Retained staging contents still consume disk space, though, and enough leftovers can make a later
 staging attempt fail with `ENOSPC`. The updater leaves leftover staging folders in place during
 later updates; it reports marked stages older than half an hour after checking their recorded
-ownership marker. Delete a leftover only after confirming that no OpenCodex process runs from it.
+ownership marker. Delete a leftover only after confirming that no OpenRelay process runs from it.
 
 If a folder will not delete, a process is still running from it. Signing out or restarting Windows
 releases the lock.
@@ -77,16 +77,16 @@ releases the lock.
 Installing over a running proxy makes it answer `503` with `package_tree_changed` until it
 restarts. Releases after 2.64.0 can restart themselves after a few seconds once the package tree
 and its Bun runtime are complete. An incomplete or failed Bun postinstall prevents that recovery.
-`ocx restart` or `ocx service restart` can find a proxy in that state, but restarting still requires
+`orl restart` or `orl service restart` can find a proxy in that state, but restarting still requires
 a complete runtime and package tree. With 2.64.0 and earlier, the
-proxy stays in that state, and `ocx restart` may report that no proxy is running while the old one
-still holds the port; use `ocx service restart`, or end the process whose `pid` the `/healthz`
-response shows and then run `ocx start`.
+proxy stays in that state, and `orl restart` may report that no proxy is running while the old one
+still holds the port; use `orl service restart`, or end the process whose `pid` the `/healthz`
+response shows and then run `orl start`.
 
-If the installer has exited or failed, inspect its error and run `ocx status`. Let any in-progress
-recovery finish, stop any running proxy through its owner (`ocx stop`, its service, or the desktop
+If the installer has exited or failed, inspect its error and run `orl status`. Let any in-progress
+recovery finish, stop any running proxy through its owner (`orl stop`, its service, or the desktop
 app), and confirm it has stopped. Reinstall with the same package manager, allowing Bun's
-postinstall to complete, then start again through the owning service or desktop app (`ocx start`
+postinstall to complete, then start again through the owning service or desktop app (`orl start`
 when unmanaged).
 
 ## If the update stops at the npm cache check
@@ -107,26 +107,26 @@ stops with `cache_root_dangling_link` or `cache_root_not_directory` and leaves t
   that is not available. Move the file aside, or point npm at another cache with
   `npm config set cache <folder>`.
 
-Then run `ocx update` again. If `ENOTDIR` persists after the check passes, open an issue with the
-full terminal output of `ocx update` and the output of `npm config get prefix` and
+Then run `orl update` again. If `ENOTDIR` persists after the check passes, open an issue with the
+full terminal output of `orl update` and the output of `npm config get prefix` and
 `npm config get cache`.
 
 ## Desktop app update stalls or fails on "Installing update…"
 
-In the OpenCodex desktop app, **Install update** downloads the installer from GitHub
+In the OpenRelay desktop app, **Install update** downloads the installer from GitHub
 Releases before replacing the app and restarting. A failed download or installation with
 a known version shows a manual-download hint and a link to that version's release page.
 
 If `Installing update…` stalls or times out, GitHub release downloads may be slow or
 blocked by your network. Use the release link in the error, or find the same version on
-the [OpenCodex releases page](https://github.com/lidge-jun/opencodex/releases), and download
+the [OpenRelay releases page](https://github.com/lidge-jun/opencodex/releases), and download
 the installer for your operating system and architecture. Preview versions have their own
 release pages; choose the version the app offered.
 
 Before running the installer, stop the proxy through its owner and confirm it has stopped:
 
-1. Quit the OpenCodex desktop app from its tray menu to stop an app-owned proxy.
-2. If a service owns the proxy, stop it through the service's controls (`ocx stop` for an
+1. Quit the OpenRelay desktop app from its tray menu to stop an app-owned proxy.
+2. If a service owns the proxy, stop it through the service's controls (`orl stop` for an
    OpenCodex-managed service). For an unmanaged terminal proxy, stop it in that terminal.
 3. On Windows, use this process listing to help identify any remaining runtime:
 
@@ -134,7 +134,7 @@ Before running the installer, stop the proxy through its owner and confirm it ha
    Get-Process -Name ocx, opencodex-desktop, bun, bunx -ErrorAction SilentlyContinue
    ```
 
-   The listing does not establish which app owns a process. Identify the OpenCodex runtime
+   The listing does not establish which app owns a process. Identify the OpenRelay runtime
    and stop it through its owning app or service; a `bun` process may belong to another app.
    Wait for the owning app and proxy to exit before installing.
 

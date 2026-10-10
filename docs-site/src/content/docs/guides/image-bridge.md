@@ -16,7 +16,7 @@ xAI Grok Imagine, so the model you're actually chatting with can still generate 
   default to avoid unexpected xAI charges — see [Configuration](#configuration) below).
 - An `xai` provider entry with an **API key**. The Responses Image Bridge pins fulfillment to the
   registry xAI Images endpoint (`https://api.x.ai/v1`); any configured `baseUrl` override is
-  ignored for image calls. OAuth / `ocx login xai` alone does **not** arm this sidecar loop.
+  ignored for image calls. OAuth / `orl login xai` alone does **not** arm this sidecar loop.
   The same `bridgeEnabled` flag does arm the separate Codex `/v1/images` relay so the built-in
   `image_gen` client can call Imagine with the Grok CLI grant — see
   [Built-in image generation](/guides/codex-integration/#built-in-image-generation-image_gen).
@@ -79,11 +79,11 @@ model is selected. It does **not** intercept Codex's built-in `image_gen` tool,
 which POSTs directly to `/v1/images/generations` (or `/images/edits`) — that path
 is covered separately in [Codex Integration](/guides/codex-integration/#built-in-image-generation-image_gen).
 
-1. When a Responses request lists `image_generation` in `tools`, OpenCodex detects it
+1. When a Responses request lists `image_generation` in `tools`, OpenRelay detects it
    during request preprocessing.
 2. The hosted tool is replaced with a **synthetic function tool** that the routed model can call
    normally — the model sees a callable tool rather than an opaque hosted tool it can't execute.
-3. When the model invokes that tool, OpenCodex intercepts the call and sends the prompt to xAI's
+3. When the model invokes that tool, OpenRelay intercepts the call and sends the prompt to xAI's
    image generation API.
 4. Generated images are saved to `~/.opencodex/artifacts/` and the **local file path** is returned
    to the model as the tool result.

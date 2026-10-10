@@ -142,7 +142,7 @@ to *add* guidance, use a [custom layer](#custom-layers) instead — those are ad
 
 ### If something else already replaced your base prompt
 
-If `model_instructions_file` points at a file opencodex did not write, the picker
+If `model_instructions_file` points at a file OpenRelay did not write, the picker
 refuses to act and says where the key points. It will not silently retarget a key
 you or another tool set. Clear it yourself first, then choose here.
 
@@ -151,9 +151,9 @@ what it finds, and you decide.
 
 Switching applies to newly started sessions, like every other change on this page.
 
-## Instructions written outside opencodex
+## Instructions written outside OpenRelay
 
-If `developer_instructions` already exists and opencodex did not write it, the
+If `developer_instructions` already exists and OpenRelay did not write it, the
 panel will not overwrite it. Instead it offers to import the text as a layer:
 you see the existing value first, and nothing is written until you confirm.
 
@@ -178,7 +178,7 @@ from changing that part of the upstream prompt cache prefix mid-session.
 A request that carries more than one `<skills_instructions>` block is passed
 through unchanged, and a request the proxy rejects does not set the catalog.
 
-To use the catalog supplied by the client on every turn, set this in opencodex's
+To use the catalog supplied by the client on every turn, set this in OpenRelay's
 `$OPENCODEX_HOME/config.json` (normally `~/.opencodex/config.json`), then restart
 the proxy:
 
@@ -202,13 +202,13 @@ the snapshot retained for an ongoing conversation.
 
 ## What this page reads, and what it does not
 
-opencodex reads one configuration file — your `config.toml`. Codex resolves its
+OpenRelay reads one configuration file — your `config.toml`. Codex resolves its
 settings from several layers, so a value here is what YOUR file says, not
 necessarily what Codex finally computes.
 
 ## The keys this page writes
 
-These live in your Codex `config.toml`, not in opencodex's own configuration.
+These live in your Codex `config.toml`, not in OpenRelay's own configuration.
 
 | Key | Default | Layer |
 |---|---|---|
@@ -220,7 +220,7 @@ These live in your Codex `config.toml`, not in opencodex's own configuration.
 | `developer_instructions` | unset | Your custom layers, joined in order |
 | `model_instructions_file` | unset | Base prompt, when a variant is selected |
 
-Writes are line edits: your comments and formatting survive, and a key opencodex
+Writes are line edits: your comments and formatting survive, and a key OpenRelay
 does not recognise is left alone rather than removed.
 
 An absent key reads as its default rather than as `false`. The panel shows the

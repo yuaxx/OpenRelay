@@ -1,9 +1,9 @@
 ---
 title: v1이 기본 서브에이전트 서피스인 이유
-description: v2의 암호화 작업 제한으로 생기는 문제, opencodex가 v1을 기본으로 제공하는 이유, v2를 계속 사용하는 방법을 설명합니다.
+description: v2의 암호화 작업 제한으로 생기는 문제, OpenRelay가 v1을 기본으로 제공하는 이유, v2를 계속 사용하는 방법을 설명합니다.
 ---
 
-opencodex를 설치하면 서브에이전트 서피스가 **v1**로 설정됩니다. Dashboard, Models, Subagents 페이지에서 **base**나 **v2**로 바꾸려면 확인을 요청하며, 그 확인 창에서 이 문서로 연결됩니다. CLI에서는 확인 메시지가 나오지 않습니다.
+OpenRelay를 설치하면 서브에이전트 서피스가 **v1**로 설정됩니다. Dashboard, Models, Subagents 페이지에서 **base**나 **v2**로 바꾸려면 확인을 요청하며, 그 확인 창에서 이 문서로 연결됩니다. CLI에서는 확인 메시지가 나오지 않습니다.
 
 이유는 분명합니다. v2에서 ChatGPT 네이티브 모델이 라우팅된 모델에 맡긴 작업은 라우팅된 모델이 읽을 수 없습니다. GPT 부모가 Grok, Claude, GLM 자식을 만드는 것은 가장 흔한 위임 방식인데, v2에서는 매번 실패합니다.
 
@@ -24,11 +24,11 @@ HTTP 400을 반환하며 암호문은 응답에 포함하지 않습니다. 읽�
 
 ## 발생 원인
 
-![같은 위임을 두 경로로 비교합니다. v1에서는 ChatGPT 부모가 평문 작업을 opencodex를 통해 보내고 프로바이더 경계를 넘은 라우팅 자식이 읽습니다. v2에서는 부모가 ChatGPT 백엔드에서 만든 encrypted_content를 보냅니다. opencodex는 복호화할 수 없어 작업이 프로바이더 경계에서 멈추고 unreadable_encrypted_agent_task 오류가 납니다.](../../../../assets/subagent-v2-encrypted-task.svg)
+![같은 위임을 두 경로로 비교합니다. v1에서는 ChatGPT 부모가 평문 작업을 OpenRelay를 통해 보내고 프로바이더 경계를 넘은 라우팅 자식이 읽습니다. v2에서는 부모가 ChatGPT 백엔드에서 만든 encrypted_content를 보냅니다. OpenRelay는 복호화할 수 없어 작업이 프로바이더 경계에서 멈추고 unreadable_encrypted_agent_task 오류가 납니다.](../../../../assets/subagent-v2-encrypted-task.svg)
 
-v1에서는 부모가 자식 작업을 평문으로 내보냅니다. opencodex가 이를 읽고 라우팅하므로 자식이 실행할 수 있는 작업을 받습니다.
+v1에서는 부모가 자식 작업을 평문으로 내보냅니다. OpenRelay가 이를 읽고 라우팅하므로 자식이 실행할 수 있는 작업을 받습니다.
 
-v2에서는 부모가 ChatGPT 백엔드에서 만든 `encrypted_content`로 작업을 내보냅니다. 키는 그 백엔드에만 있습니다. opencodex에는 키가 없으므로 프록시가 복호화하거나 다시 쓸 수 없습니다. 플래그 뒤에 숨은 평문이 아니라 실제 암호문입니다. 따라서 설정 오류가 아니라 구조적인 문제이며 프록시 설정으로 해결할 수 없습니다.
+v2에서는 부모가 ChatGPT 백엔드에서 만든 `encrypted_content`로 작업을 내보냅니다. 키는 그 백엔드에만 있습니다. OpenRelay에는 키가 없으므로 프록시가 복호화하거나 다시 쓸 수 없습니다. 플래그 뒤에 숨은 평문이 아니라 실제 암호문입니다. 따라서 설정 오류가 아니라 구조적인 문제이며 프록시 설정으로 해결할 수 없습니다.
 
 영향받지 않는 연결 방식은 세 가지입니다. 어떤 경계에서 실패하는지 보면 이유가 드러납니다.
 
@@ -46,7 +46,7 @@ v2에서는 부모가 ChatGPT 백엔드에서 만든 `encrypted_content`로 작�
 
 송신 측 문제는 아직 열려 있습니다. Windows, macOS, Linux의 CLI 0.146~0.151에서 재현된 [#36376](https://github.com/openai/codex/issues/36376)과 송신 측 전달 정책의 부재를 직접 지적한 [#37197](https://github.com/openai/codex/issues/37197)입니다. 어느 쪽에도 유지관리자의 해결 약속이나 예정 시점이 없습니다.
 
-opencodex는 결과를 [#92](https://github.com/lidge-jun/opencodex/issues/92)에 기록하고 계획 없음으로 닫았습니다. 이 저장소에서 해결할 수 없으므로 이슈는 여기 유지관리자를 기다리는 작업이 아니라 업스트림 작업을 가리킵니다.
+OpenRelay는 결과를 [#92](https://github.com/lidge-jun/opencodex/issues/92)에 기록하고 계획 없음으로 닫았습니다. 이 저장소에서 해결할 수 없으므로 이슈는 여기 유지관리자를 기다리는 작업이 아니라 업스트림 작업을 가리킵니다.
 
 ## 현재 세 모드의 동작
 
@@ -67,7 +67,7 @@ base가 첫 번째가 아니라 두 번째인 이유는 대부분의 위임 출�
 
 어느 쪽이든 응답이 기록되어 알림이 다시 나타나지 않습니다. 응답하지 않고 닫으면 다음 대시보드 방문 때 다시 보입니다.
 
-모드 변경은 **새** Codex 세션에 적용됩니다. 선택한 뒤 새 세션을 시작하세요. 오래 실행된 App 호스트에 예전 서피스가 남아 있으면 `ocx sync`를 실행하고 해당 서피스를 다시 시작하세요.
+모드 변경은 **새** Codex 세션에 적용됩니다. 선택한 뒤 새 세션을 시작하세요. 오래 실행된 App 호스트에 예전 서피스가 남아 있으면 `orl sync`를 실행하고 해당 서피스를 다시 시작하세요.
 
 ## 그래도 v2를 원한다면
 
@@ -89,8 +89,8 @@ base가 첫 번째가 아니라 두 번째인 이유는 대부분의 위임 출�
 Dashboard, Models, Subagents 모두 같은 v1/base/v2 스위치를 제공하며 base나 v2를 선택하면 확인을 요청합니다. CLI에서는 다음을 실행하세요.
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
+orl v2 status
+orl v2 mode v1
 ```
 
 CLI는 확인 메시지를 띄우지 않습니다. 같은 설정이므로 이 문서의 동작을 이해한 뒤 선택하세요.

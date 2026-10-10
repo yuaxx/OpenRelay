@@ -1,9 +1,9 @@
 ---
 title: Sélecteur de modèles de Codex App
-description: Comment les modèles opencodex apparaissent dans Codex App, Codex CLI et Codex TUI par l'intermédiaire du catalogue Codex partagé.
+description: Comment les modèles OpenRelay apparaissent dans Codex App, Codex CLI et Codex TUI par l'intermédiaire du catalogue Codex partagé.
 ---
 
-opencodex ne modifie pas Codex App. Il écrit la même configuration et le même catalogue de modèles Codex
+OpenRelay ne modifie pas Codex App. Il écrit la même configuration et le même catalogue de modèles Codex
 que ceux utilisés par Codex CLI et TUI. Le serveur d'application lit cet état partagé, mais certaines versions
 de Codex Desktop appliquent dans le moteur de rendu une seconde liste d'autorisation distante et peuvent
 encore retirer les lignes routées du sélecteur.
@@ -12,13 +12,13 @@ Les entrées OpenAI utilisent deux routes d'identification : la connexion Codex 
 clé API avec espace de noms `openai-apikey/<model>`. Le simple passage de `codexAccountMode` entre Pool et
 Direct ne change pas les identifiants du sélecteur. Toutefois, lorsque les lignes qualifiées par compte sont
 activées avec `codexAccountPickerEnabled` et que `codexAccountNamespaces` contient des sélecteurs admissibles
-dont les comptes associés existent toujours, opencodex ajoute une ligne
+dont les comptes associés existent toujours, OpenRelay ajoute une ligne
 `<selector>/<native-openai-model>` distincte pour chaque compte associé et masque les lignes natives non
 qualifiées du sélecteur Codex. Les libellés des sélecteurs sont des noms publics choisis par l'utilisateur et
 n'ont aucune signification intégrée quant au rôle du compte. Choisir une ligne qualifiée utilise exclusivement
 le compte associé, ne change pas le compte Pool actif et échoue de façon fermée au lieu de changer de compte
 si la cible n'est pas disponible. Si le catalogue Codex propre à un compte contient un identifiant visible de
-la famille OpenAI, pris en charge par l'API mais absent de l'ensemble statique d'opencodex, cet identifiant
+la famille OpenAI, pris en charge par l'API mais absent de l'ensemble statique d'OpenRelay, cet identifiant
 exact est conservé sous forme de ligne qualifiée pour les sélecteurs admissibles du compte principal. Il
 n'est ni copié vers un compte sans rapport, ni ajouté aux listes de modèles non qualifiés ou accessibles par
 clé API. La ligne est reconnue d'après la structure de champs d'une véritable entrée de catalogue, ce qui
@@ -46,7 +46,7 @@ l'intermédiaire du fournisseur canonique de transfert de la connexion Codex :
 Seuls ce fournisseur, ce point de terminaison et cet identifiant de modèle exacts reçoivent l'instantané de
 capacités Sol épinglé : contexte de 372 000 jetons, compactage automatique à 334 800 jetons, échelle de
 raisonnement native et métadonnées d'outils Codex natives. La requête continue d'envoyer
-`gpt-daybreak-blue-latest` ; opencodex ne le réécrit pas en Sol, ne crée aucune ligne non qualifiée et
+`gpt-daybreak-blue-latest` ; OpenRelay ne le réécrit pas en Sol, ne crée aucune ligne non qualifiée et
 n'accorde aucun droit au compte. La ligne API `openai-apikey/daybreak-blue-latest`, facturée séparément,
 emprunte une autre route, et ses limites de 1 050 000 / 922 000 jetons ne sont jamais copiées dans la ligne
 de connexion Codex.
@@ -98,7 +98,7 @@ dans sa liste native `available_models` et peut aussi afficher des lignes native
 catalogue vaut `hide`. L'actualisation du catalogue et le redémarrage du proxy ne peuvent pas, à eux seuls,
 modifier cette stratégie du moteur de rendu.
 
-Pour un modèle routé équivalent, opencodex propose un mode explicite de combinaison avec alias natif,
+Pour un modèle routé équivalent, OpenRelay propose un mode explicite de combinaison avec alias natif,
 désactivé par défaut. Il publie un identifiant non qualifié autorisé avec un libellé d'affichage personnalisé
 fidèle, puis achemine cet identifiant exact vers la combinaison configurée avant le routage OpenAI canonique.
 Il omet aussi du catalogue effectif les lignes natives non qualifiées désactivées tant que des alias de
@@ -108,13 +108,13 @@ pour la commande, la sémantique de la clé de désactivation et les contraintes
 
 ## Parcours d'intégration
 
-`ocx init`, `ocx start` et `ocx sync` relient au proxy la configuration et le catalogue Codex partagés.
+`orl init`, `orl start` et `orl sync` relient au proxy la configuration et le catalogue Codex partagés.
 Consultez [Intégration de Codex](/fr/guides/codex-integration/) pour l'injection de configuration, la
 synchronisation du catalogue, les lanceurs intermédiaires, le repli WebSocket et les mécanismes de restauration.
 
 ## Pourquoi les modèles routés apparaissent
 
-Le sélecteur de modèles de Codex attend des entrées ayant la structure de son propre catalogue. opencodex
+Le sélecteur de modèles de Codex attend des entrées ayant la structure de son propre catalogue. OpenRelay
 crée les entrées routées en clonant un modèle d'entrée Codex natif, puis en remplaçant l'identité du modèle :
 
 ```text
@@ -124,14 +124,14 @@ visibility = "list"
 ```
 
 Le clone conserve les champs exigés par l'analyseur strict, notamment les niveaux de raisonnement, le type
-de shell, les indicateurs de prise en charge de l'API et les instructions de base. opencodex retire ensuite
+de shell, les indicateurs de prise en charge de l'API et les instructions de base. OpenRelay retire ensuite
 les capacités exclusivement natives que la route ne peut respecter, dont les métadonnées de niveau de
 service OpenAI.
 
 ## Couverture stable actuelle des modèles
 
 L'ensemble natif de secours comprend `gpt-5.5` et GPT-5.6
-Sol/Terra/Luna. Pour la famille GPT-5.5, opencodex conserve les entrées dynamiques plus riches du
+Sol/Terra/Luna. Pour la famille GPT-5.5, OpenRelay conserve les entrées dynamiques plus riches du
 catalogue Codex installé et ne synthétise qu'une entrée manquante. L'instantané amont fourni n'est employé
 que pour GPT-5.6, auquel il apporte l'identité et les métadonnées réelles de chaque modèle plutôt qu'une
 approximation fondée sur un ancien modèle d'entrée.
@@ -199,7 +199,7 @@ fast_mode = true
 ```
 
 Toutefois, le catalogue de modèles et l'identifiant du niveau employé dans la requête d'exécution utilisent
-`priority`. opencodex préserve cette distinction. Les modèles OpenAI natifs transférés conservent la prise en
+`priority`. OpenRelay préserve cette distinction. Les modèles OpenAI natifs transférés conservent la prise en
 charge du mode rapide ; les fournisseurs routés sont conditionnés par leurs capacités. `service_tier` n'est
 retiré que si le fournisseur déclare `supportsServiceTier: false` (le registre classe OpenAI canonique comme
 `true`, et DeepSeek ainsi que Volcengine Ark comme `false`). Les passerelles personnalisées non classées
@@ -220,7 +220,7 @@ remplacements de modèle pour `spawn_agent`. La page **Sous-agents** du tableau 
 d'enregistrer jusqu'à cinq identifiants natifs non qualifiés ou identifiants routés `provider/model`.
 `subagentModels`, lorsqu'il est configuré manuellement, accepte aussi les identifiants qualifiés par compte
 `<selector>/<native-openai-model>`, mais le tableau de bord ne propose pas ces identifiants exacts ; enregistrer
-la page remplace la liste par les choix visibles dans le tableau de bord. opencodex attribue des priorités de
+la page remplace la liste par les choix visibles dans le tableau de bord. OpenRelay attribue des priorités de
 catalogue basses dans l'ordre choisi. Lorsque les lignes qualifiées par compte sont activées, les sélections
 natives non qualifiées s'étendent en groupes qualifiés par sélecteur. Les autres modèles restent accessibles
 par leur identifiant exact.
@@ -235,7 +235,7 @@ Le mode serveur distant de Codex Desktop filtre le sélecteur d'après la propre
 `available_models` du client, active lorsque le réglage distant `use_hidden_models` est activé. Les entrées
 routées du catalogue restent chargées et servies — `model/list` les renvoie et la CLI fournie les lit — mais
 le moteur de rendu de Desktop retire avant affichage tout élément absent de cette liste exclusivement native.
-opencodex n'a aucun accès à cette liste ; le défaut amont est suivi dans
+OpenRelay n'a aucun accès à cette liste ; le défaut amont est suivi dans
 [openai/codex#19694](https://github.com/openai/codex/issues/19694).
 
 Tant que Desktop ne permet pas de contrôler cette liste d'autorisation :
@@ -246,9 +246,9 @@ Tant que Desktop ne permet pas de contrôler cette liste d'autorisation :
 ## Actualisation de l'état des modèles
 ## Limitation du repli sur quota natif
 
-Lorsque l'application Codex épuise son quota natif de cinq heures, elle peut basculer vers un modèle de repli de réserve et griser les autres lignes de son sélecteur. Signalé dans [#2813](https://github.com/lidge-jun/opencodex/issues/2813), ce filtrage masque aussi les lignes routées par opencodex, alors que celles-ci utilisent des identifiants de fournisseur sans rapport et ne consomment aucun quota ChatGPT.
+Lorsque l'application Codex épuise son quota natif de cinq heures, elle peut basculer vers un modèle de repli de réserve et griser les autres lignes de son sélecteur. Signalé dans [#2813](https://github.com/lidge-jun/opencodex/issues/2813), ce filtrage masque aussi les lignes routées par OpenRelay, alors que celles-ci utilisent des identifiants de fournisseur sans rapport et ne consomment aucun quota ChatGPT.
 
-Ce filtrage est appliqué par le client avant que la requête n'atteigne le proxy, donc opencodex ne peut pas le lever. Les lignes routées sont écrites avec `visibility: "list"`, le filtrage du catalogue ne consulte que `disabledModels` et le `selectedModels` de chaque fournisseur, et aucune valeur de quota n'intervient dans la visibilité routée.
+Ce filtrage est appliqué par le client avant que la requête n'atteigne le proxy, donc OpenRelay ne peut pas le lever. Les lignes routées sont écrites avec `visibility: "list"`, le filtrage du catalogue ne consulte que `disabledModels` et le `selectedModels` de chaque fournisseur, et aucune valeur de quota n'intervient dans la visibilité routée.
 
 Sélectionner un modèle routé explicitement ne passe pas par le sélecteur. Définissez le modèle dans `config.toml` :
 
@@ -259,18 +259,18 @@ model = "anthropic/claude-sonnet-5"
 ou envoyez-le directement :
 
 ```bash
-ocx access test anthropic/claude-sonnet-5 --protocol responses
+orl access test anthropic/claude-sonnet-5 --protocol responses
 ```
 
-Les deux chemins routent correctement **dès que la requête atteint le proxy** — c'est couvert par des tests. En revanche, l'application de bureau Codex n'envoie pas le modèle configuré pendant le mode réserve : elle détermine l'état de réserve à partir de son propre sondage `wham/usage` (upsell `luna_reserve` plus une limite additionnelle `gpt-reserve` encore autorisée) et force le réglage de modèle sur `gpt-reserve` avant l'envoi, de sorte que la voie `config.toml` est écrasée dans l'application. Jusqu'à la réinitialisation de la fenêtre, utilisez `ocx access test`, Claude Code via le proxy (`ocx claude`) ou tout client `/v1` direct. Voir [Modèles routés pendant le mode réserve de Codex](/guides/codex-integration/#routed-models-during-codex-reserve-mode).
+Les deux chemins routent correctement **dès que la requête atteint le proxy** — c'est couvert par des tests. En revanche, l'application de bureau Codex n'envoie pas le modèle configuré pendant le mode réserve : elle détermine l'état de réserve à partir de son propre sondage `wham/usage` (upsell `luna_reserve` plus une limite additionnelle `gpt-reserve` encore autorisée) et force le réglage de modèle sur `gpt-reserve` avant l'envoi, de sorte que la voie `config.toml` est écrasée dans l'application. Jusqu'à la réinitialisation de la fenêtre, utilisez `orl access test`, Claude Code via le proxy (`orl claude`) ou tout client `/v1` direct. Voir [Modèles routés pendant le mode réserve de Codex](/guides/codex-integration/#routed-models-during-codex-reserve-mode).
 
 
 Si le sélecteur affiche encore des entrées obsolètes, actualisez le catalogue et redémarrez l'interface Codex concernée :
 
 ```bash
-ocx sync
+orl sync
 ```
 
-opencodex réécrit `models_cache.json` avec une enveloppe de cache volontairement périmée chaque fois que la
+OpenRelay réécrit `models_cache.json` avec une enveloppe de cache volontairement périmée chaque fois que la
 visibilité, la priorité ou les métadonnées du catalogue changent. La prochaine actualisation des modèles
 Codex relit ainsi le nouveau catalogue.

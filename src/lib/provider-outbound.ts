@@ -154,7 +154,7 @@ function warnProxyBoundaryOnce(): void {
   if (proxyBoundaryWarned) return;
   proxyBoundaryWarned = true;
   console.warn(
-    "[opencodex] Provider outbound proxy mode preserves Bun proxy/NO_PROXY routing and validates "
+    "[openrelay] Provider outbound proxy mode preserves Bun proxy/NO_PROXY routing and validates "
     + "the URL plus available local DNS results; the final route and peer cannot be pinned locally.",
   );
 }
@@ -163,7 +163,7 @@ function warnProxyDnsDegradationOnce(): void {
   if (proxyDnsDegradationWarned) return;
   proxyDnsDegradationWarned = true;
   console.warn(
-    "[opencodex] Local DNS could not resolve a proxied provider hostname; continuing after URL/literal checks. "
+    "[openrelay] Local DNS could not resolve a proxied provider hostname; continuing after URL/literal checks. "
     + "The proxy-selected peer cannot be verified or pinned locally.",
   );
 }

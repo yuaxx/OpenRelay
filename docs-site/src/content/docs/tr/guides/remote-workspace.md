@@ -5,7 +5,7 @@ description: Codex, Claude Code, Pi ve bunların girişlerini tek OCX Hub üzeri
 
 SSH makine bağlantıları için [Uzak Bağlantı](/tr/guides/remote-link/) kılavuzuna bakın.
 
-Remote Workspace, bir OpenCodex Hub üzerinde kodlama ajanlarını çalıştırırken
+Remote Workspace, bir OpenRelay Hub üzerinde kodlama ajanlarını çalıştırırken
 başka bir bilgisayarın proje dosyalarını, komutları, testleri ve derleme
 kaynaklarını sağlamasına olanak verir. Telefon veya üçüncü bir bilgisayar,
 oturumu Hub kontrol panelinden yönetebilir.
@@ -16,7 +16,7 @@ Phone browser -> Computer 1 OCX Hub -> encrypted channel -> Computer 2 OCX Execu
                  logins and sessions                      no coding CLI login
 ```
 
-Executor için yalnızca OpenCodex gerekir. Codex, Claude Code, Pi, ChatGPT girişi
+Executor için yalnızca OpenRelay gerekir. Codex, Claude Code, Pi, ChatGPT girişi
 veya sağlayıcı API anahtarı gerekmez. Hub'a dışarı yönlü WebSocket açtığından
 Executor için genel port veya yönlendiricide port yönlendirmesi gerekmez.
 
@@ -32,13 +32,13 @@ hiçbir zaman Hub'a aktarılmaz.
 ## Hub kurulumu
 
 Bilgisayar 1 tüm kodlama ajanı girişlerini ve model oturumlarını tutar.
-Kullanmak istediğiniz ajanları oraya kurup giriş yapın, ardından OpenCodex'i
+Kullanmak istediğiniz ajanları oraya kurup giriş yapın, ardından OpenRelay'i
 Hub olarak çalıştırın:
 
 ```bash
-ocx config set runtimeRole hub
-OCX_REMOTE_WORKSPACE_ENABLED=1 ocx start
-ocx gui
+orl config set runtimeRole hub
+OCX_REMOTE_WORKSPACE_ENABLED=1 orl start
+orl gui
 ```
 
 `OCX_REMOTE_WORKSPACE_ENABLED=1` değerini Hub sürecinin kendisinde ayarlayın;
@@ -63,15 +63,15 @@ ayarlamayın.
 1. Hub kontrol panelinde **Remote Workspace** açın.
 2. **Create pairing code** seçin.
 3. Bilgisayar 2'de açığa çıkarmak istediğiniz proje dizinine geçin.
-4. O bilgisayar için oluşturulan **Linux / macOS terminal** veya **Windows PowerShell** komutunu kopyalayın. Komut geçerli dizini eşleştirir ve `ocx remote-workspace agent` bağlantısını o terminalde açık tutar.
+4. O bilgisayar için oluşturulan **Linux / macOS terminal** veya **Windows PowerShell** komutunu kopyalayın. Komut geçerli dizini eşleştirir ve `orl remote-workspace agent` bağlantısını o terminalde açık tutar.
 
 Eşdeğer el ile akış:
 
 ```bash
 cd /path/to/project
-printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.example' \
+printf '%s\n' 'ONE-TIME-CODE' | orl remote-workspace pair 'https://your-hub.example' \
   --pairing-code-stdin --root "$PWD"
-ocx remote-workspace agent
+orl remote-workspace agent
 ```
 
 Windows PowerShell'de kontrol panelinin gösterdiği komutu kullanın. Eşdeğer
@@ -79,9 +79,9 @@ el ile biçim:
 
 ```powershell
 $pairingCode = 'ONE-TIME-CODE'
-$pairingCode | ocx remote-workspace pair 'https://your-hub.example' `
+$pairingCode | orl remote-workspace pair 'https://your-hub.example' `
   --pairing-code-stdin --root (Get-Location).Path
-if ($LASTEXITCODE -eq 0) { ocx remote-workspace agent }
+if ($LASTEXITCODE -eq 0) { orl remote-workspace agent }
 ```
 
 Geçerli OCX Bun yürütülebiliri Linux sandbox'ına otomatik olarak tek salt okunur
@@ -90,7 +90,7 @@ kurulmuş bir araç zinciri gerektiriyorsa ev dizininin geri kalanını açmadan
 onu açıkça eşleştirin:
 
 ```bash
-printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.example' \
+printf '%s\n' 'ONE-TIME-CODE' | orl remote-workspace pair 'https://your-hub.example' \
   --pairing-code-stdin --root "$PWD" \
   --toolchain-root "$HOME/.nvm/versions/node/v24/bin"
 ```
@@ -108,7 +108,7 @@ ajanı Ctrl+C ile durdurun; yeniden çalıştırmak aynı cihazı bağlar.
 Sırları yazdırmadan yerel kaydı denetleyin:
 
 ```bash
-ocx remote-workspace status
+orl remote-workspace status
 ```
 
 ## Uzak kodlama oturumu başlatma

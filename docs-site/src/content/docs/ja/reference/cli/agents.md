@@ -3,28 +3,28 @@ title: CLI エージェント、ルーティング、および統合
 description: マルチエージェント、コンボ、可観測性、アクセス、統合、システム、および構成コマンド。
 ---
 
-これらのコマンドは、エージェントのポリシーとルーティングを制御し、稼働中のプロキシを検査し、サポートされているクライアントを opencodex に接続します。
+これらのコマンドは、エージェントのポリシーとルーティングを制御し、稼働中のプロキシを検査し、サポートされているクライアントを OpenRelay に接続します。
 
 ## エージェントポリシー
 
-### `ocx agent <status|injection|effort|subagents|fallback|sidecar> ...`
+### `orl agent <status|injection|effort|subagents|fallback|sidecar> ...`
 
 ヘッドレス マルチエージェントロスター、エフォート キャップ、プロンプト インジェクション、フォールバック、サイドカー設定を管理します。現在のポリシーには `status` を使用します。サーフェス モード、委任、エフォート、およびフォールバック動作がどのように組み合わされるかについては、[サブエージェントサーフェス](/guides/sub-agent-surface/) を参照してください。
 
 ```bash
-ocx agent subagents set ark/model-a,openai/gpt-5.5
-ocx agent sidecar web --enabled off
+orl agent subagents set ark/model-a,openai/gpt-5.5
+orl agent sidecar web --enabled off
 ```
 
-`--enabled off` はダッシュボードの **オフ (Off)** 行と同じスイッチです。OpenCodex はサイドカーを
+`--enabled off` はダッシュボードの **オフ (Off)** 行と同じスイッチです。OpenRelay はサイドカーを
 実行しなくなり、Codex 統合は `~/.codex/config.toml` に
 `web_search = "disabled"` を書き込むため、MCP 検索サーバーだけを検索経路にできます。
 `--enabled on` はその行を再び削除します。保存でスイッチが実際に切り替わったとき、コマンドは
 Codex 側の書き込み（`--json` では `codexWebSearch`、それ以外では末尾の
-`Codex config:` 行）を報告し、書き込みできなかった場合は `ocx sync` を案内します。
+`Codex config:` 行）を報告し、書き込みできなかった場合は `orl sync` を案内します。
 このフラグは `vision` でも機能します。
 
-### `ocx v2 <status|on|off|mode <v1|default|v2>|threads <n>>`
+### `orl v2 <status|on|off|mode <v1|default|v2>|threads <n>>`
 
 Codex `multi_agent_v2` 機能フラグとスリーステート マルチエージェント サーフェス モードを管理します。
 
@@ -39,108 +39,108 @@ Codex `multi_agent_v2` 機能フラグとスリーステート マルチエー�
 | `threads <n>` |アクティブな v1/v2 スレッド制限を少なくとも 1 の整数に設定します。
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
-ocx v2 mode default
-ocx v2 on
-ocx v2 threads 16
+orl v2 status
+orl v2 mode v1
+orl v2 mode default
+orl v2 on
+orl v2 threads 16
 ```
 
-`mode` サブコマンドは、`multiAgentMode` を opencodex 設定に書き込み、Codex カタログを再同期します。モードとフラグの遷移により、現在の数値スレッド制限が有効な v1/v2 Codex キー間で移動します。移行が失敗すると、元の `config.toml` が復元されます。変更は新しい Codex セッションに適用されますが、実行中のセッションでは固定されたサーフェスが維持されます。
+`mode` サブコマンドは、`multiAgentMode` を OpenRelay 設定に書き込み、Codex カタログを再同期します。モードとフラグの遷移により、現在の数値スレッド制限が有効な v1/v2 Codex キー間で移動します。移行が失敗すると、元の `config.toml` が復元されます。変更は新しい Codex セッションに適用されますが、実行中のセッションでは固定されたサーフェスが維持されます。
 
 ## コンボルーティング
 
-### `ocx combo <list|show|set|remove> ...`・`ocx route combo ...`
+### `orl combo <list|show|set|remove> ...`・`orl route combo ...`
 
-コンボフェイルオーバーとラウンドロビン仮想モデルを管理します。 `ocx route combo` は階層別名です。 combo は現在サポートされているルーティング リソースです。ターゲットは`provider/model[:weight],provider/model[:weight]`を使用します。
+コンボフェイルオーバーとラウンドロビン仮想モデルを管理します。 `orl route combo` は階層別名です。 combo は現在サポートされているルーティング リソースです。ターゲットは`provider/model[:weight],provider/model[:weight]`を使用します。
 
 ```bash
-ocx combo list
-ocx route combo set reliable --targets ark/model-a:2,openai/gpt-5.5
+orl combo list
+orl route combo set reliable --targets ark/model-a:2,openai/gpt-5.5
 ```
 
 ルーティングの動作と設定ガイダンスについては、「[コンボ](/guides/combos/)」を参照してください。
 
 ## 可観測性とデバッグ
 
-### `ocx observe <logs|usage|storage|memory|debug|claude-inbound|injection> ...`
+### `orl observe <logs|usage|storage|memory|debug|claude-inbound|injection> ...`
 
 プロキシ リクエスト、使用状況、ストレージ、メモリ、およびデバッグ データを検査します。直接のエイリアスは次のとおりです。
 
 |別名 |同等のリソース |
 | --- | --- |
-| `ocx logs [filters] [--follow] [--json|--jsonl]` | `ocx observe logs` |
-| `ocx usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--provider <name>] [--model <id>] [--json]` | `ocx observe usage` |
-| `ocx storage [--json]` | `ocx observe storage` |
-| `ocx memory [--json]` | `ocx observe memory` |
+| `orl logs [filters] [--follow] [--json|--jsonl]` | `orl observe logs` |
+| `orl usage [--range <today|1d|7d|30d|all>] [--surface <all|codex|claude|grok>] [--provider <name>] [--model <id>] [--json]` | `orl observe usage` |
+| `orl storage [--json]` | `orl observe storage` |
+| `orl memory [--json]` | `orl observe memory` |
 
 ```bash
-ocx observe usage --range 30d --json
+orl observe usage --range 30d --json
 ```
 
 一部の使用履歴を集計できない場合、人向けの出力は読み取れる行がない場合も警告を表示します。表示される合計値は読み取れる記録のみを反映します。フィルターに一致する読み取れる記録がない場合は、合計欄の代わりに警告と案内を表示します。除外した記録には一致するものが含まれる可能性があります。`--json` は応答の `usageIncomplete` 診断と理由をそのまま保持します。
 
-### `ocx debug <provider|usage|injection|claude> <on|off|status|reset|logs [-f]>`
+### `orl debug <provider|usage|injection|claude> <on|off|status|reset|logs [-f]>`
 
 実行中のプロキシの管理 API を通じて、ランタイム デバッグ オーバーライドを読み取りまたは変更します。
 
 ```bash
-ocx debug provider on|off|status|reset
-ocx debug provider logs [-f|--follow]
-ocx debug usage on|off|status|reset
-ocx debug usage logs [-f|--follow]
+orl debug provider on|off|status|reset
+orl debug provider logs [-f|--follow]
+orl debug usage on|off|status|reset
+orl debug usage logs [-f|--follow]
 ```
 
-スコープがない場合、`ocx debug` は使用状況を出力し、プロキシが停止すると、次回起動環境がデフォルトになります。プロバイダーのデバッグのデフォルトは `OCX_DEBUG=1` です (従来の `OCX_DEBUG_FRAMES=1` も機能します)。使用法デバッグのデフォルトは `OPENCODEX_USAGE_DEBUG=1` からです。
+スコープがない場合、`orl debug` は使用状況を出力し、プロキシが停止すると、次回起動環境がデフォルトになります。プロバイダーのデバッグのデフォルトは `OCX_DEBUG=1` です (従来の `OCX_DEBUG_FRAMES=1` も機能します)。使用法デバッグのデフォルトは `OPENCODEX_USAGE_DEBUG=1` からです。
 
 ## APIアクセス
 
-### `ocx access <key|endpoints|models|test> ...`
+### `orl access <key|endpoints|models|test> ...`
 
-OpenCodex へのアクセス用 API キーの一覧、外部エンドポイント、モデルを確認します。`ocx api-key` は `ocx access key` コマンド群の別名です。
+OpenRelay へのアクセス用 API キーの一覧、外部エンドポイント、モデルを確認します。`orl api-key` は `orl access key` コマンド群の別名です。
 
 キーの作成とローテーションの開始では、通常のテキスト出力でも JSON 出力でも、一度だけ表示される平文の認証情報が返されます。エージェントはこれらの手順を実行せず、エージェントセッション外で人が直接操作するターミナルに委ねてください。キーそのものをチャットで求めず、設定と接続の確認結果、および秘密情報ではないキー ID とローテーション ID だけを受け取ってください。
 
 ```bash
-ocx access key list --json
+orl access key list --json
 ```
 
 新しいキーの設定と接続の確認は、古いキーの失効承認ではありません。ローテーションの確定や古いキーの削除には、そのキーを失効させるための明示的な承認が別途必要です。承認された操作の後は一覧を再確認してください。API の直接呼び出しでこの手順を回避しないでください。
 
 ## クライアントの統合
 
-### `ocx integration <claude|grok> ...`
+### `orl integration <claude|grok> ...`
 
 サポートされている Claude と Grok の統合を管理します。以下の直接コマンド ファミリは、クライアント固有のコントロールを公開します。
 
-### `ocx claude [claude args...]`
+### `orl claude [claude args...]`
 
 プロキシが実行されていることを確認し、`ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN`、`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`、および `config.claudeCode` のモデル スロットを使用してクロード コードを起動します。ルーティングされたモデルは、Claude Code 2.1.129 以降の安定したスロット エイリアスを介してネイティブ `/model` ピッカーに表示されます。古いバージョンでは、`ANTHROPIC_MODEL` または `/model <id>` で選択します。ユーザーがエクスポートした `ANTHROPIC_*` 変数が常に優先されます。
 
 Claude デスクトップ プロファイル コマンドは次のとおりです。
 
 ```text
-ocx claude desktop [apply]                         Save and apply the four-family profile
-ocx claude desktop show [--json]                   Show routes, families, and defaults
-ocx claude desktop move <route> <family> [--default]
-ocx claude desktop default <family> <route|none>
-ocx claude desktop export <path|->                 Export versioned JSON (`-` = stdout)
-ocx claude desktop import <path> [--apply]         Validate and import JSON
+orl claude desktop [apply]                         Save and apply the four-family profile
+orl claude desktop show [--json]                   Show routes, families, and defaults
+orl claude desktop move <route> <family> [--default]
+orl claude desktop default <family> <route|none>
+orl claude desktop export <path|->                 Export versioned JSON (`-` = stdout)
+orl claude desktop import <path> [--apply]         Validate and import JSON
 ```
 
-ファミリは `opus`、`fable`、`sonnet`、および `haiku` です。新しいルートは `opus` で始まります。 `none` は、そのファミリーが空の場合にのみ有効です。従来の適用フラグ `--static`、`--hybrid`、および `--discovery-only` は引き続きサポートされます。クロードコードの設定には`ocx claude config <status|set> ...`を使用してください。
+ファミリは `opus`、`fable`、`sonnet`、および `haiku` です。新しいルートは `opus` で始まります。 `none` は、そのファミリーが空の場合にのみ有効です。従来の適用フラグ `--static`、`--hybrid`、および `--discovery-only` は引き続きサポートされます。クロードコードの設定には`orl claude config <status|set> ...`を使用してください。
 
-### `ocx opencode [opencode args...]`
+### `orl opencode [opencode args...]`
 
 プロキシが実行されていることを確認し、OpenCode のインライン ランタイム層 (`OPENCODE_CONFIG_CONTENT`) で生成された `provider.opencodex` および `providers.opencodex` ブロックを使用してオープンコードを起動します。既存のインライン設定は保持され、今回の起動ではこの 2 つのキーのみが置き換えられます。グローバルまたはプロジェクトの `opencode.json` ファイルは、既存の上書きについて警告するために読み取られることがありますが、ディスク上のファイルは変更されません。ルーティングされたモデルは `opencodex/<provider>/<model>` として表示されます。後でプレーン `opencode` を起動すると、以前とまったく同じように動作します。
 
-### `ocx grok <status|exclude|include|set|clear|apply> ...`
+### `orl grok <status|exclude|include|set|clear|apply> ...`
 
 Grok Build モデル フェンスを管理および適用します。
 
 ## クライアント設定のエクスポート
 
-### `ocx export --client <opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh|mcode|zcode|prime|aside|raycast|omo|cline|kilo|commandcode|droid>`
+### `orl export --client <opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh|mcode|zcode|prime|aside|raycast|omo|cline|kilo|commandcode|droid>`
 
 実行中のプロキシに接続するクライアント設定を出力します。このコマンドは、ベース URL、モデル一覧、およびクライアントに応じた認証情報参照または `opencodex-loopback` プレースホルダーを含む `opencodex` プロバイダーブロックを、選択したクライアントのネイティブ形式でシリアル化します。
 
@@ -154,10 +154,10 @@ Grok Build モデル フェンスを管理および適用します。
 | `--force` | `--out` が既存のファイルを置き換えることを許可します。 |
 
 ```bash
-ocx export --client opencode                     # config plus destination, merge warning, and counts
-ocx export --client pi --json > pi-models.json   # JSON document for a pipe or a diff
-ocx export --client omp --out ./omp-models.yml    # native OMP YAML
-ocx export --client opencode --out ~/opencodex-opencode.json
+orl export --client opencode                     # config plus destination, merge warning, and counts
+orl export --client pi --json > pi-models.json   # JSON document for a pipe or a diff
+orl export --client omp --out ./omp-models.yml    # native OMP YAML
+orl export --client opencode --out ~/opencodex-opencode.json
 ```
 
 `--json` がない場合、選択したクライアントのネイティブ形式で生成された設定が先頭に続き、正規の宛先パス、マージ警告、クライアント固有の起動前ガイダンス、およびコンテキスト制限を省略する行数を含むモデル数が続きます (クライアントはこれらに対して独自のデフォルトを適用します)。
@@ -184,10 +184,10 @@ ocx export --client opencode --out ~/opencodex-opencode.json
 
 Raycast のエクスポートは、`providers` シーケンスに `id: opencodex` 要素を 1 つだけ持つ独立した `providers.yaml` 文書です。内容は `name: OpenCodex`、プロキシの `/v1` ベース URL、および `abilities` 付きのルーティング済み全モデルです (`tools` と `system_message` は常にサポート、`vision` はカタログの入力モダリティから、`reasoning_effort` はモデルに effort ラダーがある場合、`temperature` は推論モデルではオフ)。Custom Providers は Raycast Pro の機能で、Raycast はこのファイルを監視しているため、保存した変更は再起動なしで反映されます。形式は [manual.raycast.com/ai/custom-providers](https://manual.raycast.com/ai/custom-providers) に記載されています。`api_keys` エントリは書き込まれないため、このエクスポートは loopback 専用で、loopback 以外のバインドは拒否されます。
 
-opencode は `{env:OPENCODEX_OPENCODE_API_KEY}` を補間します。opencodex が生成する Pi のエクスポートには環境変数が不要で、リテラルのプレースホルダー `opencodex-loopback` が入ります。この値は必須です。Pi はモデル リストを構築する際に `apiKey` を解決し、既存の設定に未設定の環境変数参照がある場合はプロバイダー全体を隠すためです。ループバックでは、生成されたプレースホルダーをプロキシが検査することはありません。
+opencode は `{env:OPENCODEX_OPENCODE_API_KEY}` を補間します。OpenRelay が生成する Pi のエクスポートには環境変数が不要で、リテラルのプレースホルダー `opencodex-loopback` が入ります。この値は必須です。Pi はモデル リストを構築する際に `apiKey` を解決し、既存の設定に未設定の環境変数参照がある場合はプロバイダー全体を隠すためです。ループバックでは、生成されたプレースホルダーをプロキシが検査することはありません。
 
 :::caution[マージし、決して置き換えないでください]
-`ocx export` は実際のクライアント設定を書き込むことはありません。宛先は手動でマージできるように出力されます。`--out` は、`--force` なしで既存のファイルを上書きすることを拒否します。これは、設定を置き換えると、その中にすでに含まれている他のプロバイダー、エージェント、および MCP エントリが破壊されるためです。
+`orl export` は実際のクライアント設定を書き込むことはありません。宛先は手動でマージできるように出力されます。`--out` は、`--force` なしで既存のファイルを上書きすることを拒否します。これは、設定を置き換えると、その中にすでに含まれている他のプロバイダー、エージェント、および MCP エントリが破壊されるためです。
 :::
 
 キーはシリアル化されません。生成される設定には、文書化された環境参照か、秘密ではないループバック用プレースホルダーのいずれかが入ります。ループバックアドレス (`127.0.0.1`) だけでは、キー不要とは判断できません。対象の認証ポリシーとエンドポイントを確認してください。選択したキーを使うモデル・音声 CLI はループバックでも明示的なキー入力が必要です。クライアントの設定形式が対応しており、プロキシがループバック以外のアドレスにバインドする場合にのみ、参照される環境変数を設定してください。アドミッション キーの発行方法は [Remote access](/ja/reference/configuration/server/#リモートアクセス) を参照してください。上流プロバイダー自体のキーは別の設定です。[Providers](/guides/providers/) を参照してください。
@@ -198,20 +198,20 @@ opencode は `{env:OPENCODEX_OPENCODE_API_KEY}` を補間します。opencodex �
 
 ## ランタイムと構成
 
-### `ocx system <status|settings|startup|diagnostics|sync|codex-app-server|codex-restart|update|codex-cli-update> ...`
+### `orl system <status|settings|startup|diagnostics|sync|codex-app-server|codex-restart|update|codex-cli-update> ...`
 
 ヘッドレス ランタイムの設定、起動、同期、診断、更新を管理します。
 
-`ocx system codex-restart --yes` は `ocx sync --restart-codex` と同じモジュールで Codex app-server を再起動し、デスクトップ アプリも完全に終了して再起動します。プロキシ自体が Codex アプリ内で動いている場合、完了できない引き渡しを約束せず、実行可能な案内とともに拒否します。
+`orl system codex-restart --yes` は `orl sync --restart-codex` と同じモジュールで Codex app-server を再起動し、デスクトップ アプリも完全に終了して再起動します。プロキシ自体が Codex アプリ内で動いている場合、完了できない引き渡しを約束せず、実行可能な案内とともに拒否します。
 
 ```bash
-ocx system settings --stream-mode eager-relay
+orl system settings --stream-mode eager-relay
 ```
 
-`ocx system update` は OpenCodex 自体を更新します。Codex CLI は次の独立した読み取り専用コマンドで検査します。
+`orl system update` は OpenRelay 自体を更新します。Codex CLI は次の独立した読み取り専用コマンドで検査します。
 
 ```bash
-ocx system codex-cli-update check --json
+orl system codex-cli-update check --json
 ```
 
 `check` はパッケージレジストリに問い合わせず、設定済みのインストール候補について、秘匿化された実行ファイルの場所や所有権を示す根拠を含む来歴情報を、範囲を限定して検査します。公開ランチャー由来の信頼済みコンテキストが真正性を裏付けるのは候補のスナップショットだけであり、Codex が正常に実行されたことではありません。この単発コマンドは Codex を一切実行しないため、環境または永続化された状態から得た候補は報告対象にとどまります（`managed: false`、通常は `selection_unattested`）。`selectionAttested` は常に `false` です。JSON 出力には `candidateAvailable`、`candidateVersion`、`candidateSource`、`selectionAttested: false` が含まれます。Bun またはソースから直接起動するとランチャーの証明がないため、環境由来および永続化された候補を無視し、POSIX では `candidate_unavailable` を報告することがあります。Windows では、この最初のスライスは候補や構成のパスに対するファイルシステム I/O を一切行いません。信頼済みランチャーが取り込んだ絶対パスの環境候補だけを、アプリ同梱またはバージョンマネージャーとして字句的に報告でき、それ以外の Windows 候補はすべて失敗時閉鎖になります。このスライスは永続化された選択状態を一切読み取らないため、環境候補がキャプチャされていない Windows 実行では `candidate_unavailable` ではなく `windows_inspection_deferred` を報告します。コマンドは Codex CLI が導入されているかどうかを観測できないので、候補が存在しないと断定せず、検査が延期されたことを報告します。このコマンドは Codex やパッケージマネージャーの実行、shim の修復、設定やキャッシュ状態への書き込み、プロセスの停止、インストールを行いません。アプリ同梱、認識済みのバージョンマネージャー、未検証のスタンドアロン、曖昧な shim の各候補は管理対象外または不明として報告され、管理対象と判定されることはありません。
@@ -221,27 +221,27 @@ Windows で `CODEX_CLI_PATH=codex` のような単純なコマンド名、リモ
 #### Windows x64 インストールの明示的な観測
 
 ```text
-ocx system codex-cli-update attest [--json]
-ocx system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
+orl system codex-cli-update attest [--json]
+orl system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
 ```
 
-`attest` は、選択済みまたは明示した Windows x64 の npm インストールを読み取り専用で観測する任意の操作です。オプションなしでは、証明済みランチャースナップショットが特定した選択候補（設定済み `CODEX_CLI_PATH` または取り込み PATH 上の最初の `codex`）を観測し、opencodex ラッパーは名前を変えた `codex.opencodex-real.cmd` npm バックアップに解決します。4 個の絶対パスをすべて指定すると検出を上書きします。検出はパスを提案するだけで、ハンドル保持による観測が最終的な権威です。`--candidate` は標準 npm の `<prefix>/codex.cmd` または `<prefix>/node_modules/@openai/codex/bin/codex.js` を指定します。`--npm-cli` は `node_modules/npm/bin/npm-cli.js` で終わり、`--node` は明示的な `node.exe` を指定します。アプリのバンドル、認識済みバージョン管理ツールの配置、npm バックアップのない opencodex 所有の shim、独自ラッパーは拒否されます。
+`attest` は、選択済みまたは明示した Windows x64 の npm インストールを読み取り専用で観測する任意の操作です。オプションなしでは、証明済みランチャースナップショットが特定した選択候補（設定済み `CODEX_CLI_PATH` または取り込み PATH 上の最初の `codex`）を観測し、OpenRelay ラッパーは名前を変えた `codex.opencodex-real.cmd` npm バックアップに解決します。4 個の絶対パスをすべて指定すると検出を上書きします。検出はパスを提案するだけで、ハンドル保持による観測が最終的な権威です。`--candidate` は標準 npm の `<prefix>/codex.cmd` または `<prefix>/node_modules/@openai/codex/bin/codex.js` を指定します。`--npm-cli` は `node_modules/npm/bin/npm-cli.js` で終わり、`--node` は明示的な `node.exe` を指定します。アプリのバンドル、認識済みバージョン管理ツールの配置、npm バックアップのない OpenRelay 所有の shim、独自ラッパーは拒否されます。
 
 制限付き読み取り中、ネイティブハンドルで親ディレクトリとファイルを保持します。未対応プラットフォーム、再解析ポイント・junction、競合する書き込み、安全でないパス、上限を超えるファイルは拒否されます。固定形式のレポートにパスは含まれません。`status` は `observed` または `refused` で、`installationIdentityObserved` を返します。`selectionAttested`、`managed`、`applyAllowed` は常に `false` です。拒否の報告でも終了コード 0 になり得るため、`status` を確認してください。
 
 識別値やダイジェストは観測時点のファイルを表し、持続的な更新許可ではありません。選択されたランタイム、過去のインストーラー、実効 npm 設定、ツールの真正性は証明しません。指定した Node も観測するだけで、ランチャーが選ぶ Node だとは証明しません。対象の実行、レジストリ要求、インストール、設定の書き込み、プロセス制御は行いません。既存の Windows `check` は引き続き候補・設定のファイルシステム I/O を行いません。
 
-### `ocx config [show|get|set|unset|validate|export|import] ...`
+### `orl config [show|get|set|unset|validate|export|import] ...`
 
-`ocx config [show] [--json] [--source]` は、プロキシを起動せずにローカル設定を表示します。`show` を省略しても、どちらかのフラグ、または両方を任意の順序で指定できます。`--source` は診断のソース、エラー、警告を含め、表示時のみ使用できます。`--json` は明示的な操作の前にも指定でき、実行する操作を変更しません。`--json` または `--source` の重複と不明な引数は拒否されます。
+`orl config [show] [--json] [--source]` は、プロキシを起動せずにローカル設定を表示します。`show` を省略しても、どちらかのフラグ、または両方を任意の順序で指定できます。`--source` は診断のソース、エラー、警告を含め、表示時のみ使用できます。`--json` は明示的な操作の前にも指定でき、実行する操作を変更しません。`--json` または `--source` の重複と不明な引数は拒否されます。
 
-検証された OpenCodex 設定を検査し、安全に変更します。 `show` および `get` はシークレットをマスクします。インポートは書き込む前に検証され、`--yes` が必要です。
+検証された OpenRelay 設定を検査し、安全に変更します。 `show` および `get` はシークレットをマスクします。インポートは書き込む前に検証され、`--yes` が必要です。
 
 ### Forced Claude Code subagent model
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

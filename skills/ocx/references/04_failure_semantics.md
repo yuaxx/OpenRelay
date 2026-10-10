@@ -30,7 +30,7 @@ exit 1; a capability route miss uses 4 even when an undeclared handler exists.
 ## Distinguishing "not running" from "failing"
 
 ```bash
-ocx ready --json
+orl ready --json
 ```
 
 Use readiness before live management. `pending` permits a bounded wait; `failed`
@@ -49,7 +49,7 @@ used to be indistinguishable; they are now reported separately, so read the mess
 | `oauth_mutation_busy` | 503 | another credential write is in flight | wait `Retry-After` (1s), retry once |
 | `catalog_busy` | 503 | a model-catalog gather is in flight | wait `Retry-After` (1s), retry once |
 | config-mutation lock reason | 503 | a config write holds the lock | retry shortly |
-| credential-conflict reason | — | the install is structurally broken | run `ocx doctor`; do NOT retry |
+| credential-conflict reason | — | the install is structurally broken | run `orl doctor`; do NOT retry |
 | `stale_preview` | 409 | a storage cleanup digest no longer matches | re-run the preview |
 | `dest_exists` | 409 | a trash restore target already exists | resolve the file, then retry |
 | `codex_busy` | 409 | Codex is holding `state.sqlite` | retry after Codex quits |
@@ -70,7 +70,7 @@ and repeating the call produces the same error indefinitely.
    `Retry-After` interval and retry **once**. An exit 5 from provider apply or profile update requires
    fresh review, not a timed retry. Never repeat an uncertain or persisted write
    merely because its exit code is nonzero.
-4. Exit 1 with a credential-conflict reason → run `ocx doctor` and report. Do not retry.
+4. Exit 1 with a credential-conflict reason → run `orl doctor` and report. Do not retry.
 5. Exit 1 otherwise → read the message. A transport failure may be worth one retry; an unexpected
    5xx is worth reporting.
 
@@ -82,28 +82,28 @@ credential conflict looks like progress and produces nothing.
 Two states that read as failures and are not. Both come from the same change: a repair of a
 healthy job must not be an outage.
 
-**`ocx service repair` printing `service is already loaded from the current plist; nothing to
+**`orl service repair` printing `service is already loaded from the current plist; nothing to
 do.` is success.** The repair renders the plist first and compares it. When the rendered
 bytes match the file, the token file is unchanged, and `launchctl print` reports the job
 loaded from that plist, launchd is not touched at all. Do not retry it, and do not escalate
-to `ocx service uninstall`.
+to `orl service uninstall`.
 
-**`ocx service restart` is NOT an alias of `repair` — it always restarts.** It runs the same
+**`orl service restart` is NOT an alias of `repair` — it always restarts.** It runs the same
 refresh, and when nothing was reloaded (the healthy, unchanged job above) it restarts the
 loaded job in place with `launchctl kickstart -k gui/<uid>/com.opencodex.proxy`, verifies the
 job with the same probe, and prints `service restarted (launchctl kickstart -k …)`. So when a
 restart is the actual requirement — after a change to `unauthenticatedLoopbackListener`,
-`hostname` or `port` — tell the operator `ocx service restart`, not a hand-written launchctl
+`hostname` or `port` — tell the operator `orl service restart`, not a hand-written launchctl
 command. Linux restarts through `systemctl --user restart` and Windows stops then starts the
 task, on either verb.
 
-A bare `ocx service` still selects `repair`, so it will not bounce a healthy hub. Reserve
-`ocx service repair` for a job loaded from an older plist, or not loaded at all.
+A bare `orl service` still selects `repair`, so it will not bounce a healthy hub. Reserve
+`orl service repair` for a job loaded from an older plist, or not loaded at all.
 `launchctl kickstart -k gui/$(id -u)/com.opencodex.proxy` is still a correct manual fallback
-and the failure path names it, but do not lead with it. `ocx restart` is a different verb
+and the failure path names it, but do not lead with it. `orl restart` is a different verb
 entirely: it restarts a proxy process, not the service the manager supervises.
 
-`ocx service status` has four launchd verdicts, and only two of them call for a repair:
+`orl service status` has four launchd verdicts, and only two of them call for a repair:
 
 | Summary | Meaning | Repair? |
 |---|---|---|
@@ -115,11 +115,11 @@ entirely: it restarts a proxy process, not the service the manager supervises.
 The last row is the one to get right. It is not evidence the service is down: the command
 itself recommends nothing, and a probe that could not run never marks a running proxy as
 dead. Reporting it as "not loaded" is what used to send operators to repair a serving hub.
-If the proxy answers `ocx ready`, the hub is up regardless of what the probe could see.
+If the proxy answers `orl ready`, the hub is up regardless of what the probe could see.
 
 ## A hub-gated skip is not a failure
 
-`ocx sync`, `ocx sync-cache`, `ocx ensure` and `ocx restore back` on a `runtimeRole: "hub"`
+`orl sync`, `orl sync-cache`, `orl ensure` and `orl restore back` on a `runtimeRole: "hub"`
 can exit 0 having deliberately written nothing:
 
 > This machine is a hub; it does not rewrite its own Codex/Grok/Claude configs unless
@@ -127,7 +127,7 @@ can exit 0 having deliberately written nothing:
 
 That is the hub gate, not the operator's `clientIntegrations` toggle, and not a lock
 conflict — there is nothing to retry. Either enable the listener and restart the proxy
-(`ocx service restart` on a service install), or
+(`orl service restart` on a service install), or
 report that this hub leaves its own clients native. Details:
 [05_remote_hub.md](05_remote_hub.md#the-hub-gate-on-the-hubs-own-clients).
 
@@ -143,7 +143,7 @@ empty one and getting a 400 that looks like a bug in the verb.
 
 Starring the repository has no CLI verb and no failure code, because it has no CLI path at all. It
 spends the user's GitHub identity and the server requires a dashboard session for exactly that
-reason. `ocx inspect star` reads status; if starring is wanted, ask the user.
+reason. `orl inspect star` reads status; if starring is wanted, ask the user.
 
 
 ## Provider save and convergence failures
@@ -151,7 +151,7 @@ reason. `ocx inspect star` reads status; if starring is wanted, ask the user.
 Live provider lifecycle, pacing and batch operations can return `success: true`
 with a nonzero exit: the configuration was saved but `catalogRefresh` failed or
 was skipped as busy, stale, refused or unavailable. Preserve both facts. Read back
-with `ocx provider snapshot --json` (and pacing read for pacing changes), then
+with `orl provider snapshot --json` (and pacing read for pacing changes), then
 inspect the reported convergence issue. Do not resend an add/remove/apply to
 repair catalog refresh. Null, absent or `not-requested` refresh does not mean
 client synchronization occurred, even when the command exits 0.

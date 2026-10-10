@@ -1,9 +1,9 @@
 ---
 title: 桌面应用
-description: 在 macOS、Windows 和 Linux 上安装并使用 OpenCodex 桌面应用。
+description: 在 macOS、Windows 和 Linux 上安装并使用 OpenRelay 桌面应用。
 ---
 
-OpenCodex 桌面应用将原生托盘与 web 仪表盘结合。其内置 CLI 会查找现有的本地 proxy；只有确认不存在时，应用才会启动内置运行时。
+OpenRelay 桌面应用将原生托盘与 web 仪表盘结合。其内置 CLI 会查找现有的本地 proxy；只有确认不存在时，应用才会启动内置运行时。
 
 仪表盘由找到的本地 proxy 端点提供服务（默认端口为 `10100`）。桌面应用是围绕该仪表盘和内置运行时的本地外壳。
 
@@ -40,11 +40,11 @@ sudo apt install ./OpenCodex-<version>-linux-amd64.deb
 
 ## 首次启动
 
-应用会让内置 CLI 运行 `ocx resolve --json`；如果已有可访问的本地 proxy，就连接到它。只有 CLI 证实不存在运行时，应用才会启动内置运行时；结果不确定时会显示启动失败。随后，仪表盘会在应用的 webview 中通过找到的 loopback 端点打开。登录时隐藏在托盘中启动的应用会保留轻量的启动页，直到你第一次从托盘打开或再次启动应用时才加载仪表盘。
+应用会让内置 CLI 运行 `orl resolve --json`；如果已有可访问的本地 proxy，就连接到它。只有 CLI 证实不存在运行时，应用才会启动内置运行时；结果不确定时会显示启动失败。随后，仪表盘会在应用的 webview 中通过找到的 loopback 端点打开。登录时隐藏在托盘中启动的应用会保留轻量的启动页，直到你第一次从托盘打开或再次启动应用时才加载仪表盘。
 
 使用托盘中的 **Open dashboard** 或 **Open in browser**，可在内嵌仪表盘与常用浏览器之间切换。托盘也提供更新检查。
 
-在 macOS 上，关闭仪表盘后，应用会继续在菜单栏中运行。从 Dock 或 Finder 再次打开 OpenCodex 即可恢复仪表盘，无需重启代理。
+在 macOS 上，关闭仪表盘后，应用会继续在菜单栏中运行。从 Dock 或 Finder 再次打开 OpenRelay 即可恢复仪表盘，无需重启代理。
 
 ## 在托盘中查看用量
 
@@ -70,11 +70,11 @@ sudo apt install ./OpenCodex-<version>-linux-amd64.deb
 
 ## Widget
 
-macOS 应用包含 OpenCodex WidgetKit 扩展。widget 的设置和本地快照细节参见 [macOS 菜单栏应用指南](/zh-cn/guides/macos-menu-bar/)。
+macOS 应用包含 OpenRelay WidgetKit 扩展。widget 的设置和本地快照细节参见 [macOS 菜单栏应用指南](/zh-cn/guides/macos-menu-bar/)。
 
 ## 卸载
 
-在 macOS 上，将“应用程序”中的 `OpenCodex.app` 拖入废纸篓。在 Windows 上，从 **Installed apps** 中移除 OpenCodex。在基于 Debian 的 Linux 系统中运行：
+在 macOS 上，将“应用程序”中的 `OpenCodex.app` 拖入废纸篓。在 Windows 上，从 **Installed apps** 中移除 OpenRelay。在基于 Debian 的 Linux 系统中运行：
 
 ```bash
 sudo apt remove opencodex

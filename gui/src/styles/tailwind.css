@@ -1,0 +1,13 @@
+/* Preflight is intentionally omitted: legacy screens own their element defaults.
+   Unlayered, prefixed utilities can coexist with the existing unlayered CSS. */
+@import "tailwindcss/theme.css" layer(theme) prefix(or);
+@import "tailwindcss/utilities.css" prefix(or) source("../");
+
+@theme inline {
+  --color-canvas: var(--bg);
+  --color-panel: var(--surface);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-ui);
+}

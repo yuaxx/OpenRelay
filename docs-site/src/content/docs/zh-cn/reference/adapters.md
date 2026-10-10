@@ -3,7 +3,7 @@ title: Adapters
 description: provider adapter 的目标、请求构建方式与各自特性。
 ---
 
-**adapter** 负责在 opencodex 的内部请求/响应模型与某个 provider 的 wire 格式之间转换。每个
+**adapter** 负责在 OpenRelay 的内部请求/响应模型与某个 provider 的 wire 格式之间转换。每个
 adapter 都实现 `ProviderAdapter` 接口（`src/adapters/base.ts`）：
 
 ```ts
@@ -71,7 +71,7 @@ interface ProviderAdapter {
   **`required` 或精确命名选择会 fail closed**，因为 Ollama 的 `/api/chat` 没有可用来强制它的
   `tool_choice` 字段。
 - **正典 Ollama Cloud 上拒绝结构化输出。** Ollama 目前在文档中说明其 Cloud 不支持结构化输出，
-  且 Cloud 不会强制 `format` 字段，因此对按 schema 提出的请求，OpenCodex 会让其显式失败，而
+  且 Cloud 不会强制 `format` 字段，因此对按 schema 提出的请求，OpenRelay 会让其显式失败，而
   不是返回不受约束的自由文本。本地 / 自定义 `ollama-native` 端点保留 Ollama 原生的 `format`
   映射（`json_object` → `"json"`，`json_schema` → schema 对象本身）。
 
@@ -150,7 +150,7 @@ Kiro 的 assistant 文本本身没有可靠的回合结束标记，但终止的 
 错误，内容过滤或 guardrail 停止表现为 filtered incomplete。没有真实工具调用却出现的 `TOOL_USE` 被视为
 矛盾而非进展。
 
-启用工具时，opencodex 会添加私有 `codex_kiro_final_answer`。重试不会制造空的 assistant/user 回合，
+启用工具时，OpenRelay 会添加私有 `codex_kiro_final_answer`。重试不会制造空的 assistant/user 回合，
 而会保留原始 user/tool-result，并在发送前校验角色交替、非空结构消息以及 tool use/result 配对。
 完成工具的回答即使与先前 commentary 完全相同，也会作为 `final_answer` 发出。
 当缺少只有用户能提供的决定、信息或澄清而无法继续时，契约同样要求把该问题通过完成工具发出并停止；它也作为结束回合的 `final_answer` 到达，而不是 commentary。
@@ -184,7 +184,7 @@ Cursor 的 HTTP/1.1 兼容传输：通过 `agent.v1.AgentService/RunSSE` 接收 
   checkpoint 由同一 provider conversation 所有时才允许；否则执行 full replay。compaction、
   helper/shadow 隔离、account/model 不匹配、ref 缺失、decode 失败、forced-fresh recovery 以及
   invalid_argument 重试也会回退到 full replay。进程重启会丢弃内存 store 并执行 full replay。
-  Cursor Connect 不提供权威的 cache_read_tokens，因此 OpenCodex usage 不是 cache hit 计数器。
+  Cursor Connect 不提供权威的 cache_read_tokens，因此 OpenRelay usage 不是 cache hit 计数器。
   受限的 Desktop fallback 只保存进程本地由 HMAC 派生的 owner；原始 session/thread header 与
   OAuth/authorization 材料不会写入 checkpoint state。基于 OAuth 的 live transport 和按账号过滤的
   live model discovery 仍是实验功能；登录与 transport 设置参见[提供商指南](/zh-cn/guides/providers/)
@@ -207,7 +207,7 @@ Cursor 的 HTTP/1.1 兼容传输：通过 `agent.v1.AgentService/RunSSE` 接收 
 - 使用 `runTurn` 而非常规的 fetch/parse 路径。请求与服务端事件由 `devin/cloud-direct/wire.ts` 手写的 protobuf 分帧处理。
 - 通过 `GetCascadeModelConfigs` 按账号获取模型；不在套餐内的模型在列表阶段就被过滤，而不是到请求时才失败。
 - Cognition 对工具说明有长度上限和精确短语黑名单。适配器会改写已知短语并截断过长的说明。
-- 密钥不会刷新。失效后请重新执行 `ocx login devin`。
+- 密钥不会刷新。失效后请重新执行 `orl login devin`。
 - 即使走 CLI 导入路径，本地的也只有凭据，请求本身无论哪条路径都发往 Cognition。早期版本曾在 `devin-cli` id 下提供第二个适配器，把请求作为对本地 `devin acp` 子进程的 Agent Client Protocol 会话来执行，现已移除。仍引用该适配器的已保存配置会在启动时重写为 `devin`，包括 `"devin-acp"` 这类自定义名称的行。
 
 ## `azure-openai`（别名：`azure`）

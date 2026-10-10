@@ -56,7 +56,7 @@ export function resolveCodexAccountTargetFromRows(
   if (requested === MAIN_ALIAS || requested === MAIN_CODEX_ACCOUNT_ID) return { id: MAIN_CODEX_ACCOUNT_ID };
   if (accounts.some(account => account.id === requested)) return { id: requested };
   if (isReservedCodexAccountWord(requested)) {
-    return { error: `"${requested}" is reserved; it clears the selection with \`ocx account use\` and names no account`, kind: "reserved" };
+    return { error: `"${requested}" is reserved; it clears the selection with \`orl account use\` and names no account`, kind: "reserved" };
   }
   const exact = accounts.filter(account => account.alias === requested);
   const matches = exact.length > 0

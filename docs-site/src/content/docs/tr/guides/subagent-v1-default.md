@@ -1,9 +1,9 @@
 ---
 title: v1 neden varsayılan alt ajan arayüzü?
-description: v2 şifreli görev sınırlamasının neyi bozduğu, OpenCodex'in neden artık v1 sunduğu ve yine de v2 istiyorsanız ne yapacağınız.
+description: v2 şifreli görev sınırlamasının neyi bozduğu, OpenRelay'in neden artık v1 sunduğu ve yine de v2 istiyorsanız ne yapacağınız.
 ---
 
-OpenCodex, alt ajan arayüzü **v1** olarak kurulur. Dashboard, Models ve Subagents
+OpenRelay, alt ajan arayüzü **v1** olarak kurulur. Dashboard, Models ve Subagents
 sayfaları **base** veya **v2** moduna geçmeden önce onay ister; bu sayfa da o
 onayın bağlantı hedefidir. CLI onay istemez.
 
@@ -31,13 +31,13 @@ güvenle yanlış yanıt üretmesine yol açardı.
 
 ## Neden olur?
 
-![İki yol aynı devri karşılaştırıyor. v1'de ChatGPT ebeveyni OpenCodex üzerinden düz metin görev gönderir; görev sağlayıcı sınırını aşar ve yönlendirilen çocuk onu okur. v2'de ebeveyn ChatGPT arka ucunun ürettiği encrypted_content gönderir; OpenCodex şifresini çözemez, bu nedenle görev sağlayıcı sınırında durur ve istek unreadable_encrypted_agent_task ile başarısız olur.](../../../../assets/subagent-v2-encrypted-task.svg)
+![İki yol aynı devri karşılaştırıyor. v1'de ChatGPT ebeveyni OpenRelay üzerinden düz metin görev gönderir; görev sağlayıcı sınırını aşar ve yönlendirilen çocuk onu okur. v2'de ebeveyn ChatGPT arka ucunun ürettiği encrypted_content gönderir; OpenRelay şifresini çözemez, bu nedenle görev sağlayıcı sınırında durur ve istek unreadable_encrypted_agent_task ile başarısız olur.](../../../../assets/subagent-v2-encrypted-task.svg)
 
-v1'de ebeveyn çocuğun görevini düz metin olarak üretir. OpenCodex onu okur,
+v1'de ebeveyn çocuğun görevini düz metin olarak üretir. OpenRelay onu okur,
 yönlendirir ve yönlendirilen çocuk uygulanabilir bir görev alır.
 
 v2'de ebeveyn, ChatGPT arka ucunun ürettiği `encrypted_content` olarak görevi
-verir. Anahtar o arka uçta kalır. OpenCodex anahtara hiç sahip olmadığından
+verir. Anahtar o arka uçta kalır. OpenRelay anahtara hiç sahip olmadığından
 proxy'nin çözebileceği veya yeniden yazabileceği bir şey yoktur: değer, bir
 bayrağın arkasındaki düz metin değil gerçekten şifreli metindir. Bu yüzden
 sorun yapılandırma hatası değil yapısaldır ve proxy tarafı ayarlarla çözülemez.
@@ -65,7 +65,7 @@ CLI 0.146 ile 0.151 arasında yeniden üretildi; [#37197](https://github.com/ope
 ise eksik parçayı, yani gönderme tarafı teslim politikasını, doğrudan belirtir.
 İkisinde de bakım sorumlularının bir taahhüdü veya tahmini bitiş tarihi yoktur.
 
-OpenCodex bunun sonucunu [#92](https://github.com/lidge-jun/opencodex/issues/92)
+OpenRelay bunun sonucunu [#92](https://github.com/lidge-jun/opencodex/issues/92)
 olarak kaydetti ve planlanmadığı için kapattı: bu depoda çözülecek bir şey
 yoktur; konu, buradaki bakım sorumlularını bekleyen görev değil yukarı akış
 işine işarettir.
@@ -97,7 +97,7 @@ kontrol panelini sonraki açışınızda yeniden görünür.
 
 Mod değişiklikleri **yeni** Codex oturumlarına uygulanır. Seçimden sonra yeni
 oturum başlatın; uzun süredir çalışan bir App ana bilgisayarı eski arayüzü
-gösteriyorsa `ocx sync` çalıştırıp o Codex arayüzünü yeniden başlatın.
+gösteriyorsa `orl sync` çalıştırıp o Codex arayüzünü yeniden başlatın.
 
 ## Yine de v2 istiyorsanız
 
@@ -125,8 +125,8 @@ Dashboard, Models ve Subagents aynı v1/base/v2 anahtarını taşır ve üçü d
 veya v2 öncesinde sorar. CLI üzerinden:
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
+orl v2 status
+orl v2 mode v1
 ```
 
 CLI onay istemez. Aynı ayardır; bu sayfanın anlattıklarını bilerek seçin.

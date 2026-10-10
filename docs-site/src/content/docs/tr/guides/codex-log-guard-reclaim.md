@@ -9,7 +9,7 @@ Geri kazanma **asla otomatik olarak zamanlanmaz** ve yalnızca Depolama sayfası
 
 ## Geri kazanma ne yapar
 
-OpenCodex, sınırlı bir çevrimdışı bakım dizisi uygular:
+OpenRelay, sınırlı bir çevrimdışı bakım dizisi uygular:
 
 1. Codex'in etkin `sqlite_home` konumu üzerinden kanonik `logs_2.sqlite` dosyasını bulur;
 2. dosya kimliğini ve bilinen Codex günlük şemasını doğrular;
@@ -42,29 +42,29 @@ Geri kazanma özellikle şunları **yapmaz**:
 - gelecekteki bilinmeyen bir günlük şemasında devam etmek; ya da
 - başarısız bir SQLite bütünlük denetiminden sonra devam etmek.
 
-Meşgul Log Guard kilidi, meşgul SQLite yazıcısı veya meşgul ilk denetim noktası arka planda yeniden denenmek yerine açık bir ret olarak döner. Denetim noktası çekişmesi ancak bir artımlı vakum partisi kaydedildikten sonra ortaya çıkarsa OpenCodex, hiçbir şeyin değişmediğini iddia etmek yerine tamamlanmış işi `stopReason: "busy"` ile başarılı bir kısmi sonuç olarak bildirir.
+Meşgul Log Guard kilidi, meşgul SQLite yazıcısı veya meşgul ilk denetim noktası arka planda yeniden denenmek yerine açık bir ret olarak döner. Denetim noktası çekişmesi ancak bir artımlı vakum partisi kaydedildikten sonra ortaya çıkarsa OpenRelay, hiçbir şeyin değişmediğini iddia etmek yerine tamamlanmış işi `stopReason: "busy"` ile başarılı bir kısmi sonuç olarak bildirir.
 
 ## CLI
 
 Önce geri kazanılabilir alanı inceleyin:
 
 ```bash
-ocx storage codex-logs status
+orl storage codex-logs status
 ```
 
 Tek bir sınırlı bakım geçişi çalıştırın:
 
 ```bash
-ocx storage codex-logs compact
+orl storage codex-logs compact
 ```
 
 Makine tarafından okunabilir önce/sonra ölçümleri için:
 
 ```bash
-ocx storage codex-logs compact --json
+orl storage codex-logs compact --json
 ```
 
-Sonuç daha fazla geri kazanılabilir alan kaldığını bildirirse, açıkça başka bir sınırlı geçiş istemediğiniz sürece burada durun. OpenCodex sonsuza kadar döngüye girmez veya sizin için takip geçişi zamanlamaz.
+Sonuç daha fazla geri kazanılabilir alan kaldığını bildirirse, açıkça başka bir sınırlı geçiş istemediğiniz sürece burada durun. OpenRelay sonsuza kadar döngüye girmez veya sizin için takip geçişi zamanlamaz.
 
 ## Yönetim API'si
 

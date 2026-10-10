@@ -1,9 +1,9 @@
 ---
 title: Yönetim API'si
-description: opencodex kontrol düzlemi için kimlik doğrulama, hatalar ve uç nokta referansı.
+description: OpenRelay kontrol düzlemi için kimlik doğrulama, hatalar ve uç nokta referansı.
 ---
 
-Yönetim API'si, opencodex'in kontrol düzlemidir. `http://localhost:10100`
+Yönetim API'si, OpenRelay'in kontrol düzlemidir. `http://localhost:10100`
 adresindeki kontrol paneli onun bir istemcisidir; başsız `ocx` sağlayıcı, model,
 kombo, hesap, ayarlar, tanılama ve yaşam döngüsü komutları da istemcilerdir. API
 yalnızca proxy çalışırken kullanılabilir.
@@ -15,7 +15,7 @@ veya otomasyon oluştururken bu referansı kullanın. Kalıcı değerler nihai o
 ## Kimlik doğrulama modeli
 
 Yönetim API'sinin, veri düzlemi API anahtarlarından bağımsız kendi yönetici
-kimlik bilgisi vardır. Başlangıçta opencodex bunu şu sırayla çözer:
+kimlik bilgisi vardır. Başlangıçta OpenRelay bunu şu sırayla çözer:
 
 1. Ayarlandığında `OPENCODEX_ADMIN_AUTH_TOKEN`.
 2. Güçlendirilmiş bir gizli dosyada oluşturulan bir `ocx_admin_*` belirteci.
@@ -98,7 +98,7 @@ bir bilet rozeti taşır ve rozet, geçerlilik pencerelerini listeleyen ve süre
 dolmaya en yakın kuponu kullanan bir iletişim kutusu açar. İletişim kutusu
 istemci tarafından üretilen bir `operationId` gönderir ve yeniden denemek yerine
 zaman aşımından sonra göndermeyi durdurur; çünkü günlük kaydı hâlâ açık olan
-bir kullanım yeniden yürütülür. `ocx account grok-reset-coupons` uçbirim
+bir kullanım yeniden yürütülür. `orl account grok-reset-coupons` uçbirim
 eşdeğeri olarak kalır.
 
 Claude kullanım sıfırlamaları **Providers > Anthropic > Accounts** üzerinden aynı
@@ -369,7 +369,7 @@ dolaşmamalıdır. Depoya yıldız verip vermeyeceğini kullanıcı seçmelidir.
 | --- | --- | --- |
 | `GET /api/system/memory` | Skaler süreç, yığın (heap), akış, yanıt durumu, denetleyici ve aktif tur metriklerini döndürün | — |
 | `POST /api/system/restart` | İstemci enjeksiyonunu kaldırmadan boşaltma duyarlı bir süreç yeniden başlatması başlatın | 202 döndürür; tekrarlanan çağrılar mevcut boşaltmayı bildirir |
-| `POST /api/stop` | Servisi durdurun, yerel Codex'i geri yükleyin, yönetilen Grok enjeksiyonunu kaldırın ve proxy'yi boşaltın | 409 servis sahipliği çakışması; çağıran `ocx stop` değilken bir Windows Görev Zamanlayıcı sarmalayıcısı proxy'yi yeniden başlatabiliyorsa 409 `respawnable_service` (hiçbir şey değiştirilmez); kurulu yönetici durmayı reddederse 409; Görev Zamanlayıcı durumu okunamıyorsa 409 `service_state_unknown` (hiçbir şey değiştirilmez; sorguyu onarıp yeniden deneyin) |
+| `POST /api/stop` | Servisi durdurun, yerel Codex'i geri yükleyin, yönetilen Grok enjeksiyonunu kaldırın ve proxy'yi boşaltın | 409 servis sahipliği çakışması; çağıran `orl stop` değilken bir Windows Görev Zamanlayıcı sarmalayıcısı proxy'yi yeniden başlatabiliyorsa 409 `respawnable_service` (hiçbir şey değiştirilmez); kurulu yönetici durmayı reddederse 409; Görev Zamanlayıcı durumu okunamıyorsa 409 `service_state_unknown` (hiçbir şey değiştirilmez; sorguyu onarıp yeniden deneyin) |
 
 ### Codex kimlik doğrulama yetkilendirmesi
 
@@ -455,7 +455,7 @@ HTTP: 400 invalid/unsupported; 404 missing account; `oauth_mutation_busy` on loc
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

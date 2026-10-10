@@ -3,26 +3,26 @@ title: Yerel bağlam uyumluluğu
 description: Codex geçmiş ve not aktarmasının uygunluk koşulları, kimlik doğrulamalı deneme yapılandırması ve sınırları.
 ---
 
-OpenCodex, yerel Codex geçmişini ve notlarını zaten aktarır. Bu, yönlendirilen sağlayıcılar için genel bir bellek hizmeti değildir; HTTP uç noktalarının sunulması da belirli bir Codex derlemesinin, hesabın veya modelin bunları kullanabildiğini kanıtlamaz. Aktarmanın sahiplik, iptal ve kimlik bilgisi sınırları için [Codex entegrasyonuna](/tr/guides/codex-integration/) bakın.
+OpenRelay, yerel Codex geçmişini ve notlarını zaten aktarır. Bu, yönlendirilen sağlayıcılar için genel bir bellek hizmeti değildir; HTTP uç noktalarının sunulması da belirli bir Codex derlemesinin, hesabın veya modelin bunları kullanabildiğini kanıtlamaz. Aktarmanın sahiplik, iptal ve kimlik bilgisi sınırları için [Codex entegrasyonuna](/tr/guides/codex-integration/) bakın.
 
 ## Birbirinden bağımsız iki gereksinim
 
-Codex uzantıyı etkinleştirmeli, OpenCodex ise arayanı tanımlamalıdır. Arka uç URL'sini değiştirmek tek başına iki gereksinimi de karşılamaz.
+Codex uzantıyı etkinleştirmeli, OpenRelay ise arayanı tanımlamalıdır. Arka uç URL'sini değiştirmek tek başına iki gereksinimi de karşılamaz.
 
 İncelenen yukarı akış Codex sözleşmesi; yerel katalog kaydında `supports_experimental_context` bildiren bir model, uygun bir ChatGPT oturumu ve adı tam olarak `OpenAI` olan, temel URL'si `/backend-api/codex` ile biten bir sağlayıcı gerektirir. Otomatik etkinleştirme, `env_key`, `experimental_bearer_token`, komut destekli `auth` veya AWS kimlik doğrulaması kullanan sağlayıcıları reddeder. İncelenen uygunluk koşulu ChatGPT Plus, Pro ve ProLite planlarını kabul eder; bu, o planlardaki her hesapta arka uç geçmiş uç noktalarının çalıştığı anlamına gelmez.
 
-OpenCodex ayrıca hem başarılı model isteğinde hem de sonraki bağlam isteklerinde etkin bir **veri düzlemi API anahtarı** gerektirir. Varsayılan yerleşik geri döngü enjeksiyonu bu anahtarı göndermez; bu nedenle modeller çalışırken bağlam çağrıları `context_principal_required` (403) ile başarısız olabilir. Kimlik doğrulamalı uzak sağlayıcı tablosu biçimi de tek başına yerel bağlam çözümü değildir: `env_key` ve sağlayıcı adı yukarıdaki Codex etkinleştirme sözleşmesini karşılamaz. İki sorunu gizlemek için asıl taraf veya hesap sahipliği denetimlerini asla kaldırmayın.
+OpenRelay ayrıca hem başarılı model isteğinde hem de sonraki bağlam isteklerinde etkin bir **veri düzlemi API anahtarı** gerektirir. Varsayılan yerleşik geri döngü enjeksiyonu bu anahtarı göndermez; bu nedenle modeller çalışırken bağlam çağrıları `context_principal_required` (403) ile başarısız olabilir. Kimlik doğrulamalı uzak sağlayıcı tablosu biçimi de tek başına yerel bağlam çözümü değildir: `env_key` ve sağlayıcı adı yukarıdaki Codex etkinleştirme sözleşmesini karşılamaz. İki sorunu gizlemek için asıl taraf veya hesap sahipliği denetimlerini asla kaldırmayın.
 
 ## Açık etkinleştirme söz dizimi
 
-OpenCodex, Codex'in `FeatureToml` tarafından kabul edilen iki kalıcı kök özellik biçimini de kabul eder:
+OpenRelay, Codex'in `FeatureToml` tarafından kabul edilen iki kalıcı kök özellik biçimini de kabul eder:
 
 ```toml
 [features]
 context_management = true
 ```
 
-Eşdeğer tablo biçimi de çalışır ve boole biçimini henüz tanımayan eski OpenCodex sürümleriyle uyumludur:
+Eşdeğer tablo biçimi de çalışır ve boole biçimini henüz tanımayan eski OpenRelay sürümleriyle uyumludur:
 
 ```toml
 [features.context_management]
@@ -35,9 +35,9 @@ experimental_mode = true
 
 Bu, **kaynak koduyla denetlenmiş bir deneme yapılandırmasıdır; gerçek hesapla uçtan uca doğrulama değildir**. Denemeden önce Codex yapılandırmasını yedekleyin ve kalıcı bir görev kontrol noktası tutun. Yeni, atılabilir bir iş parçacığı kullanın; çalışan mevcut bir iş parçacığının sağlayıcı kimliğini değiştirmeyin.
 
-Codex sürecinin ortamındaki `OCX_CONTEXT_API_KEY` değişkenine mevcut etkin bir OpenCodex veri düzlemi anahtarı verin. Yönetim/yönetici belirteci kullanmayın veya anahtarı TOML içinde saklamayın. Ayrı başlatılan masaüstü uygulaması, bir servisin ortamını otomatik olarak devralmaz. Normal yerel Codex ChatGPT oturumunu kullanılabilir tutun; ek başlık OAuth'un yerini almaz.
+Codex sürecinin ortamındaki `OCX_CONTEXT_API_KEY` değişkenine mevcut etkin bir OpenRelay veri düzlemi anahtarı verin. Yönetim/yönetici belirteci kullanmayın veya anahtarı TOML içinde saklamayın. Ayrı başlatılan masaüstü uygulaması, bir servisin ortamını otomatik olarak devralmaz. Normal yerel Codex ChatGPT oturumunu kullanılabilir tutun; ek başlık OAuth'un yerini almaz.
 
-Yukarıdaki kök özellik etkinleştirmesi, OpenCodex'te yapılandırılmış kanonik ChatGPT iletme sağlayıcısı ve güncel yerel model kataloğuyla birlikte bu **ek** sağlayıcıyı ve profili aynı Codex yapılandırmasına ekleyin. Portu gerçek yerel proxy'ye uyarlayın. Kök `model_provider` değerini ve mevcut sağlayıcı tablolarını değiştirmeyin.
+Yukarıdaki kök özellik etkinleştirmesi, OpenRelay'te yapılandırılmış kanonik ChatGPT iletme sağlayıcısı ve güncel yerel model kataloğuyla birlikte bu **ek** sağlayıcıyı ve profili aynı Codex yapılandırmasına ekleyin. Portu gerçek yerel proxy'ye uyarlayın. Kök `model_provider` değerini ve mevcut sağlayıcı tablolarını değiştirmeyin.
 
 ```toml
 [model_providers.ocx-native-context]
@@ -57,7 +57,7 @@ model = "gpt-6-astra"
 
 Özel sağlayıcı kimliği bilinçli bir seçimdir. Yukarı akış Codex, yerleşik sağlayıcıları `model_providers.openai` üzerinden genellikle geçersiz kılmaz; oraya eklenen başlık sessizce etkisiz kalabilir. Özel kimlik normal sağlayıcıyı korurken tam `OpenAI` adı yerel arka uç koşulunu karşılar. Bu profile `env_key` eklemeyin: `env_http_headers` yerel kabul bilgisini ayrı taşırken `Authorization` yerel ChatGPT oturumunu taşımayı sürdürür. OpenCodex yerel anahtarı tüketir; ChatGPT'ye iletmez.
 
-Kök etkinleştirme diğer uygun yerel profilleri de etkiler. **Bu deneme sırasında ek anahtarı taşımayan sıradan yerleşik geri döngü iş parçacıklarını sürdürmeyin.** Bu iş parçacıklarına dönmeden önce kök özelliği kapatıp `ocx sync` çalıştırın. Bu, otomatik veya varsayılan bir entegrasyon değişikliği değildir; CLI profili de masaüstünde profil seçiminin desteklendiğine dair bir iddia değildir.
+Kök etkinleştirme diğer uygun yerel profilleri de etkiler. **Bu deneme sırasında ek anahtarı taşımayan sıradan yerleşik geri döngü iş parçacıklarını sürdürmeyin.** Bu iş parçacıklarına dönmeden önce kök özelliği kapatıp `orl sync` çalıştırın. Bu, otomatik veya varsayılan bir entegrasyon değişikliği değildir; CLI profili de masaüstünde profil seçiminin desteklendiğine dair bir iddia değildir.
 
 ## Bağlamı sıfırlamadan önce doğrulayın
 
@@ -65,9 +65,9 @@ Kök etkinleştirme diğer uygun yerel profilleri de etkiler. **Bu deneme sıras
 
 - **403 `context_principal_required`:** geçerli bir yerel veri düzlemi anahtarı proxy'ye ulaşmadı.
 - **409 `context_account_unavailable`:** sahiplik yok veya tutarsız; o anda etkin hesabı onun yerine koymayın ya da yazmayı körlemesine yinelemeyin.
-- **404:** proxy'nin devre dışı/bilinmeyen uç nokta yanıtını yukarı akış 404 yanıtından ayırın. İkincisi, OpenCodex yönlendirme hatasının veya hesap genelinde kesintinin kanıtı değildir.
+- **404:** proxy'nin devre dışı/bilinmeyen uç nokta yanıtını yukarı akış 404 yanıtından ayırın. İkincisi, OpenRelay yönlendirme hatasının veya hesap genelinde kesintinin kanıtı değildir.
 
-Başarılı model çağrısı veya `ocx ready`, notların, geçmişin ya da durum geri yüklemenin çalıştığını kanıtlamaz. Model yönlendirme, hesap değişiklikleri, proxy yeniden başlatmaları ve yukarı akış uç noktası kullanılabilirliği ayrı konulardır. Hiçbir yerel bayrak eksik arka uç uygunluğunu veremez; başarısız bağlam işlemi başarılı bir sıfırlama olarak bildirilmemelidir. İşiniz bittiğinde deneme tablolarını kaldırıp deneme anahtarını ortamdan çıkarın; doğrulanmış kimlik doğrulamalı bir yol kullanmadığınız sürece özelliği kapalı bırakın.
+Başarılı model çağrısı veya `orl ready`, notların, geçmişin ya da durum geri yüklemenin çalıştığını kanıtlamaz. Model yönlendirme, hesap değişiklikleri, proxy yeniden başlatmaları ve yukarı akış uç noktası kullanılabilirliği ayrı konulardır. Hiçbir yerel bayrak eksik arka uç uygunluğunu veremez; başarısız bağlam işlemi başarılı bir sıfırlama olarak bildirilmemelidir. İşiniz bittiğinde deneme tablolarını kaldırıp deneme anahtarını ortamdan çıkarın; doğrulanmış kimlik doğrulamalı bir yol kullanmadığınız sürece özelliği kapalı bırakın.
 
 ## İncelenen yukarı akış sözleşmeleri
 

@@ -131,7 +131,7 @@ function printLocalStatus(deps: V2CliDeps): number {
     log.log(multiAgentModeLine(mode, keepNativeV1));
     log.log(cfg.keepNativeChatGptOnV1 === true
       ? requiresGlobalV2Disabled(mode, keepNativeV1) && isEnabled()
-        ? "keep_native_chatgpt_on_v1: CONFLICT — global multi_agent_v2 overrides the native v1 catalog pin; run 'ocx v2 keep-native-v1 on' to reconcile"
+        ? "keep_native_chatgpt_on_v1: CONFLICT — global multi_agent_v2 overrides the native v1 catalog pin; run 'orl v2 keep-native-v1 on' to reconcile"
         : "keep_native_chatgpt_on_v1: ON — global V2 override is off; ChatGPT-native rows use v1 and routed rows use v2 when mode is v2"
       : "keep_native_chatgpt_on_v1: OFF");
     const threads = getLogicalMaxThreads();
@@ -171,7 +171,7 @@ export async function cmdV2(args: string[], deps: V2CliDeps = {}, findPort?: () 
     // A read-back failure cannot claim rollback or overwrite already observed mutation evidence.
     let state: ReturnType<typeof localV2State> | null = null;
     try { state = localV2State(deps.isEnabled, deps.hasMaxThreads); }
-    catch { ok = false; lines = ["Local V2 outcome is unverified. Read ocx v2 status before retrying; no rollback is implied."]; }
+    catch { ok = false; lines = ["Local V2 outcome is unverified. Read orl v2 status before retrying; no rollback is implied."]; }
     if (parsed.json) log.log(JSON.stringify({ ok, target: "local", action: parsed.verb, changed, state, sync }));
     else for (const line of lines) (ok ? log.log : log.error).call(log, terminalSafeText(line));
     return ok ? 0 : 1;
@@ -183,14 +183,14 @@ export async function cmdV2(args: string[], deps: V2CliDeps = {}, findPort?: () 
     }
     if (parsed.verb === "mode-hint") {
       const result = setMultiAgentModeHintText(parsed.value);
-      if (!result.ok) return emit(false, ["Unable to write the native mode hint. Check Codex support and ownership, then read ocx v2 status."]);
+      if (!result.ok) return emit(false, ["Unable to write the native mode hint. Check Codex support and ownership, then read orl v2 status."]);
       changed = result.changed;
       return emit(true, [result.changed ? "multi_agent_mode_hint_text saved — applies to new sessions." : "multi_agent_mode_hint_text already set — nothing to do."]);
     }
     if (parsed.verb === "threads") {
       const enabled = (deps.isEnabled ?? isMultiAgentV2Enabled)();
       const result = transitionMultiAgentV2(enabled, (next, env, validate) => runCodexFeatures(next ? "enable" : "disable", deps, env, validate), { threadLimit: parsed.value });
-      if (!result.ok) return emit(false, ["Unable to update the native thread limit. Read ocx v2 status before retrying."]);
+      if (!result.ok) return emit(false, ["Unable to update the native thread limit. Read orl v2 status before retrying."]);
       changed = result.changed;
       return emit(true, [changed ? `max_threads = ${parsed.value} (${enabled ? "v2" : "v1"}) — applies to new sessions.` : `max_threads already ${parsed.value} — nothing to do.`]);
     }
@@ -202,7 +202,7 @@ export async function cmdV2(args: string[], deps: V2CliDeps = {}, findPort?: () 
       if (parsed.value !== "default") {
         const target = parsed.value === "v2" && config.keepNativeChatGptOnV1 !== true;
         const transition = transitionMultiAgentV2(target, (next, env, validate) => runCodexFeatures(next ? "enable" : "disable", deps, env, validate));
-        if (!transition.ok) { changed = false; return emit(false, ["Native mode transition failed. Read ocx v2 status before retrying."]); }
+        if (!transition.ok) { changed = false; return emit(false, ["Native mode transition failed. Read orl v2 status before retrying."]); }
         changed ||= transition.changed;
       }
       if (parsed.value === "default") deleteConfigTopLevelKey(config, "multiAgentMode");
@@ -215,7 +215,7 @@ export async function cmdV2(args: string[], deps: V2CliDeps = {}, findPort?: () 
       changed = !unchangedKeep;
       if (parsed.value && requiresGlobalV2Disabled(config.multiAgentMode, true)) {
         const transition = transitionMultiAgentV2(false, (next, env, validate) => runCodexFeatures(next ? "enable" : "disable", deps, env, validate));
-        if (!transition.ok) { changed = false; return emit(false, ["Native hybrid-mode transition failed. Read ocx v2 status before retrying."]); }
+        if (!transition.ok) { changed = false; return emit(false, ["Native hybrid-mode transition failed. Read orl v2 status before retrying."]); }
         changed ||= transition.changed;
       }
       if (parsed.value) config.keepNativeChatGptOnV1 = true;
@@ -227,10 +227,10 @@ export async function cmdV2(args: string[], deps: V2CliDeps = {}, findPort?: () 
     } else {
       const want = parsed.verb === "on";
       if (want && requiresGlobalV2Disabled(config.multiAgentMode, config.keepNativeChatGptOnV1 === true)) {
-        return emit(false, ["v2 on: incompatible with keep-native-v1 while mode is v2 — Codex's global multi_agent_v2 overrides the native v1 catalog pin. Run 'ocx v2 keep-native-v1 off' first."]);
+        return emit(false, ["v2 on: incompatible with keep-native-v1 while mode is v2 — Codex's global multi_agent_v2 overrides the native v1 catalog pin. Run 'orl v2 keep-native-v1 off' first."]);
       }
       const transition = transitionMultiAgentV2(want, (next, env, validate) => runCodexFeatures(next ? "enable" : "disable", deps, env, validate));
-      if (!transition.ok) return emit(false, ["Native feature transition failed. Read ocx v2 status before retrying."]);
+      if (!transition.ok) return emit(false, ["Native feature transition failed. Read orl v2 status before retrying."]);
       changed = transition.changed;
       if (!changed) return emit(true, [`multi_agent_v2 already ${want ? "ON" : "OFF"} — nothing to do.`]);
       successLines = [v2StatusLine(want),
@@ -249,9 +249,9 @@ export async function cmdV2(args: string[], deps: V2CliDeps = {}, findPort?: () 
       successLines = [`keep_native_chatgpt_on_v1 already ${parsed.value ? "ON" : "OFF"} — ${outcome}`];
     }
     return emit(sync.ok, sync.ok ? successLines
-      : ["catalog resync failed or is unverified; local V2 settings landed. Read ocx v2 status, then run ocx sync."]);
+      : ["catalog resync failed or is unverified; local V2 settings landed. Read orl v2 status, then run orl sync."]);
   } catch {
     changed = null;
-    return emit(false, ["Local V2 operation failed; native or saved settings may have changed. Read ocx v2 status before retrying; no rollback is implied."]);
+    return emit(false, ["Local V2 operation failed; native or saved settings may have changed. Read orl v2 status before retrying; no rollback is implied."]);
   }
 }

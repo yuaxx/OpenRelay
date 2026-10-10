@@ -1,15 +1,15 @@
 ---
 title: 管理 API
-description: opencodex 控制平面的身份验证、错误和端点参考。
+description: OpenRelay 控制平面的身份验证、错误和端点参考。
 ---
 
-Management API 是 opencodex 的控制平面。`http://localhost:10100` 上的仪表板只是它的一个客户端；无头的 `ocx` provider、model、combo、account、settings、diagnostics 和 lifecycle 命令也是客户端。该 API 仅在代理运行时可用。
+Management API 是 OpenRelay 的控制平面。`http://localhost:10100` 上的仪表板只是它的一个客户端；无头的 `ocx` provider、model、combo、account、settings、diagnostics 和 lifecycle 命令也是客户端。该 API 仅在代理运行时可用。
 
 请使用 [Web 仪表板](/guides/web-dashboard/) 作为交互式客户端，或者在构建自动化时参考本文档。持久化值最终遵循 [配置](/reference/configuration/)。
 
 ## 身份验证模型
 
-Management API 有自己独立的管理员凭证，与数据平面 API 密钥无关。启动时，opencodex 会按以下顺序解析它：
+Management API 有自己独立的管理员凭证，与数据平面 API 密钥无关。启动时，OpenRelay 会按以下顺序解析它：
 
 1. `OPENCODEX_ADMIN_AUTH_TOKEN`，如果已设置。
 2. 在加固后的密钥文件中生成的 `ocx_admin_*` 令牌。
@@ -76,7 +76,7 @@ Authorization: Bearer <admin-token>
 仪表板从 **Providers > xAI Grok > Accounts** 驱动这两条优惠券路径：每个已登录账号行
 都带有显示剩余优惠券数量的票据徽章，该徽章会打开一个对话框，列出有效期窗口并兑换
 最接近到期的优惠券。该对话框会发送客户端生成的 `operationId`，并在超时后停止发送而不是
-重试，因为 journal 记录仍处于打开状态的兑换会再次执行。`ocx account grok-reset-coupons`
+重试，因为 journal 记录仍处于打开状态的兑换会再次执行。`orl account grok-reset-coupons`
 仍然是对应的终端命令。
 
 Claude 用量重置同样可以从 **Providers > Anthropic > Accounts** 操作。每个已登录账号行都带有显示剩余重置次数的票据徽章，对话框会在再次确认后使用一次重置机会。重置会恢复 5 小时和每周用量额度，但不会改变每周额度的重置日期。如果请求未及时返回结果，对话框会保留其 `operationId`，并在十分钟内提供使用同一 ID 重试的选项；Claude Code 客户端也以此方式恢复。在此期间，同一重置机会的新操作会被拒绝。重置机会只能通过仪表板使用：仅凭管理员令牌会收到 `403 session_required`。
@@ -298,7 +298,7 @@ OpenAI 也遵循此规则：开关不会选择特殊的 922k 模式。有效上�
 | --- | --- | --- |
 | `GET /api/system/memory` | 返回标量级的进程、堆、流、响应状态、看门狗和活跃回合指标 | — |
 | `POST /api/system/restart` | 在不移除客户端注入的情况下，开始一次考虑排空的进程重启 | 返回 202；重复调用会报告现有排空 |
-| `POST /api/stop` | 停止服务、恢复原生 Codex、移除受管 Grok 注入并排空代理 | 409 服务所有权冲突；当 Windows 任务计划程序包装器可能重新拉起代理且调用方不是 `ocx stop` 时返回 409 `respawnable_service`（不会做任何更改）；已安装的管理器拒绝停止时返回 409；无法读取任务计划程序状态时返回 409 `service_state_unknown`（不会做任何更改；修复查询后重试） |
+| `POST /api/stop` | 停止服务、恢复原生 Codex、移除受管 Grok 注入并排空代理 | 409 服务所有权冲突；当 Windows 任务计划程序包装器可能重新拉起代理且调用方不是 `orl stop` 时返回 409 `respawnable_service`（不会做任何更改）；已安装的管理器拒绝停止时返回 409；无法读取任务计划程序状态时返回 409 `service_state_unknown`（不会做任何更改；修复查询后重试） |
 
 ### Codex 身份验证委托
 
@@ -372,7 +372,7 @@ HTTP: 400 invalid/unsupported; 404 missing account; `oauth_mutation_busy` on loc
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

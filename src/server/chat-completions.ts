@@ -53,6 +53,7 @@ import { clientWireLogOf, clientWireOf } from "./inference/client-wire";
 import { directEncodersApply } from "./inference/client-encoder-delivery";
 import { responseWithDeferredRequestLog } from "./relay";
 import { handleResponses } from "./responses";
+import { registerRtkSource } from "../compression/rtk/transport";
 import { previewXaiOauthWireModel } from "./responses/core-normalize";
 import { providerConsumesCallerAuthorization } from "../providers/caller-authorization";
 import { captureExplicitOpenAiCallerAuth } from "../providers/openai-sidecar";
@@ -440,6 +441,7 @@ async function handleChatCompletionsWithBudget(
     body: internalBodyJson,
   });
   linkRequestSessionLane(req, internalReq);
+  if (config.rtk?.enabled === true) registerRtkSource(internalReq, chatBody, "chat");
 
   const finalizeNativeLog = createFinalRequestLog(logIds, logCtx).finish;
   const upstream = await handleResponses(internalReq, config, logCtx, {

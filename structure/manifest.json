@@ -161,6 +161,15 @@
       ]
     },
     {
+      "path": "transports/rtk.md",
+      "tier": 3,
+      "title": "Terminal Result Compression",
+      "scope": "Opt-in bounded terminal-result compression, protocol pairing, outbound copies and content-free counters.",
+      "documents": [
+        "src/compression/"
+      ]
+    },
+    {
       "path": "transports/byte-accounting.md",
       "tier": 3,
       "title": "Byte Accounting",

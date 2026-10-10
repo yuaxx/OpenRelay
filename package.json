@@ -12,6 +12,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
+    "orl": "./bin/ocx.mjs",
     "opencodex": "./bin/ocx.mjs",
     "ocx": "./bin/ocx.mjs"
   },
@@ -43,6 +44,7 @@
   ],
   "testRunnerBun": "1.4.0",
   "scripts": {
+    "orl": "bun run src/cli/index.ts",
     "dev": "bun run src/cli/index.ts start",
     "dev:proxy": "bun run src/cli/index.ts start",
     "dev:gui": "cd gui && bun run dev",

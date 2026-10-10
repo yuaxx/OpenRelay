@@ -1,5 +1,5 @@
-export const START_USAGE = "Usage: ocx start [--port <port>] [--socks5 [host:port] | --socks5-off]";
-export const START_USAGE_LINE = "ocx start [--port <port>] [--socks5 [host:port] | --socks5-off]";
+export const START_USAGE = "Usage: orl start [--port <port>] [--socks5 [host:port] | --socks5-off]";
+export const START_USAGE_LINE = "orl start [--port <port>] [--socks5 [host:port] | --socks5-off]";
 export const DEFAULT_SOCKS5_PROXY = "socks5://127.0.0.1:10808";
 
 export class StartArgsError extends Error {

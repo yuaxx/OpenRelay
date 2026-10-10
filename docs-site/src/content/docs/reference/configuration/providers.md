@@ -3,7 +3,7 @@ title: Provider Configuration
 description: Provider entries, authentication, endpoints, model catalogs, quotas, context caps, and provider-specific options.
 ---
 
-A provider tells opencodex where a model lives, which wire adapter it speaks, and how requests are
+A provider tells OpenRelay where a model lives, which wire adapter it speaks, and how requests are
 authenticated.
 
 ## Initial model selection
@@ -13,13 +13,13 @@ New non-OAuth connections wait for a reliable model list before exposing models.
 This runs only for a new provider registration. Existing selections survive updates, re-login and key replacement. After initialization, enable the models you need in Models or with the CLI below; the separate new-model-arrival policy is unchanged. Replace `<model-id>` with an ID from the list.
 
 ```sh
-ocx models live --provider openrouter
-ocx models enable '<model-id>'
-ocx models disable '<model-id>'
-ocx models provider openrouter on
+orl models live --provider openrouter
+orl models enable '<model-id>'
+orl models disable '<model-id>'
+orl models provider openrouter on
 ```
 
-After GUI registration or OAuth login, the confirmation dialog lets you open the Models page. CLI registration and login print model-management commands; JSON includes structured next steps. `--no-wait` reports pending login, not completion. Start the proxy with `ocx start` before using live model commands.
+After GUI registration or OAuth login, the confirmation dialog lets you open the Models page. CLI registration and login print model-management commands; JSON includes structured next steps. `--no-wait` reports pending login, not completion. Start the proxy with `orl start` before using live model commands.
 
 ## Z.ai Coding Plan quota endpoints
 
@@ -46,11 +46,11 @@ separate. Full request URLs such as `/api/v1/responses` are not provider base UR
 | `codexAccounts?` | `CodexAccount[]` | `[]` | ChatGPT/Codex pool account metadata managed by Codex Auth. Secrets live separately in `codex-accounts.json`. |
 | `pausedCodexAccountIds?` | `string[]` | `[]` | Accounts excluded from Pool selection until resumed, including the main `__main__` account when paused. Manual pause and resume also update existing main and pool entries for the same account and workspace. |
 | `creditCodexAccountIds?` | `string[]` | `[]` | Accounts allowed to keep serving from ChatGPT credits after a usage limit, including the main `__main__` account. Upstream does not refuse an account that holds credits at 100%; it serves the request and draws the balance. Spending is opt-in: an account not listed here is skipped by selection while one of its usage windows (weekly or monthly, only monthly on 30-day plans, or the 5-hour window) reads 100% with its reset still ahead, and returns once that reset passes. A weekly or monthly reading without a reset time does not hold the account; a 5-hour reading at 100% without a reset holds it only while that reading is still fresh. When no other account is available, automatic selection finds none rather than spending credits. An unlisted `__main__` is also refused, like a hard-lock refusal, when a request names it or carries its credential. Listing `__main__` does not lift the main-account hard lock (on by default at 98%), which still stops the main login first; turn the lock off to let the main account spend credits (a lock at 100% still stops it at 100%). New accounts start unlisted. Managed by the **Use credits** switch in the Codex Auth header and the **Use credits after limit** switch in each account card's **⋯** menu. |
-| `codexQuotaAutoRefresh?` | `Record<string, object>` | `{}` | Per-Codex-login-account opt-in for automatic `fiveHour` and `weekly` window activation in Pool mode; Direct mode does not run this worker. In Providers/Codex Auth **Advanced settings**, one control enables or disables both supported windows across all current main and added accounts. New accounts are not opted in automatically. Enable skips windows absent from live WHAM data; disable also clears stale enabled windows. The UI reuses granular `/api/settings` writes, reconciles partial failures, and retries the original ON/OFF intent without replacing unrelated settings or completed reset markers. The API still rejects enabling an unavailable window with HTTP 409. At a reported reset time, opencodex sends one minimal non-stored Codex message using that account's quota and persists the activated timestamp. This does not apply to API-key providers. |
+| `codexQuotaAutoRefresh?` | `Record<string, object>` | `{}` | Per-Codex-login-account opt-in for automatic `fiveHour` and `weekly` window activation in Pool mode; Direct mode does not run this worker. In Providers/Codex Auth **Advanced settings**, one control enables or disables both supported windows across all current main and added accounts. New accounts are not opted in automatically. Enable skips windows absent from live WHAM data; disable also clears stale enabled windows. The UI reuses granular `/api/settings` writes, reconciles partial failures, and retries the original ON/OFF intent without replacing unrelated settings or completed reset markers. The API still rejects enabling an unavailable window with HTTP 409. At a reported reset time, OpenRelay sends one minimal non-stored Codex message using that account's quota and persists the activated timestamp. This does not apply to API-key providers. |
 | `codexAccountNamespaces?` | `Record<string, string>` | — | Optional map from an arbitrary public model selector to a stored Codex account target. When account-qualified picker rows are enabled, each selector whose target is present adds separate `<selector>/<native-openai-model>` rows to the Codex picker; each row uses only that account. With any selector active, bare native rows are hidden in the picker, but their ids remain routable and listed by raw `/v1/models` unless explicitly disabled. |
 | `codexAccountPickerEnabled?` | `boolean` | off when the map is empty | Controls whether eligible `codexAccountNamespaces` mappings generate account-qualified Codex picker rows. `true` allows mapped rows to appear. If omitted with a non-empty map, it is treated as enabled for backward compatibility; if the map is empty, it is off. `false` hides generated rows and restores bare native picker rows without deleting mappings or disabling exact `<selector>/<native-openai-model>` routing. |
 | `activeCodexAccountId?` | `string` | — | Manually selected Pool account for the next request. Selection clears thread affinity; in-flight requests keep captured credentials. |
-| `codexAccountPriorities?` | `Record<string, number>` | — | Per-account selection order for the Codex pool: account id → integer from `-100` to `100`, **higher is used earlier**, absent means `0`. This is an ordering boundary, not an eligibility one: selection narrows the already-eligible accounts to the highest tier that still has quota headroom, and `accountPoolStrategy` then picks within that tier. A tier is skipped only when every member is at or above its own nonzero effective usage threshold (account override or global default), cooling down, soft-avoided, paused, or needs reauthentication — unknown quota never drains a tier. Ordering never makes an ineligible account selectable and by default, never re-binds a thread that already has an account. The main `__main__` account participates on equal terms, which is how the Codex Desktop login can be set to drain last. With no entries the pool behaves exactly as before. A malformed map is ignored with a console warning (ordering off, no config repair). Managed by `ocx account priority` and the Codex Auth page. |
+| `codexAccountPriorities?` | `Record<string, number>` | — | Per-account selection order for the Codex pool: account id → integer from `-100` to `100`, **higher is used earlier**, absent means `0`. This is an ordering boundary, not an eligibility one: selection narrows the already-eligible accounts to the highest tier that still has quota headroom, and `accountPoolStrategy` then picks within that tier. A tier is skipped only when every member is at or above its own nonzero effective usage threshold (account override or global default), cooling down, soft-avoided, paused, or needs reauthentication — unknown quota never drains a tier. Ordering never makes an ineligible account selectable and by default, never re-binds a thread that already has an account. The main `__main__` account participates on equal terms, which is how the Codex Desktop login can be set to drain last. With no entries the pool behaves exactly as before. A malformed map is ignored with a console warning (ordering off, no config repair). Managed by `orl account priority` and the Codex Auth page. |
 | `activeCodexAccountPinned?` | `string` | — | Account id the operator last selected by hand. While set, a higher `codexAccountPriorities` tier cannot preempt it until the pin is released by drain, exclusion, deletion, or an explicit failover/promotion away. Ordinary round-robin movement inside the capped tier does not release it. Writing any `codexAccountPriorities` entry also releases the pin, so a pin made before an order existed cannot outrank one set afterward. `GET /api/codex-auth/active` reports both whether the effective account is pinned (`pinned`) and the account carrying the ceiling (`pinnedAccountId`). |
 | `codexAccountPriorityFailback?` | `boolean` | `false` | Opt-in return of ongoing Codex Pool tasks to a usable higher-priority account under the `quota` strategy. Requests trigger a background quota refresh at most once every five minutes, including failed refresh attempts. When recent quota observations show headroom, the next request may rebind even if its current account is below the threshold. This explicit preference can discard a warm prompt cache; it does not change default cache affinity. No requests means no polling. Manual pins, model access, cooldowns, pauses and reauthentication exclusions still apply; in-flight requests keep their captured account. Requires the current source account's effective threshold to be positive (an override of 0 disables it; a positive override works with global 0); exact account routes and Direct mode are unchanged. |
 | `autoSwitchThreshold?` | `number` | `80` | Usage threshold for placing new/unbound work. `quota` can re-evaluate unbound tasks on their next request once usage crosses this threshold. Bound tasks keep their account past the threshold by default (`pool.cacheAffinity`); they leave only when that account is exhausted or otherwise cannot serve, and then only for an account with genuine quota headroom and strictly lower usage. Set `pool.cacheAffinity: false` to re-evaluate bound tasks at this threshold, still only onto such a destination. `fill-first` uses it only as the drain point for unbound assignment; normal `round-robin` selection does not use it. The score uses the hottest known 5h, weekly, or 30d quota window. `0` disables usage-based proactive switching only, not unbound assignment or failure recovery. |
@@ -78,7 +78,7 @@ matches the observed main account cannot bypass that account's applicable cooldo
 Pool alternative is used, or the request is rejected. Unrelated caller credentials do not inherit
 the main account's cooldown; explicit Direct behavior is unchanged.
 
-Selector names are user-chosen public labels; opencodex assigns no account-role semantics to them.
+Selector names are user-chosen public labels; OpenRelay assigns no account-role semantics to them.
 `codexAccountNamespaces` keys are 1–64 characters, starting and ending with an
 ASCII letter or number, with letters, numbers, `.`, `_`, or `-` inside. Reserved JavaScript object
 names are rejected. Each value is a valid pool-account id (never internal `__main__`) or `"@main"`
@@ -104,7 +104,7 @@ is no cross-route credential fallback. API GPT-5.6 rows carry 1,050,000 context 
 metadata, and Pro virtual ids rewrite to the base wire model with `reasoning.mode: "pro"`.
 
 `openaiProviderTierVersion: 2` marks the current single-provider projection. Before migrating a
-shipped v1 config, opencodex creates `config.json.pre-openai-tiers-v2.bak` without replacing a
+shipped v1 config, OpenRelay creates `config.json.pre-openai-tiers-v2.bak` without replacing a
 differing backup and rewrites known legacy namespaced selected ids to bare ids.
 
 ### GPT-6 Astra, Sol, Luna and Astra Minor
@@ -121,7 +121,7 @@ and `modelAutoCompactTokenLimits` can narrow its window and soft compaction budg
 An explicit smaller provider cap or target limit still wins, including native-alias combos.
 
 The API row has 1,050,000 context, 922,000 maximum input, 128,000 maximum output, text/image input,
-and API reasoning efforts through `max`. OpenCodex's routed synthetic Ultra control retains its
+and API reasoning efforts through `max`. OpenRelay's routed synthetic Ultra control retains its
 existing wire-effort mapping; it is not an additional API effort. There is no Astra `-pro` alias.
 Use the existing `fastMode` setting, or Codex's `service_tier = "fast"` with
 `[features].fast_mode = true`; API `fast` and `priority` are accepted Fast spellings.
@@ -131,7 +131,7 @@ September 22, 2026) are Codex-login natives: `gpt-6-sol` and `gpt-6-luna`, shown
 and **GPT-6-Luna**. Like Astra they are listed on every install and are not gated on an account
 roster; if your account cannot use them yet, the request still goes out and you see the upstream
 error. Their metadata comes from the Codex `/models` roster, which serves these two rows only to
-`client_version` **0.155.0 or later**; opencodex ships a copy of those rows, so they appear even
+`client_version` **0.155.0 or later**; OpenRelay ships a copy of those rows, so they appear even
 when your installed Codex catalog predates them.
 
 | Model | Default context | Opt-in ceiling | Default effort | Reasoning ladder |
@@ -219,7 +219,7 @@ Providers can expose a built-in shorthand, such as `agy` for `google-antigravity
 | `tlsProfile?` | `"antigravity-browser"` | **Use at your own risk.** Opt-in browser-like TLS handshake (through the optional `wreq-js` dependency) for the canonical `google-antigravity` OAuth provider. It changes only how the connection looks on the wire; it is not an official Google client, and it does not change what Google's terms allow. Google can still detect, rate-limit, suspend, or ban the account you signed in with, and you alone carry that risk. It is off by default and accepted only with the Google adapter, Cloud Code Assist mode, and Google's canonical HTTPS Antigravity hosts. Redirects stay manual. The provider's own `proxy`/`noProxy` route is carried by the TLS transport; a route it cannot keep fails the request instead of leaving by another path, which includes any direct route while `HTTP_PROXY`, `HTTPS_PROXY`, or `ALL_PROXY` is set. `GET /api/providers` reports the profile state as `pending`, `active`, or `failed`. Omitting the field keeps the normal Bun transport and never loads the dependency. |
 | `responsesPath?` | `string` | Relative resource path for key-auth `openai-responses` requests. It must start with `/` and contain no scheme, query, or fragment. |
 | `chatCompletionsPath?` | `string` | Relative resource path for `openai-chat` requests, the mirror of `responsesPath` and subject to the same shape rules. Needed when one upstream serves Chat Completions and Responses under different prefixes: a per-model wire override changes the adapter and leaves `baseUrl` alone, so without this an opted-in Chat request would be sent to the Responses base. Z.AI is the shipped example. |
-| `allowEncryptedV2AgentTasks?` | `boolean` | Disabled by default. Trust a direct key-auth `openai-responses` provider to consume or relay opaque encrypted V2 sub-agent tasks unchanged. Eligible routes skip `agentTaskRecovery`; all other routes keep the existing recovery or fail-closed behavior. OpenCodex does not decrypt, translate, or recover tasks sent through this opt-in. |
+| `allowEncryptedV2AgentTasks?` | `boolean` | Disabled by default. Trust a direct key-auth `openai-responses` provider to consume or relay opaque encrypted V2 sub-agent tasks unchanged. Eligible routes skip `agentTaskRecovery`; all other routes keep the existing recovery or fail-closed behavior. OpenRelay does not decrypt, translate, or recover tasks sent through this opt-in. |
 | `upstreamWebsocket?` | `boolean` | Opt-in upstream Responses WebSocket transport for `openai-responses` requests (default false). Honored only for the first-party `https://api.openai.com/v1` upstream; custom-provider endpoints always use bounded HTTP/SSE because Bun cannot enforce an inbound WebSocket message limit before allocating the complete message. For the canonical ChatGPT `openai` provider, omitting it keeps the upstream WebSocket on eligible turns, an explicit `false` sends streaming turns over HTTP/SSE, and provider management rejects `true`; with `false`, native mid-turn steering and injection are unavailable. The field is independent of the client-facing `websockets` setting and changes neither the endpoint nor the credential. Plain HTTP remains on SSE; non-Responses paths and `openai-chat` requests stay on HTTP. |
 | `supportsServiceTier?` | `boolean` | Tri-state canonical Fast capability fallback. `true` publishes Fast in the catalog, satisfies service-tier routing requirements, contributes a supported fingerprint, and lets fast mode inject the provider's canonical wire value on a compatible final adapter. `false` strips the field and never injects, and exact model declarations cannot reopen it. Absent leaves the provider unclassified: fast mode does not inject or normalize a canonical caller value, and caller values obey the final wire's forwarding permission (`chatServiceTier` on Chat; passthrough on Responses). The registry classifies canonical OpenAI (`true`), DeepSeek, and Volcengine Ark (`false`); set it explicitly only for custom gateways that genuinely support tiers. |
 | `responseTierAuthoritative?` | `boolean` | Whether the response tier can confirm or deny Fast. Set `false` explicitly for routes with non-authoritative response metadata; omission preserves existing behavior. This does not enable Fast or change outbound parameters. See [Response service-tier authority](#response-service-tier-authority). |
@@ -232,7 +232,7 @@ Providers can expose a built-in shorthand, such as `agy` for `google-antigravity
 | `preserveResponsesMessageMetadata?` | `boolean` | Default off. Preserve private `internal_chat_message_metadata_passthrough` on input items for explicitly trusted launcher relays. This forwards private turn/session metadata to that destination; do not enable for ordinary gateways. |
 | `dropResponsesReasoningItems?` | `boolean` | Remove replayed Responses `reasoning` items from continuation input entirely, instead of forwarding them with blanked content. This is lossy: summaries, item ids, and `encrypted_content` go with them, so no reasoning item from the previous turn remains in the forwarded input. It does not remove `previous_response_id`, so an upstream holding its own turn state may still reach it. Enable only for an upstream that rejects reasoning replay outright — the built-in Volcengine Ark Coding Plan preset sets it because validated tool continuations answered `400 InvalidParameter` otherwise. Set it to `false` on that provider to forward reasoning items again. |
 | `disabled?` | `boolean` | Keep the provider on disk but exclude it from routing and model/catalog listings. |
-| `apiKey?` | `string` | API key, an `${ENV_VAR}` / `$ENV_VAR` reference, or a `keychain:<provider>` reference written by `ocx provider keychain <name> store`. References resolve at request time. See [Storing keys in the OS keychain](#storing-keys-in-the-os-keychain). |
+| `apiKey?` | `string` | API key, an `${ENV_VAR}` / `$ENV_VAR` reference, or a `keychain:<provider>` reference written by `orl provider keychain <name> store`. References resolve at request time. See [Storing keys in the OS keychain](#storing-keys-in-the-os-keychain). |
 | `apiKeyTransport?` | `"x-api-key" \| "bearer"` | Anthropic key header style. Defaults to native `x-api-key`; valid only for key-auth `anthropic` providers. |
 | `apiKeyPool?` | `ApiKeyPoolEntry[]` | Multi-key pool. `apiKey` mirrors the active entry; each item has `id`, `key`, optional `label`, and optional numeric `addedAt`. |
 | `apiKeyPoolStrategy?` | `"round-robin" \| "fill-first" \| "quota"` | How a warm key is chosen **before** the first attempt when the committed key is already cooling. Omitted keeps rotation reactive-only: the pool moves after a 429 or 401 and not before. `round-robin` takes the next key in the pool, `fill-first` keeps the first eligible one, and `quota` prefers the key with the most remaining headroom, falling back to `fill-first` order for a provider whose per-key quota is unknown. A healthy committed key is never overridden, so a manual key selection stands. |
@@ -263,11 +263,11 @@ Providers can expose a built-in shorthand, such as `agy` for `google-antigravity
 | `reasoningEfforts?` | `string[]` | Provider-wide Codex reasoning labels to advertise and send. For `google`-adapter providers, a configured ladder also asserts `thinkingLevel` capability: direct and Vertex non-image requests send the selected effort as `generationConfig.thinkingConfig.thinkingLevel`, while Cloud Code Assist uses its envelope-specific path. |
 | `modelReasoningEfforts?` | `Record<string, string[]>` | Per-model labels. An empty list hides effort control. As with `reasoningEfforts`, each configured `google`-adapter ladder asserts `thinkingLevel` capability; direct and Vertex non-image requests use the flat Gemini path, while Cloud Code Assist sends it under its request envelope. An adapter that ships its own per-model table (currently `command-code`) lets that table win at the wire for models it knows, so set `modelReasoningEffortsAuthoritative` as well to widen such a row. |
 | `modelReasoningEffortsAuthoritative?` | `boolean` | Treat this provider's `modelReasoningEfforts` as authoritative at the wire, not only in the catalog. Without it, an adapter that ships its own per-model effort table (currently `command-code`) advertises your widened ladder in the picker and then strips the extra rung on the way out. It is opt-in because presets are seeded with the shipped table, so a stored row alone cannot prove you wrote it rather than an older release. With it set, a rung the upstream refuses is returned as that error instead of being silently retried without the effort — you asked for it, so you see the answer. |
-| `modelSuppressSyntheticMax?` | `Record<string, boolean>` | Catalog-only per-model switch. `true` prevents OpenCodex from adding a missing synthetic `max` rung while retaining a provider-declared `max` and continuing to add `ultra` to reasoning-capable ladders. A preserved row that already contains `max` keeps it until healthy discovery rebuilds that row, because the catalog does not persist whether an older `max` was synthetic. If a configured default names a suppressed missing `max`, the catalog falls back to the highest real rung below it. Codex uses the same ladder membership for the picker and explicit `spawn_agent` effort validation, so an explicit `max` spawn can fail client-side before proxy clamping; `ultra` remains the supported harness path. |
+| `modelSuppressSyntheticMax?` | `Record<string, boolean>` | Catalog-only per-model switch. `true` prevents OpenRelay from adding a missing synthetic `max` rung while retaining a provider-declared `max` and continuing to add `ultra` to reasoning-capable ladders. A preserved row that already contains `max` keeps it until healthy discovery rebuilds that row, because the catalog does not persist whether an older `max` was synthetic. If a configured default names a suppressed missing `max`, the catalog falls back to the highest real rung below it. Codex uses the same ladder membership for the picker and explicit `spawn_agent` effort validation, so an explicit `max` spawn can fail client-side before proxy clamping; `ultra` remains the supported harness path. |
 | `modelSupportsReasoningSummaries?` | `Record<string, boolean>` | Set a model to `false` to stop advertising summaries and strip summary-delivery fields. |
 | `modelReasoningSummaryDelivery?` | `Record<string, "sequential" \| "sequential_cutoff" \| "concurrent" \| "concurrent_cutoff">` | Per-model Responses delivery enum; rewrites an existing delivery field. |
 | `modelAdapters?` | `Record<string, string>` | Per-model `openai-chat` or `openai-responses` wire override for mixed-wire gateways. Explicit entries beat registry defaults. The OpenCode Go preset selects Responses for `gpt-5.6-luna` while leaving sibling models on their documented wires; DeepSeek can select native Responses for `deepseek-v4-flash`; Alibaba Token Plan (Beijing) pins `qwen3.8-flash`, `qwen3.7-plus`, and `glm-5.3` to its native Responses API for Responses inbound only (live-verified on that gateway, including plaintext reasoning replay; Chat and Anthropic inbound stay on Chat, and the rest of the family can be opted in here); and GitHub Copilot declares Responses-only defaults for the following models (`gpt-5.3-codex`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.5`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-6-astra`, `grok-4.5`, `grok-4.6`, `mai-code-1.1-flash`, `mai-code-1-flash-picker`) because those models reject `/chat/completions` for agent traffic. Models without a built-in default (for example `gpt-5.4-nano`) can be opted in here. Single-wire upstream pins and canonical ChatGPT forward reject overrides. |
-| xAI Chat Completions (dashboard / CLI) | switch | Grok 4.5/4.6 OAuth Responses requests default to Responses. Existing Chat overrides are migrated once on upgrade; later Chat choices are preserved. Turn on to select Chat for both models, off to select Responses. CLI: `ocx provider edit xai --xai-chat on` or `--xai-chat off` (running proxy required). Mixed means only one model currently uses Chat. Other overrides and tier policy stay unchanged. API-key and translated Chat/Anthropic defaults are unchanged. Grok 4.7 defaults to Responses on OAuth through its registry wire default and can use Chat through an explicit `modelAdapters["grok-4.7"] = "openai-chat"` override. |
+| xAI Chat Completions (dashboard / CLI) | switch | Grok 4.5/4.6 OAuth Responses requests default to Responses. Existing Chat overrides are migrated once on upgrade; later Chat choices are preserved. Turn on to select Chat for both models, off to select Responses. CLI: `orl provider edit xai --xai-chat on` or `--xai-chat off` (running proxy required). Mixed means only one model currently uses Chat. Other overrides and tier policy stay unchanged. API-key and translated Chat/Anthropic defaults are unchanged. Grok 4.7 defaults to Responses on OAuth through its registry wire default and can use Chat through an explicit `modelAdapters["grok-4.7"] = "openai-chat"` override. |
 | `xaiResponsesXSearch?` | `boolean` | Disabled by default. On an xAI Responses destination, append the provider-hosted `x_search` declaration only when a live `web_search` tool survives final request normalization. Existing declarations are not duplicated, caller `tool_choice`/`allowed_tools` selectors are never widened, and this is separate from the web-search sidecar's `search.xSearch` options. |
 | `modelPreferHostedTools?` | `Record<string,string[]>` | Exact-model opt-in for non-forward Responses gateways that reserve a hosted-tool namespace. Currently accepts only `["image_generation"]`; a matching model must use the `openai-responses` wire and support that hosted tool. It removes colliding client `image_gen` declarations and rewrites their selectors to preserve caller tool choice. For OpenAI API virtual `-pro` models, the selected public ID is matched first and the resolved base wire-model ID is a fallback. `modelAdapters` resolves the public ID first, then the base ID; the second resolution determines the final wire. Other models retain normal alias behavior. |
 | `annotateEmptyToolOutputs?` | `boolean` | Replace a present-but-empty tool result with a short marker before it reaches the model, so a blank result is not read as a missing one. Applies to blank strings and text-only part arrays; image, file, and encrypted parts are never touched. Defaults to `true` for DeepSeek from the built-in registry and is otherwise unset. Set `false` to opt a provider out — an explicit `false` is preserved across later edits that omit the field. `PATCH /api/providers?name=<provider>` accepts `true`, `false`, or `null` to clear the override and return to registry-default behavior. |
@@ -309,7 +309,7 @@ Providers can expose a built-in shorthand, such as `agy` for `google-antigravity
 | `directGeminiWireRenames?` | `boolean` | Google only. Applies only to direct AI Studio requests. Omitted or `true` keeps the `-tiered` wire rename for Gemini Flash ids (`gemini-3.7-flash` -> `gemini-3.7-flash-tiered`); `false` sends the requested bare ids to the wire unchanged. Vertex preserves the requested model ID, and Cloud Code Assist routing is unchanged. Set `false` when the configured upstream still serves the bare ids. |
 | `project?` | `string` | Vertex or Antigravity Cloud Code Assist project id. |
 | — | — | Antigravity account quota probes (`retrieveUserQuota` and `retrieveUserQuotaSummary`) always go to Google's own Cloud Code host through the pinned outbound transport, regardless of a configured `baseUrl`; the account bearer is never sent to an operator-configured endpoint and a redirect aborts the probe. Only the model-list fallback still honors `baseUrl`. |
-| — | — | If Antigravity quota summary returns 403 for a valid OAuth account, OpenCodex retries that endpoint once with the legacy `antigravity/1.0` User-Agent and the same token and project. A 401 is not retried. Inference and model discovery retain the IDE User-Agent. |
+| — | — | If Antigravity quota summary returns 403 for a valid OAuth account, OpenRelay retries that endpoint once with the legacy `antigravity/1.0` User-Agent and the same token and project. A 401 is not retried. Inference and model discovery retain the IDE User-Agent. |
 | `location?` | `string` | Vertex location; environment fallback is `GOOGLE_CLOUD_LOCATION`. |
 | `mcpServers?` | `Record<string, CursorMcpServerConfig>` | Cursor only: stdio or Streamable HTTP MCP servers. |
 | `desktopExecutor?` | `DesktopExecutorConfig` | Cursor only: external computer-use and record-screen commands. |
@@ -349,13 +349,13 @@ The concurrency slot stays occupied until the upstream request finishes, includi
 For a base URL whose hostname ends in `.openai.azure.com`, discovery fills missing image/text
 input support and context/output limits even when the provider has a custom name. Azure
 `/models` inference and chat flags alone do not describe image support or token limits.
-opencodex supplements them with the public [models.dev catalog](https://models.dev), using its
+OpenRelay supplements them with the public [models.dev catalog](https://models.dev), using its
 Azure rows before bundled Azure metadata and other vendor bundles. Model-id lookup is exact
-or case-insensitive; a newly published model does not require a new opencodex release.
+or case-insensitive; a newly published model does not require a new OpenRelay release.
 
 The public metadata snapshot refreshes during discovery at most once per 24 hours, with a
 two-second deadline and a 16 MiB body limit. It is stored in `azure-model-metadata-cache.json`
-under the opencodex config directory. No Azure credentials are sent to the public catalog.
+under the OpenRelay config directory. No Azure credentials are sent to the public catalog.
 Offline discovery keeps stale cached metadata or falls back to bundled hints; generation
 requests do not fetch this snapshot.
 
@@ -390,7 +390,7 @@ use the new selection. Selection changes before the first provider send retain n
 
 A bridged search result is shown to the provider again on the conversation's next turn only for
 the same caller, conversation, provider, model and selected key. The caller is identified by the
-opencodex API key it presents, so a client that sends no opencodex API key gets no such replay:
+OpenRelay API key it presents, so a client that sends no OpenRelay API key gets no such replay:
 its earlier search cells reach the provider unchanged, as they do for a provider without the bridge.
 
 An explicit `inlineThinkTagModels` list replaces matching registry defaults; `[]` disables recovery.
@@ -430,7 +430,7 @@ use its own `proxy` or inherit a global proxy.
 #### What the route covers
 
 The route is applied to routed inference, provider discovery and connection tests, and API-key
-quota probes. Some transports cannot carry it, and OpenCodex says so rather than pretending
+quota probes. Some transports cannot carry it, and OpenRelay says so rather than pretending
 otherwise:
 
 - **OAuth token exchange and refresh** keep using the process-wide proxy. These reach fixed vendor
@@ -508,7 +508,7 @@ below override it per provider. The [provider guide](/guides/providers/#approval
 has the operator workflow and a worked example.
 
 When native OpenAI rows are included and the final catalog has an ordinary bare native row
-other than Reserve (hidden rows count), OpenCodex keeps the hidden `codex-auto-review` row so
+other than Reserve (hidden rows count), OpenRelay keeps the hidden `codex-auto-review` row so
 Codex can select its preferred approval reviewer when no override is configured. It stays out
 of model pickers, subagent choices, Desktop lists and public `/v1/models` lists. Provider and
 root reviewer overrides retain their precedence and do not stamp this internal row. Catalogs
@@ -538,7 +538,7 @@ stamp keep the root selector, or normal upstream auto-review behavior when that 
 canonical `openai` provider does not accept these fields.
 
 Removing the root selector clears root stamps from every row, including native rows stamped by
-earlier releases that predate OpenCodex's provenance marker. That cleanup recognizes a legacy
+earlier releases that predate OpenRelay's provenance marker. That cleanup recognizes a legacy
 stamp by its shape — one value across the whole catalog that a routed row also carries — so a
 genuine per-row value matching that shape is cleared with it, and a catalog that has since
 diverged from that shape needs one manual sync. Provider stamps are never touched by root removal.
@@ -635,7 +635,7 @@ non-authoritative response metadata:
 { "responseTierAuthoritative": false }
 ```
 
-**Gateway support is opt-in.** Updating OpenCodex alone does not add this declaration to
+**Gateway support is opt-in.** Updating OpenRelay alone does not add this declaration to
 existing providers. Without it, an eligible priority request followed by `service_tier: "default"`
 retains the legacy `response-declined` interpretation. Configure `false` only when the
 route's response metadata is known to be non-authoritative.
@@ -747,7 +747,7 @@ need to rediscover. Every legacy variant id keeps routing unchanged.
 The built-in `xai` preset supports Fast on both of its transports, with different scope.
 API-key mode targets `https://api.x.ai/v1`; routes resolved to `openai-chat` send
 `service_tier: "priority"` through Chat Completions, while model defaults and overrides can
-select the `openai-responses` transport instead. `ocx login xai`
+select the `openai-responses` transport instead. `orl login xai`
 instead stores OAuth credentials for the Grok subscription gateway
 (`https://cli-chat-proxy.grok.com/v1`; these credentials refresh automatically), where Fast
 is classified per model (live-probed 2026-09-13 and 2026-09-23): grok-4.7, grok-4.6, grok-4.5, grok-4.3, grok-4.20-0309-reasoning,
@@ -768,7 +768,7 @@ record `grok-4.7-build-fast` as the wire model. API-key mode is unchanged: build
 public API, so Grok 4.7 Fast there still means priority processing. An explicit
 `xai/grok-4.7-build-fast` selection from an earlier configuration keeps working.
 
-When no explicit provider `fastWire` is configured, an opencodex API key restricted by
+When no explicit provider `fastWire` is configured, an OpenRelay API key restricted by
 `allowedModels` must permit `xai/grok-4.7-build-fast` (or its bare model id) for OAuth Fast.
 Allowing only `xai/grok-4.7` does not authorize this Fast model variant. A key allowing only
 the Fast wire model can use it; plain requests or disabled Fast still require `xai/grok-4.7`.
@@ -818,7 +818,7 @@ the dashboard keeps the standard-price estimate as a documented lower bound and 
 `≥`; downgraded attempts have no lower-bound marker.
 
 API-key providers may hold a literal key or an environment reference. OAuth providers use the
-credential store populated by `ocx login`; subscription-backed Claude Code launch behavior is
+credential store populated by `orl login`; subscription-backed Claude Code launch behavior is
 configured under [`claudeCode.authMode`](/reference/configuration/server/#claude-code-claudecode).
 
 OrcaRouter exposes both forms explicitly: `orcarouter` is the manual API-key provider and
@@ -837,17 +837,17 @@ does not require this provider opt-in. See the [OrcaRouter setup example](/guide
 ## Provider diagnostic outbound safety
 
 Dashboard connection tests and live model discovery use a bounded GET-only transport. Without an
-outbound proxy, opencodex resolves the hostname once and connects only to that validated address.
+outbound proxy, OpenRelay resolves the hostname once and connects only to that validated address.
 HTTPS retains the original Host, SNI, and certificate verification; provider config cannot disable
 certificate checks.
 
 These operations use the [server's configured outbound fetch](/reference/configuration/server/).
 A server SOCKS5 proxy — set with
-`config.proxy` or inherited from a SOCKS5 `ALL_PROXY` — uses OpenCodex's built-in tunnel when
+`config.proxy` or inherited from a SOCKS5 `ALL_PROXY` — uses OpenRelay's built-in tunnel when
 `NO_PROXY` does not exempt the target. Scheme-specific `HTTP_PROXY` and
 `HTTPS_PROXY` retain Bun's native HTTP(S) handling, while a non-SOCKS `ALL_PROXY` is not a native
 HTTP fetch route. URL and literal-address checks still run, but a selected proxy chooses the final
-route, DNS answer, and peer, so opencodex cannot pin or verify that peer. This is an explicit
+route, DNS answer, and peer, so OpenRelay cannot pin or verify that peer. This is an explicit
 security limitation.
 
 Private/local destinations require `allowPrivateNetwork: true` and, when an outbound proxy is active,
@@ -890,7 +890,7 @@ rotation. Account changes preserve and replay the conversation context, but prov
 prompt-cache reuse across accounts is not guaranteed and the cache may need to warm again.
 
 On a **401/403**, App login clears that account's process-local affinity and requires reauthentication.
-On a **429**, opencodex honors `Retry-After`, starts the account cooldown, clears affinity, and may
+On a **429**, OpenRelay honors `Retry-After`, starts the account cooldown, clears affinity, and may
 rotate the request to another eligible Pool account. These failure transitions remain active with
 `autoSwitchThreshold: 0`; that setting disables only usage-based proactive switching.
 
@@ -966,7 +966,7 @@ the next quota read probes again, because the saved observations do not include 
 
 :::caution[Experimental]
 Leave this disabled unless you understand Anthropic account policy risk. Prefer manual
-`ocx account use anthropic <id>` switching when unsure.
+`orl account use anthropic <id>` switching when unsure.
 :::
 
 ### Anthropic · Pool 2 (`anthropic2`)
@@ -977,7 +977,7 @@ format, native Messages and Responses bridge, and model metadata. Only the accou
 around them are separate. Choose a pool with the model prefix: `anthropic/claude-sonnet-5` uses the
 primary pool and `anthropic2/claude-sonnet-5` uses Pool 2.
 
-Pool 2 stays dormant until you add it. Log in with `ocx login anthropic2` or add **Anthropic · Pool 2**
+Pool 2 stays dormant until you add it. Log in with `orl login anthropic2` or add **Anthropic · Pool 2**
 on the dashboard Providers page. A successful first login creates `providers.anthropic2` with the
 marker `"anthropicOAuthInstance": "anthropic2"`. Pool 2 never becomes the default provider: bare
 `claude-*` model names, the default model, and Claude Code caller forwarding keep resolving to
@@ -1004,7 +1004,7 @@ is rejected.
 }
 ```
 
-The two pools are isolated inside opencodex:
+The two pools are isolated inside OpenRelay:
 
 - **Credentials:** Pool 2 accounts are stored under their own `anthropic2` key in the protected
   credential store. A login whose token or verified Anthropic account is already stored in the other
@@ -1028,9 +1028,9 @@ adopts or writes back a Claude Code CLI token; this difference is intentional. P
 and a Pool 2 request with no usable Pool 2 account fails with an authentication error instead of
 borrowing a primary-pool or Claude Code credential.
 
-Account commands and management APIs take the pool by name: `ocx account pool anthropic2 …`,
-`ocx account auto-switch anthropic2 …`, `ocx account routes anthropic2 …`, and
-`ocx account anthropic-reset-grants --provider anthropic2`. The pool settings and reset-grant
+Account commands and management APIs take the pool by name: `orl account pool anthropic2 …`,
+`orl account auto-switch anthropic2 …`, `orl account routes anthropic2 …`, and
+`orl account anthropic-reset-grants --provider anthropic2`. The pool settings and reset-grant
 endpoints accept `provider: "anthropic2"`; omitting it keeps the primary pool.
 
 #### Helper pool selection (`anthropicInstance`)
@@ -1089,7 +1089,7 @@ second account.
 | `providers.<name>.oauthAccountFailover.enabled?` | `boolean` | inherits | Per-provider override for the same preference; beats the global setting in either direction. `false` declines the preference for this provider even when the global setting is `true`, and `true` opts this provider in even when the global setting is `false`. Reactive 429 rotation is unaffected either way. |
 | `providers.<name>.oauthAccountFailover.strategy?` | `"quota" \| "round-robin" \| "fill-first" \| "least-loaded"` (Kiro only) | — | Kiro's `least-loaded` picks the eligible account with the fewest in-flight requests, using account order for ties. It requires `pool.kernel` and proactive preference; other strategies retain their existing rules. |
 | `providers.kiro.oauthAccountFailover.maxConcurrentPerAccount?` | integer 1–100 | unlimited | A process-local per-account queue holds a slot through response completion or cancellation. A full selected account waits at most 250 ms, then returns 503 `account_capacity` with `Retry-After: 1`. The cap does not move the request to another account. |
-| `providers.<name>.oauthAccountFailover.autoSwitchThreshold?` | `number` | `80` | 0–100 usage percent at which `fill-first` advances off the active account (#695). Set with `ocx account auto-switch <provider> threshold <n>`. Read only under `pool.kernel` with `strategy: "fill-first"`; an account with no measured usage counts as under the threshold. |
+| `providers.<name>.oauthAccountFailover.autoSwitchThreshold?` | `number` | `80` | 0–100 usage percent at which `fill-first` advances off the active account (#695). Set with `orl account auto-switch <provider> threshold <n>`. Read only under `pool.kernel` with `strategy: "fill-first"`; an account with no measured usage counts as under the threshold. |
 | `providers.<name>.oauthAccountFailover.stickyLimit?` | `number` | `1` | Successful dispatches retained on one `round-robin` selection, 1–100 (#695). Read only under `pool.kernel` with `strategy: "round-robin"`. |
 
 To decline proactive account steering for one provider whose terms you would rather not test,
@@ -1110,7 +1110,7 @@ That setting survives logging in, adding an account, and reauthenticating.
 Generic OAuth providers (Google Antigravity, xAI, Cursor, Kimi, GitHub Copilot, Nous, and any
 other OAuth provider outside the Codex and Anthropic pools) also accept `strategy` and
 `autoSwitchThreshold` on the same key, through `GET`/`PUT /api/oauth/accounts/pool?provider=<name>`
-and the `ocx account strategy` / `ocx account auto-switch` / `ocx account sticky` verbs. The response carries
+and the `orl account strategy` / `orl account auto-switch` / `orl account sticky` verbs. The response carries
 `"inert"` for those three fields only — `true` while they are stored but not consumed,
 `false` once `pool.kernel` is on and they actually select an account — `enabled` is live and governs the pre-dispatch
 preference. `quotaWindow` is not part of the generic contract. Codex (`/api/codex-auth`) and Anthropic
@@ -1207,7 +1207,7 @@ wins over configured `baseUrl`. Four entry types keep the configured URL:
 Adapters can adjust the resolved URL afterward. Kiro, for example, follows the imported credential's
 API region for canonical `runtime.{region}.kiro.dev`. See [Adapters](/reference/adapters/).
 
-When routing discards `baseUrl`, opencodex logs the registry endpoint and only the configured origin;
+When routing discards `baseUrl`, OpenRelay logs the registry endpoint and only the configured origin;
 a configured path may itself contain a credential. Remove the unused URL or choose the provider entry
 matching the intended region. `alibaba-token-plan` is pinned to Beijing, while
 `alibaba-token-plan-intl` covers international endpoints.
@@ -1236,7 +1236,7 @@ so passthrough stays byte-for-byte identical.
 
 ## Cursor provider (`adapter: "cursor"`)
 
-The Cursor bridge is experimental. After `ocx login cursor`, add or edit `providers.cursor`.
+The Cursor bridge is experimental. After `orl login cursor`, add or edit `providers.cursor`.
 
 If a proxy cannot carry Cursor's default HTTP/2 stream, set `upstreamHttpVersion` to `"http1.1"`
 or its `"h1"` alias.
@@ -1316,7 +1316,7 @@ accept bypassing Codex approval and sandbox semantics.
 
 ## Zed provider (`adapter: "zed"`)
 
-The Zed Hosted AI bridge is experimental and login-only. Run `ocx login zed` before using it; the
+The Zed Hosted AI bridge is experimental and login-only. Run `orl login zed` before using it; the
 login stores the Zed account identity with its native-app access token in the normal OAuth store.
 
 ```json
@@ -1402,10 +1402,10 @@ Vercel AI Gateway can route a model across multiple underlying inference provide
 }
 ```
 
-Model keys are Vercel public model selectors without the outer OpenCodex provider prefix. Selecting
+Model keys are Vercel public model selectors without the outer OpenRelay provider prefix. Selecting
 `vercel-ai-gateway/zai-glm-5.2` restores native `zai/glm-5.2` before applying the model rule. The
 same mapping applies to a native `vercel/<model-id>` selector: use the encoded
-`vercel-ai-gateway/vercel-<model-id>` selector in OpenCodex and keep `vercel/<model-id>` as the
+`vercel-ai-gateway/vercel-<model-id>` selector in OpenRelay and keep `vercel/<model-id>` as the
 model key.
 
 ## Static model allowlists
@@ -1416,9 +1416,9 @@ By default a provider's `apiKey` and `apiKeyPool` sit in `config.json` (mode 060
 If you would rather keep the key material out of the file, move it into the OS credential store:
 
 ```bash
-ocx provider keychain deepseek status    # store: file | env | keychain, and whether the keychain answers
-ocx provider keychain deepseek store     # move active key + pool into the OS keychain
-ocx provider keychain deepseek restore   # bring the plaintext back and delete the keychain items
+orl provider keychain deepseek status    # store: file | env | keychain, and whether the keychain answers
+orl provider keychain deepseek store     # move active key + pool into the OS keychain
+orl provider keychain deepseek restore   # bring the plaintext back and delete the keychain items
 ```
 
 The same operations are `GET`/`POST /api/providers/keychain`. After `store`, `config.json` holds
@@ -1466,7 +1466,7 @@ listing). Listed ids are kept in the routed catalog with the same context and ef
 `models`, and they survive `liveModels: false` too. `selectedModels` still narrows what is visible,
 so an id must be in both lists when an allowlist is active. Retaining an id does not make the
 upstream accept it; a wrong id fails at request time with the upstream error. From the CLI:
-`ocx provider edit <name> --retain-models gemini-3.7-flash,other-id` (`-` clears).
+`orl provider edit <name> --retain-models gemini-3.7-flash,other-id` (`-` clears).
 
 Preview GPT-5.6 fallback entries use the same mechanism. The OpenAI API-key preset seeds base and Pro
 ids with context `1050000` and max input `922000`; OpenRouter seeds `openai/gpt-5.6-sol`,
@@ -1527,7 +1527,7 @@ catalog advertises `max` while keeping `xhigh` distinct.
 
 ## OpenCode Go Responses compatibility
 
-On non-forward requests whose resolved endpoint is `https://opencode.ai/zen/go/v1/responses`, OpenCodex moves
+On non-forward requests whose resolved endpoint is `https://opencode.ai/zen/go/v1/responses`, OpenRelay moves
 Codex's `additional_tools` input declarations into top-level `tools` after tool and namespace
 normalization. Supported hosted tools are preserved until model-specific filtering; malformed
 wrappers remain unchanged. This does not discard ciphertext or unknown agent-message content.
@@ -1554,7 +1554,7 @@ existing protocol. The stateless flag does not force Responses streaming into JS
 
 ## OpenCode Go session affinity
 
-Every request opencodex routes to an OpenCode Go destination carries an `x-opencode-session` header.
+Every request OpenRelay routes to an OpenCode Go destination carries an `x-opencode-session` header.
 The upstream began rejecting requests without it on 2026-09-06, so the header is not an optimization.
 
 The value depends on what the request already knows about itself:
@@ -1565,18 +1565,18 @@ The value depends on what the request already knows about itself:
   so every turn of one conversation reaches Go under the same session.
 - A request with no identity at all, such as a model-availability probe or a first request before any
   conversation metadata exists, receives a value allocated once for that request. It is isolated from
-  other requests rather than shared, and it survives the places opencodex rebuilds the request: the
+  other requests rather than shared, and it survives the places OpenRelay rebuilds the request: the
   translation to the internal Responses shape, compaction, combo children, and the policy-fallback
   retry that hands the turn to the next candidate.
 
-Non-Go destinations are unaffected: opencodex never derives or adds the session header for them. A
-header an operator configured on such a provider is still sent, because opencodex leaves that
+Non-Go destinations are unaffected: OpenRelay never derives or adds the session header for them. A
+header an operator configured on such a provider is still sent, because OpenRelay leaves that
 configuration alone.
 
 ## OpenCode Go reasoning efforts
 
 Go catalog rows preserve their configured reasoning efforts exactly, including during
-catalog sync. OpenCodex does not append synthetic `max` or `ultra` choices to these rows.
+catalog sync. OpenRelay does not append synthetic `max` or `ultra` choices to these rows.
 Use `modelReasoningEfforts` and `modelDefaultReasoningEfforts` for each model's accepted
 upstream values. Key these per-provider maps by upstream model ID, not the routed
 `opencode-go/<model-id>` catalog slug. For example, a configured `["high", "max"]` list
@@ -1585,7 +1585,7 @@ See the [OpenCode Go model list](https://opencode.ai/docs/go/#models) for the cu
 A configured subset can exclude the lower tiers. Other providers retain their existing behavior.
 
 For a native-first picker, include native ids in `modelPickerOrder` followed by the
-routed ids. This orders the complete picker while preserving OpenCodex's separate natural-priority
+routed ids. This orders the complete picker while preserving OpenRelay's separate natural-priority
 guidance calculation. Native Codex's advertised five follow picker priority and may change;
 exact-name override eligibility is not limited to that advertisement. Routed-only orders keep
 their previous behavior. See the
@@ -1645,7 +1645,7 @@ id. Declare `text, image` on a custom row and images reach that model even when 
 lists it as text-only; declare only `text` and it is routed through the vision sidecar. This is
 the same precedence the catalog already applied, so the advertised row and the request now agree.
 `modelCapabilities` stays above it, because that is the dedicated per-model capability axis —
-including the write made by `ocx provider edit <provider> --model <id> --text-only`. A custom row
+including the write made by `orl provider edit <provider> --model <id> --text-only`. A custom row
 that leaves the modalities blank inherits the provider row instead of claiming text-only.
 Every consumer that answers "can this model take an image" applies one rule to the declaration:
 image is absent from the list. A row declaring only `audio` or `video` therefore counts as

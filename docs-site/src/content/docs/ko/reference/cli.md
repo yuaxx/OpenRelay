@@ -3,9 +3,9 @@ title: CLI 레퍼런스
 description: 명령 분기, 종료 코드, 그리고 모든 ocx 명령군으로 연결되는 링크.
 ---
 
-opencodex CLI는 `ocx`입니다. 첫 번째 명령 이름으로 분기하며, `setup`/`init`, `restore`/`eject`, `models`/`model` 같은 별칭은 같은 동작으로 이어집니다. 알 수 없는 명령과 잘못된 명령 형태는 오류입니다.
+OpenRelay CLI는 `ocx`입니다. 첫 번째 명령 이름으로 분기하며, `setup`/`init`, `restore`/`eject`, `models`/`model` 같은 별칭은 같은 동작으로 이어집니다. 알 수 없는 명령과 잘못된 명령 형태는 오류입니다.
 
-`ocx help`(`ocx --help` / `ocx -h`도 가능)는 최상위 사용법을 보여 줍니다. 도움말 표에 등록된 명령은 `ocx help <command>`, `ocx <command> --help`, `ocx <command> -h`로 볼 수 있습니다. 도움말과 버전 명령은 읽기 전용이며 Codex나 opencodex 상태를 시작, 중지, 설치, 제거하거나 다시 쓰지 않습니다.
+`orl help`(`orl --help` / `orl -h`도 가능)는 최상위 사용법을 보여 줍니다. 도움말 표에 등록된 명령은 `orl help <command>`, `orl <command> --help`, `orl <command> -h`로 볼 수 있습니다. 도움말과 버전 명령은 읽기 전용이며 Codex나 OpenRelay 상태를 시작, 중지, 설치, 제거하거나 다시 쓰지 않습니다.
 
 ## 명령군
 
@@ -17,33 +17,33 @@ opencodex CLI는 `ocx`입니다. 첫 번째 명령 이름으로 분기하며, `s
 
 관리 명령은 기록된 런타임 포트와 신원 검사를 사용해 살아 있는 프록시의 management API와 왕복 통신하며, 두 번째 설정 경로를 따로 두지 않습니다. 멈췄거나 닿을 수 없는 프록시는 HTTP 503으로 표시되며 CLI는 0이 아닌 종료 코드를 반환합니다. 명시적으로 오프라인 설정 작업으로 문서화된 명령은 라이브 프록시 없이 설정 파일을 검증하고 수정할 수 있습니다.
 
-`ocx system codex-cli-update check`는 실행 중인 프록시가 없어도 되며 패키지 레지스트리를 조회하지 않습니다. 설정된 설치 후보에 대해 전체 경로를 숨긴 실행 파일 위치와 소유권 근거를 포함한 provenance 메타데이터를 제한된 범위에서 검사합니다. 신뢰할 수 있는 배포 런처 컨텍스트가 인증하는 것은 후보 스냅샷뿐이며, Codex가 성공적으로 실행되었다는 사실은 인증하지 않습니다. 이 단발성 명령은 Codex를 전혀 실행하지 않으므로 환경 또는 저장된 상태에서 얻은 후보는 보고 전용입니다(`managed: false`, 일반적으로 `selection_unattested`). `selectionAttested`는 항상 `false`입니다. JSON 출력에는 `candidateAvailable`, `candidateVersion`, `candidateSource`, `selectionAttested: false`가 포함됩니다. Bun이나 소스에서 직접 실행하면 런처 증거가 없으므로 환경 및 저장된 후보를 무시하고 POSIX에서는 `candidate_unavailable`, Windows에서는 `windows_inspection_deferred`을 보고할 수 있습니다. Windows에서는 이 첫 조각이 후보 또는 설정 경로의 파일시스템을 전혀 읽지 않습니다. 배포 런처가 증명한 절대 환경 후보에 한해서 앱 번들 또는 버전 관리자라는 어휘적 표지만 보고하며, 그 밖의 Windows 후보는 모두 실패 닫힘 처리합니다. 이 명령은 소프트웨어를 설치하거나 복구하지 않고, Codex나 npm을 실행하지 않으며, 실행 중인 프로세스를 제어하거나 설정 또는 캐시 상태를 쓰지 않습니다.
+`orl system codex-cli-update check`는 실행 중인 프록시가 없어도 되며 패키지 레지스트리를 조회하지 않습니다. 설정된 설치 후보에 대해 전체 경로를 숨긴 실행 파일 위치와 소유권 근거를 포함한 provenance 메타데이터를 제한된 범위에서 검사합니다. 신뢰할 수 있는 배포 런처 컨텍스트가 인증하는 것은 후보 스냅샷뿐이며, Codex가 성공적으로 실행되었다는 사실은 인증하지 않습니다. 이 단발성 명령은 Codex를 전혀 실행하지 않으므로 환경 또는 저장된 상태에서 얻은 후보는 보고 전용입니다(`managed: false`, 일반적으로 `selection_unattested`). `selectionAttested`는 항상 `false`입니다. JSON 출력에는 `candidateAvailable`, `candidateVersion`, `candidateSource`, `selectionAttested: false`가 포함됩니다. Bun이나 소스에서 직접 실행하면 런처 증거가 없으므로 환경 및 저장된 후보를 무시하고 POSIX에서는 `candidate_unavailable`, Windows에서는 `windows_inspection_deferred`을 보고할 수 있습니다. Windows에서는 이 첫 조각이 후보 또는 설정 경로의 파일시스템을 전혀 읽지 않습니다. 배포 런처가 증명한 절대 환경 후보에 한해서 앱 번들 또는 버전 관리자라는 어휘적 표지만 보고하며, 그 밖의 Windows 후보는 모두 실패 닫힘 처리합니다. 이 명령은 소프트웨어를 설치하거나 복구하지 않고, Codex나 npm을 실행하지 않으며, 실행 중인 프로세스를 제어하거나 설정 또는 캐시 상태를 쓰지 않습니다.
 
 Windows x64 설치 관측은 [`attest` 명령](/ko/reference/cli/agents/)을 참조하세요. 명시적 경로 없이 증명에 바인딩된 런처 스냅샷이 식별한 선택 후보를 관측하며, 업데이트 권한이나 런타임 선택을 증명하지 않습니다.
 
-뜻이 분명하면 `list`나 `status`가 기본입니다. 구조화된 스냅샷은 `--json`을, 스트리밍 요청 로그 피드는 `ocx observe logs --follow --jsonl`을 사용합니다. 테마, 언어, 내비게이션처럼 순수하게 시각적인 브라우저 상태에는 CLI 대응이 없습니다. Cloudflare Tunnel 설정은 이 명령 집합 밖입니다.
+뜻이 분명하면 `list`나 `status`가 기본입니다. 구조화된 스냅샷은 `--json`을, 스트리밍 요청 로그 피드는 `orl observe logs --follow --jsonl`을 사용합니다. 테마, 언어, 내비게이션처럼 순수하게 시각적인 브라우저 상태에는 CLI 대응이 없습니다. Cloudflare Tunnel 설정은 이 명령 집합 밖입니다.
 
 ## 라이브니스 프로브 상한 재정의
 
-`ocx health`, `ocx status`, `ocx account *`, `ocx login codex`, `ocx ready`는 짧은 라이브니스 프로브로 실행 중인 프록시를 찾습니다. 기본값은 시도당 750 ms이고, 중지와 시작 판단에는 재시도를 포함해 1500 ms를 씁니다. 콘텐츠 필터나 EDR 계열 네트워크 확장 같은 보안 계층이 루프백 연결마다 고정 지연을 더하는 호스트에서는 정상 프록시가 응답하기 전에 이 상한이 끝날 수 있습니다.
+`orl health`, `orl status`, `orl account *`, `orl login codex`, `orl ready`는 짧은 라이브니스 프로브로 실행 중인 프록시를 찾습니다. 기본값은 시도당 750 ms이고, 중지와 시작 판단에는 재시도를 포함해 1500 ms를 씁니다. 콘텐츠 필터나 EDR 계열 네트워크 확장 같은 보안 계층이 루프백 연결마다 고정 지연을 더하는 호스트에서는 정상 프록시가 응답하기 전에 이 상한이 끝날 수 있습니다.
 
-이런 호스트에서는 `OCX_PROBE_TIMEOUT_MS`로 상한을 올리세요. 예: `OCX_PROBE_TIMEOUT_MS=5000 ocx status`. 값은 1부터 30000까지의 정수 밀리초입니다. 재정의는 올리기만 합니다. 750 ms 기본값과 1500 ms 중지·시작 예산은 하한을 유지하므로 `1000`은 기본 프로브만 늘립니다. 설정하지 않았거나 비어 있거나 소수, 음수, 0, 상한을 넘는 값은 무시됩니다.
+이런 호스트에서는 `OCX_PROBE_TIMEOUT_MS`로 상한을 올리세요. 예: `OCX_PROBE_TIMEOUT_MS=5000 orl status`. 값은 1부터 30000까지의 정수 밀리초입니다. 재정의는 올리기만 합니다. 750 ms 기본값과 1500 ms 중지·시작 예산은 하한을 유지하므로 `1000`은 기본 프로브만 늘립니다. 설정하지 않았거나 비어 있거나 소수, 음수, 0, 상한을 넘는 값은 무시됩니다.
 
 ## 종료 코드와 확인
 
-성공한 명령은 종료 코드 0을 반환합니다. 잘못된 사용법, 알 수 없는 명령이나 리소스, 실패한 API 작업, 필요한 서비스가 없음은 0이 아닌 종료 코드를 반환합니다. `ocx health`는 프록시가 건강할 때만 0을, 건강한 프록시가 없으면 1을, 잘못된 인수에는 2를 반환하므로 서비스 probe로 쓸 수 있습니다. 스크립트는 사람이 읽는 출력 대신 종료 코드를 확인해야 합니다.
+성공한 명령은 종료 코드 0을 반환합니다. 잘못된 사용법, 알 수 없는 명령이나 리소스, 실패한 API 작업, 필요한 서비스가 없음은 0이 아닌 종료 코드를 반환합니다. `orl health`는 프록시가 건강할 때만 0을, 건강한 프록시가 없으면 1을, 잘못된 인수에는 2를 반환하므로 서비스 probe로 쓸 수 있습니다. 스크립트는 사람이 읽는 출력 대신 종료 코드를 확인해야 합니다.
 
 제거, 가져오기, 크레딧 소모, 업데이트처럼 확인을 알리는 파괴적 작업은 비대화형 사용 시 `--yes`가 필요합니다. 이 플래그는 명시적인 동의이며, 생략했다고 해서 동작이 조용히 확인되면 안 됩니다.
 
 ## 버전과 내부 디스패치 대상
 
-`ocx --version`, `ocx -v`, `ocx version`은 스크립트가 읽기 좋은 한 줄짜리 버전을 출력하고 종료합니다.
+`orl --version`, `orl -v`, `orl version`은 스크립트가 읽기 좋은 한 줄짜리 버전을 출력하고 종료합니다.
 
 일반 도움말에는 두 개의 디스패치 대상이 의도적으로 빠져 있습니다. `__refresh-version [preview]`는 분리된 프로세스에서 업데이트 알림 캐시를 새로 고치고, `__gui-update-worker <job-id> [latest|preview] [restart]`는 대시보드 업데이트 작업을 실행합니다. 이들은 구현 세부 사항일 뿐이며 안정적인 사용자 명령이 아닙니다. 대시보드는 worker PID를 기록하고, worker가 죽은 활성 작업은 복구하며, PID가 없는 오래된 활성 기록은 10분 뒤 오래된 것으로 취급하고, 살아 있는 worker를 동시 업데이트로부터 보호합니다.
 
 ## Capability argument validation
 
-`ocx capabilities`는 알 수 없는 인수, 반복된 플래그, 빈 `--route` 값을 종료 코드 64로 거부합니다. 유효한 경로에 등록된 기능이 없으면 종료 코드 4를 반환합니다.
+`orl capabilities`는 알 수 없는 인수, 반복된 플래그, 빈 `--route` 값을 종료 코드 64로 거부합니다. 유효한 경로에 등록된 기능이 없으면 종료 코드 4를 반환합니다.
 
 ## Integer option values
 
@@ -51,8 +51,8 @@ Windows x64 설치 관측은 [`attest` 명령](/ko/reference/cli/agents/)을 참
 
 ## Windows JSON configuration files
 
-`ocx config validate <file>`과 `ocx config import <file> --yes`는 선행 BOM이 있는 UTF-8 JSON도 읽습니다. 표준 입력(`-`)에도 적용되므로 Windows PowerShell이나 편집기의 UTF-8 내보내기를 사용할 수 있습니다. UTF-16은 지원하지 않습니다.
+`orl config validate <file>`과 `orl config import <file> --yes`는 선행 BOM이 있는 UTF-8 JSON도 읽습니다. 표준 입력(`-`)에도 적용되므로 Windows PowerShell이나 편집기의 UTF-8 내보내기를 사용할 수 있습니다. UTF-16은 지원하지 않습니다.
 
 ## Default alias listing
 
-`ocx alias --json`은 `ocx alias list --json`과 같습니다. `--json`은 명시한 alias 작업의 앞이나 뒤에 둘 수 있습니다.
+`orl alias --json`은 `orl alias list --json`과 같습니다. `--json`은 명시한 alias 작업의 앞이나 뒤에 둘 수 있습니다.

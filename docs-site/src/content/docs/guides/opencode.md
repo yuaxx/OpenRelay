@@ -1,10 +1,10 @@
 ---
 title: opencode
-description: Use any routed model from opencode — opencodex injects a runtime provider block and leaves your own opencode config untouched.
+description: Use any routed model from opencode — OpenRelay injects a runtime provider block and leaves your own opencode config untouched.
 ---
 
 opencode reads its providers from merged JSON config layers rather than environment
-variables, so there is no `ANTHROPIC_BASE_URL`-style slot to inject. `ocx opencode`
+variables, so there is no `ANTHROPIC_BASE_URL`-style slot to inject. `orl opencode`
 bridges that gap: it ensures the proxy is running, builds a provider block from the
 visible catalog, and injects it through OpenCode's inline runtime layer
 (`OPENCODE_CONFIG_CONTENT`).
@@ -12,14 +12,14 @@ visible catalog, and injects it through OpenCode's inline runtime layer
 ## Quickstart
 
 ```bash
-ocx opencode
+orl opencode
 ```
 
 This ensures the proxy is running and launches opencode with the generated
 `provider.opencodex` and `providers.opencodex` blocks injected for that process — the
 legacy spelling opencode V1 reads, and the native V2 spelling. Both carry reasoning-effort
 variants in the format their client reads. Extra arguments pass through:
-`ocx opencode run "hello"`.
+`orl opencode run "hello"`.
 
 Routed models appear in the picker under the `opencodex` provider:
 
@@ -30,7 +30,7 @@ opencodex/gpt-5.6-sol      # native slugs stay unprefixed
 
 ## Reasoning effort
 
-opencode exposes reasoning effort as model *variants*. opencodex writes one variant per
+opencode exposes reasoning effort as model *variants*. OpenRelay writes one variant per
 declared effort, including `none` when the model explicitly supports disabling reasoning.
 The selection reaches the proxy as a reasoning effort, not just a picker label. Existing
 upstream effort pins in opencodex still apply.
@@ -93,11 +93,11 @@ read global or project config to detect a provider override — under `provider.
 or `providers.opencodex` — while your existing providers, agents, keybinds, MCP entries,
 and relative `{file:…}` references keep resolving from their original files.
 
-For this launch only, opencodex adds both generated blocks — `provider.opencodex` and
+For this launch only, OpenRelay adds both generated blocks — `provider.opencodex` and
 `providers.opencodex` — through OpenCode's inline runtime layer. That layer merges after global/custom/project config
 and overrides only conflicting keys for the child process.
 
-| Layer | Behavior with `ocx opencode` |
+| Layer | Behavior with `orl opencode` |
 | --- | --- |
 | Global / custom / project config | Left on disk exactly as you wrote it |
 | Inline runtime (`OPENCODE_CONFIG_CONTENT`) | Receives the generated `provider.opencodex` and `providers.opencodex` blocks (merged into any inherited inline config) |
@@ -105,17 +105,17 @@ and overrides only conflicting keys for the child process.
 
 If a global or project config also defines the provider under `provider.opencodex` or
 `providers.opencodex`, the launcher prints an informational note: the runtime layer from
-`ocx opencode` overrides it for that launch.
+`orl opencode` overrides it for that launch.
 
 ## Putting the block into your own config
 
-`ocx opencode` injects the provider block for one launch only, which means plain `opencode` still
+`orl opencode` injects the provider block for one launch only, which means plain `opencode` still
 knows nothing about the proxy. When you want routed models available from plain `opencode` — or
-from an editor extension that never goes through the launcher — `ocx export` prints the same
+from an editor extension that never goes through the launcher — `orl export` prints the same
 provider block for you to merge into your own config:
 
 ```bash
-ocx export --client opencode
+orl export --client opencode
 ```
 
 The proxy must be running. The command prints the config, the canonical destination
@@ -126,17 +126,17 @@ moving the block into your config is your explicit act.
 :::caution[Merge, never replace]
 Merge both blocks — `provider.opencodex` and `providers.opencodex` — into your existing config.
 Replacing the whole file with the exported one destroys your other providers, agents, keybinds,
-and MCP entries. `ocx export --out` refuses to overwrite an existing file for exactly this reason,
+and MCP entries. `orl export --out` refuses to overwrite an existing file for exactly this reason,
 so point `--out` at a scratch path and copy the blocks across:
 
 ```bash
-ocx export --client opencode --out ~/opencodex-opencode.json
+orl export --client opencode --out ~/opencodex-opencode.json
 ```
 :::
 
 Unlike the launcher's runtime block, a merged block is a static snapshot: it does not follow your
-catalog. Re-run `ocx export` after you add a provider or change model visibility or metadata.
-Alternatively, [enable the managed integration](/guides/integrations/): `ocx sync` safely
+catalog. Re-run `orl export` after you add a provider or change model visibility or metadata.
+Alternatively, [enable the managed integration](/guides/integrations/): `orl sync` safely
 refreshes its already-owned blocks, leaving hand-edited or removed blocks untouched.
 
 Once merged, export the admission key before launching opencode — unless the proxy is on loopback,
@@ -179,7 +179,7 @@ a configured API key — which is what a non-loopback bind requires.
 
 A loopback bind (`127.0.0.1`, the default) authenticates nothing, so the `{env:…}` reference is
 inert and you can leave the variable unset. It matters only when `hostname` is set beyond loopback;
-see [Remote access](/reference/configuration/server/#remote-access). This admission key is opencodex's
+see [Remote access](/reference/configuration/server/#remote-access). This admission key is OpenRelay's
 own, and is unrelated to the upstream provider keys configured under
 [Providers](/guides/providers/).
 

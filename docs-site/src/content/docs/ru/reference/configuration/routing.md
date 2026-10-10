@@ -15,7 +15,7 @@ upstream.
 
 ## Порядок разрешения модели
 
-opencodex разрешает запрошенную модель в следующем порядке:
+OpenRelay разрешает запрошенную модель в следующем порядке:
 
 1. Настроенный `policy/<id>` или алиас routing profile запускает policy evaluator и направляет запрос
    к выбранному кандидату. Неразрешённый `policy/<id>` переходит к последующим правилам.
@@ -65,7 +65,7 @@ opencodex разрешает запрошенную модель в следую
 selector-qualified строки и возвращает обычные GPT-строки, но не удаляет сопоставления и не меняет
 маршрутизацию точного `<selector>/<model>`. Поэтому повторное включение восстанавливает те же
 публичные метки. Изменения аккаунтов и настройки сохраняются до bounded catalog refresh;
-предупреждение с `ocx sync` означает только, что каталог picker'а ещё нужно привести в согласованное
+предупреждение с `orl sync` означает только, что каталог picker'а ещё нужно привести в согласованное
 состояние, а не потерю изменения маршрутизации.
 
 ## Combo (`config.combos`)
@@ -111,7 +111,7 @@ selector-qualified строки и возвращает обычные GPT-ст�
 
 ### Допустимость в каталоге
 
-Combo остаётся доступной для прямой маршрутизации, даже если её нельзя вывести в списке. `ocx sync`,
+Combo остаётся доступной для прямой маршрутизации, даже если её нельзя вывести в списке. `orl sync`,
 `/v1/models` и селектор Codex показывают её, только когда у каждой цели есть возможности, которые
 можно пересечь:
 
@@ -129,7 +129,7 @@ Combo остаётся доступной для прямой маршрутиз
 
 Явно запрошенный `policy/<id>` (или настроенный псевдоним) выбирает среди фиксированного разрешённого списка кандидатов по жёстким требованиям к возможностям и детерминированной объяснимой оценке. Существующие идентификаторы моделей никогда не проходят через профиль неявно. Поддерживаются: `candidates` (явный список), необязательный `alias`, `require` (`minContextWindow`, `minQuotaHeadroom`, `tools`, `imageInput`, `structuredOutput`, `localOnly`, `remoteAllowed`, `encryptedCodexTasks`, `reasoningEffort`, `serviceTier`), `optimize` (веса latency/health/cost/quota), `limits.maxEstimatedCostUsd`, `unknownEvidence` (allow/penalize/exclude). Неизвестное не становится нулём или бесплатным.
 
-CLI: `ocx route policy list`, `ocx route policy show <id>`, `ocx route policy dry-run <id> --model-context <tokens> --tools`, `ocx route policy evaluate <id>`.
+CLI: `orl route policy list`, `orl route policy show <id>`, `orl route policy dry-run <id> --model-context <tokens> --tools`, `orl route policy evaluate <id>`.
 
 Комбо — это явная маршрутизация по целям с выбираемой стратегией (`failover` в заданном порядке, сглаженная взвешенная балансировка `round-robin`, случайная балансировка `random`, `least-used` или `reset-window`): выбор определяет настроенная стратегия, а retryable-сбои переводят запрос к следующей цели в списке. Профиль — это выбор на основе доказательств среди кандидатов.
 
@@ -142,7 +142,7 @@ CLI: `ocx route policy list`, `ocx route policy show <id>`, `ocx route policy dr
 
 Возвращаемые записи истории и решений маршрута содержат только маскированные метаданные запроса (например, непрозрачные метки `apiKeyId`). Учётные данные, сырые тела промптов и секреты провайдеров не включаются.
 
-CLI: `ocx logs explain <request-id>`, `ocx logs rebuild-index`, `ocx logs index-status`.
+CLI: `orl logs explain <request-id>`, `orl logs rebuild-index`, `orl logs index-status`.
 
 ## Миграция
 

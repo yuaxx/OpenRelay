@@ -3,7 +3,7 @@ title: 提供方配置
 description: 提供者条目、身份验证、端点、模型目录、配额、上下文上限以及提供者特定选项。
 ---
 
-提供者用于告诉 opencodex 模型位于哪里、使用哪种线协议适配器，以及请求如何进行身份验证。
+提供者用于告诉 OpenRelay 模型位于哪里、使用哪种线协议适配器，以及请求如何进行身份验证。
 
 ## 首次注册时的模型选择
 
@@ -12,13 +12,13 @@ description: 提供者条目、身份验证、端点、模型目录、配额、�
 仅在首次注册提供者时应用；更新、重新登录和更换密钥不会重置已有选择。初始化后，可在 Models 或使用以下 CLI 命令启用所需模型。后续新增模型的独立策略不变。请将 `<model-id>` 替换为列表中的 ID。
 
 ```sh
-ocx models live --provider openrouter
-ocx models enable '<model-id>'
-ocx models disable '<model-id>'
-ocx models provider openrouter on
+orl models live --provider openrouter
+orl models enable '<model-id>'
+orl models disable '<model-id>'
+orl models provider openrouter on
 ```
 
-在界面中完成注册或 OAuth 登录后，提示框可打开 Models 页面。CLI 会输出模型管理命令，JSON 也包含后续步骤。`--no-wait` 表示登录仍在等待中，并非已完成。使用实时模型命令前，请先运行 `ocx start` 启动代理。
+在界面中完成注册或 OAuth 登录后，提示框可打开 Models 页面。CLI 会输出模型管理命令，JSON 也包含后续步骤。`--no-wait` 表示登录仍在等待中，并非已完成。使用实时模型命令前，请先运行 `orl start` 启动代理。
 
 ## 提供者相关顶级字段
 
@@ -35,7 +35,7 @@ ocx models provider openrouter on
 | `codexAccountNamespaces?` | `Record<string, string>` | — | 将任意公开 model selector 映射到已保存 Codex account target 的可选配置。启用账户限定的选择器行后，target 存在的每个 selector 都会在 Codex picker 中添加独立的 `<selector>/<native-openai-model>` row，且每个 row 只使用对应账户。只要有 selector 生效，bare native row 就会在 picker 中隐藏；但除非显式禁用，其 id 仍可路由，并继续列在 raw `/v1/models` 中。 |
 | `codexAccountPickerEnabled?` | `boolean` | 映射为空时关闭 | 控制是否根据有效的 `codexAccountNamespaces` 映射生成账户限定的 Codex 选择器行。`true` 允许显示映射行。在非空映射中省略此字段时，为保持向后兼容会视为已启用；映射为空时则关闭。`false` 会隐藏生成行并恢复选择器中的裸原生行，但不会删除映射，也不会禁用精确的 `<selector>/<native-openai-model>` 路由。 |
 | `activeCodexAccountId?` | `string` | — | 为下一次请求手动选定的 Pool 账户。选择会清除线程亲和性；进行中的请求会保留捕获到的凭据。 |
-| `codexAccountPriorities?` | `Record<string,number>` | — | Codex pool 各账号的选择顺序：账号 ID → `-100` 到 `100` 的整数，**数值越大越先使用**，未设置即为 `0`。这是顺序边界而非资格边界：选择会把已经合格的账号收窄到仍有 quota 余量的最高 tier，再由 `accountPoolStrategy` 在该 tier 内挑选。只有当某个 tier 的所有成员都达到各自非零的有效阈值（账号覆盖值，未设置则使用全局值）、处于 cooldown、被 soft-avoid、已暂停或需要重新认证时，该 tier 才会被跳过；usage 未知不会让 tier 耗尽。顺序不会让不合格的账号变得可选，也不会重新绑定已经绑定账号的 thread。主账号 `__main__` 同样参与排序，因此可以让 Codex Desktop 登录账号最后才被用到。没有任何条目时，行为与以往完全一致。映射格式非法时会打印警告并关闭排序（不会触发 config 修复）。可通过 `ocx account priority` 和 Codex Auth 页面管理。 |
+| `codexAccountPriorities?` | `Record<string,number>` | — | Codex pool 各账号的选择顺序：账号 ID → `-100` 到 `100` 的整数，**数值越大越先使用**，未设置即为 `0`。这是顺序边界而非资格边界：选择会把已经合格的账号收窄到仍有 quota 余量的最高 tier，再由 `accountPoolStrategy` 在该 tier 内挑选。只有当某个 tier 的所有成员都达到各自非零的有效阈值（账号覆盖值，未设置则使用全局值）、处于 cooldown、被 soft-avoid、已暂停或需要重新认证时，该 tier 才会被跳过；usage 未知不会让 tier 耗尽。顺序不会让不合格的账号变得可选，也不会重新绑定已经绑定账号的 thread。主账号 `__main__` 同样参与排序，因此可以让 Codex Desktop 登录账号最后才被用到。没有任何条目时，行为与以往完全一致。映射格式非法时会打印警告并关闭排序（不会触发 config 修复）。可通过 `orl account priority` 和 Codex Auth 页面管理。 |
 | `autoSwitchThreshold?` | `number` | `80` | 基于用量的主动切换阈值。`quota` 可在下一次请求中重新评估未绑定任务。已绑定任务默认（`pool.cacheAffinity`）在越过阈值后仍保留账号，直到该账号耗尽或无法继续服务，并且只改绑到确有额度余量且 usage 严格更低的账号。将 `pool.cacheAffinity` 设为 `false` 才会在该阈值重新评估已绑定任务。`fill-first` 仅把它用作未绑定分配的耗尽点；正常 `round-robin` 不使用它。分数取已知 5 小时、周或 30 天 quota window 的最高值。`0` 只关闭基于用量的主动切换，不关闭未绑定任务分配或故障恢复。 |
 | `codexAccountAutoSwitchThresholds?` | `Record<string,number>` | — | 各账号对 `autoSwitchThreshold` 的覆盖：账号 ID → `0`–`100` 的整数。没有条目时继承全局值；`0` 只关闭从该账号发起的基于用量的切换。支持主账号 `__main__`。可在 Codex Auth 的账号卡片中管理。 启用覆盖时，会将当前全局阈值复制为固定的账号值。覆盖值（包括 `0`）在之后修改全局阈值时仍优先。禁用时发送 `threshold: null`，删除条目，并恢复继承当前全局阈值及其未来的更改。 |
 | `accountPoolStrategy?` | `"quota" \| "round-robin" \| "fill-first" \| "reset-first"` | `"quota"` | 新建/未绑定 Codex 请求的分配策略。没有 live `(parent thread id, quota scope)` affinity 的请求属于未绑定；代理重启或 affinity 重置后，已有可见任务也可能未绑定。`quota` 在没有活跃账号时选择已知 usage 最低的合格账号；活跃账号合格且低于 `autoSwitchThreshold` 时继续使用；达到阈值后，可把未绑定请求切换到 usage 更低的合格账号。已绑定任务默认会保留到账号耗尽（已知 usage 为 100%）或无法继续服务，改绑时只前往确有额度余量且 usage 严格更低的账号。关闭该标志后，也可在该阈值把已绑定任务的下一次请求改绑到确有额度余量且 usage 严格更低的账号。`round-robin` 均匀分配未绑定请求；`fill-first` 在 cooldown、不可用或耗尽阈值前持续分配给活跃账号。  `reset-first`: 在低于用量阈值的账号中，优先选择下次5小时或周额度重置最早的账号。已绑定任务遵循配置的亲和策略。独立模型额度按用量排序。 此排序不使用月额度重置时间。 |
@@ -52,7 +52,7 @@ ocx models provider openrouter on
 
 这些策略均使用各账户的有效阈值：存在 `codexAccountAutoSwitchThresholds` 条目时使用该值，否则继承全局 `autoSwitchThreshold`。覆盖值为 0 仅关闭基于用量的主动切换；启动绑定、硬锁、冷却、模型使用资格检查和故障恢复仍然生效。
 
-selector 名称是用户自定的公开 label；opencodex 不会为其赋予账户角色语义。
+selector 名称是用户自定的公开 label；OpenRelay 不会为其赋予账户角色语义。
 `codexAccountNamespaces` 的 key 长度为 1–64 个字符，首尾必须是 ASCII 字母或数字，
 中间可使用字母、数字、`.`、`_` 或 `-`；保留的 JavaScript object 名称会被拒绝。value 必须是有效的
 pool account id（不能是内部 `__main__`），或用 `"@main"` 表示 Codex Desktop 账号。与 provider 及
@@ -71,7 +71,7 @@ selector，而不是分配一个新名称。
 
 `openai` 和 `openai-apikey` 是固定的保留 id。`openai.codexAccountMode` 默认是 `"pool"`，会在主账户和新增账户之间选择；`"direct"` 只使用当前调用者/主登录态。API 只使用其配置的 API key 或 key 池。请使用裸模型名或 `openai-apikey/<model>`；不存在跨路由凭据回退。API 的 GPT-5.6 行携带 1,050,000 上下文 / 922,000 最大输入元数据，而 Pro 虚拟 id 会重写为基础线协议模型并带上 `reasoning.mode: "pro"`。
 
-`openaiProviderTierVersion: 2` 标记当前的单提供者投影。对已发布的 v1 配置进行迁移之前，opencodex 会创建 `config.json.pre-openai-tiers-v2.bak`，且不会覆盖不同的备份文件，并会把已知的旧式命名空间选择 id 重写为裸 id。
+`openaiProviderTierVersion: 2` 标记当前的单提供者投影。对已发布的 v1 配置进行迁移之前，OpenRelay 会创建 `config.json.pre-openai-tiers-v2.bak`，且不会覆盖不同的备份文件，并会把已知的旧式命名空间选择 id 重写为裸 id。
 
 ## 提供者命名空间别名
 
@@ -160,7 +160,7 @@ selector，而不是分配一个新名称。
 
 注册或替换提供商（`POST /api/providers`）时，会先验证 `responsesPath` 和 `chatCompletionsPath`，再修改内存或磁盘中的配置。`PATCH /api/providers?name=<provider>` 会将请求体与已保存的提供商合并；除仅更新 `requestPacing` 的请求外，凡是修改 `disabled` 以外字段的更新，都会在保存前以同样方式验证合并后提供商的路径，若保留的既有路径无效则返回 `400`，且不更改配置。加载配置文件时也适用同样的路径规则。
 
-API key 提供者可以持有字面量 key，或环境引用。OAuth 提供者使用由 `ocx login` 填充的凭据存储；基于订阅的 Claude Code 启动行为在 [`claudeCode.authMode`](/zh-cn/reference/configuration/server/#claude-code-claudecode) 下配置。
+API key 提供者可以持有字面量 key，或环境引用。OAuth 提供者使用由 `orl login` 填充的凭据存储；基于订阅的 Claude Code 启动行为在 [`claudeCode.authMode`](/zh-cn/reference/configuration/server/#claude-code-claudecode) 下配置。
 
 ### 保存提供方时会保留什么
 
@@ -188,7 +188,7 @@ API key 提供者可以持有字面量 key，或环境引用。OAuth 提供者�
 { "responseTierAuthoritative": false }
 ```
 
-**网关需要显式配置。** 仅升级 OpenCodex 不会为现有 provider 自动添加该声明。未配置时，
+**网关需要显式配置。** 仅升级 OpenRelay 不会为现有 provider 自动添加该声明。未配置时，
 符合 Fast 条件且已发送 priority 的请求收到 `service_tier: "default"`，仍会按原逻辑记录为 `response-declined`。
 仅对已知响应元数据无法确认实际等级的链路设置 `false`。
 
@@ -204,14 +204,14 @@ API key 提供者可以持有字面量 key，或环境引用。OAuth 提供者�
 该字段只接受布尔值。对于官方 API、未声明的网关等其他目的地，省略或显式设为 `true`
 都保留基于响应的判定。标准 `https://chatgpt.com/backend-api/codex` 地址配合
 `authMode: "forward"` 始终自动按非权威处理，即使配置为 `true` 也不例外。
-OpenCodex 不会依据网关名称或 URL 猜测可信度。如果同一网关混合不同的响应契约，
+OpenRelay 不会依据网关名称或 URL 猜测可信度。如果同一网关混合不同的响应契约，
 应拆成独立 provider 条目，只为相关条目配置此声明。
 
 ## 提供者诊断出站安全性
 
-仪表板连接测试和实时模型发现使用受限的、仅 GET 传输。没有出站代理时，opencodex 只会解析一次主机名，并仅连接到该已验证地址。HTTPS 仍会保留原始 Host、SNI 和证书验证；提供者配置不能关闭证书检查。
+仪表板连接测试和实时模型发现使用受限的、仅 GET 传输。没有出站代理时，OpenRelay 只会解析一次主机名，并仅连接到该已验证地址。HTTPS 仍会保留原始 Host、SNI 和证书验证；提供者配置不能关闭证书检查。
 
-这些操作使用[服务器配置的出站 fetch](/zh-cn/reference/configuration/server/)。通过 `config.proxy` 设置或继承自 SOCKS5 `ALL_PROXY` 的服务器 SOCKS5 代理，在目标不匹配 `NO_PROXY` 时使用 OpenCodex 的内置隧道。`HTTP_PROXY` 和 `HTTPS_PROXY` 保留 Bun 的原生 HTTP(S) 处理，而非 SOCKS 的 `ALL_PROXY` 不是原生 HTTP fetch 路由。URL 和字面量地址检查仍会执行，但所选代理会决定最终路由、DNS 解析结果和对端，因此 opencodex 无法固定或验证该对端。这是一个明确的安全限制。
+这些操作使用[服务器配置的出站 fetch](/zh-cn/reference/configuration/server/)。通过 `config.proxy` 设置或继承自 SOCKS5 `ALL_PROXY` 的服务器 SOCKS5 代理，在目标不匹配 `NO_PROXY` 时使用 OpenRelay 的内置隧道。`HTTP_PROXY` 和 `HTTPS_PROXY` 保留 Bun 的原生 HTTP(S) 处理，而非 SOCKS 的 `ALL_PROXY` 不是原生 HTTP fetch 路由。URL 和字面量地址检查仍会执行，但所选代理会决定最终路由、DNS 解析结果和对端，因此 OpenRelay 无法固定或验证该对端。这是一个明确的安全限制。
 
 私有/本地目标需要 `allowPrivateNetwork: true`，并且在出站代理启用时，还需要匹配的 `NO_PROXY` 条目。回环地址会自动加入；每个 LAN 主机都必须显式列出，因为 CIDR 条目不会被解释。匹配器支持精确主机、域后缀、可选端口、带方括号的 IPv6 以及 `*`；例如，应显式列出 `192.168.1.50`。元数据和链路本地目标仍会被阻止。诊断请求会拒绝重定向，并报告一个已剥离凭据的目标。普通提供者请求的重定向审查仍然独立于这个诊断保护。
 
@@ -254,14 +254,14 @@ affinity。这些策略不能规避 provider enforcement。
 只有共享5小时或每周额度明确拒绝的429才会冷却账户并切换。临时速率限制保留亲和性，只暂停该账户的请求准入；每个请求最多一次短暂的同账户重试和一次合格兄弟账户切换。没有依据响应头的429只允许一次同账户短暂重试，不冷却账户，也不生成Retry-After。默认单账户行为不变。Fable专属拒绝不限制Sonnet；手动选择和亲和性均检查请求模型的共享与家族额度。被动家族信息在30分钟或已知重置时到期，由一个服务请求串行重新验证。使用阈值仍是软偏好，全部候选耗尽时保留原有回退，不是用量或账单硬上限。亲和性是进程本地的，并且有大小上限。令牌刷新失败保留原有重新认证规则。明确的订阅或账户计费 403 可在输出前切换账户，并按 `Retry-After` 或默认十分钟冷却；普通权限拒绝不会切换。如果所有合格账户都在冷却，客户端会在已知时收到带 `Retry-After` 的 429，而不是身份验证错误。
 
 :::caution[Experimental]
-除非你理解 Anthropic 账户策略风险，否则请保持关闭。若不确定，优先手动使用 `ocx account use anthropic <id>` 切换。
+除非你理解 Anthropic 账户策略风险，否则请保持关闭。若不确定，优先手动使用 `orl account use anthropic <id>` 切换。
 :::
 
 ### Anthropic · Pool 2 (`anthropic2`)
 
 `anthropic2`（“Anthropic · Pool 2”）是第二个内置的 Anthropic OAuth 提供者，拥有自己的账户池。它与 `anthropic` 使用同一套 Anthropic 实现：相同的登录流程、线路格式、原生 Messages 与 Responses 桥接以及模型元数据。只有账户及其所在的账户池是分开的。通过模型前缀选择账户池：`anthropic/claude-sonnet-5` 使用主账户池，`anthropic2/claude-sonnet-5` 使用 Pool 2。
 
-在你添加之前，Pool 2 处于休眠状态。使用 `ocx login anthropic2` 登录，或在控制面板的提供者页面添加 **Anthropic · 账户池 2**。首次登录成功后会创建带有标记 `"anthropicOAuthInstance": "anthropic2"` 的 `providers.anthropic2`。Pool 2 永远不会成为默认提供者：不带前缀的 `claude-*` 模型名、默认模型以及 Claude Code 调用方转发仍解析到 `anthropic`。你此前自行创建、没有标记的 `anthropic2` 条目保持其自定义含义；登录会拒绝该名称冲突，既不改写该条目，也不改写你的凭据。
+在你添加之前，Pool 2 处于休眠状态。使用 `orl login anthropic2` 登录，或在控制面板的提供者页面添加 **Anthropic · 账户池 2**。首次登录成功后会创建带有标记 `"anthropicOAuthInstance": "anthropic2"` 的 `providers.anthropic2`。Pool 2 永远不会成为默认提供者：不带前缀的 `claude-*` 模型名、默认模型以及 Claude Code 调用方转发仍解析到 `anthropic`。你此前自行创建、没有标记的 `anthropic2` 条目保持其自定义含义；登录会拒绝该名称冲突，既不改写该条目，也不改写你的凭据。
 
 Pool 2 从自己的提供者条目读取账户池设置。键、默认值和行为与上文的顶层 `anthropicAccountPool` 相同，且不从主账户池继承任何内容。`providers.anthropic.anthropicAccountPool`，以及任何其他提供者上的该字段，都会被拒绝。
 
@@ -280,7 +280,7 @@ Pool 2 从自己的提供者条目读取账户池设置。键、默认值和行�
 }
 ```
 
-两个账户池在 opencodex 内部相互隔离：
+两个账户池在 OpenRelay 内部相互隔离：
 
 - **凭据：** Pool 2 账户以独立的 `anthropic2` 键保存在受保护的凭据存储中。若登录的令牌或已验证的 Anthropic 账户已保存在另一个账户池中，该登录会被拒绝。
 - **账户池设置与运行时状态：** 选择、会话亲和性、冷却、暂停、模型路由和按账户阈值都只属于一个账户池。路由的 `fallback: true` 只在同一账户池内放宽。
@@ -288,11 +288,11 @@ Pool 2 从自己的提供者条目读取账户池设置。键、默认值和行�
 - **重置额度：** Pool 2 使用自己的日志（`anthropic2-reset-grant-ledger.json`），与保持不变的主账户池日志并存。
 - **恢复：** 直接的 `anthropic2/<model>` 请求绝不会回退到主账户池，Pool 2 的速率限制或拒绝也绝不会让主账户池的账户进入冷却。显式指定两个账户池的组合（combo）保留你声明的目标。
 
-这种分离是 opencodex 内部的路由边界。它不会改变 Anthropic 对待你账户的方式，也不会消除上文所述的账户策略风险。
+这种分离是 OpenRelay 内部的路由边界。它不会改变 Anthropic 对待你账户的方式，也不会消除上文所述的账户策略风险。
 
 Pool 2 账户只能通过浏览器 OAuth 添加。与 `anthropic` 不同，Pool 2 从不导入、接管或回写 Claude Code CLI 令牌；这一差异是有意为之。Pool 2 初始为空；没有可用 Pool 2 账户的 Pool 2 请求会以认证错误失败，而不会借用主账户池或 Claude Code 的凭据。
 
-账户命令和管理 API 按名称指定账户池：`ocx account pool anthropic2 …`、`ocx account auto-switch anthropic2 …`、`ocx account routes anthropic2 …` 以及 `ocx account anthropic-reset-grants --provider anthropic2`。账户池设置和重置额度端点接受 `provider: "anthropic2"`；省略时仍使用主账户池。
+账户命令和管理 API 按名称指定账户池：`orl account pool anthropic2 …`、`orl account auto-switch anthropic2 …`、`orl account routes anthropic2 …` 以及 `orl account anthropic-reset-grants --provider anthropic2`。账户池设置和重置额度端点接受 `provider: "anthropic2"`；省略时仍使用主账户池。
 
 #### 辅助功能的账户池选择（`anthropicInstance`）
 
@@ -346,7 +346,7 @@ Pool 2 账户只能通过浏览器 OAuth 添加。与 `anthropic` 不同，Pool 
 
 适配器之后可以再调整解析后的 URL。例如，Kiro 会依据导入凭据的 API 区域，遵循规范的 `runtime.{region}.kiro.dev`。参见[适配器](/reference/adapters/)。
 
-当路由丢弃 `baseUrl` 时，opencodex 会记录注册表端点以及仅有的已配置 origin；配置的路径本身也可能包含凭据。请移除未使用的 URL，或选择与预期区域相匹配的提供者条目。`alibaba-token-plan` 锁定在北京，而 `alibaba-token-plan-intl` 覆盖国际端点。
+当路由丢弃 `baseUrl` 时，OpenRelay 会记录注册表端点以及仅有的已配置 origin；配置的路径本身也可能包含凭据。请移除未使用的 URL，或选择与预期区域相匹配的提供者条目。`alibaba-token-plan` 锁定在北京，而 `alibaba-token-plan-intl` 覆盖国际端点。
 
 对于损坏的 `openai-responses` 网关，修复应放在提供者对象上：
 
@@ -371,7 +371,7 @@ Pool 2 账户只能通过浏览器 OAuth 添加。与 `anthropic` 不同，Pool 
 
 ## Cursor 提供者（`adapter: "cursor"`）
 
-Cursor 桥接是实验性的。执行 `ocx login cursor` 之后，添加或编辑 `providers.cursor`。
+Cursor 桥接是实验性的。执行 `orl login cursor` 之后，添加或编辑 `providers.cursor`。
 
 如果代理无法承载 Cursor 默认的 HTTP/2 stream，请将 `upstreamHttpVersion` 设置为
 `"http1.1"` 或其别名 `"h1"`。推理会切换到 Cursor 的 `RunSSE` + `BidiAppend` 兼容传输，`GetUsableModels`
@@ -422,7 +422,7 @@ Cursor 由服务端驱动的本地工具默认是禁用的。Codex 继续使用�
 
 Grok 4.7 在 OAuth 上支持 Fast，提供 `low` / `medium` / `high` / `xhigh`，上下文窗口为 500,000。按 [xAI 标准价格](https://docs.x.ai/developers/models/grok-4.7)，每百万 token 的输入、缓存输入和输出费用分别为 $2.00、$0.50 和 $6.00；上下文达到 200,000 token 时分别为 $4.00 / $1.00 / $12.00。
 
-未显式配置提供商的 `fastWire` 时，通过 `allowedModels` 限制的 opencodex API 密钥必须允许 `xai/grok-4.7-build-fast`（或不带提供商前缀的模型 ID），才能发送 OAuth Fast 请求。仅允许 `xai/grok-4.7` 不会授予此 Fast 模型的权限。仅允许 Fast 模型的密钥可以使用该模型；普通请求或关闭 Fast 时仍需允许 `xai/grok-4.7`。显式配置 `fastWire` 时，应允许实际发送的模型。例如，`service-tier` 方式保留 `xai/grok-4.7`，因此需要该模型的权限。提供商限制仍然有效。
+未显式配置提供商的 `fastWire` 时，通过 `allowedModels` 限制的 OpenRelay API 密钥必须允许 `xai/grok-4.7-build-fast`（或不带提供商前缀的模型 ID），才能发送 OAuth Fast 请求。仅允许 `xai/grok-4.7` 不会授予此 Fast 模型的权限。仅允许 Fast 模型的密钥可以使用该模型；普通请求或关闭 Fast 时仍需允许 `xai/grok-4.7`。显式配置 `fastWire` 时，应允许实际发送的模型。例如，`service-tier` 方式保留 `xai/grok-4.7`，因此需要该模型的权限。提供商限制仍然有效。
 
 ## OpenRouter 提供者路由
 
@@ -452,7 +452,7 @@ OpenRouter 可以通过多个推理提供者来提供同一个模型。`openRout
 }
 ```
 
-模型键必须是精确的原生 OpenRouter id，不带外层的 opencodex 提供者前缀。选择 `openrouter/anthropic-claude-sonnet-5` 会在应用模型规则之前，还原为原生 `anthropic/claude-sonnet-5`。
+模型键必须是精确的原生 OpenRouter id，不带外层的 OpenRelay 提供者前缀。选择 `openrouter/anthropic-claude-sonnet-5` 会在应用模型规则之前，还原为原生 `anthropic/claude-sonnet-5`。
 
 ## Vercel AI Gateway 提供者路由
 
@@ -483,7 +483,7 @@ Vercel AI Gateway 可以在多个底层推理提供者之间路由一个模型�
 }
 ```
 
-模型键是 Vercel 的公开模型选择器，不带外层的 OpenCodex 提供者前缀。选择 `vercel-ai-gateway/zai-glm-5.2` 时，会先还原为原生 `zai/glm-5.2`，再应用模型规则。相同映射也适用于原生 `vercel/<model-id>` 选择器：在 OpenCodex 中使用编码后的 `vercel-ai-gateway/vercel-<model-id>` 选择器，并将 `vercel/<model-id>` 保留为模型键。
+模型键是 Vercel 的公开模型选择器，不带外层的 OpenRelay 提供者前缀。选择 `vercel-ai-gateway/zai-glm-5.2` 时，会先还原为原生 `zai/glm-5.2`，再应用模型规则。相同映射也适用于原生 `vercel/<model-id>` 选择器：在 OpenRelay 中使用编码后的 `vercel-ai-gateway/vercel-<model-id>` 选择器，并将 `vercel/<model-id>` 保留为模型键。
 
 ## 静态模型允许列表
 

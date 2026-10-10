@@ -153,7 +153,7 @@ function repairCodexShimIfNeeded(launcherPath = fileURLToPath(import.meta.url)) 
     windowsHide: true,
   });
   if (res.status !== 0) {
-    console.warn(`opencodex: Codex shim repair failed (${res.status ?? "unknown exit"}). Try: ocx codex-shim install`);
+    console.warn(`[openrelay] Codex shim repair failed (${res.status ?? "unknown exit"}). Try: orl codex-shim install`);
   }
 }
 
@@ -230,7 +230,7 @@ function runPackageManagerSelfUpdate(manager) {
       },
     });
     if (!ownerResult.ok) {
-      console.error(`opencodex: ${ownerResult.reason}; aborting before stopping the proxy.`);
+      console.error(`[openrelay] ${ownerResult.reason}; aborting before stopping the proxy.`);
       process.exit(1);
     }
     owner = ownerResult.owner;
@@ -258,13 +258,13 @@ function runPackageManagerSelfUpdate(manager) {
     : ["install", "-g", `${PKG}@${tag}`];
   const installInvocation = managerInvocation(installArgs);
   if (!latestInvocation || !installInvocation) {
-    console.error(`opencodex: could not resolve ${manager} from a trusted absolute PATH entry; aborting before stopping the proxy.`);
+    console.error(`[openrelay] could not resolve ${manager} from a trusted absolute PATH entry; aborting before stopping the proxy.`);
     process.exit(1);
   }
   const latestResult = spawnSync(latestInvocation.file, latestInvocation.args, readProbeOptions(latestInvocation));
   const latest = latestResult.status === 0 && typeof latestResult.stdout === "string" ? latestResult.stdout.trim() : "";
 
-  console.log(`opencodex v${current} (installed via ${manager}, tag ${tag})`);
+  console.log(`OpenRelay v${current} (installed via ${manager}, tag ${tag})`);
   if (latest && latest === current) {
     console.log(`Already on the latest ${tag} version (v${latest}).`);
     process.exit(0);
@@ -276,11 +276,11 @@ function runPackageManagerSelfUpdate(manager) {
     return spawnSync(invocation.file, invocation.args, readProbeOptions(invocation));
   });
   if (integrity.ok === false) {
-    console.error(`opencodex: ${integrity.reason}; aborting before stopping the proxy.`);
+    console.error(`[openrelay] ${integrity.reason}; aborting before stopping the proxy.`);
     process.exit(1);
   }
   if (integrity.ok === "skipped") {
-    console.warn(`opencodex: integrity pre-flight skipped: ${integrity.reason}. Proceeding best-effort.`);
+    console.warn(`[openrelay] integrity pre-flight skipped: ${integrity.reason}. Proceeding best-effort.`);
   } else {
     console.log(`Verified ${PKG}@${latest} integrity metadata ${integrity.integrity.slice(0, 24)}…`);
   }
@@ -296,7 +296,7 @@ function runPackageManagerSelfUpdate(manager) {
       ? runNpmCachePreflight({ cachePath: npmCache.path })
       : process.platform === "win32" ? { ok: true, reason: "windows_skip" } : npmCache;
     if (!cachePreflight.ok) {
-      console.error(`opencodex: ${npmCachePreflightFailureMessage(cachePreflight.reason)}. Aborting before stopping the proxy.`);
+      console.error(`[openrelay] ${npmCachePreflightFailureMessage(cachePreflight.reason)}. Aborting before stopping the proxy.`);
       process.exit(1);
     }
     npmCachePath = npmCache.path;
@@ -342,7 +342,7 @@ function runPackageManagerSelfUpdate(manager) {
   let runtimePlan = planUpdateRuntimeHandling({ ...initialOwnership, serviceInstalled: serviceWasInstalled, supervision: observeSupervision() });
   if (runtimePlan.notice) console.log(runtimePlan.notice);
   if (!runtimePlan.mayReplacePackage) {
-    console.error("opencodex: update stopped before tray handoff, runtime stop, or package replacement because runtime authority does not permit it.");
+    console.error("[openrelay] update stopped before tray handoff, runtime stop, or package replacement because runtime authority does not permit it.");
     process.exit(1);
   }
   const trayBeforeUpdate = planWindowsTrayUpdate(
@@ -475,12 +475,12 @@ function runPackageManagerSelfUpdate(manager) {
     const plan = planUpdateRuntimeHandling({ ...readOwnership(), serviceInstalled: false, supervision });
     if (!plan.mayStopRuntime) {
       console.warn(supervision
-        ? "OpenCodex Desktop supervises the proxy; no CLI runtime was restored."
+        ? "OpenRelay Desktop supervises the proxy; no CLI runtime was restored."
         : plan.notice);
       return false;
     }
     if (!postUpdateLauncherUsable || !existsSync(postUpdateLauncher)) {
-      console.error("opencodex: cannot restart the proxy because the launcher is missing; reinstall opencodex manually.");
+      console.error("[openrelay] cannot restart the proxy because the launcher is missing; reinstall opencodex manually.");
       return false;
     }
     const env = mutationChildEnvironment();
@@ -496,7 +496,7 @@ function runPackageManagerSelfUpdate(manager) {
       env,
     });
     child.on("error", error => {
-      console.error(`opencodex: direct proxy restart failed: ${error.message}`);
+      console.error(`[openrelay] direct proxy restart failed: ${error.message}`);
     });
     child.unref();
     const deadline = Date.now() + UPDATE_RECOVERY_READY_MS;
@@ -506,7 +506,7 @@ function runPackageManagerSelfUpdate(manager) {
         && probeProxyLiveness(current.target.port, current.target.hostname ?? bakeHostname) === "live") return true;
       Atomics.wait(UPDATE_RECOVERY_SLEEP, 0, 0, UPDATE_RECOVERY_POLL_MS);
     }
-    console.error("opencodex: the recovery proxy did not publish a healthy runtime before the recovery deadline.");
+    console.error("[openrelay] the recovery proxy did not publish a healthy runtime before the recovery deadline.");
     return false;
   }
 
@@ -515,7 +515,7 @@ function runPackageManagerSelfUpdate(manager) {
       const supervision = observeSupervision();
       const plan = planUpdateRuntimeHandling({ ...readOwnership(), serviceInstalled: true, supervision });
       if (!plan.mayRestoreService) console.warn(supervision
-        ? "OpenCodex Desktop supervises the proxy; CLI recovery was skipped. Use the app's updater (tray → Check for Updates)."
+        ? "OpenRelay Desktop supervises the proxy; CLI recovery was skipped. Use the app's updater (tray → Check for Updates)."
         : plan.notice);
       return plan.mayRestoreService;
     };
@@ -572,8 +572,8 @@ function runPackageManagerSelfUpdate(manager) {
         const nowOwned = planUpdateRuntimeHandling({ ...readOwnership(), serviceInstalled: true, supervision });
         if (!nowOwned.mayStopRuntime) {
           console.warn(supervision
-            ? "OpenCodex Desktop supervises the proxy; CLI recovery was skipped. Use the app's updater (tray → Check for Updates)."
-            : nowOwned.notice ?? "opencodex: the background runtime is owned elsewhere; not starting a second proxy.");
+            ? "OpenRelay Desktop supervises the proxy; CLI recovery was skipped. Use the app's updater (tray → Check for Updates)."
+            : nowOwned.notice ?? "[openrelay] the background runtime is owned elsewhere; not starting a second proxy.");
           return;
         }
         // Repair normally avoids elevation for a healthy registration, but a stale Windows
@@ -582,10 +582,10 @@ function runPackageManagerSelfUpdate(manager) {
         // update never leaves the user without a running proxy.
         console.warn(
           svc.status === 0
-            ? "opencodex: service refresh left a non-viable manager — starting the proxy directly instead."
-            : "opencodex: service refresh failed — starting the proxy directly instead.",
+            ? "[openrelay] service refresh left a non-viable manager — starting the proxy directly instead."
+            : "[openrelay] service refresh failed — starting the proxy directly instead.",
         );
-        console.warn("  Run 'ocx service repair' to see why the background service could not restart.");
+        console.warn("  Run 'orl service repair' to see why the background service could not restart.");
         startProxyDirectly();
       }
     } finally {
@@ -614,7 +614,7 @@ function runPackageManagerSelfUpdate(manager) {
     if (lockedOwnership.subjectToken !== initialOwnership.subjectToken || !lockedPlan.mayReplacePackage) {
       releaseUpdateLease();
       console.error(lockedPlan.notice
-        ?? "opencodex: update stopped because runtime ownership changed before stop authorization; rerun from the beginning.");
+        ?? "[openrelay] update stopped because runtime ownership changed before stop authorization; rerun from the beginning.");
       process.exit(1);
     }
     runtimePlan = lockedPlan;
@@ -636,7 +636,7 @@ function runPackageManagerSelfUpdate(manager) {
         });
       } catch {
         releaseUpdateLease();
-        console.error("opencodex: could not stop the Windows tray; aborting before package replacement.");
+        console.error("[openrelay] could not stop the Windows tray; aborting before package replacement.");
         process.exit(1);
       }
     }
@@ -671,20 +671,20 @@ function runPackageManagerSelfUpdate(manager) {
         ({ liveness: recoveryLiveness, plan: recovery } = planRecovery());
       }
       if (recovery.reason === "desktop-supervised") {
-        console.log("OpenCodex Desktop supervises the proxy; no CLI runtime was restored.");
+        console.log("OpenRelay Desktop supervises the proxy; no CLI runtime was restored.");
       } else if (recovery.reason === "ownership-unknown") {
-        console.error(`opencodex: ${reason}; runtime ownership is unknown, so automatic recovery was refused. Run 'ocx status --json' and repair the service-state record before retrying.`);
+        console.error(`[openrelay] ${reason}; runtime ownership is unknown, so automatic recovery was refused. Run 'orl status --json' and repair the service-state record before retrying.`);
       } else if (recovery.reason === "ownership-transferred") {
-        console.log("opencodex: runtime ownership moved to another installation; the stopped CLI runtime was not revived.");
+        console.log("[openrelay] runtime ownership moved to another installation; the stopped CLI runtime was not revived.");
       } else if (recovery.reason.startsWith("runtime-")) {
-        console.error(`opencodex: ${reason}; package runtime liveness is ${recoveryLiveness}, so automatic recovery was refused.`);
+        console.error(`[openrelay] ${reason}; package runtime liveness is ${recoveryLiveness}, so automatic recovery was refused.`);
       } else if (recovery.reason === "launcher-unavailable") {
-        console.error("opencodex: no verified active launcher remains for automatic recovery; reinstall opencodex manually.");
+        console.error("[openrelay] no verified active launcher remains for automatic recovery; reinstall opencodex manually.");
       } else if (recovery.action === "service") {
-        console.warn(`opencodex: ${reason} after stopping the proxy — restoring the previous background service.`);
+        console.warn(`[openrelay] ${reason} after stopping the proxy — restoring the previous background service.`);
         refreshBackgroundServiceOrStartDirect();
       } else if (recovery.action === "direct") {
-        console.warn(`opencodex: ${reason} after stopping the proxy — restarting the previous version directly.`);
+        console.warn(`[openrelay] ${reason} after stopping the proxy — restarting the previous version directly.`);
         startProxyDirectly();
       }
       return recovery;
@@ -701,7 +701,7 @@ function runPackageManagerSelfUpdate(manager) {
     if (stopNeeded && !runtimePlan.mayStopRuntime) {
       releaseUpdateLease();
       console.error(runtimePlan.notice
-        ?? "opencodex: update stopped because this installation may not stop the current runtime.");
+        ?? "[openrelay] update stopped because this installation may not stop the current runtime.");
       process.exit(1);
     }
     if (stopNeeded) {
@@ -741,19 +741,19 @@ function runPackageManagerSelfUpdate(manager) {
       if (!decision.proceed) {
         if (trayBeforeUpdate.restoreOnFailure) runTrayLifecycle(launcher, "start");
         if (decision.reason === "teardown-outstanding") {
-          console.error("opencodex: a shared teardown from an earlier stop is still outstanding and needs manual review; aborting the update.");
-          console.error("opencodex: confirm no proxy is running, run 'ocx restore', then remove the pending-teardown file in the opencodex home.");
+          console.error("[openrelay] a shared teardown from an earlier stop is still outstanding and needs manual review; aborting the update.");
+          console.error("[openrelay] confirm no proxy is running, run 'orl restore', then remove the pending-teardown file in the OpenRelay home.");
         } else console.error(decision.reason === "proxy-unknown"
-          ? `opencodex: could not confirm the proxy on ${bakeHostname}:${bakePort} is stopped; aborting the update. Run 'ocx stop' and retry.`
-          : "opencodex: could not stop the running proxy; aborting the update. Run 'ocx stop' and retry.");
+          ? `[openrelay] could not confirm the proxy on ${bakeHostname}:${bakePort} is stopped; aborting the update. Run 'orl stop' and retry.`
+          : "[openrelay] could not stop the running proxy; aborting the update. Run 'orl stop' and retry.");
         releaseUpdateLease();
         process.exit(1);
       }
       if (historyOnlyStop || historyRestoreIncomplete()) {
         console.warn(
-          "opencodex: WARNING — Codex resume-history metadata restore is incomplete (a backup manifest remains).\n" +
+          "[openrelay] WARNING — Codex resume-history metadata restore is incomplete (a backup manifest remains).\n" +
           "  The DB may be busy or the manifest/target may need review; untracked routed history is intentionally unchanged.\n" +
-          "  After the update: close the Codex app, run 'ocx doctor', then run 'ocx stop' once to retry.",
+          "  After the update: close the Codex app, run 'orl doctor', then run 'orl stop' once to retry.",
         );
       }
       if (decision.reason === "history-deferred") {
@@ -761,9 +761,9 @@ function runPackageManagerSelfUpdate(manager) {
         // sentence from the manifest warning above: an operator told "history metadata is
         // incomplete" would assume config and catalog already came back.
         console.warn(
-          "opencodex: WARNING — the shared teardown was refused by the Codex history preflight and restored nothing.\n" +
+          "[openrelay] WARNING — the shared teardown was refused by the Codex history preflight and restored nothing.\n" +
           "  Config, catalog, history and provenance were preserved, and the teardown receipt was kept.\n" +
-          "  The proxy is down, so the update continues; close the Codex app and run 'ocx stop' once afterwards to finish the restore.",
+          "  The proxy is down, so the update continues; close the Codex app and run 'orl stop' once afterwards to finish the restore.",
         );
       }
     }
@@ -778,7 +778,7 @@ function runPackageManagerSelfUpdate(manager) {
       releaseUpdateLease();
       if (trayBeforeUpdate.restoreOnFailure) runTrayLifecycle(launcher, "start");
       console.error(replacementPlan.notice
-        ?? "opencodex: update stopped because runtime ownership or liveness changed after the stop decision; rerun from the beginning.");
+        ?? "[openrelay] update stopped because runtime ownership or liveness changed after the stop decision; rerun from the beginning.");
       process.exit(1);
     }
 
@@ -814,10 +814,10 @@ function runPackageManagerSelfUpdate(manager) {
           res = { status: 0 };
         } else if (tx.phase === "stage" || tx.phase === "verify") {
           // Live tree untouched: report and stop. Nothing to roll back.
-          console.error(`opencodex: update aborted before touching the live install (${tx.phase}): ${tx.error}`);
+          console.error(`[openrelay] update aborted before touching the live install (${tx.phase}): ${tx.error}`);
           res = { status: 1 };
         } else {
-          console.error(`opencodex: update failed (${tx.phase}): ${tx.error}${tx.rolledBack ? " — previous version restored." : ""}`);
+          console.error(`[openrelay] update failed (${tx.phase}): ${tx.error}${tx.rolledBack ? " — previous version restored." : ""}`);
           res = { status: 1 };
         }
       } else {
@@ -852,7 +852,7 @@ function runPackageManagerSelfUpdate(manager) {
           postUpdateLauncher = join(update.path, "bin", "ocx.mjs");
           res = { status: 0 };
         } else {
-          console.error(`opencodex: ${update.error}${update.rolledBack ? "." : " Manual recovery may be required."}`);
+          console.error(`[openrelay] ${update.error}${update.rolledBack ? "." : " Manual recovery may be required."}`);
           postUpdateLauncherUsable = Boolean(update.activePath);
           if (update.activePath) postUpdateLauncher = join(update.activePath, "bin", "ocx.mjs");
           res = { status: 1 };
@@ -866,8 +866,8 @@ function runPackageManagerSelfUpdate(manager) {
       // An unexpected exception leaves the active package path unproven for either manager.
       // Do not run service/tray/proxy recovery through a possibly half-swapped tree.
       postUpdateLauncherUsable = false;
-      console.error(`opencodex: ${manager} update failed unexpectedly (${error?.message ?? error}). ` +
-        `Run 'ocx update' again or follow the manual recovery steps below.`);
+      console.error(`[openrelay] ${manager} update failed unexpectedly (${error?.message ?? error}). ` +
+        `Run 'orl update' again or follow the manual recovery steps below.`);
       res = { status: 1 };
     }
     if (res.status !== 0) recoverStoppedRuntimeAfterFailure("update failed");
@@ -887,7 +887,7 @@ function runPackageManagerSelfUpdate(manager) {
         windowsHide: true,
       });
       if (tray.status !== 0) {
-        console.warn("opencodex: Windows tray refresh failed. Run: ocx tray install");
+        console.warn("[openrelay] Windows tray refresh failed. Run: orl tray install");
         if (trayBeforeUpdate.restoreOnFailure && postUpdateLauncherUsable) runTrayLifecycle(postUpdateLauncher, "start");
       }
     }
@@ -951,7 +951,7 @@ function fail(msg) {
     : "npm install -g --allow-scripts=bun @bitkyc08/opencodex";
   const desktopCli = findDesktopCli();
   console.error(
-    `opencodex: ${msg}\n` +
+    `[openrelay] ${msg}\n` +
       "The bundled Bun runtime could not be prepared. This usually means the\n" +
       "install skipped lifecycle scripts (for example npm blocked bun's postinstall\n" +
       "or pnpm did not approve bun's build) or optional dependencies. Reinstall with:\n" +
@@ -971,7 +971,7 @@ function resolveBun({ allowInstall = true } = {}) {
     const overridePath = resolve(override);
     if (isRealBunBinary(overridePath)) return { path: overridePath, source: "override" };
     console.error(
-      `opencodex: ${BUN_OVERRIDE_ENV} is missing, unreadable, or not a complete Bun binary; falling back to the bundled runtime.`,
+      `[openrelay] ${BUN_OVERRIDE_ENV} is missing, unreadable, or not a complete Bun binary; falling back to the bundled runtime.`,
     );
   }
 
@@ -997,7 +997,7 @@ function resolveBun({ allowInstall = true } = {}) {
   // well over a second, so the total budget is generous rather than interactive-tight.
   const pathBun = findPathBun({ pinnedVersion: pinnedBunVersion(), deadlineMs: PATH_BUN_PROBE_BUDGET_MS });
   if (pathBun) {
-    console.error(`opencodex: using PATH Bun ${pathBun.version}.`);
+    console.error(`[openrelay] using PATH Bun ${pathBun.version}.`);
     return { path: pathBun.path, source: "process" };
   }
   fail(bunDir ? "Bun binary missing after install attempt." : "the `bun` dependency is not installed.");
@@ -1010,13 +1010,13 @@ function resolveBun({ allowInstall = true } = {}) {
 const updateHelpRequested = process.argv[2] === "update" &&
   process.argv.slice(3).some(a => a === "--help" || a === "-h" || a === "help");
 if (updateHelpRequested) {
-  console.log("Usage: ocx update [--tag latest|preview]\n\nUpdate opencodex. Preview installs stay on the preview tag unless overridden.");
+  console.log("Usage: orl update [--tag latest|preview]\n\nUpdate OpenRelay. Preview installs stay on the preview tag unless overridden.");
   process.exit(0);
 }
 
 const codexCliUpdateInspection = isCodexCliUpdateInspectionArgv(process.argv);
 if (codexCliUpdateInspection && typeof process.versions.bun === "string") {
-  console.error("opencodex: codex-cli-update inspection must use the published Node launcher.");
+  console.error("[openrelay] codex-cli-update inspection must use the published Node launcher.");
   process.exit(1);
 }
 
@@ -1024,9 +1024,9 @@ const { launchProof, launchContext, inheritedEnv } = createNodeLaunchContext();
 const desktopPlan = planDesktopCliHandoff({ selfPaths: [fileURLToPath(import.meta.url), process.execPath] });
 if (desktopPlan.kind === "error") {
   if (desktopPlan.issue.startsWith("record-")) {
-    console.error(`opencodex: OpenCodex Desktop's terminal-command record at ${desktopCliRecordPath()} could not be used (${desktopPlan.issue}). Open OpenCodex Desktop to repair the terminal command, or run with OCX_NO_DESKTOP_HANDOFF=1.`);
+    console.error(`[openrelay] OpenRelay Desktop's terminal-command record at ${desktopCliRecordPath()} could not be used (${desktopPlan.issue}). Open OpenRelay Desktop to repair the terminal command, or run with OCX_NO_DESKTOP_HANDOFF=1.`);
   } else {
-    console.error(`opencodex: Desktop CLI handoff refused (${desktopPlan.issue}). Repair the terminal command in OpenCodex Desktop, or run with OCX_NO_DESKTOP_HANDOFF=1.`);
+    console.error(`[openrelay] Desktop CLI handoff refused (${desktopPlan.issue}). Repair the terminal command in OpenRelay Desktop, or run with OCX_NO_DESKTOP_HANDOFF=1.`);
   }
   process.exit(1);
 }
@@ -1035,7 +1035,7 @@ if (desktopPlan.kind === "handoff") {
     argv: process.argv.slice(2), env: inheritedEnv, proof: launchProof, context: launchContext,
   });
   if (result.kind === "error") {
-    console.error(`opencodex: Desktop CLI handoff failed (${result.issue}). Repair the terminal command in OpenCodex Desktop, or run with OCX_NO_DESKTOP_HANDOFF=1.`);
+    console.error(`[openrelay] Desktop CLI handoff failed (${result.issue}). Repair the terminal command in OpenRelay Desktop, or run with OCX_NO_DESKTOP_HANDOFF=1.`);
     process.exit(127);
   }
   if (result.kind === "exit") {
@@ -1053,11 +1053,11 @@ if (desktopPlan.kind === "handoff") {
 if (process.argv[2] === "update" && installMethod === "mise") {
   if (installOwnership.owner) {
     console.error(
-      `opencodex: this installation is externally managed by mise; update it with: mise upgrade ${installOwnership.owner.tool}`,
+      `[openrelay] this installation is externally managed by mise; update it with: mise upgrade ${installOwnership.owner.tool}`,
     );
   } else {
     console.error(
-      "opencodex: this installation appears to be managed by mise, but its ownership metadata is unreadable or inconsistent; repair the mise installation metadata before updating.",
+      "[openrelay] this installation appears to be managed by mise, but its ownership metadata is unreadable or inconsistent; repair the mise installation metadata before updating.",
     );
   }
   process.exit(1);
@@ -1075,9 +1075,9 @@ if (!codexCliUpdateInspection && installMethod === "npm" && isNodeModulesInstall
   try {
     const probe = bootRestoreProbe(resolve(here, ".."));
     if (probe.action === "restored") {
-      console.warn(`opencodex: previous update left a broken install — restored the backup from ${probe.from}.`);
+      console.warn(`[openrelay] previous update left a broken install — restored the backup from ${probe.from}.`);
     } else if (probe.action === "failed") {
-      console.warn(`opencodex: a backup from a failed update exists but could not be restored automatically: ${probe.error}`);
+      console.warn(`[openrelay] a backup from a failed update exists but could not be restored automatically: ${probe.error}`);
     }
   } catch { /* the probe must never block launch */ }
 }
@@ -1198,7 +1198,7 @@ const clearHandlers = () => {
 
 child.on("error", err => {
   clearHandlers();
-  console.error(`opencodex: failed to launch Bun runtime: ${err.message}`);
+  console.error(`[openrelay] failed to launch Bun runtime: ${err.message}`);
   process.exit(1);
 });
 

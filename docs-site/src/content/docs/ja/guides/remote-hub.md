@@ -12,43 +12,43 @@ Remote Hub はプロバイダー認証情報、カタログ、使用量を一台
 `standalone` は一台で完結し、`hub` はプロバイダー秘密情報と使用量を所有し、`client` は接続状態とクライアント専用データキーだけを保存します。
 
 ```bash
-ocx connect https://hub-name.tailnet-name.ts.net --pairing-code-stdin
-ocx connect status
-ocx sync
+orl connect https://hub-name.tailnet-name.ts.net --pairing-code-stdin
+orl connect status
+orl sync
 ```
 
-準備状況を人が読む出力では、カタログ値に含まれる C0/C1 制御文字、DEL、Unicode の行・段落区切り文字（U+2028、U+2029）を目に見える 16 進エスケープとして表示します。初回の接続だけでなく、`ocx sync` が取得し直したハブのカタログを拒否したときも同じです。JSON 形式の状態には元の診断値をそのまま残します。
+準備状況を人が読む出力では、カタログ値に含まれる C0/C1 制御文字、DEL、Unicode の行・段落区切り文字（U+2028、U+2029）を目に見える 16 進エスケープとして表示します。初回の接続だけでなく、`orl sync` が取得し直したハブのカタログを拒否したときも同じです。JSON 形式の状態には元の診断値をそのまま残します。
 
 発行されたキーは所有者だけが読める `service-api-token` に保存され、`config.json` には入りません。接続中の使用量は hub 側で同じ `apiKeyId` に絞り込まれ、切断後はローカル保存分を表示します。両者はミラーリングされません。
-`ocx service uninstall` はローカルサービスを削除しますが、クライアントが接続中である場合、接続メタデータが無効または不一致である場合、または保留中の接続マーカーが現在のキーと一致する場合は、既存のキーを保持します。古いキーに対する有効なマーカーがあっても、無関係なサービスキーは保持されません。マーカーが安全でない、不正な形式、または読み取れない場合、トークンのクリーンアップを確認できないため、キーを保持したと断定せずに警告します。接続中のクライアントのローカルキーと状態を削除するには `ocx disconnect` を使用します。
+`orl service uninstall` はローカルサービスを削除しますが、クライアントが接続中である場合、接続メタデータが無効または不一致である場合、または保留中の接続マーカーが現在のキーと一致する場合は、既存のキーを保持します。古いキーに対する有効なマーカーがあっても、無関係なサービスキーは保持されません。マーカーが安全でない、不正な形式、または読み取れない場合、トークンのクリーンアップを確認できないため、キーを保持したと断定せずに警告します。接続中のクライアントのローカルキーと状態を削除するには `orl disconnect` を使用します。
 
 管理トークンは通常の管理だけに使え、同意セッションを作ることは永久にできません。同意操作にはサーバー発行の `gui-session`、一致する Origin、CSRF が必要です。`Tailscale-User-Login` は専用管理リスナーでのみ信頼し、許可する ID を `remoteGui.allowedTailscaleUsers` に正確に設定します。
 
 ## サービスと Tailscale Serve
 
 ```bash
-ocx config set runtimeRole hub
-ocx config set hostname 100.64.0.10
-ocx config set corsAllowOrigins '["http://localhost:10100"]'
+orl config set runtimeRole hub
+orl config set hostname 100.64.0.10
+orl config set corsAllowOrigins '["http://localhost:10100"]'
 
-# 新規の standalone 設定には `hub` も `remoteGui` も存在せず、`ocx config set` は
+# 新規の standalone 設定には `hub` も `remoteGui` も存在せず、`orl config set` は
 # 親オブジェクトを自動生成しません。いきなりネストしたパスを書くと
 # `config parent path not found: hub` で失敗します。`runtimeRole` を変えても
 # 生成されません。先にオブジェクトを作ってからフィールドを設定してください。
-ocx config set hub '{}'
-ocx config set remoteGui '{}'
-ocx config set hub.managementPublicOrigin '"https://hub-name.tailnet-name.ts.net"'
-ocx config set hub.managementIngress '{"enabled":true,"port":10101}'
-ocx config set remoteGui.allowedTailscaleUsers '["operator@example.com"]'
+orl config set hub '{}'
+orl config set remoteGui '{}'
+orl config set hub.managementPublicOrigin '"https://hub-name.tailnet-name.ts.net"'
+orl config set hub.managementIngress '{"enabled":true,"port":10101}'
+orl config set remoteGui.allowedTailscaleUsers '["operator@example.com"]'
 export OPENCODEX_API_AUTH_TOKEN="$(openssl rand -hex 32)"
-ocx service install
+orl service install
 ```
 
 設定がまだ完全に空であれば、オブジェクトごと一度に書いても構いません。
 
 ```bash
-ocx config set hub '{"managementPublicOrigin":"https://hub-name.tailnet-name.ts.net","managementIngress":{"enabled":true,"port":10101}}'
-ocx config set remoteGui '{"allowedTailscaleUsers":["operator@example.com"]}'
+orl config set hub '{"managementPublicOrigin":"https://hub-name.tailnet-name.ts.net","managementIngress":{"enabled":true,"port":10101}}'
+orl config set remoteGui '{"allowedTailscaleUsers":["operator@example.com"]}'
 ```
 
 この形はオブジェクトがまだ無いときだけに使ってください。オブジェクト全体の設定はマージではなく**置換**です。すでに `hub.managementIngress` がある設定に上の行を流すと、その値は黙って消えます。既存の設定を直すときは親が揃っているので、ネストしたパスで一つずつ設定すれば他には触れません。
@@ -68,7 +68,7 @@ tailscale serve status
 
 ### データリスナーに TLS を付ける
 
-上の Serve マッピングが公開するのは**管理**入口だけです。管理入口は `/v1/*`、`/healthz`、`/readyz` を提供しないため、それだけではリモートクライアントが使えるデータプレーンになりません。opencodex 自身は TLS を終端しません。リスナーは平文 HTTP で、HTTPS は常に運用者が用意するフロントエンドの役目です。
+上の Serve マッピングが公開するのは**管理**入口だけです。管理入口は `/v1/*`、`/healthz`、`/readyz` を提供しないため、それだけではリモートクライアントが使えるデータプレーンになりません。OpenRelay 自身は TLS を終端しません。リスナーは平文 HTTP で、HTTPS は常に運用者が用意するフロントエンドの役目です。
 
 データプレーンも Serve で公開できます。HTTPS ポートをもう一つ使うだけです。macOS では一段だけ余分に必要になります。Tailscale Serve は `127.0.0.1` にしかプロキシできず、ノード自身の tailnet アドレスにバインドしたリスナーを指せません。App Store 版の macOS クライアントはリモート宛先自体を拒否します。hub 上にループバックのフォワーダーを立て、Serve をそちらへ向けてください。
 
@@ -81,19 +81,19 @@ tailscale serve --bg --https=8443 http://127.0.0.1:10110
 tailscale serve status   # 443 -> 10101 と 8443 -> 10110 の両方が出ること
 ```
 
-Serve が受け付ける HTTPS ポートは限られています。通ったと決めつけず、`tailscale serve status` でマッピングが実際に作られたか確認してください。フォワーダーは hub と同じ寿命にします。バックグラウンドのシェルジョブは再起動で消える一方サービスは戻ってくるため、hub は動いているのに TLS では届かない状態が残ります。`ocx service install` と並べて launchd か systemd から起動してください。
+Serve が受け付ける HTTPS ポートは限られています。通ったと決めつけず、`tailscale serve status` でマッピングが実際に作られたか確認してください。フォワーダーは hub と同じ寿命にします。バックグラウンドのシェルジョブは再起動で消える一方サービスは戻ってくるため、hub は動いているのに TLS では届かない状態が残ります。`orl service install` と並べて launchd か systemd から起動してください。
 
 接続時は二つの origin を別々に指定します。位置引数の URL が**データ** origin で、`/readyz` と `/v1/catalog` はここから取得されます。`--management-url` はペアリングとキー発行に使うダッシュボードの origin です。ポートが同じである必要はありません。
 
 ```bash
-ocx connect https://hub-name.tailnet-name.ts.net:8443 \
+orl connect https://hub-name.tailnet-name.ts.net:8443 \
   --management-url https://hub-name.tailnet-name.ts.net \
   --admin-token-stdin
 ```
 
 `--management-url` を省略すると `/readyz` の応答が返す `hub.managementPublicOrigin` が使われます。二つの origin が異なる場合は明示したほうが明快です。
 
-**データリスナーを `127.0.0.1` にバインドして近道しないでください。** ループバックへのバインドは、opencodex が純粋にローカルな配置だと判断する仕組みです。データ用の資格情報を要求しなくなる代わりに、リクエストの `Host` ヘッダーまでループバックであることを要求します。TLS フロントエンドは `Host: hub-name.tailnet-name.ts.net` をそのまま転送するので、`/v1/catalog` は `403 origin_rejected` を返し、その検査を行わない `/readyz` は `200` のままです。健全に見えるのにモデルを返せない配置ができあがります。リクエスト経路のどこも `X-Forwarded-Host` を読まないため、フロントエンド側では直せません。リスナーは tailnet アドレスに置いてください。資格情報の検査は有効なままで、`Host` 検査は適用されません。
+**データリスナーを `127.0.0.1` にバインドして近道しないでください。** ループバックへのバインドは、OpenRelay が純粋にローカルな配置だと判断する仕組みです。データ用の資格情報を要求しなくなる代わりに、リクエストの `Host` ヘッダーまでループバックであることを要求します。TLS フロントエンドは `Host: hub-name.tailnet-name.ts.net` をそのまま転送するので、`/v1/catalog` は `403 origin_rejected` を返し、その検査を行わない `/readyz` は `200` のままです。健全に見えるのにモデルを返せない配置ができあがります。リクエスト経路のどこも `X-Forwarded-Host` を読まないため、フロントエンド側では直せません。リスナーは tailnet アドレスに置いてください。資格情報の検査は有効なままで、`Host` 検査は適用されません。
 
 `0.0.0.0` へのバインドでも動き、ループバックからも届くのでフォワーダーは不要になります。ただしデータポートが全インターフェースに公開されるため、他のネットワークを気にしなくてよいホストに限ってください。
 
@@ -102,17 +102,17 @@ Serve が立ち上がったら、HTTPS のデータ origin に対して `/readyz
 ## OAuth、キー更新、切断
 
 ```bash
-ocx config set oauthOpenBrowser false
-ocx connect rotate --pairing-code-stdin
+orl config set oauthOpenBrowser false
+orl connect rotate --pairing-code-stdin
 # HTTPS のみ:
-ocx connect rotate --admin-token-stdin
+orl connect rotate --admin-token-stdin
 ```
 
 OAuth は `POST /api/oauth/login` で開始し、コールバックできない場合は最終 URL またはコードを `{provider,input}` として `POST /api/oauth/login/code` へ渡します。コードを argv やログに残さないでください。
 
 キー更新では最大10分間、旧キーと新キーが同じ `apiKeyId` で有効です。旧キーを `service-api-token.prev` に保存し、新キーを原子的に置換して `/v1/catalog` で確認後に確定します。結果が不明な場合は一時権限を使って同じコマンドを再実行し、両候補の判定が終わるまで削除しないでください。
 
-`ocx disconnect` は hub が停止中でもローカル状態を復元しますが、hub のキーは失効させません。切断後は hub の **接続 → API キー** だけが失効経路です。`ocx connect revoke --admin-token-stdin` は接続中のみ利用できます。
+`orl disconnect` は hub が停止中でもローカル状態を復元しますが、hub のキーは失効させません。切断後は hub の **接続 → API キー** だけが失効経路です。`orl connect revoke --admin-token-stdin` は接続中のみ利用できます。
 
 ## Docker とトラブルシューティング
 

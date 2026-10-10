@@ -17,7 +17,7 @@ export function isStandaloneTarget(value: string): boolean {
 }
 
 export function standaloneExecutableName(target: string): string {
-  return target.startsWith("bun-windows-") ? "ocx.exe" : "ocx";
+  return target.startsWith("bun-windows-") ? "orl.exe" : "orl";
 }
 
 export function standaloneArchiveExtension(target: string): string {

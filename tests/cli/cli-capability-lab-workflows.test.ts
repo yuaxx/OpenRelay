@@ -44,7 +44,7 @@ describe("local Lab discovery contracts", () => {
   test("invalid public evidence emits the failure summary and a nonzero exit", async () => {
     const path = join(home, "invalid.json");
     writeFileSync(path, "{}");
-    expect(leaf("lab public verify").usage).toBe("ocx lab public verify --file <bundle.json> [--json]");
+    expect(leaf("lab public verify").usage).toBe("orl lab public verify --file <bundle.json> [--json]");
     expect(leaf("lab public verify").mutates).toBe(false);
     expect(await handleLabCommand(["public", "verify", "--file", path, "--json"], { configDir: home })).toBe(1);
     expect(JSON.parse(String(output.mock.calls[0][0]))).toEqual({ status: "schema_rejected", locallyVerified: false });

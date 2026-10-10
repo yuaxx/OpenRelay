@@ -108,12 +108,12 @@ const commandRunners: Record<string, CommandRunner> = {
   stop: async deps => {
     const parsed = parseStopApproval(deps.args.slice(1));
     if (!parsed.ok) {
-      console.error("Usage: ocx stop [--json [--expect-pid <pid> --expect-port <port> --expect-hostname <host> --expect-config-home <home> --expect-cli-version <version> --expect-compatibility-token <hex>]]");
+      console.error("Usage: orl stop [--json [--expect-pid <pid> --expect-port <port> --expect-hostname <host> --expect-config-home <home> --expect-cli-version <version> --expect-compatibility-token <hex>]]");
       return 64;
     }
     // Downtime warning lives HERE, not in handleStop: `restart`/tray-restart callers
     // re-start the proxy immediately, so warning there would contradict the next line.
-    const warning = "⚠️  Codex/Claude requests through the proxy will fail until it is restarted ('ocx start' or 'ocx service start').";
+    const warning = "⚠️  Codex/Claude requests through the proxy will fail until it is restarted ('orl start' or 'orl service start').";
     if (!parsed.json) {
       const notice = desktopStopNotice((deps.inspectDesktopSupervision ?? inspectDesktopSupervision)());
       if (notice) console.error(notice);
@@ -169,7 +169,7 @@ const commandRunners: Record<string, CommandRunner> = {
       };
       const live = await deps.findLiveProxy();
       if (!live) {
-        return emitBack(false, "No running proxy found. Run 'ocx start' — it injects opencodex automatically.", 1);
+        return emitBack(false, "No running proxy found. Run 'orl start' — it injects opencodex automatically.", 1);
       }
       const desired = setIntegrationEnabled("codex", true);
       if (!desired.ok) {
@@ -193,10 +193,10 @@ const commandRunners: Record<string, CommandRunner> = {
         return emitBack(false, "Plain `codex` was not switched back to opencodex. Fix the reported Codex config issue and retry.", 1);
       }
       const target = collectOrcaCodexHomeDiagnostic();
-      return emitBack(true, `Plain \`codex\` now routes through opencodex in ${target.effectiveCodexHome} (undo with: ocx restore).`, 0);
+      return emitBack(true, `Plain \`codex\` now routes through OpenRelay in ${target.effectiveCodexHome} (undo with: orl restore).`, 0);
     }
     if (removeProviderTable && !restoreJson) {
-      console.log("⚠️  Removing [model_providers.opencodex] means conversations already tagged opencodex will stop opening.");
+      console.log("⚠️  Removing [model_providers.opencodex] means conversations already tagged OpenRelay will stop opening.");
     }
     const desired = setIntegrationEnabled("codex", false);
     if (!desired.ok) {
@@ -290,9 +290,9 @@ const commandRunners: Record<string, CommandRunner> = {
         console.log("The following lines remain in $CODEX_HOME/config.toml because conversations already tagged opencodex resolve their provider only through this table:");
         console.log(retained.lines.join("\n"));
         console.log(`Follow-up: ${retained.followUp}`);
-        console.log("Switch back with: ocx restore back");
+        console.log("Switch back with: orl restore back");
       } else {
-        console.log("Codex integration is OFF and plain `codex` now runs natively. Switch back with: ocx restore back");
+        console.log("Codex integration is OFF and plain `codex` now runs natively. Switch back with: orl restore back");
       }
       console.log(`Note: ${OCX_NATIVE_REPLAY_RECOVERY_NOTE}`);
     } else {
@@ -330,7 +330,7 @@ const commandRunners: Record<string, CommandRunner> = {
     // would interleave prose with JSON on one stdout -- unparseable, which is worse than the
     // ignored flag. The structured-report refactor is tracked as its own work-phase.
     if (doctorArgs.some(isJsonOption)) {
-      console.error("ocx doctor does not support --json yet. Run `ocx doctor` for the human report, or use `ocx status --json` and `ocx ready --json` for machine-readable health.");
+      console.error("orl doctor does not support --json yet. Run `orl doctor` for the human report, or use `orl status --json` and `orl ready --json` for machine-readable health.");
       return 2;
     }
     const { RECOVER_ZERO_BYTE_COORDINATOR_FLAG, runDoctor, doctorFailed } = await import("./doctor");
@@ -360,7 +360,7 @@ const commandRunners: Record<string, CommandRunner> = {
     await reconcileClientJournalBeforeLifecycle(clientState);
     if (clientState.kind !== "disconnected") {
       console.error(clientState.kind === "connected"
-        ? "Client mode does not start a local provider proxy; use 'ocx sync'."
+        ? "Client mode does not start a local provider proxy; use 'orl sync'."
         : `Client state is ${clientState.kind}: ${clientState.reason}`);
       // A validated client delegates inference to its hub; no local startup is needed.
       return clientState.kind === "connected" ? 0 : 1;
@@ -677,9 +677,9 @@ const commandRunners: Record<string, CommandRunner> = {
         const extra = deps.args.slice(2);
         if (extra.length > 0) {
           console.error(extra.some(isJsonOption)
-            ? "ocx codex-shim status does not support --json; use ocx status --json (codexShim)."
-            : "ocx codex-shim status does not accept arguments or options.");
-          console.error("Usage: ocx codex-shim status");
+            ? "orl codex-shim status does not support --json; use orl status --json (codexShim)."
+            : "orl codex-shim status does not accept arguments or options.");
+          console.error("Usage: orl codex-shim status");
           return 2;
         }
         console.log(codexShimStatus());
@@ -692,7 +692,7 @@ const commandRunners: Record<string, CommandRunner> = {
         break;
       }
       default:
-        console.error("Usage: ocx codex-shim <install|status|uninstall|remove>");
+        console.error("Usage: orl codex-shim <install|status|uninstall|remove>");
         return 1;
     }
     return 0;
@@ -762,7 +762,7 @@ const commandRunners: Record<string, CommandRunner> = {
   health: async deps => {
     const healthArgs = deps.args.slice(1);
     if (healthArgs.length > 1 || (healthArgs.length === 1 && healthArgs[0] !== "--json")) {
-      console.error("Usage: ocx health [--json]\nSee: ocx help health");
+      console.error("Usage: orl health [--json]\nSee: orl help health");
       return 2;
     }
     const wantsHealthJson = healthArgs.includes("--json");
@@ -827,7 +827,7 @@ const commandRunners: Record<string, CommandRunner> = {
   },
   route: async deps => {
     if (deps.args[1] !== "combo" && deps.args[1] !== "policy") {
-      console.error("Usage: ocx route <combo|policy> <subcommand>");
+      console.error("Usage: orl route <combo|policy> <subcommand>");
       return 2;
     }
     if (deps.args[1] === "combo") {
@@ -912,7 +912,7 @@ const commandRunners: Record<string, CommandRunner> = {
       const { handleClientIntegrationCommand } = await import("./integrations");
       return await handleClientIntegrationCommand(deps.args.slice(2), { findLiveProxy: deps.findLiveProxy });
     } else {
-      console.error("Usage: ocx integration <claude|grok|client|native> <subcommand>\nSee: ocx help integration");
+      console.error("Usage: orl integration <claude|grok|client|native> <subcommand>\nSee: orl help integration");
       return 2;
     }
   },

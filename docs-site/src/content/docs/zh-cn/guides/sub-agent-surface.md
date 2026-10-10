@@ -5,7 +5,7 @@ description: 控制 Codex 如何在所有模型上生成和管理子代理。
 
 ## 什么是子代理
 
-子代理是一个独立的 Codex 工作器，主代理可以为专注任务创建它。它有自己的上下文和工具，因此多个独立任务可以并行运行。opencodex 负责控制 Codex 的哪种协作界面会暴露这些工作器、Codex 会为它们提供哪些模型，以及失败模型如何回退。它不会决定主代理何时必须委派。
+子代理是一个独立的 Codex 工作器，主代理可以为专注任务创建它。它有自己的上下文和工具，因此多个独立任务可以并行运行。OpenRelay 负责控制 Codex 的哪种协作界面会暴露这些工作器、Codex 会为它们提供哪些模型，以及失败模型如何回退。它不会决定主代理何时必须委派。
 
 ## 模式
 
@@ -29,7 +29,7 @@ description: 控制 Codex 如何在所有模型上生成和管理子代理。
 - **base** 会恢复上游固定值。未固定的条目会遵循原生 `multi_agent_v2` 功能开关。
 - **v2** 会把所有模型的 `multi_agent_version` 设为 `"v2"`；但启用 **让 ChatGPT 保持 v1** 时例外：ChatGPT 原生条目保持 `"v1"`，路由/组合条目仍为 `"v2"`。
 
-opencodex 会把这一点作为最后一步同时应用到实时的 `/v1/models` 目录和同步到磁盘的目录。因此，模式更改会一致影响新建的 App、CLI 和 TUI 会话。
+OpenRelay 会把这一点作为最后一步同时应用到实时的 `/v1/models` 目录和同步到磁盘的目录。因此，模式更改会一致影响新建的 App、CLI 和 TUI 会话。
 
 对于 v2 roster，资格有三种状态：标记为 `"v2"` 的条目、显式设为 `null` 的条目，或者没有 `multi_agent_version` 字段的条目。真正的 `"v1"` 固定值会被排除，因为它说明该模型属于另一种协作界面。
 
@@ -37,11 +37,11 @@ opencodex 会把这一点作为最后一步同时应用到实时的 `/v1/models`
 
 Dashboard 上的 **Sub-agent delegation** 控件管理三个相关设置：
 
-- `injectionModel` 是 opencodex 指引中指定的首选工作器模型。
+- `injectionModel` 是 OpenRelay 指引中指定的首选工作器模型。
 - `injectionEffort` 是可选的 `reasoning_effort`，用于请求该模型。
 - `injectionPrompt` 会替换内置的 v2 指引文本。
 
-`multiAgentGuidanceEnabled` 默认开启，是 opencodex 编写的指引在两个界面上的总开关。关闭它会同时抑制 v2 的 designation block 和 v1 的 proactive 文本。
+`multiAgentGuidanceEnabled` 默认开启，是 OpenRelay 编写的指引在两个界面上的总开关。关闭它会同时抑制 v2 的 designation block 和 v1 的 proactive 文本。
 
 这些是发给主代理的指令，不是 proxy 侧的 spawn 路由器。对于 v2，全历史 fork 会继承父模型，并拒绝模型或 effort 覆盖。因此，指引会要求 Codex 在传递 `model` 或 `reasoning_effort` 时使用 `fork_turns: "none"`（或者像 `"3"` 这样正向的部分 turn 数），并让任务消息保持自包含。
 
@@ -54,25 +54,25 @@ Dashboard 上的 **Sub-agent delegation** 控件管理三个相关设置：
 | `{{roster}}` | 解析后的、对 picker 可见且与界面兼容的 roster |
 | `{{fallback}}` | 配置的全局 fallback 指引 |
 
-内置的 v2 指引有 700 字符预算。如果会超出预算，opencodex 会优先删除 roster，而不是截断核心 spawn 指令。内置指引仅在首选模型、可用 roster 或 fallback chain 解析成功时触发。只要配置了 `injectionModel`，自定义提示词就会触发；如果未限定的值无法唯一解析，`{{model}}` 会替换为空字符串。
+内置的 v2 指引有 700 字符预算。如果会超出预算，OpenRelay 会优先删除 roster，而不是截断核心 spawn 指令。内置指引仅在首选模型、可用 roster 或 fallback chain 解析成功时触发。只要配置了 `injectionModel`，自定义提示词就会触发；如果未限定的值无法唯一解析，`{{model}}` 会替换为空字符串。
 
-在 v1 上，opencodex 只在 `max` 或 `ultra` 推理强度下注入与 v2 推荐预设相同的主动委派指引。
+在 v1 上，OpenRelay 只在 `max` 或 `ultra` 推理强度下注入与 v2 推荐预设相同的主动委派指引。
 仅改变委派的触发条件：不再需要单独提出委派请求；用户指示以及权限、任务范围和协作工具规则仍然适用。
 它不会在 v1 上额外添加首选模型、roster、fallback list 或自定义提示词。
 
-默认关闭的 `syncCodexSubagentDefaults` 选项与指引是分开的。当 opencodex 拥有活跃的 Codex 路由时，同步或重启可以把所选值写入 Codex TOML 中带标记的 `[agents] default_subagent_model` 和 `default_subagent_reasoning_effort` 条目。opencodex 只会更新或移除带有其标记的字段。如果任一目标字段属于用户，整对值会保持不变，而不会部分写入；含糊不清的 TOML 会在不写入的情况下被拒绝。外部 provider 管理器和用户拥有的根路由也仍然具有最终权威。
+默认关闭的 `syncCodexSubagentDefaults` 选项与指引是分开的。当 OpenRelay 拥有活跃的 Codex 路由时，同步或重启可以把所选值写入 Codex TOML 中带标记的 `[agents] default_subagent_model` 和 `default_subagent_reasoning_effort` 条目。OpenRelay 只会更新或移除带有其标记的字段。如果任一目标字段属于用户，整对值会保持不变，而不会部分写入；含糊不清的 TOML 会在不写入的情况下被拒绝。外部 provider 管理器和用户拥有的根路由也仍然具有最终权威。
 
 ## Fallback chains
 
-对于生成出的工作器，opencodex 会按以下优先级构建顺序：
+对于生成出的工作器，OpenRelay 会按以下优先级构建顺序：
 
 1. 请求的主模型。
-2. opencodex 配置中 `subagentModelFallbackByModel` 提供的 per-model 链，按请求的主模型做键。
-3. opencodex 配置中的全局 `subagentModelFallback` 列表。
+2. OpenRelay 配置中 `subagentModelFallbackByModel` 提供的 per-model 链，按请求的主模型做键。
+3. OpenRelay 配置中的全局 `subagentModelFallback` 列表。
 
-per-role fallback 链应该放在 opencodex 配置里，而不是 `$CODEX_HOME/agents/*.toml`。Codex 0.146+ 会严格反序列化 agent 角色文件，并把 `model_fallback` 当作未知字段拒绝，导致整个角色定义被跳过（#1190）。opencodex 为了向后兼容仍然能读取 TOML 里的旧版 `model_fallback`，但 `ocx doctor` 会给出警告，而且 Codex 本身会忽略受影响的角色。
+per-role fallback 链应该放在 OpenRelay 配置里，而不是 `$CODEX_HOME/agents/*.toml`。Codex 0.146+ 会严格反序列化 agent 角色文件，并把 `model_fallback` 当作未知字段拒绝，导致整个角色定义被跳过（#1190）。OpenRelay 为了向后兼容仍然能读取 TOML 里的旧版 `model_fallback`，但 `orl doctor` 会给出警告，而且 Codex 本身会忽略受影响的角色。
 
-重复的模型 id 会在保留第一次出现的前提下移除。在选择过程中，opencodex 会跳过已禁用、不可路由、由已禁用 provider 支撑、标记为 unhealthy、处于 cooldown、没有可用 pooled Codex 账户，或者超出配置配额阈值的候选项。可用性探测会缓存 `subagentModelFallbackPollMs` 的时长，默认 60 秒。
+重复的模型 id 会在保留第一次出现的前提下移除。在选择过程中，OpenRelay 会跳过已禁用、不可路由、由已禁用 provider 支撑、标记为 unhealthy、处于 cooldown、没有可用 pooled Codex 账户，或者超出配置配额阈值的候选项。可用性探测会缓存 `subagentModelFallbackPollMs` 的时长，默认 60 秒。
 
 fallback 不会让不兼容的加密任务变得可读。当子任务为 ChatGPT 加密时，即使链中更靠前出现了其他外部模型，选择也只会限制在规范的原生 ChatGPT 目标，以及通过 `allowEncryptedV2AgentTasks: true` 明确信任的直接密钥认证 Responses 路由。combo 仍然只使用规范的原生目标。
 
@@ -80,7 +80,7 @@ fallback 不会让不兼容的加密任务变得可读。当子任务为 ChatGPT
 
 Codex 只能把 v2 原生到路由的子任务作为后端加密的 `encrypted_content` 发送。这个载荷可以被原生 ChatGPT 后端读取，但外部 provider 不能读取。这就是已知的 [#92](https://github.com/lidge-jun/opencodex/issues/92) 限制。
 
-opencodex 会安全失败，而不是转发空任务或不可读任务：
+OpenRelay 会安全失败，而不是转发空任务或不可读任务：
 
 - 不符合条件的直接非原生路由会返回 HTTP 400，并且 `error.code = "unreadable_encrypted_agent_task"`，不会回显密文。符合条件且通过 `allowEncryptedV2AgentTasks: true` 明确选择加入的直接密钥认证 Responses provider 会改为接收不透明密文，并绕过此错误。
 - 对于该任务，combo 只会考虑规范的原生 ChatGPT 目标，包括重试。如果没有可用目标，则返回相同的 400 错误。
@@ -101,27 +101,27 @@ opencodex 会安全失败，而不是转发空任务或不可读任务：
 
 ### CLI
 
-使用 `ocx v2` 管理协作界面和原生功能设置：
+使用 `orl v2` 管理协作界面和原生功能设置：
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
-ocx v2 mode default
-ocx v2 mode v2
-ocx v2 threads 8
+orl v2 status
+orl v2 mode v1
+orl v2 mode default
+orl v2 mode v2
+orl v2 threads 8
 ```
 
-使用 `ocx agent` 管理委派、roster、effort 上限和 fallback 设置：
+使用 `orl agent` 管理委派、roster、effort 上限和 fallback 设置：
 
 ```bash
-ocx agent status
-ocx agent injection set --model anthropic/claude-sonnet-5 --effort xhigh
-ocx agent subagents set gpt-5.6-sol,anthropic/claude-sonnet-5
-ocx agent fallback set gpt-5.6-luna,xai/grok-4.5 --poll-ms 60000
-ocx agent effort set --subagent max
+orl agent status
+orl agent injection set --model anthropic/claude-sonnet-5 --effort xhigh
+orl agent subagents set gpt-5.6-sol,anthropic/claude-sonnet-5
+orl agent fallback set gpt-5.6-luna,xai/grok-4.5 --poll-ms 60000
+orl agent effort set --subagent max
 ```
 
-传入 `-` 可清除可空的 `ocx agent injection` 值，或者对 roster / fallback list 使用相应的 `clear` 操作。所有命令族请参见 [CLI reference](/reference/cli/)。
+传入 `-` 可清除可空的 `orl agent injection` 值，或者对 roster / fallback list 使用相应的 `clear` 操作。所有命令族请参见 [CLI reference](/reference/cli/)。
 
 ### API
 
@@ -163,11 +163,11 @@ curl -X PUT http://localhost:10100/api/injection-model \
 
 ### 模式更改会影响正在运行的会话吗？
 
-不会。更改模式后请启动一个新的 Codex 会话。如果长时间运行的 App host 仍然显示旧的目录状态，请运行 `ocx sync` 并重启那个 Codex 界面。
+不会。更改模式后请启动一个新的 Codex 会话。如果长时间运行的 App host 仍然显示旧的目录状态，请运行 `orl sync` 并重启那个 Codex 界面。
 
 ### 推理强度
 
-`injectionEffort` 只会影响委派工作器的指引，以及在显式启用时影响原生 Codex 子代理默认值。它不会改变父会话的 effort。`ultra` 是面向客户端的顶级档位，Codex 会把它转换成 `max`；随后 opencodex 会按所选 provider 对该值进行映射或限制。
+`injectionEffort` 只会影响委派工作器的指引，以及在显式启用时影响原生 Codex 子代理默认值。它不会改变父会话的 effort。`ultra` 是面向客户端的顶级档位，Codex 会把它转换成 `max`；随后 OpenRelay 会按所选 provider 对该值进行映射或限制。
 
 ### 上下文上限
 

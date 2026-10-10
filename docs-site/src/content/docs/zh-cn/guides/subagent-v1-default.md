@@ -1,9 +1,9 @@
 ---
 title: 为什么 v1 是默认子代理界面
-description: v2 加密任务限制会破坏什么、OpenCodex 为何现在默认使用 v1，以及仍想使用 v2 时该怎么办。
+description: v2 加密任务限制会破坏什么、OpenRelay 为何现在默认使用 v1，以及仍想使用 v2 时该怎么办。
 ---
 
-OpenCodex 安装后的子代理界面默认为 **v1**。Dashboard、Models 和 Subagents 页面在切换到 **base** 或 **v2** 前都会要求确认，并链接到本页。CLI 不会提示。
+OpenRelay 安装后的子代理界面默认为 **v1**。Dashboard、Models 和 Subagents 页面在切换到 **base** 或 **v2** 前都会要求确认，并链接到本页。CLI 不会提示。
 
 原因明确而具体：在 v2 上，从 ChatGPT 原生模型分派给路由模型的任务无法被路由模型读取。这恰恰是最常见的委派方式——GPT 父代理启动 Grok、Claude 或 GLM 子代理——而在 v2 上每次都会失败。
 
@@ -24,11 +24,11 @@ OpenCodex 安装后的子代理界面默认为 **v1**。Dashboard、Models 和 S
 
 ## 原因
 
-![两条路径对比相同的委派。v1 上，ChatGPT 父代理通过 OpenCodex 发送明文任务，任务跨过提供商边界，路由子代理可读取。v2 上，父代理发送由 ChatGPT 后端生成的 encrypted_content；OpenCodex 无法解密，因此任务停在提供商边界，请求以 unreadable_encrypted_agent_task 失败。](../../../../assets/subagent-v2-encrypted-task.svg)
+![两条路径对比相同的委派。v1 上，ChatGPT 父代理通过 OpenRelay 发送明文任务，任务跨过提供商边界，路由子代理可读取。v2 上，父代理发送由 ChatGPT 后端生成的 encrypted_content；OpenRelay 无法解密，因此任务停在提供商边界，请求以 unreadable_encrypted_agent_task 失败。](../../../../assets/subagent-v2-encrypted-task.svg)
 
-在 v1 上，父代理以纯文本发出子代理的任务。OpenCodex 读取并路由它，子代理因而收到可执行的内容。
+在 v1 上，父代理以纯文本发出子代理的任务。OpenRelay 读取并路由它，子代理因而收到可执行的内容。
 
-在 v2 上，父代理以 ChatGPT 后端生成的 `encrypted_content` 发出任务。密钥留在该后端，OpenCodex 从未持有它，因此代理既无法解密也无法改写；该值确实是密文，并不是由标志隐藏的明文。这是结构限制，而非配置错误，代理端的设置无法修复。
+在 v2 上，父代理以 ChatGPT 后端生成的 `encrypted_content` 发出任务。密钥留在该后端，OpenRelay 从未持有它，因此代理既无法解密也无法改写；该值确实是密文，并不是由标志隐藏的明文。这是结构限制，而非配置错误，代理端的设置无法修复。
 
 有三种拓扑不受影响；了解它们也有助于理解失败发生的位置：
 
@@ -46,7 +46,7 @@ OpenCodex 安装后的子代理界面默认为 **v1**。Dashboard、Models 和 S
 
 发送端的问题仍未解决：[ #36376](https://github.com/openai/codex/issues/36376) 在 Windows、macOS 和 Linux 上的 CLI 0.146 至 0.151 中复现；[#37197](https://github.com/openai/codex/issues/37197) 则直接指出缺少发送端的传递策略。维护者尚未承诺修复或给出时间表。
 
-OpenCodex 在 [#92](https://github.com/lidge-jun/opencodex/issues/92) 记录了影响，并以“不计划处理”关闭：此仓库无法修复，因此该 issue 是上游工作的索引，并非等待这里的维护者处理的任务。
+OpenRelay 在 [#92](https://github.com/lidge-jun/opencodex/issues/92) 记录了影响，并以“不计划处理”关闭：此仓库无法修复，因此该 issue 是上游工作的索引，并非等待这里的维护者处理的任务。
 
 ## 三种模式目前的作用
 
@@ -67,7 +67,7 @@ base 排在第二而非第一，是因为它将大多数人用于*发起*委派�
 
 两种选择都会被记录，通知不再出现。如果直接关闭通知而未作选择，下次打开仪表盘时仍会看到它。
 
-模式变更只对**新建** Codex 会话生效。选择后请新建会话；如果长期运行的 App 宿主仍显示旧界面，请执行 `ocx sync` 并重启该界面。
+模式变更只对**新建** Codex 会话生效。选择后请新建会话；如果长期运行的 App 宿主仍显示旧界面，请执行 `orl sync` 并重启该界面。
 
 ## 如果仍想使用 v2
 
@@ -89,8 +89,8 @@ base 排在第二而非第一，是因为它将大多数人用于*发起*委派�
 Dashboard、Models 和 Subagents 都提供相同的 v1/base/v2 开关，而且切换到 base 或 v2 时都会要求确认。CLI 命令如下：
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
+orl v2 status
+orl v2 mode v1
 ```
 
 CLI 不会提示。这是同一设置，因此请了解本页描述的行为后再选择。

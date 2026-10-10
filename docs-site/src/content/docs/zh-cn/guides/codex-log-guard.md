@@ -3,11 +3,11 @@ title: Codex Log Guard
 description: 检查并明确控制 Codex 诊断日志的持久化，同时不暴露日志正文。
 ---
 
-OpenCodex 可以检查 Codex 的持久化诊断日志数据库；在你主动启用后，还能减少 Codex 持久保存的诊断日志行。检查始终只读。保护是明确的修改操作；除非数据库具备已知的 Codex 日志结构且 Codex 已停止，否则会拒绝执行。
+OpenRelay 可以检查 Codex 的持久化诊断日志数据库；在你主动启用后，还能减少 Codex 持久保存的诊断日志行。检查始终只读。保护是明确的修改操作；除非数据库具备已知的 Codex 日志结构且 Codex 已停止，否则会拒绝执行。
 
 ## 检查结果包含什么
 
-OpenCodex 按 Codex 原有的优先级解析生效的 `sqlite_home`，检查其中规范的 `logs_2.sqlite` 数据库。编号更高或旧版的 `logs_N.sqlite` 文件绝不会被替代为可修改的目标。
+OpenRelay 按 Codex 原有的优先级解析生效的 `sqlite_home`，检查其中规范的 `logs_2.sqlite` 数据库。编号更高或旧版的 `logs_N.sqlite` 文件绝不会被替代为可修改的目标。
 
 Storage 视图报告：
 
@@ -19,11 +19,11 @@ Storage 视图报告：
 
 如果 `sqlite_home` 位于 `CODEX_HOME` 之外，诊断数据库会单独显示；其字节数不会被悄悄计入现有的 `CODEX_HOME` 存储总量。
 
-生成这些诊断信息时，OpenCodex 不会选取或暴露 `feedback_log_body`。日志级别会归入固定的已知级别集合及 `OTHER`，目标名称不会被序列化。
+生成这些诊断信息时，OpenRelay 不会选取或暴露 `feedback_log_body`。日志级别会归入固定的已知级别集合及 `OTHER`，目标名称不会被序列化。
 
 ## 保护模式
 
-保护功能**默认关闭**。启用后，会在 Codex 规范的 `logs_2.sqlite` 数据库中安装一个由 OpenCodex 拥有的 `BEFORE INSERT` 触发器。OpenCodex 绝不会替换使用其保留名称的未知触发器，也只会移除 SQL 与其自有版本匹配的触发器。
+保护功能**默认关闭**。启用后，会在 Codex 规范的 `logs_2.sqlite` 数据库中安装一个由 OpenRelay 拥有的 `BEFORE INSERT` 触发器。OpenRelay 绝不会替换使用其保留名称的未知触发器，也只会移除 SQL 与其自有版本匹配的触发器。
 
 提供两种模式：
 
@@ -36,7 +36,7 @@ Log Guard 只过滤本地 SQLite 中持久化的日志行。它不会改变 Code
 
 ### 安全检查
 
-在 Protect、Disable 或 Repair 修改外部数据库之前，OpenCodex 会：
+在 Protect、Disable 或 Repair 修改外部数据库之前，OpenRelay 会：
 
 1. 精确解析规范的 `logs_2.sqlite` 路径；
 2. 验证路径指向普通文件而非符号链接，且已知结构完全匹配；
@@ -44,52 +44,52 @@ Log Guard 只过滤本地 SQLite 中持久化的日志行。它不会改变 Code
 4. 获取专用的跨进程 Log Guard 锁；
 5. 持锁后再次检查 Codex 进程；
 6. 以**不创建文件**的读写方式打开数据库，并在不等待忙锁的情况下取得 SQLite `BEGIN IMMEDIATE`；
-7. 只修改 OpenCodex 自有的 Log Guard 触发器，并在提交前读回结果；
-8. 仍持有 Log Guard 锁时，将请求的模式保存到 OpenCodex 配置。
+7. 只修改 OpenRelay 自有的 Log Guard 触发器，并在提交前读回结果；
+8. 仍持有 Log Guard 锁时，将请求的模式保存到 OpenRelay 配置。
 
-如果进程枚举不确定、数据库忙碌、结构未知，或保留的触发器名称对应不同的 SQL，修改会安全拒绝。OpenCodex 不会自动终止 Codex。
+如果进程枚举不确定、数据库忙碌、结构未知，或保留的触发器名称对应不同的 SQL，修改会安全拒绝。OpenRelay 不会自动终止 Codex。
 
 ## 偏移与修复
 
-请求的保护模式保存在 OpenCodex 配置中，与 Codex 日志数据库分开。这一点很重要，因为 Codex 迁移可能重建 `logs` 表，而 SQLite 会删除附着在被替换表上的触发器。
+请求的保护模式保存在 OpenRelay 配置中，与 Codex 日志数据库分开。这一点很重要，因为 Codex 迁移可能重建 `logs` 表，而 SQLite 会删除附着在被替换表上的触发器。
 
-当保存的模式为 `compat` 或 `quiet`，但未观察到相应的自有触发器时，Log Guard 会报告 **drifted**。`ocx doctor` 会报告偏移，但绝不会自动修复。
+当保存的模式为 `compat` 或 `quiet`，但未观察到相应的自有触发器时，Log Guard 会报告 **drifted**。`orl doctor` 会报告偏移，但绝不会自动修复。
 
 修复需要明确执行：
 
 ```bash
-ocx storage codex-logs repair
+orl storage codex-logs repair
 ```
 
-OpenCodex 特意不会在每次启动时重建保护。只有获得足够的实际使用证据，证明跨 Codex 迁移这样做是安全的，后续版本才可能重新考虑自动修复。
+OpenRelay 特意不会在每次启动时重建保护。只有获得足够的实际使用证据，证明跨 Codex 迁移这样做是安全的，后续版本才可能重新考虑自动修复。
 
 ## CLI
 
 读取状态：
 
 ```bash
-ocx storage codex-logs status
-ocx storage codex-logs status --json
-ocx doctor
+orl storage codex-logs status
+orl storage codex-logs status --json
+orl doctor
 ```
 
 启用推荐的兼容策略：
 
 ```bash
-ocx storage codex-logs protect
+orl storage codex-logs protect
 ```
 
 明确选择安静模式：
 
 ```bash
-ocx storage codex-logs protect --mode quiet
+orl storage codex-logs protect --mode quiet
 ```
 
-关闭 OpenCodex 保护或修复偏移：
+关闭 OpenRelay 保护或修复偏移：
 
 ```bash
-ocx storage codex-logs unprotect
-ocx storage codex-logs repair
+orl storage codex-logs unprotect
+orl storage codex-logs repair
 ```
 
 在 Log Guard 命令后加上 `--json` 可获得机器可读的输出。规范的命令语法和 JSON 行为请参阅 [CLI 参考](/zh-cn/reference/cli/)。
@@ -97,7 +97,7 @@ ocx storage codex-logs repair
 现有命令保持不变：
 
 ```bash
-ocx storage --json
+orl storage --json
 ```
 
 其响应包含与 Storage 页面相同的 Codex 日志状态。
@@ -124,9 +124,9 @@ Protect 请求体为 `{"mode":"compat"}` 或 `{"mode":"quiet"}`。`GET /api/stor
 
 状态检查使用 SQLite `immutable=1` 以只读方式打开数据库，避免诊断读取创建或更新 `-wal`、`-shm` 附属文件。
 
-这一做法有取舍：SQL 聚合结果与观察到的触发器元数据反映的是最近一次 checkpoint 的数据库快照。如果 Codex 正在写入，实时 WAL 中可能有比不可变快照更新的行或结构页面。成功的修改响应使用 OpenCodex 在写事务内验证的触发器状态；之后的只读状态请求可能暂时落后，直到 SQLite 对这些结构页面执行 checkpoint。
+这一做法有取舍：SQL 聚合结果与观察到的触发器元数据反映的是最近一次 checkpoint 的数据库快照。如果 Codex 正在写入，实时 WAL 中可能有比不可变快照更新的行或结构页面。成功的修改响应使用 OpenRelay 在写事务内验证的触发器状态；之后的只读状态请求可能暂时落后，直到 SQLite 对这些结构页面执行 checkpoint。
 
-OpenCodex 单独报告 WAL 文件大小，**不会**将结果标为 SSD 写入速率、NAND 写入量或硬盘磨损／TBW 消耗。
+OpenRelay 单独报告 WAL 文件大小，**不会**将结果标为 SSD 写入速率、NAND 写入量或硬盘磨损／TBW 消耗。
 
 ## 兼容性状态
 

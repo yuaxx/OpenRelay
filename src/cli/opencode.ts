@@ -281,7 +281,7 @@ export async function fetchOpencodeProxyModels(
   const headers = new Headers({ Accept: "application/json" });
   const token = managementToken.trim();
   if (!token) throw new Error("No local admin token is available for the model catalog.");
-  headers.set("X-OpenCodex-API-Key", token);
+  headers.set("X-OpenRelay-API-Key", token);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), deps.timeoutMs ?? OPENCODE_PROXY_MODELS_TIMEOUT_MS);
   const abortIfTimedOut = (): Promise<never> => new Promise((_, reject) => {
@@ -670,7 +670,7 @@ export async function cmdOpencode(args: string[]): Promise<number> {
   console.error("   Your existing opencode config files are left untouched; only the runtime provider blocks are injected.");
   const providerOverride = opencodeProviderOverridePath(process.cwd());
   if (providerOverride) {
-    console.error(`ℹ ${providerOverride} also defines our provider key; the runtime layer from ocx opencode overrides it for this launch.`);
+    console.error(`ℹ ${providerOverride} also defines our provider key; the runtime layer from orl opencode overrides it for this launch.`);
   }
 
   const builtEnv = buildOpencodeEnv(blocks, apiKey, process.env);

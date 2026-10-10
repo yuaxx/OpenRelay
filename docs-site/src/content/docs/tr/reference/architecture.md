@@ -1,9 +1,9 @@
 ---
 title: Mimari
-description: opencodex iç yapısı — modül haritası, AdapterEvent köprüsü, istek ayrıştırıcısı ve önbellekleme.
+description: OpenRelay iç yapısı — modül haritası, AdapterEvent köprüsü, istek ayrıştırıcısı ve önbellekleme.
 ---
 
-opencodex tek bir Bun sürecidir. Bir istek OpenAI Responses olarak girer, dahili
+OpenRelay tek bir Bun sürecidir. Bir istek OpenAI Responses olarak girer, dahili
 bir modele normalleştirilir, yönlendirilir, bir adaptör aracılığıyla bir
 sağlayıcıya gönderilir ve Responses SSE'ye geri köprülenir. Uçtan uca akış için
 [Nasıl Çalışır](/tr/getting-started/how-it-works/) sayfasına bakın.
@@ -12,7 +12,7 @@ sağlayıcıya gönderilir ve Responses SSE'ye geri köprülenir. Uçtan uca ak�
 
 ```
 src/
-├── cli/                # ocx komut dağıtımı, başlatma, durum, sağlayıcı komutları
+├── cli/                # orl komut dağıtımı, başlatma, durum, sağlayıcı komutları
 ├── server/             # Bun.serve, /v1/* proxy, /api/* yönetim API'si, WS köprüsü
 ├── codex/              # Codex yapılandırma enjeksiyonu, katalog senkronizasyonu, kimlik doğrulama/hesap entegrasyonu
 ├── providers/          # sağlayıcı meta verileri, API anahtarı havuzu, kota ve etiketler
@@ -157,7 +157,7 @@ bir aramadan hemen önce yüklenir veya yenilenir, `oauth/token-guardian.ts` ise
 yalnızca politikası izin veren sağlayıcıları proaktif olarak yenileyebilir.
 Yenileme süreç içi tek uçuş, hesap başına dosya kilidi ve nesil CAS ile koordine
 edilir, böylece eşzamanlı yazıcılar daha yeni bir kimlik bilgisini ezemez.
-Paylaşılan bir sağlık projeksiyonu (`oauth/health.ts`) `ocx status`, `ocx
+Paylaşılan bir sağlık projeksiyonu (`oauth/health.ts`) `orl status`, `ocx
 doctor`, yönetim API'si ve kontrol panelini besler. Codex/ChatGPT havuz kimlik
 bilgileri ve işleme özel iş parçacığı bağlılığı `codex/` altında yaşar ve
 yönetim yanıtlarının dışında tutulur; bağlılık `401` / `403` / `429`'da
@@ -170,7 +170,7 @@ tanılamaları için `usage/` tarafından toplanır.
 
 `server/index/serve-options.ts` varsayılan olarak `/v1/responses` üzerinde HTTP/SSE sunar.
 Codex `websockets` `false` iken bir Responses WebSocket yükseltmesi denerse
-opencodex `426 upgrade_required` döndürür; Codex daha sonra bu oturum için
+OpenRelay `426 upgrade_required` döndürür; Codex daha sonra bu oturum için
 HTTP'ye geri döner. `"websockets": true` ayarlandığında aynı uç nokta
 yükseltmeyi kabul eder ve WebSocket köprüsünü kullanır.
 

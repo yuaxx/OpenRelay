@@ -1,6 +1,6 @@
 ---
 title: Çekme isteği kalite sözleşmesi
-description: OpenCodex çekme istekleri için inceleme hazırlığı, katkıda bulunan sorumluluğu, güven yolları ve kapatma politikası.
+description: OpenRelay çekme istekleri için inceleme hazırlığı, katkıda bulunan sorumluluğu, güven yolları ve kapatma politikası.
 ---
 
 ## Bir şeyi düzeltmek için izne ihtiyacınız yoktur

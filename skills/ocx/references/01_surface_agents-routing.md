@@ -10,9 +10,9 @@ Non-mutating probes may still contact providers, consume quota or refresh caches
 
 Declared capabilities: 50.
 
-### `ocx agent subagents force`
+### `orl agent subagents force`
 
-Usage: `ocx agent subagents force <model|-> [--json]`
+Usage: `orl agent subagents force <model|-> [--json]`
 
 Force Claude Code subagents onto one exposed model at the next routed launch; - clears.
 
@@ -30,9 +30,9 @@ JSON mode: `payload`.
 
 - Requires Claude Code 2.1.257+. Plain claude, forks, inherit skills, the main model and small-fast sidecars are unaffected.
 
-### `ocx agent request-user-input`
+### `orl agent request-user-input`
 
-Usage: `ocx agent request-user-input [on|off] [--json]`
+Usage: `orl agent request-user-input [on|off] [--json]`
 
 Show or set whether default mode may ask the operator a question mid-task.
 
@@ -51,9 +51,9 @@ JSON mode: `payload`.
 
 - A bare invocation reads and never writes.
 
-### `ocx agent roles`
+### `orl agent roles`
 
-Usage: `ocx agent roles [status] [--json]; ocx agent roles set <role> <model> [--effort <level>] [--json]; ocx agent roles suggest [--model <id>] [--apply] [--json]`
+Usage: `orl agent roles [status] [--json]; orl agent roles set <role> <model> [--effort <level>] [--json]; orl agent roles suggest [--model <id>] [--apply] [--json]`
 
 omo (Codex / LazyCodex): show each Codex agent role's model pin, set one role's model in its TOML and in omo.jsonc, or suggest a model for every role.
 
@@ -79,9 +79,9 @@ JSON mode: `payload`.
 - set rewrites only the root model value of $CODEX_HOME/agents/<role>.toml, plus model_reasoning_effort with --effort; omo.jsonc gets the same model and, when LazyCodex has that level, the effort as reasoning; it is skipped when absent or when it contains comments.
 - suggest sizes every role with one model call and prints proposals without writing; --apply writes each proposed model, and its effort when the role file already sets model_reasoning_effort.
 
-### `ocx agent injection`
+### `orl agent injection`
 
-Usage: `ocx agent injection status [--json]; ocx agent injection set [--model <id|->] [--effort <level|->] [--prompt <text|->] [--guidance <on|off>] [--sync-codex-defaults <on|off>] [--json]; ocx agent injection suggest <work description> [--model <id>] [--apply] [--json]`
+Usage: `orl agent injection status [--json]; orl agent injection set [--model <id|->] [--effort <level|->] [--prompt <text|->] [--guidance <on|off>] [--sync-codex-defaults <on|off>] [--json]; orl agent injection suggest <work description> [--model <id>] [--apply] [--json]`
 
 Show or set the delegation model and effort, or suggest both for a described piece of delegated work.
 
@@ -99,7 +99,7 @@ State-changing: yes.
 | `--model` | string | set: the delegation model, - clears it. suggest: size the work with this model instead of the Codex default model. |
 | `--effort` | string | set: the delegation reasoning effort, - clears it. |
 | `--prompt` | string | set: a custom guidance prompt, - clears it. |
-| `--guidance` | string | set: on or off for OpenCodex delegation guidance. |
+| `--guidance` | string | set: on or off for OpenRelay delegation guidance. |
 | `--apply` | boolean | suggest: write the proposed model and effort through the delegation settings write. |
 | `--sync-codex-defaults` | string | set only: enable/disable the existing model-dependent default-sync policy. |
 
@@ -109,9 +109,9 @@ JSON mode: `payload`.
 - suggest may spend a model call; it writes no settings unless --apply is explicitly supplied. Preserve unsized/unassigned/already-set outcomes.
 - Default-sync edits return actual normalized model/effort/prompt/guidance/default-sync state; they do not promise a client catalog rewrite. Clearing a model also clears dependent settings under server validation.
 
-### `ocx combo test`
+### `orl combo test`
 
-Usage: `ocx combo test [--combo <id>] [--decision-provider <provider|jev> | --decision-model <route>] [--decision-timeout <ms>] [--json]`
+Usage: `orl combo test [--combo <id>] [--decision-provider <provider|jev> | --decision-model <route>] [--decision-timeout <ms>] [--json]`
 
 Run one JEV decision probe through a decision method: TypeSafe, a System One row, or an opencodex model.
 
@@ -134,9 +134,9 @@ JSON mode: `payload`.
 
 - --combo without an explicit decision override reads the saved combo first. The synthetic decision probe may spend a backend call; a failed-open receipt is not an applied decision.
 
-### `ocx combo discover`
+### `orl combo discover`
 
-Usage: `ocx combo discover [--query <text>] [--json]`
+Usage: `orl combo discover [--query <text>] [--json]`
 
 List configured System One decision rows and catalog models that look like decision services.
 
@@ -155,7 +155,7 @@ JSON mode: `payload`.
 
 - Read-only: nothing is probed and no provider row is created.
 
-### `ocx message sessions`
+### `orl message sessions`
 
 Discover already-loaded local Codex sessions without reading conversation history.
 
@@ -171,7 +171,7 @@ JSON mode: `envelope`.
 
 - Linux/macOS Unix socket only. Uses effective CODEX_HOME; starts no daemon and returns no partial directory.
 
-### `ocx message send`
+### `orl message send`
 
 Submit one correlated peer message to an exact loaded local Codex destination.
 
@@ -194,9 +194,9 @@ JSON mode: `envelope`.
 - queued means submitted, not processed. unknown must not be replayed; no automatic retry, daemon start or thread resume.
 - Exit 0: queued; 1: not sent; 3: unknown; 64: invalid usage. No remote/Claude transport or skill installation.
 
-### `ocx agent status`
+### `orl agent status`
 
-Usage: `ocx agent status [--json]`
+Usage: `orl agent status [--json]`
 
 Read agent mode, delegation, effort caps, roster, fallback and sidecars.
 
@@ -217,9 +217,9 @@ State-changing: no.
 
 JSON mode: `envelope`.
 
-### `ocx agent effort`
+### `orl agent effort`
 
-Usage: `ocx agent effort status [--json]`
+Usage: `orl agent effort status [--json]`
 
 Read or set main and subagent effort caps.
 
@@ -237,9 +237,9 @@ JSON mode: `payload`.
 
 - set requires at least one cap; a null clears it.
 
-### `ocx agent effort set`
+### `orl agent effort set`
 
-Usage: `ocx agent effort set [--main <level|->] [--subagent <level|->] [--json]`
+Usage: `orl agent effort set [--main <level|->] [--subagent <level|->] [--json]`
 
 Read or set main and subagent effort caps.
 
@@ -259,9 +259,9 @@ JSON mode: `payload`.
 
 - set requires at least one cap; a null clears it.
 
-### `ocx agent subagents`
+### `orl agent subagents`
 
-Usage: `ocx agent subagents status [--json]`
+Usage: `orl agent subagents status [--json]`
 
 Read, replace or clear the ordered featured subagent roster.
 
@@ -279,9 +279,9 @@ JSON mode: `payload`.
 
 - At most five models; clear sends an empty roster. agent roster is an alias.
 
-### `ocx agent subagents set`
+### `orl agent subagents set`
 
-Usage: `ocx agent subagents set <model,model...> [--json]`
+Usage: `orl agent subagents set <model,model...> [--json]`
 
 Read, replace or clear the ordered featured subagent roster.
 
@@ -299,9 +299,9 @@ JSON mode: `payload`.
 
 - At most five models; clear sends an empty roster. agent roster is an alias.
 
-### `ocx agent subagents clear`
+### `orl agent subagents clear`
 
-Usage: `ocx agent subagents clear [--json]`
+Usage: `orl agent subagents clear [--json]`
 
 Clear the saved subagents models.
 
@@ -319,9 +319,9 @@ JSON mode: `payload`.
 
 - At most five models; clear sends an empty roster. agent roster is an alias.
 
-### `ocx agent fallback`
+### `orl agent fallback`
 
-Usage: `ocx agent fallback status [--json]`
+Usage: `orl agent fallback status [--json]`
 
 Read, replace or clear fallback models and polling interval.
 
@@ -339,9 +339,9 @@ JSON mode: `payload`.
 
 - set requires models and/or --poll-ms; clear empties the models and may also set --poll-ms.
 
-### `ocx agent fallback set`
+### `orl agent fallback set`
 
-Usage: `ocx agent fallback set [model,model...] [--poll-ms <5000-600000>] [--json]`
+Usage: `orl agent fallback set [model,model...] [--poll-ms <5000-600000>] [--json]`
 
 Read, replace or clear fallback models and polling interval.
 
@@ -360,9 +360,9 @@ JSON mode: `payload`.
 
 - set requires models and/or --poll-ms; clear empties the models and may also set --poll-ms.
 
-### `ocx agent fallback clear`
+### `orl agent fallback clear`
 
-Usage: `ocx agent fallback clear [--poll-ms <5000-600000>] [--json]`
+Usage: `orl agent fallback clear [--poll-ms <5000-600000>] [--json]`
 
 Clear the saved fallback models.
 
@@ -381,9 +381,9 @@ JSON mode: `payload`.
 
 - set requires models and/or --poll-ms; clear empties the models and may also set --poll-ms.
 
-### `ocx agent sidecar`
+### `orl agent sidecar`
 
-Usage: `ocx agent sidecar status [--json]`
+Usage: `orl agent sidecar status [--json]`
 
 Read configured sidecars and candidate models.
 
@@ -399,9 +399,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx agent sidecar web`
+### `orl agent sidecar web`
 
-Usage: `ocx agent sidecar web (--list | [--model <id|->] [--backend <openai|anthropic|xai|gemini|exa|->] [--reasoning <level>] [--enabled <on|off>] [--stream-routed-output <on|off>]) [--json]`
+Usage: `orl agent sidecar web (--list | [--model <id|->] [--backend <openai|anthropic|xai|gemini|exa|->] [--reasoning <level>] [--enabled <on|off>] [--stream-routed-output <on|off>]) [--json]`
 
 List web candidates or change the web sidecar.
 
@@ -427,9 +427,9 @@ JSON mode: `payload`.
 - Without --list at least one setting is required. Stored settings and Codex application outcomes remain distinct.
 - Web reasoning remains supported even though the mutation reply does not echo it. max-descriptions and timeout belong only to vision. New-option replies project the saved web settings and actual native apply report.
 
-### `ocx agent sidecar vision`
+### `orl agent sidecar vision`
 
-Usage: `ocx agent sidecar vision (--list | [--model <id|->] [--backend <openai|anthropic|routed|->] [--reasoning <level>] [--max-descriptions <n>] [--enabled <on|off>] [--timeout-ms <1-2147483647>]) [--json]`
+Usage: `orl agent sidecar vision (--list | [--model <id|->] [--backend <openai|anthropic|routed|->] [--reasoning <level>] [--max-descriptions <n>] [--enabled <on|off>] [--timeout-ms <1-2147483647>]) [--json]`
 
 List vision candidates or change the vision sidecar.
 
@@ -456,9 +456,9 @@ JSON mode: `payload`.
 - Without --list at least one setting is required. Stored settings and Codex application outcomes remain distinct.
 - Stream-routed-output belongs only to web. Timeout changes preserve siblings; native apply and saved state are distinct.
 
-### `ocx effort`
+### `orl effort`
 
-Usage: `ocx effort [status|low|medium|high|xhigh|max|ultra|->] [--json]`
+Usage: `orl effort [status|low|medium|high|xhigh|max|ultra|->] [--json]`
 
 Read effort settings or set the main cap with a shorthand level.
 
@@ -477,11 +477,11 @@ State-changing: yes.
 JSON mode: `envelope`.
 
 - Uses the live proxy when available, otherwise local config. Once live is selected, errors never fall back to local writes; set reads back live status and can report partial application.
-- The shorthand ocx effort <low|medium|high|xhigh|max|ultra|-> changes only the main cap; unset aliases clear.
+- The shorthand orl effort <low|medium|high|xhigh|max|ultra|-> changes only the main cap; unset aliases clear.
 
-### `ocx effort set`
+### `orl effort set`
 
-Usage: `ocx effort set [--main <level|->] [--subagent <level|->] [--injection <level|->] [--json]`
+Usage: `orl effort set [--main <level|->] [--subagent <level|->] [--injection <level|->] [--json]`
 
 Set one or more effort fields.
 
@@ -505,9 +505,9 @@ JSON mode: `envelope`.
 
 - Local configuration is used when no live proxy is found; runtime failures are not silent offline success.
 
-### `ocx effort clear`
+### `orl effort clear`
 
-Usage: `ocx effort clear [--json]`
+Usage: `orl effort clear [--json]`
 
 Clear both caps while retaining delegation effort.
 
@@ -527,9 +527,9 @@ JSON mode: `envelope`.
 
 - Local configuration is used when no live proxy is found; runtime failures are not silent offline success.
 
-### `ocx effort model`
+### `orl effort model`
 
-Usage: `ocx effort model <provider/model|model> [--json]`
+Usage: `orl effort model <provider/model|model> [--json]`
 
 Inspect a model effort ladder and wire mappings from local configuration.
 
@@ -545,9 +545,9 @@ JSON mode: `envelope`.
 
 - Local configuration/catalog derivation; routes is empty because no management API is called.
 
-### `ocx v2 status`
+### `orl v2 status`
 
-Usage: `ocx v2 [status] [--live] [--json]`
+Usage: `orl v2 [status] [--live] [--json]`
 
 Report local multi-agent mode and Codex feature settings.
 
@@ -568,9 +568,9 @@ JSON mode: `envelope`.
 - Local mode/keep-native and changed on/off preserve their existing sync calls even without a discovered port; threads/hints and unchanged toggles do not gain sync. Unknown or failed sync evidence is nonzero with landed state visible.
 - Live writes use actual post-write state and full catalog outcomes; a502 can mean partial native changes. Read back before retrying; no rollback is implied.
 
-### `ocx v2 on`
+### `orl v2 on`
 
-Usage: `ocx v2 on [--live] [--json]`
+Usage: `orl v2 on [--live] [--json]`
 
 Enable the local Codex multi_agent_v2 feature.
 
@@ -591,9 +591,9 @@ JSON mode: `envelope`.
 - Local mode/keep-native and changed on/off preserve their existing sync calls even without a discovered port; threads/hints and unchanged toggles do not gain sync. Unknown or failed sync evidence is nonzero with landed state visible.
 - Live writes use actual post-write state and full catalog outcomes; a502 can mean partial native changes. Read back before retrying; no rollback is implied.
 
-### `ocx v2 off`
+### `orl v2 off`
 
-Usage: `ocx v2 off [--live] [--json]`
+Usage: `orl v2 off [--live] [--json]`
 
 Disable the local Codex multi_agent_v2 feature.
 
@@ -614,9 +614,9 @@ JSON mode: `envelope`.
 - Local mode/keep-native and changed on/off preserve their existing sync calls even without a discovered port; threads/hints and unchanged toggles do not gain sync. Unknown or failed sync evidence is nonzero with landed state visible.
 - Live writes use actual post-write state and full catalog outcomes; a502 can mean partial native changes. Read back before retrying; no rollback is implied.
 
-### `ocx v2 mode`
+### `orl v2 mode`
 
-Usage: `ocx v2 mode <v1|default|v2> [--live] [--json] [--acknowledge-surface-advisory]`
+Usage: `orl v2 mode <v1|default|v2> [--live] [--json] [--acknowledge-surface-advisory]`
 
 Set local model-catalog multi-agent mode.
 
@@ -638,9 +638,9 @@ JSON mode: `envelope`.
 - Local mode/keep-native and changed on/off preserve their existing sync calls even without a discovered port; threads/hints and unchanged toggles do not gain sync. Unknown or failed sync evidence is nonzero with landed state visible.
 - Live writes use actual post-write state and full catalog outcomes; a502 can mean partial native changes. Read back before retrying; no rollback is implied.
 
-### `ocx v2 keep-native-v1`
+### `orl v2 keep-native-v1`
 
-Usage: `ocx v2 keep-native-v1 <on|off> [--live] [--json]`
+Usage: `orl v2 keep-native-v1 <on|off> [--live] [--json]`
 
 Keep native ChatGPT on v1 while routed models use v2.
 
@@ -661,9 +661,9 @@ JSON mode: `envelope`.
 - Local mode/keep-native and changed on/off preserve their existing sync calls even without a discovered port; threads/hints and unchanged toggles do not gain sync. Unknown or failed sync evidence is nonzero with landed state visible.
 - Live writes use actual post-write state and full catalog outcomes; a502 can mean partial native changes. Read back before retrying; no rollback is implied.
 
-### `ocx v2 threads`
+### `orl v2 threads`
 
-Usage: `ocx v2 threads <n> [--live] [--json]`
+Usage: `orl v2 threads <n> [--live] [--json]`
 
 Set the local active-mode thread limit (integer at least 1).
 
@@ -684,9 +684,9 @@ JSON mode: `envelope`.
 - Local mode/keep-native and changed on/off preserve their existing sync calls even without a discovered port; threads/hints and unchanged toggles do not gain sync. Unknown or failed sync evidence is nonzero with landed state visible.
 - Live writes use actual post-write state and full catalog outcomes; a502 can mean partial native changes. Read back before retrying; no rollback is implied.
 
-### `ocx v2 mode-hint`
+### `orl v2 mode-hint`
 
-Usage: `ocx v2 mode-hint <text|--clear> [--live] [--json]; ocx v2 mode-hint [--live] [--json] -- <literal-text>`
+Usage: `orl v2 mode-hint <text|--clear> [--live] [--json]; orl v2 mode-hint [--live] [--json] -- <literal-text>`
 
 Set nonblank local delegation hint text or restore effort-derived policy.
 
@@ -709,9 +709,9 @@ JSON mode: `envelope`.
 - Live writes use actual post-write state and full catalog outcomes; a502 can mean partial native changes. Read back before retrying; no rollback is implied.
 - Use -- before one literal hint that equals a reserved control such as --live, --json or --clear. Text after the terminator is never interpreted as a target/output flag.
 
-### `ocx combo list`
+### `orl combo list`
 
-Usage: `ocx combo list [--json]`
+Usage: `orl combo list [--json]`
 
 List saved combos.
 
@@ -727,9 +727,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx combo show`
+### `orl combo show`
 
-Usage: `ocx combo show <id> [--json]`
+Usage: `orl combo show <id> [--json]`
 
 Read one saved combo from the collection.
 
@@ -745,9 +745,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx combo set`
+### `orl combo set`
 
-Usage: `ocx combo set <id> [--targets <provider/model[:weight],...> | --targets-file <FILE|->] [--strategy <failover|round-robin|random|least-used|reset-window|jev>] [--sticky <1-100|->] [--effort <low|medium|high|xhigh|max|ultra|->] [--effort-mode <fallback|force|->] [--alias <name|->] [--native-alias [on|off]] [--display-name <label|->] [--decision-provider <provider|-> | --decision-model <route|->] [--decision-timeout <ms|->] [--rename-from <id>] [--image-input <auto|disabled>] [--reasoning-effort-mode <strict|adaptive>] [--json]`
+Usage: `orl combo set <id> [--targets <provider/model[:weight],...> | --targets-file <FILE|->] [--strategy <failover|round-robin|random|least-used|reset-window|jev>] [--sticky <1-100|->] [--effort <low|medium|high|xhigh|max|ultra|->] [--effort-mode <fallback|force|->] [--alias <name|->] [--native-alias [on|off]] [--display-name <label|->] [--decision-provider <provider|-> | --decision-model <route|->] [--decision-timeout <ms|->] [--rename-from <id>] [--image-input <auto|disabled>] [--reasoning-effort-mode <strict|adaptive>] [--json]`
 
 Create, update or rename a combo.
 
@@ -785,9 +785,9 @@ JSON mode: `payload`.
 - New file/flag conflicts refuse before transport. Partial edits preserve target metadata; explicit false/default values override server carry. Turning a native alias off may also require clearing its incompatible alias.
 - Read/merge/write uses one target and remains an upsert without revision CAS. Saved-but-incomplete catalog outcomes return nonzero with their receipt.
 
-### `ocx combo remove`
+### `orl combo remove`
 
-Usage: `ocx combo remove <id> --yes [--json]`
+Usage: `orl combo remove <id> --yes [--json]`
 
 Remove a saved combo after explicit confirmation.
 
@@ -806,9 +806,9 @@ JSON mode: `payload`.
 
 - delete is an alias; the ID is encoded in the id query parameter.
 
-### `ocx route policy list`
+### `orl route policy list`
 
-Usage: `ocx route policy list [--json]`
+Usage: `orl route policy list [--json]`
 
 List saved routing profiles and revisions.
 
@@ -824,9 +824,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx route policy show`
+### `orl route policy show`
 
-Usage: `ocx route policy show <id> [--json]`
+Usage: `orl route policy show <id> [--json]`
 
 Read one saved routing profile.
 
@@ -842,33 +842,9 @@ State-changing: no.
 
 JSON mode: `payload`.
 
-### `ocx route policy dry-run`
+### `orl route policy dry-run`
 
-Usage: `ocx route policy dry-run <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]`
-
-Evaluate a saved profile against explicit requirements without changing it.
-
-State-changing: yes.
-
-| Method | Route |
-|---|---|
-| POST | `/api/routing-profiles/dry-run` |
-
-| Flag | Value | Meaning |
-|---|---|---|
-| `--model-context` | number | Positive context window requirement. |
-| `--tools` | boolean | Require tools. |
-| `--image` | boolean | Require image input. |
-| `--structured-output` | boolean | Require structured output. |
-| `--json` | boolean | Emit structured JSON. |
-
-JSON mode: `payload`.
-
-- evaluate and dry-run do not save the profile, but their POST can activate Lab and start automation already enabled by local policy. No profile create, update or delete is exposed.
-
-### `ocx route policy evaluate`
-
-Usage: `ocx route policy evaluate <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]`
+Usage: `orl route policy dry-run <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]`
 
 Evaluate a saved profile against explicit requirements without changing it.
 
@@ -890,9 +866,33 @@ JSON mode: `payload`.
 
 - evaluate and dry-run do not save the profile, but their POST can activate Lab and start automation already enabled by local policy. No profile create, update or delete is exposed.
 
-### `ocx route policy create`
+### `orl route policy evaluate`
 
-Usage: `ocx route policy create <id> --file <FILE|-> [--json]`
+Usage: `orl route policy evaluate <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]`
+
+Evaluate a saved profile against explicit requirements without changing it.
+
+State-changing: yes.
+
+| Method | Route |
+|---|---|
+| POST | `/api/routing-profiles/dry-run` |
+
+| Flag | Value | Meaning |
+|---|---|---|
+| `--model-context` | number | Positive context window requirement. |
+| `--tools` | boolean | Require tools. |
+| `--image` | boolean | Require image input. |
+| `--structured-output` | boolean | Require structured output. |
+| `--json` | boolean | Emit structured JSON. |
+
+JSON mode: `payload`.
+
+- evaluate and dry-run do not save the profile, but their POST can activate Lab and start automation already enabled by local policy. No profile create, update or delete is exposed.
+
+### `orl route policy create`
+
+Usage: `orl route policy create <id> --file <FILE|-> [--json]`
 
 Create a routing profile from an editable-only document.
 
@@ -913,9 +913,9 @@ JSON mode: `envelope`.
 - An existing ID refuses rather than becoming an update.
 - Unknown/readonly/nested unsupported file fields refuse; no raw validator issues or file contents are echoed.
 
-### `ocx route policy update`
+### `orl route policy update`
 
-Usage: `ocx route policy update <id> --file <FILE|-> --expected-revision <revision> [--json]`
+Usage: `orl route policy update <id> --file <FILE|-> --expected-revision <revision> [--json]`
 
 Update a routing profile from an editable-only document.
 
@@ -937,9 +937,9 @@ JSON mode: `envelope`.
 - Stale revision is exit5 with no overwrite/retry; missing profile is exit4.
 - Unknown/readonly/nested unsupported file fields refuse; no raw validator issues or file contents are echoed.
 
-### `ocx route policy remove`
+### `orl route policy remove`
 
-Usage: `ocx route policy remove <id> --yes [--json]`
+Usage: `orl route policy remove <id> --yes [--json]`
 
 Remove one exact routing profile ID.
 
@@ -958,9 +958,9 @@ JSON mode: `envelope`.
 
 - Uses the internal stored ID, not a public model alias. DELETE has no revision guard. Saved/catalog outcomes remain distinct; no alternate-target retry.
 
-### `ocx combo stats`
+### `orl combo stats`
 
-Usage: `ocx combo stats <id> [--range <7d|30d|all>] [--json]`
+Usage: `orl combo stats <id> [--range <7d|30d|all>] [--json]`
 
 Read JEV decision and token coverage for an exact combo ID.
 
@@ -980,9 +980,9 @@ JSON mode: `envelope`.
 - Uses jev=1,comboId and range. Preserves actual counts, nullable averages, measurement coverage and incomplete/truncated history.
 - No monetary cost or comparative savings baseline exists in this DTO. This is not a decision probe and makes no model inference request.
 
-### `ocx agent memory-models show`
+### `orl agent memory-models show`
 
-Usage: `ocx agent memory-models show [--json]`
+Usage: `orl agent memory-models show [--json]`
 
 Read the memory model override block.
 
@@ -1001,9 +1001,9 @@ JSON mode: `envelope`.
 - An omitted phase keeps its existing/default route; this does not disable extraction, consolidation or the memory pipeline. File{} means no configured overrides, while clear sends null.
 - Set replaces the full block, preserving canonical schema normalization only. No synthetic inference verifies the save. Writes report the actual normalized block and catalogRefreshPending, which is not a full catalog receipt.
 
-### `ocx agent memory-models set`
+### `orl agent memory-models set`
 
-Usage: `ocx agent memory-models set (--file <FILE|-> | [--extract-model <model> [--extract-effort <effort>]] [--consolidation-model <model> [--consolidation-effort <effort>]]) [--json]`
+Usage: `orl agent memory-models set (--file <FILE|-> | [--extract-model <model> [--extract-effort <effort>]] [--consolidation-model <model> [--consolidation-effort <effort>]]) [--json]`
 
 Replace the memory model override block.
 
@@ -1027,9 +1027,9 @@ JSON mode: `envelope`.
 - An omitted phase keeps its existing/default route; this does not disable extraction, consolidation or the memory pipeline. File{} means no configured overrides, while clear sends null.
 - Set replaces the full block, preserving canonical schema normalization only. No synthetic inference verifies the save. Writes report the actual normalized block and catalogRefreshPending, which is not a full catalog receipt.
 
-### `ocx agent memory-models clear`
+### `orl agent memory-models clear`
 
-Usage: `ocx agent memory-models clear [--json]`
+Usage: `orl agent memory-models clear [--json]`
 
 Clear the memory model override block.
 
@@ -1048,9 +1048,9 @@ JSON mode: `envelope`.
 - An omitted phase keeps its existing/default route; this does not disable extraction, consolidation or the memory pipeline. File{} means no configured overrides, while clear sends null.
 - Set replaces the full block, preserving canonical schema normalization only. No synthetic inference verifies the save. Writes report the actual normalized block and catalogRefreshPending, which is not a full catalog receipt.
 
-### `ocx agent compaction-routing show`
+### `orl agent compaction-routing show`
 
-Usage: `ocx agent compaction-routing show [--json]`
+Usage: `orl agent compaction-routing show [--json]`
 
 Read the compaction routing override block.
 
@@ -1069,9 +1069,9 @@ JSON mode: `envelope`.
 - Clear restores ordinary compaction routing; it does not disable compaction. Omitted triggers/sources retain server defaults.
 - Set replaces the full block, preserving canonical schema normalization only. No synthetic inference verifies the save. Writes report the actual normalized block and catalogRefreshPending, which is not a full catalog receipt.
 
-### `ocx agent compaction-routing set`
+### `orl agent compaction-routing set`
 
-Usage: `ocx agent compaction-routing set (--file <FILE|-> | --model <model> [--effort <effort>] [--triggers <manual,auto>] [--sources <selector,...>]) [--json]`
+Usage: `orl agent compaction-routing set (--file <FILE|-> | --model <model> [--effort <effort>] [--triggers <manual,auto>] [--sources <selector,...>]) [--json]`
 
 Replace the compaction routing override block.
 
@@ -1095,9 +1095,9 @@ JSON mode: `envelope`.
 - Clear restores ordinary compaction routing; it does not disable compaction. Omitted triggers/sources retain server defaults.
 - Set replaces the full block, preserving canonical schema normalization only. No synthetic inference verifies the save. Writes report the actual normalized block and catalogRefreshPending, which is not a full catalog receipt.
 
-### `ocx agent compaction-routing clear`
+### `orl agent compaction-routing clear`
 
-Usage: `ocx agent compaction-routing clear [--json]`
+Usage: `orl agent compaction-routing clear [--json]`
 
 Clear the compaction routing override block.
 
@@ -1116,9 +1116,9 @@ JSON mode: `envelope`.
 - Clear restores ordinary compaction routing; it does not disable compaction. Omitted triggers/sources retain server defaults.
 - Set replaces the full block, preserving canonical schema normalization only. No synthetic inference verifies the save. Writes report the actual normalized block and catalogRefreshPending, which is not a full catalog receipt.
 
-### `ocx memory`
+### `orl memory`
 
-Usage: `ocx memory [--limit <n>] [--json]`
+Usage: `orl memory [--limit <n>] [--json]`
 
 Read runtime memory and active-turn diagnostics.
 

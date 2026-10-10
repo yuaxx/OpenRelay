@@ -9,14 +9,14 @@ reject loopback, LAN and private addresses. That is why every community recipe f
 local models ends with ngrok, Cloudflare Tunnel or a VPS.
 
 Cursor also ships a second desktop build, **Cursor Private Inference**, whose agent loop runs
-locally and calls an OpenAI-compatible gateway you configure. Pointed at opencodex, it uses
+locally and calls an OpenAI-compatible gateway you configure. Pointed at OpenRelay, it uses
 your routed models with no tunnel, no app patching and no TLS. This page covers that build.
 
 ## Before you start
 
 Read this section first; it is the part people miss.
 
-- **opencodex does not distribute this build.** Cursor does not document it either. It is
+- **OpenRelay does not distribute this build.** Cursor does not document it either. It is
   not linked from cursor.com, may change without notice, and may stop being available. If
   you do not already have it, this guide does not apply; use the community
   [`ocx-cursor`](https://www.npmjs.com/package/ocx-cursor) bridge with a public HTTPS
@@ -24,7 +24,7 @@ Read this section first; it is the part people miss.
 - **Cursor sign-in is still required.** The login wall comes before the gateway dialog.
 - **Cursor's own models are unavailable.** In local mode the picker lists only what your
   gateway returns. Tab completion, Cursor's catalog (Composer, Auto) and Cloud Agents are
-  off. You can still reach Cursor-provider models through opencodex's own `cursor/*`
+  off. You can still reach Cursor-provider models through OpenRelay's own `cursor/*`
   routes if you have configured that provider.
 - **Every turn carries Cursor's local system prompt**, roughly 23k tokens on the second
   and later turns. Budget for it when you pick a model.
@@ -51,12 +51,12 @@ on inside the workbench bundle, not in `product.json`, so there is no flag to fl
 `nameLong` says regular Cursor, that install cannot reach a loopback gateway.
 
 The agent loop that talks to the gateway lives in one file under the same install root,
-`extensions/cursor-agent-exec/dist/main.js`. opencodex reads it (read-only, bounded) to learn
+`extensions/cursor-agent-exec/dist/main.js`. OpenRelay reads it (read-only, bounded) to learn
 Cursor's reasoning-effort table; see "Models and reasoning effort".
 
 ## Configure the gateway
 
-opencodex needs to be running (`ocx service status`). Then either of these works; both
+OpenRelay needs to be running (`orl service status`). Then either of these works; both
 end up in the same place.
 
 **In the app.** Settings → Models → Gateway → Configure gateway:
@@ -66,7 +66,7 @@ end up in the same place.
 | Base URL | `http://127.0.0.1:10100/v1` (include `/v1`; plain `http://` loopback is accepted) |
 | API Key | the value of `OPENCODEX_API_AUTH_TOKEN` if your service uses API auth, otherwise any placeholder such as `opencodex-loopback` |
 
-Click **Refresh model list**. The picker fills with opencodex's `/v1/models`; switch on the
+Click **Refresh model list**. The picker fills with OpenRelay's `/v1/models`; switch on the
 rows you want.
 
 **With environment variables.** The app reads these at start:
@@ -99,7 +99,7 @@ arm64). Configuration is identical across them.
 
 ## From the dashboard
 
-The opencodex dashboard has a **Cursor** tab under Integrations (`/#integrations/cursor`). It is
+The OpenRelay dashboard has a **Cursor** tab under Integrations (`/#integrations/cursor`). It is
 read-only toward Cursor: it never writes Cursor's settings database, keychain entry, or app
 bundle, so there is no switch to flip. What it does is hand you the values and show you whether
 they took.
@@ -110,7 +110,7 @@ they took.
   Cursor's own update channel which local-mode installer it advertises for this platform and CPU
   (the `cursor-local` channel on `api2.cursor.sh`) and shows that version with a link to the
   `downloads.cursor.com/local-mode/` installer. Nothing is requested until you press the button:
-  opening the tab and its periodic refresh never contact Cursor's channel. opencodex only displays the
+  opening the tab and its periodic refresh never contact Cursor's channel. OpenRelay only displays the
   link: it never downloads, launches or installs anything. The answer is cached for 30 minutes
   (5 after a failure). When the channel cannot be reached, answers with something unusable, or
   Cursor ships no build for this computer (only x64 and arm64 on Windows, macOS and Linux have
@@ -120,7 +120,7 @@ they took.
 - **Gateway values.** The Base URL on the proxy's own listening port (from its runtime record,
   so a reverse-proxied dashboard still shows the port Cursor on this machine can reach), with a
   Copy button. The API Key row depends on the bind: when it needs no credential the row is
-  `opencodex-loopback` with Copy; when API auth is on, or any opencodex API key is configured,
+  `opencodex-loopback` with Copy; when API auth is on, or any OpenRelay API key is configured,
   the row tells you to use one of your own keys and links to the API Keys tab. Any configured
   key works, not only `OPENCODEX_API_AUTH_TOKEN`.
 - **Connection.** The last `/v1/models` request whose User-Agent is exactly `Cursor/<version>`
@@ -128,23 +128,23 @@ they took.
   "never seen" until Cursor calls the proxy; pressing
   **Refresh model list** in Cursor is what makes it flip. The card refreshes every 15 seconds
   while the tab is open.
-- **What Cursor will show.** A Model / Reasoning / Context table for the models opencodex
+- **What Cursor will show.** A Model / Reasoning / Context table for the models OpenRelay
   advertises (disabled models and provider allowlists apply, the same as the raw list),
   following the rules in the next section. It is a prediction: Cursor picks the Reasoning
   ladder from its own table.
 
 ## Models and reasoning effort
 
-The picker is opencodex's raw `/v1/models` list. Two things decide whether a model row gets
+The picker is OpenRelay's raw `/v1/models` list. Two things decide whether a model row gets
 a **Reasoning** control:
 
-1. opencodex must advertise capabilities on the row (`api_types` plus a `capabilities`
+1. OpenRelay must advertise capabilities on the row (`api_types` plus a `capabilities`
    object). It does, from v2.41. Older proxies show the models but no effort control.
 2. The model id, after stripping everything up to the last `/` and any `@…` suffix, must
    match Cursor's own effort table. That table is compiled into the app
-   (`extensions/cursor-agent-exec/dist/main.js`); opencodex reads it from the detected install
+   (`extensions/cursor-agent-exec/dist/main.js`); OpenRelay reads it from the detected install
    so the dashboard prediction follows a Cursor update, and the card says which build it read
-   or "static mirror" when none was found. Cursor decides the ladder, not opencodex, and no
+   or "static mirror" when none was found. Cursor decides the ladder, not OpenRelay, and no
    `/v1/models` field can add a model to that table. The matrix below is the 3.18.25 snapshot
    the static mirror carries:
 
@@ -158,7 +158,7 @@ a **Reasoning** control:
 | `gemini-*` (needs `supports_reasoning`) | Minimal, Low, Medium, High | `reasoning_effort` |
 | anything else, including `claude-fable-5-1`, `kimi-k3` | no control | — |
 
-So `anthropic/claude-opus-5` works, and opencodex's `max`/`ultra` tiers for GPT-5.6 are not
+So `anthropic/claude-opus-5` works, and OpenRelay's `max`/`ultra` tiers for GPT-5.6 are not
 reachable from this picker.
 
 ### Models with no control
@@ -168,7 +168,7 @@ Reasoning control, and Cursor logs one line per such id when the gateway adverti
 `supports_reasoning`: "Local provider advertises reasoning support for a model with no
 hardcoded Bottlerocket effort family". Two ways to still choose an effort:
 
-- **Effort rows** (`cursorEffortRows: true` in the opencodex config, default off): the gateway
+- **Effort rows** (`cursorEffortRows: true` in the OpenRelay config, default off): the gateway
   publishes one picker entry per effort for table-less models, such as
   `anthropic/claude-fable-5-1--high` or `cursor/kimi-k3--max`, and routes each to the base
   model with that effort applied. Models Cursor already renders get no extra rows, and an exact
@@ -182,33 +182,33 @@ hardcoded Bottlerocket effort family". Two ways to still choose an effort:
 
 Regular Cursor shows a **Max** toggle next to some models. That is Max Mode, a larger context
 window, not a reasoning tier. In the local-agent build the same idea appears as a **Context**
-entry in the model menu, and opencodex lights it up for the native GPT-5.6 family: **272K**
+entry in the model menu, and OpenRelay lights it up for the native GPT-5.6 family: **272K**
 (default) or **922K** (the 1M opt-in, marked as costing more). The value you pick caps that
 turn's context. Routed models show a single window and no Context entry; a provider context
 cap below 922K removes the entry for the native rows too.
 
-Reasoning-effort **Max** (opencodex's `max`/`ultra`) is the other meaning, and that one is
+Reasoning-effort **Max** (OpenRelay's `max`/`ultra`) is the other meaning, and that one is
 not reachable: Cursor takes the effort ladder from its own table rather than from the gateway,
 and the GPT-5.6 entry stops at Extra High.
 
-Because opencodex advertises `responses` in `api_types`, this build sends agent turns to
+Because OpenRelay advertises `responses` in `api_types`, this build sends agent turns to
 `/v1/responses` with `reasoning.effort`, not to `/v1/chat/completions`.
 
 That wire choice has a side effect for Claude rows: Cursor sends Claude effort only as
 `output_config.effort` on the Anthropic Messages wire, so with a `/v1` Base URL a Claude row
 that does show a control still runs at the provider default. A Base URL ending in `/messages`
 reverses it: Claude effort is sent and OpenAI-family effort is dropped. One gateway entry cannot
-serve both families; effort rows (above) side-step this because opencodex applies the effort
+serve both families; effort rows (above) side-step this because OpenRelay applies the effort
 itself.
 
 ## Verify
 
-`ocx observe logs` shows the turns as `inboundProtocol: responses` with `admissionKind: loopback`.
+`orl observe logs` shows the turns as `inboundProtocol: responses` with `admissionKind: loopback`.
 
 | Symptom | Check |
 |---|---|
 | 401 from the gateway | the API Key does not match `OPENCODEX_API_AUTH_TOKEN`; for a loopback bind without API auth any value works |
-| picker is empty | opencodex is not running, or the Base URL is missing `/v1`; press Refresh model list after fixing |
-| models listed but no Reasoning control | opencodex older than v2.41, or the id is not in Cursor's table (the dashboard marks it —); turn on `cursorEffortRows` or set a provider default |
+| picker is empty | OpenRelay is not running, or the Base URL is missing `/v1`; press Refresh model list after fixing |
+| models listed but no Reasoning control | OpenRelay older than v2.41, or the id is not in Cursor's table (the dashboard marks it —); turn on `cursorEffortRows` or set a provider default |
 | a schema change is not picked up | Cursor caches `/models` per Base URL string with no expiry; Refresh model list re-reads it, otherwise restart the app or temporarily save a different spelling of the URL (`localhost` vs `127.0.0.1`) |
 | 23k-token first turn | expected; that is Cursor's local system prompt |

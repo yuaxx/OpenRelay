@@ -1,4 +1,5 @@
 import { DashboardOverviewHead } from "./dashboard-overview-head";
+import { DashboardRtk } from "./dashboard-rtk";
 import { DashboardOverviewPanels } from "./dashboard-overview-panels";
 import type { useDashboardData } from "./use-dashboard-data";
 
@@ -8,6 +9,7 @@ export function DashboardOverviewSection(d: Dash) {
   return (
     <div className="dash-overview-stack">
       <DashboardOverviewHead {...d} />
+      <DashboardRtk key={d.apiBase} apiBase={d.apiBase} settings={d.settings?.rtk} />
       <DashboardOverviewPanels {...d} />
     </div>
   );

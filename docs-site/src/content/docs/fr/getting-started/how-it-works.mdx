@@ -1,11 +1,11 @@
 ---
 title: Fonctionnement
-description: Le cycle de vie complet d’une requête opencodex — analyse, routage, adaptation, pont et diffusion.
+description: Le cycle de vie complet d’une requête OpenRelay — analyse, routage, adaptation, pont et diffusion.
 ---
 
 import { Steps } from '@astrojs/starlight/components';
 
-Codex communique au moyen de l’**API Responses** d’OpenAI. opencodex accepte `POST /v1/responses`
+Codex communique au moyen de l’**API Responses** d’OpenAI. OpenRelay accepte `POST /v1/responses`
 sur HTTP avec des événements envoyés par le serveur, ainsi qu’une mise à niveau WebSocket facultative
 sur le même chemin. Il traduit la requête vers le protocole du fournisseur, puis reconvertit la réponse
 en événements Responses. Codex ignore ainsi qu’il ne dialogue pas avec OpenAI.
@@ -26,13 +26,13 @@ en événements Responses. Codex ignore ainsi qu’il ne dialogue pas avec OpenA
 
 ## Sélection du compte d’authentification Codex
 
-Lorsque le fournisseur sélectionné est le relais ChatGPT/Codex, opencodex peut choisir un compte dans
+Lorsque le fournisseur sélectionné est le relais ChatGPT/Codex, OpenRelay peut choisir un compte dans
 le pool enregistré avant de transmettre la requête en amont. Cette règle distingue volontairement deux cas :
 
 - **Les fils existants conservent leur affinité.** Un fil reste lié à la génération du compte qui l’a
   démarré. Une longue session SSH, tmux ou Codex connectée depuis un appareil mobile conserve donc le
   même compte au lieu d’être rééquilibrée en pleine conversation.
-- **Les nouvelles sessions peuvent être rééquilibrées.** Pour un nouveau fil, opencodex choisit parmi les comptes admissibles selon
+- **Les nouvelles sessions peuvent être rééquilibrées.** Pour un nouveau fil, OpenRelay choisit parmi les comptes admissibles selon
   `accountPoolStrategy` (`quota` par défaut, ou `round-robin` / `fill-first`). La stratégie `quota`
   compare l’utilisation connue sur les fenêtres de 5 heures, d’une semaine et de 30 jours. Il peut choisir
   un compte moins utilisé lorsque le compte actif franchit `autoSwitchThreshold`. Les comptes en délai de
@@ -65,22 +65,22 @@ le modèle et l’effort de raisonnement à utiliser. Les requêtes v2 conserven
    (`claude-`, `gpt-`, `o1-`/`o3-`/`o4-`, `llama-`/`mixtral-`/`gemma-`) → le `models[]` d'un fournisseur →
    `defaultProvider` de secours. Consultez [Routage des modèles](/fr/guides/model-routing/).
 
-3. **Authentification** — pour un fournisseur `oauth`, opencodex injecte un jeton d’accès automatiquement
+3. **Authentification** — pour un fournisseur `oauth`, OpenRelay injecte un jeton d’accès automatiquement
    actualisé comme jeton Bearer, ce qui permet aux adaptateurs existants de s’authentifier sans modification.
    Pour les comptes du pool ChatGPT/Codex, `codex/auth-context.ts` résout d’abord le compte et l’adaptateur
    de transfert direct refuse de poursuivre si les informations d’identification requises sont indisponibles.
 
 4. **Service auxiliaire de vision (facultatif)** — si le modèle routé figure dans `provider.noVisionModels` et que
-   la requête contient une image, opencodex fait décrire chaque image par le service auxiliaire de vision ChatGPT
+   la requête contient une image, OpenRelay fait décrire chaque image par le service auxiliaire de vision ChatGPT
    configuré, puis la remplace par du texte afin qu’un modèle textuel puisse tout de même la traiter.
    Voir [Services auxiliaires](/fr/guides/sidecars/).
 
 5. **Transfert direct rapide** — si l’adaptateur transfère directement les Responses (`openai-responses` ou
-   `azure-openai`), opencodex conserve le corps Responses, applique les réécritures de routage et de
+   `azure-openai`), OpenRelay conserve le corps Responses, applique les réécritures de routage et de
    compatibilité ciblées, puis relaie la réponse sans la convertir en événements `AdapterEvent`.
 
 6. **Service auxiliaire de recherche web (facultatif)** — si Codex active l’outil hébergé `web_search` alors que
-   le modèle routé n’est pas un modèle OpenAI, opencodex expose une fonction synthétique `web_search` et
+   le modèle routé n’est pas un modèle OpenAI, OpenRelay expose une fonction synthétique `web_search` et
    exécute le modèle dans une courte boucle agentique. Par défaut, les recherches réelles passent par
    `gpt-5.6-luna` avec votre connexion ChatGPT, puis leurs résultats sont réinjectés comme résultats d’outil.
 
@@ -89,7 +89,7 @@ le modèle et l’effort de raisonnement à utiliser. Les requêtes v2 conserven
    modèle routé produit un résumé sans outil et renvoie l’historique de remplacement attendu par Codex.
 
 8. **Adaptation** — sinon, la méthode `buildRequest()` de l’adaptateur choisi produit la requête HTTP en amont
-   (URL, en-têtes et corps) dans le format natif du fournisseur, puis opencodex l’envoie avec `fetch`.
+   (URL, en-têtes et corps) dans le format natif du fournisseur, puis OpenRelay l’envoie avec `fetch`.
 9. **Pont de réponse** — la méthode `parseStream()` (ou `parseResponse()`) de l’adaptateur produit des `AdapterEvent` internes
    (texte, raisonnement, début/delta/fin d’appel d’outil, fin et erreur). `bridge.ts` reconvertit ce flux
    en événements Responses SSE — `response.output_text.delta`, `response.reasoning_summary_text.delta`,
@@ -101,7 +101,7 @@ le modèle et l’effort de raisonnement à utiliser. Les requêtes v2 conserven
 ## Pourquoi un proxy et pas un fork Codex ?
 
 Codex utilise directement l’API Responses. En traduisant les échanges à la frontière du protocole,
-opencodex fonctionne avec les **CLI, App et SDK** Codex sans modification, résiste aux mises à jour de
+OpenRelay fonctionne avec les **CLI, App et SDK** Codex sans modification, résiste aux mises à jour de
 Codex et permet de changer de fournisseur pour chaque requête sans toucher au client. La traduction est
 bidirectionnelle et fidèle à la diffusion : résumés de raisonnement, espaces de noms d’outils MCP, outils
 libres (`apply_patch`) et découverte `tool_search` effectuent tous un aller-retour correct. Consultez la

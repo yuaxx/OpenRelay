@@ -19,10 +19,10 @@ export function recoveryAccountLabel(id: string, display: string): string {
 
 export function emptyAccountNextAction(provider?: string, type?: AccountType): string {
   const name = provider && commandSelector(provider);
-  if (!name) return "Next: ocx account login <provider> (see ocx help account login)";
+  if (!name) return "Next: orl account login <provider> (see orl help account login)";
   return type === "api-key"
-    ? `Next: ocx account add-key ${name} (pipe the key from a human-controlled stdin source; see ocx help account add-key)`
-    : `Next: ocx account login ${name}`;
+    ? `Next: orl account add-key ${name} (pipe the key from a human-controlled stdin source; see orl help account add-key)`
+    : `Next: orl account login ${name}`;
 }
 
 export function projectAccountHealth(
@@ -35,8 +35,8 @@ export function projectAccountHealth(
   const name = commandSelector(provider);
   const selector = commandSelector(id);
   const reauth = provider === "openai" && id === "__main__"
-    ? "ocx account main reauth --device"
-    : name && selector ? `ocx account reauth ${name} --id ${selector}` : "ocx help account reauth";
+    ? "orl account main reauth --device"
+    : name && selector ? `orl account reauth ${name} --id ${selector}` : "orl help account reauth";
   let healthAction: string | undefined;
   switch (health) {
     case "Reauthentication required":
@@ -47,7 +47,7 @@ export function projectAccountHealth(
       healthAction = `Verify the account with the provider in a browser, then run: ${reauth}`;
       break;
     case "Credential conflict":
-      healthAction = "Ensure only one proxy process writes the credential store, then run: ocx doctor";
+      healthAction = "Ensure only one proxy process writes the credential store, then run: orl doctor";
       break;
     case "Validation pending":
       healthAction = "Wait for quota recovery, then click Refresh quotas in the dashboard Codex account pool";

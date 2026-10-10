@@ -1,9 +1,9 @@
 ---
 title: Référence de configuration
-description: Où opencodex stocke la configuration, comment les modifications sont appliquées et les liens vers chaque domaine de configuration.
+description: Où OpenRelay stocke la configuration, comment les modifications sont appliquées et les liens vers chaque domaine de configuration.
 ---
 
-opencodex stocke sa configuration persistante dans `$OPENCODEX_HOME/config.json`, normalement
+OpenRelay stocke sa configuration persistante dans `$OPENCODEX_HOME/config.json`, normalement
 `~/.opencodex/config.json`. Sous Windows, la valeur par défaut est
 `%USERPROFILE%\.opencodex\config.json`.
 
@@ -12,8 +12,8 @@ opencodex stocke sa configuration persistante dans `$OPENCODEX_HOME/config.json`
 Choisissez le canal d'édition qui correspond à la tâche :
 
 - **Tableau de bord :** utilisez l'interface Web pour configurer de manière guidée les fournisseurs, les modèles, les agents, les accès et le stockage.
-- **Interface en ligne de commande :** `ocx init` crée le fichier initial, tandis que des commandes telles que `ocx provider`, `ocx models`,
-  `ocx combo`, `ocx agent` et `ocx config` mettent à jour ou consultent les paramètres qui leur sont propres.
+- **Interface en ligne de commande :** `orl init` crée le fichier initial, tandis que des commandes telles que `orl provider`, `orl models`,
+  `orl combo`, `orl agent` et `orl config` mettent à jour ou consultent les paramètres qui leur sont propres.
 - **Fichier :** modifiez directement `config.json` pour les champs qui ne disposent ni d'une interface dédiée ni d'une commande. Le fichier doit
   rester au format JSON valide.
 
@@ -23,7 +23,7 @@ enregistrement ultérieur à chaud peut donc réécrire, depuis cet instantané,
 `claudeCode` et ceux de liaison de l'écouteur modifiés en externe sont fusionnés lorsqu'ils bénéficient d'une protection explicite contre les conflits, mais cette
 protection ne s'étend pas à toutes les sous-arborescences.
 
-Si le fichier ne peut pas être analysé, opencodex le sauvegarde en tant que
+Si le fichier ne peut pas être analysé, OpenRelay le sauvegarde en tant que
 `config.json.invalid-<timestamp>`, affiche un avertissement dans la console et démarre avec les valeurs par défaut. Si le fichier est absent,
 la valeur par défaut d'une nouvelle installation est également utilisée : un fournisseur `openai` en mode transfert.
 
@@ -56,8 +56,8 @@ stockés dans des magasins d'informations d'identification distincts plutôt que
 rester confidentiels ; utilisez des alias de sélection publics lorsqu'ils sont pris en charge.
 
 :::note[Écritures atomiques]
-opencodex écrit les fichiers gérés `config.toml` et `opencodex-catalog.json` dans un fichier temporaire,
+OpenRelay écrit les fichiers gérés `config.toml` et `opencodex-catalog.json` dans un fichier temporaire,
 puis le renomme (`atomicWriteFile`).
-Cela évite les fichiers partiels lorsque plusieurs processus d'écriture, comme `ocx stop` et le gestionnaire d'arrêt du proxy,
+Cela évite les fichiers partiels lorsque plusieurs processus d'écriture, comme `orl stop` et le gestionnaire d'arrêt du proxy,
 restaurent Codex simultanément.
 :::

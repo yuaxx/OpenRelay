@@ -50,7 +50,7 @@ export async function handleCatalogCommand(args: string[]): Promise<number> {
       cacheSynced: false, codexRestarted: false, code: "usage",
     };
     if (json) console.log(JSON.stringify(envelope));
-    else console.error("Usage: ocx catalog pull <https-url> [--auth-env <NAME>] [--json] [--restart-codex] [--restart-app-server-only]");
+    else console.error("Usage: orl catalog pull <https-url> [--auth-env <NAME>] [--json] [--restart-codex] [--restart-app-server-only]");
     return 2;
   }
   let token: string | undefined;

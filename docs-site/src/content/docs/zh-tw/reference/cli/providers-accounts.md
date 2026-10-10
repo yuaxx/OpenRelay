@@ -7,7 +7,7 @@ description: 供應商設定、憑證、配額與模型目錄指令。
 
 ## 供應商
 
-### `ocx provider <subcommand>`
+### `orl provider <subcommand>`
 
 非互動式供應商管理。Registry 項目依名稱播種；自訂名稱需要同時提供 `--adapter` 與 `--base-url`。
 
@@ -28,43 +28,43 @@ description: 供應商設定、憑證、配額與模型目錄指令。
 預設的 `add`、`remove` 與 `set-default` 修改本機設定。修改執行中的代理需加 `--live`，線上刪除還需 `--yes`。`--sync --json` 同樣會在儲存後嘗試同步；失敗時保留儲存結果，以非零狀態結束，並回傳 `needsSync: true`。`--live` 不能與 `--sync` 同用。pacing 與 snapshot/apply 操作請見[英文指南](/reference/cli/providers-accounts/#snapshot-edit-and-apply-with-a-baseline)。
 
 ```bash
-ocx provider list --json
-ocx provider list --jsonl
-ocx provider test ark
-ocx provider add anthropic --api-key sk-ant-... --set-default --sync
-ocx provider add local-dev --adapter openai-chat --base-url http://localhost:11434/v1
-ocx provider show anthropic --json
-ocx models --provider anthropic --json
-ocx models live --provider ark --json
+orl provider list --json
+orl provider list --jsonl
+orl provider test ark
+orl provider add anthropic --api-key sk-ant-... --set-default --sync
+orl provider add local-dev --adapter openai-chat --base-url http://localhost:11434/v1
+orl provider show anthropic --json
+orl models --provider anthropic --json
+orl models live --provider ark --json
 ```
 
 `--jsonl` 僅輸出已設定的供應商，每行一個 JSON 物件。每個物件的欄位與 `--json` 輸出中 `configured` 陣列的元素相同，不包含 `registryCount` 摘要。指令碼可以逐行處理這些物件。`--json` 與 `--jsonl` 不能同時使用。
 
 ## 認證
 
-### `ocx login <provider>`
+### `orl login <provider>`
 
 啟動供應商已註冊的登入流程。OAuth 供應商會開啟瀏覽器並在 `~/.opencodex/` 下儲存自動重新整理的憑證；API-key 登入供應商會開啟其金鑰儀表板、提示輸入金鑰、在可能時驗證它，並儲存產生的供應商設定。當名稱缺失或未知時，指令會印出目前接受的 OAuth 與 API-key 供應商 id。
 
-在 `ocx status` / `ocx doctor` 回報需要重新認證或終端 refresh 失敗後，請使用相同指令**重新認證**（或在儀表板中使用 Reauthenticate）。Codex pool 帳號不是上面那些 OAuth／API key 供應商，但 `ocx login codex` 可以到達：它會轉到帳號池登入，所以 `ocx login codex --reauth` 等同於 `ocx account reauth codex`。儀表板的 Codex 帳號池（Reauthenticate）也可以。這條路徑跑在 proxy 內部，需要 proxy 正在執行。
+在 `orl status` / `orl doctor` 回報需要重新認證或終端 refresh 失敗後，請使用相同指令**重新認證**（或在儀表板中使用 Reauthenticate）。Codex pool 帳號不是上面那些 OAuth／API key 供應商，但 `orl login codex` 可以到達：它會轉到帳號池登入，所以 `orl login codex --reauth` 等同於 `orl account reauth codex`。儀表板的 Codex 帳號池（Reauthenticate）也可以。這條路徑跑在 proxy 內部，需要 proxy 正在執行。
 
 ```bash
-ocx login xai
-ocx login anthropic
+orl login xai
+orl login anthropic
 ```
 
-### `ocx logout <provider>`
+### `orl logout <provider>`
 
 移除供應商已儲存的 OAuth 憑證。
 
 ## 帳號與金鑰池
 
-### `ocx account <subcommand>`
+### `orl account <subcommand>`
 
 透過執行中的代理列出並切換供應商帳號與 API-key 池。隨附的說明介面如下：
 
 ```text
-Usage: ocx account <list|history|current|use|clear|refresh|auto-switch|alias|priority|pause|resume|pause-exhausted|strategy|sticky|remove|clear-cooldown|add-key|import|import-orca|login|reauth|code|cancel|reset-credits|grok-reset-coupons|main> ...
+Usage: orl account <list|history|current|use|clear|refresh|auto-switch|alias|priority|pause|resume|pause-exhausted|strategy|sticky|remove|clear-cooldown|add-key|import|import-orca|login|reauth|code|cancel|reset-credits|grok-reset-coupons|main> ...
 
 list [provider]     Codex 帳號池、OAuth 帳號與 API 金鑰（識別碼依 API 回傳遮罩顯示）。
 history openai <pool-account-id> [--limit <1-200>]  單一 Codex 帳號池帳號的近期路由決策。
@@ -111,15 +111,15 @@ Codex 池選擇套用於清除既有親和性後的下一個請求；進行中�
 }
 ```
 
-### `ocx account list [provider] [--json] [--all] [--quota [--refresh]]`
+### `orl account list [provider] [--json] [--all] [--quota [--refresh]]`
 
-未指定供應商時，列出 Codex 池、OAuth 帳號與已設定的 API-key 池。除非存在 `--all`，否則空的供應商會被跳過。指定供應商時，僅列出該憑證家族。人類輸出使用 `PROVIDER TYPE ID PLAN/LABEL STATUS`；手動選擇的 Codex 列標記為 `selected`。當儲存了兩個以上符合資格的 Kiro 帳號時，預設情況下 429 會自動輪換至另一個帳號，並優先選擇已知剩餘額度最多的帳號；輪換由帳號存在與否驅動，且無法關閉；`oauthAccountFailover.enabled: false` 拒絕的是送出前的帳號優選，而非 429 復原。`ocx account login kiro` 每次將一個帳號加入池中。空結果仍為成功。`--json` 回傳：
+未指定供應商時，列出 Codex 池、OAuth 帳號與已設定的 API-key 池。除非存在 `--all`，否則空的供應商會被跳過。指定供應商時，僅列出該憑證家族。人類輸出使用 `PROVIDER TYPE ID PLAN/LABEL STATUS`；手動選擇的 Codex 列標記為 `selected`。當儲存了兩個以上符合資格的 Kiro 帳號時，預設情況下 429 會自動輪換至另一個帳號，並優先選擇已知剩餘額度最多的帳號；輪換由帳號存在與否驅動，且無法關閉；`oauthAccountFailover.enabled: false` 拒絕的是送出前的帳號優選，而非 429 復原。`orl account login kiro` 每次將一個帳號加入池中。空結果仍為成功。`--json` 回傳：
 
 ```text
 { accounts: AccountRow[], notes: string[] }
 ```
 
-### `ocx account current <provider> [--json]`
+### `orl account current <provider> [--json]`
 
 顯示現用帳號或金鑰。無手動 pin 的 Codex 池回報自動最低用量選擇；另一個無現用憑證的家族回報該狀態並仍離開 0。`--json` 回傳：
 
@@ -127,24 +127,24 @@ Codex 池選擇套用於清除既有親和性後的下一個請求；進行中�
 { provider, type, activeId: string | null, autoSwitchThreshold?: number, account: AccountRow | null }
 ```
 
-### `ocx account use <provider> <account-or-key-id|alias|main|auto> [--json]`
+### `orl account use <provider> <account-or-key-id|alias|main|auto> [--json]`
 
-`auto` 會清除手動選擇，讓池重新依自身策略分配工作 — 但若 Codex 帳號的 id 恰為 `auto`，則精確 id 比對優先；`ocx account clear <provider>` 一律還原自動選擇。Codex 帳號可以用 `ocx account alias` 設定的別名代替 id 來指定；`priority`、`pause`、`resume`、`clear-cooldown`、`remove` 與 `alias` 亦然。對於 Codex 帳號，`auto`、`main` 和 `__main__` 為保留字（不區分大小寫），不能設為別名。OAuth 帳號與 API 金鑰的顯示名稱仍遵循原有規則。
+`auto` 會清除手動選擇，讓池重新依自身策略分配工作 — 但若 Codex 帳號的 id 恰為 `auto`，則精確 id 比對優先；`orl account clear <provider>` 一律還原自動選擇。Codex 帳號可以用 `orl account alias` 設定的別名代替 id 來指定；`priority`、`pause`、`resume`、`clear-cooldown`、`remove` 與 `alias` 亦然。對於 Codex 帳號，`auto`、`main` 和 `__main__` 為保留字（不區分大小寫），不能設為別名。OAuth 帳號與 API 金鑰的顯示名稱仍遵循原有規則。
 
-選擇既有的 Codex 帳號、OAuth 帳號或 API 金鑰。對於 `openai`，`main` 選擇 Codex App 登入。Codex 池選擇清除行程本地親和性並套用於下一個請求，包含來自既有可見任務的請求；代理重啟或親和性驅逐也可能使任務未綁定，而進行中的請求保留其擷取的帳號。這僅控制池路由；Direct 模式繼續使用呼叫者擁有／原生的 main 憑證。基於用量的主動切換、401/403 重新認證、429/retry-after 冷卻、排除，以及 pre-output 429/402 失敗復原稍後可能選擇另一個合格的池帳號。當基於用量的切換關閉時，這些復原路徑仍然活躍。OpenCodex 在帳號變更後重播對話，但供應商端的 prompt cache 可能是冷的。未知的供應商或 id 離開 1。
+選擇既有的 Codex 帳號、OAuth 帳號或 API 金鑰。對於 `openai`，`main` 選擇 Codex App 登入。Codex 池選擇清除行程本地親和性並套用於下一個請求，包含來自既有可見任務的請求；代理重啟或親和性驅逐也可能使任務未綁定，而進行中的請求保留其擷取的帳號。這僅控制池路由；Direct 模式繼續使用呼叫者擁有／原生的 main 憑證。基於用量的主動切換、401/403 重新認證、429/retry-after 冷卻、排除，以及 pre-output 429/402 失敗復原稍後可能選擇另一個合格的池帳號。當基於用量的切換關閉時，這些復原路徑仍然活躍。OpenRelay 在帳號變更後重播對話，但供應商端的 prompt cache 可能是冷的。未知的供應商或 id 離開 1。
 在 **401/403** 時，App 登入清除該帳號的行程本地親和性並要求重新認證。
-在 **429** 時，opencodex 遵循 `Retry-After`、啟動帳號冷卻、清除親和性，並可能將請求輪換到另一個合格的池帳號。這些失敗轉換在 `autoSwitchThreshold: 0` 時仍然活躍；該設定僅停用基於用量的主動切換。
+在 **429** 時，OpenRelay 遵循 `Retry-After`、啟動帳號冷卻、清除親和性，並可能將請求輪換到另一個合格的池帳號。這些失敗轉換在 `autoSwitchThreshold: 0` 時仍然活躍；該設定僅停用基於用量的主動切換。
 `--json` 回傳：
 
 ```text
 { ok: true, provider, type, activeId }
 ```
 
-### `ocx account clear <provider> [--json]`
+### `orl account clear <provider> [--json]`
 
 不解析帳號 id 即清除 Codex 帳號的手動選擇，即使存在名為 `auto` 的帳號仍有效。僅適用於 Codex 池；其他提供者類型沒有可還原的自動選擇。
 
-### `ocx account pause|resume <provider> <id|alias|main> [--json]`
+### `orl account pause|resume <provider> <id|alias|main> [--json]`
 
 暫停或恢復 Codex、Anthropic 或通用 OAuth 供應商池中的單一帳號，包括
 `google-antigravity`。在 Codex 池中，`main` 僅代表 Codex 內建帳號；OAuth 帳號必須用 id 或唯一別名識別。
@@ -160,49 +160,49 @@ Anthropic 暫停不受帳號池啟用開關影響，包含工作階段綁定與 
 刪除帳號會一併刪除暫停狀態；個別帳號的自動切換門檻不在此功能範圍內。
 
 ```bash
-ocx account pause google-antigravity <account-id-or-alias>
-ocx account resume google-antigravity <account-id-or-alias>
+orl account pause google-antigravity <account-id-or-alias>
+orl account resume google-antigravity <account-id-or-alias>
 ```
 
-### `ocx account clear-cooldown <openai|anthropic> <id|alias|main> [--json]`
+### `orl account clear-cooldown <openai|anthropic> <id|alias|main> [--json]`
 
 清除行程本地的失敗冷卻，但不變更已儲存的憑證。Codex 池帳號使用 `openai`，Anthropic
 OAuth 帳號使用 `anthropic`；其他供應商會被拒絕。兩種形式都接受帳號 id 或唯一別名，
 而 `main` 僅適用於 Codex 池。
 
 ```bash
-ocx account clear-cooldown anthropic <id-or-alias>
+orl account clear-cooldown anthropic <id-or-alias>
 ```
 
 即使沒有作用中的冷卻，命令也會成功，JSON 中的 `cleared` 為 `false`。清除 Anthropic
 冷卻也會推進帳號 generation，因此舊的 quota probe 無法恢復已清除狀態或發布過期的配額資格。
 
-### `ocx account refresh <provider> [--json]`
+### `orl account refresh <provider> [--json]`
 
-對於 Codex 池，請使用 `ocx account refresh openai [--json]`。它強制重新整理帳號配額並印出可用的週／月百分比與重置時間；缺失的配額資料被回報為未知，而非 0%。其 JSON 封裝為 `{ accounts: AccountRow[] }`，每個 Codex 列上有 `quota`。
+對於 Codex 池，請使用 `orl account refresh openai [--json]`。它強制重新整理帳號配額並印出可用的週／月百分比與重置時間；缺失的配額資料被回報為未知，而非 0%。其 JSON 封裝為 `{ accounts: AccountRow[] }`，每個 Codex 列上有 `quota`。
 
 對於 OAuth 與 API-key 供應商，這會強制重新整理供應商配額報告端點；它不是 token 重新登入或普通的帳號清單重新讀取。`--json` 回傳
 `{ provider, report: ProviderQuotaReport | null }`。無支援配額報告的供應商會印出
 `no quota report available for <provider>` 並離開 0。未知供應商與管理 API 失敗離開 1；失敗或逾時的上游配額探測會降級為 null 或過時報告（離開 0），與儀表板的配額列一致。
 
-### `ocx account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]`
+### `orl account auto-switch <provider> <on|off|status|threshold <0-100>> [--json]`
 
 控制 `openai` Codex 帳戶池閾值，或儲存通用 OAuth 帳戶池閾值。`on` 儲存 80%，`off` 儲存 0%，`threshold <n>` 接受 0–100。通用池的閾值只有在 `pool.kernel` 開啟且 `strategy: "fill-first"` 時才參與選擇；旗標關閉時，儲存閾值不會啟用閾值切換。兩種情況下都不會改變供應商啟用設定或停用 429 錯誤後的輪替。通用池的查詢與修改結果使用伺服器確認值。通用池的 `poolEnabled` 是已儲存的供應商設定，`null` 表示未指定，並不代表繼承後的實際狀態。`inert: true` 表示閾值已儲存但未套用，`inert: false` 表示帳戶池正在套用它。沒有 `inert` 欄位表示能力未知，此時同樣不會回報 `enabled: true`。API 金鑰供應商與無效值會被拒絕。
 
-### `ocx account auto-switch anthropic … --account <id>`
+### `orl account auto-switch anthropic … --account <id>`
 
-Anthropic OAuth 使用 `ocx account auto-switch anthropic threshold 90 --account <id>` 儲存帳戶專屬整數 0–100。`off --account <id>` 設為 0，`on --account <id>` 設為 80，`inherit --account <id>` 恢復繼承，`status --account <id>` 唯讀查詢；可加 `--json`。帳戶卡片提供相同控制。未設定/null 繼承 `anthropicAccountPool.autoSwitchThreshold`（預設 80）；0 只停用該帳戶依用量切換。設定在重啟和重新登入後保留，刪除帳戶時移除。手動選擇、affinity、未知或全部耗盡時的後備行為與模型路由限制不變。集區停用時不套用門檻；暫停與 429 復原仍有效。
+Anthropic OAuth 使用 `orl account auto-switch anthropic threshold 90 --account <id>` 儲存帳戶專屬整數 0–100。`off --account <id>` 設為 0，`on --account <id>` 設為 80，`inherit --account <id>` 恢復繼承，`status --account <id>` 唯讀查詢；可加 `--json`。帳戶卡片提供相同控制。未設定/null 繼承 `anthropicAccountPool.autoSwitchThreshold`（預設 80）；0 只停用該帳戶依用量切換。設定在重啟和重新登入後保留，刪除帳戶時移除。手動選擇、affinity、未知或全部耗盡時的後備行為與模型路由限制不變。集區停用時不套用門檻；暫停與 429 復原仍有效。
 
 ```text
 openai: { provider, autoSwitchThreshold: number, enabled: boolean }
 generic OAuth: { provider, autoSwitchThreshold: number | null, enabled: boolean, poolEnabled: boolean | null, inert: boolean | null }
 ```
 
-### `ocx account login|reauth|code|cancel ...`
+### `orl account login|reauth|code|cancel ...`
 
-從無頭 shell 執行基於瀏覽器或手動 code 的帳號認證。請使用 `ocx account --help` 查看供應商專屬的指令形式。
+從無頭 shell 執行基於瀏覽器或手動 code 的帳號認證。請使用 `orl account --help` 查看供應商專屬的指令形式。
 
-### `ocx account remove <provider> <id|alias|main> --yes [--json]`
+### `orl account remove <provider> <id|alias|main> --yes [--json]`
 
 此受保護的非互動刪除需要 `--yes`。刪除前，它驗證 id 存在；缺失的 id 離開 1 而不發送 DELETE。主要的 Codex App 登入無法被移除，因此 `remove openai main --yes` 被拒絕。刪除後，家族會再次讀取：移除 pin 的 Codex 帳號會清除 pin 並回到自動選擇；OAuth 提升第一個剩餘帳號或回報無；API-key 池提升第一個剩餘金鑰或回報無。`--json` 成功與失敗結構為：
 
@@ -211,42 +211,42 @@ generic OAuth: { provider, autoSwitchThreshold: number | null, enabled: boolean,
 { error: string } // stderr, exit 1
 ```
 
-### `ocx account add-key <provider> [--label <label>] [--json]`
+### `orl account add-key <provider> [--label <label>] [--json]`
 
 為 API-key 供應商新增並啟用金鑰。金鑰僅從非 TTY piped／重新導向的 stdin 讀取；互動式 TTY 輸入、空輸入、OAuth／Codex 供應商與 API 失敗離開 1。金鑰永不回顯，即使它出現在 label 中時亦然。偏好使用密碼管理員或 here-string：
 
 ```bash
-ocx account add-key openrouter --label personal <<< "$OPENROUTER_API_KEY"
-security find-generic-password -w openrouter | ocx account add-key openrouter --json
+orl account add-key openrouter --label personal <<< "$OPENROUTER_API_KEY"
+security find-generic-password -w openrouter | orl account add-key openrouter --json
 ```
 
 `--json` 回傳 `{ ok: true, id: string | null, label?: string }` 且永不包含金鑰。
 
-### `ocx account reset-credits <id|main> [--consume --yes]`
+### `orl account reset-credits <id|main> [--consume --yes]`
 
 檢查帳號的 Codex reset credits。消耗 credit 是破壞性的，需要同時提供 `--consume` 與 `--yes`。
 
-### `ocx account grok-reset-coupons [<account-id>] [--consume --yes [--token-id <id>] [--operation-id <uuid>]] [--json]`
+### `orl account grok-reset-coupons [<account-id>] [--consume --yes [--token-id <id>] [--operation-id <uuid>]] [--json]`
 
 檢查或兌換 xAI / Grok 帳號剩餘的 reset coupons。
 
 未加上 `--consume` 呼叫時，回傳可用的 coupon token 與其有效期間：
 
 ```bash
-ocx account grok-reset-coupons
-ocx account grok-reset-coupons acc_xai_01 --json
+orl account grok-reset-coupons
+orl account grok-reset-coupons acc_xai_01 --json
 ```
 
 兌換 reset coupon 會改變計費狀態，並永久消耗一個 coupon token。`--consume` 嚴格要求同時提供 `--yes`：
 
 ```bash
-ocx account grok-reset-coupons --consume --yes
-ocx account grok-reset-coupons --consume --yes --token-id <token-id>
+orl account grok-reset-coupons --consume --yes
+orl account grok-reset-coupons --consume --yes --token-id <token-id>
 ```
 
 傳入 `--operation-id <uuid>`（必須是有效的 UUIDv4）可保證結算具備冪等性。當網路中斷或命令重試時，相同的 operation id 會重播已持久化的結果，而不會再消耗一個 coupon。
 
-### `ocx account priority <provider> <account-id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]`
+### `orl account priority <provider> <account-id|alias|main> [<-100..100|first|earlier|normal|later|last|reset>] [--json]`
 
 讀取或設定某個 Codex pool account 的選擇順序：**數值越高越早使用**，預設為 `0`，範圍是
 `-100` 到 `100`。只有 `openai` Codex pool 有順序，其他 provider 會以 exit 1 結束。
@@ -270,23 +270,23 @@ active account 也會釋放 pin，但會一併丟掉該選取。）代理無法�
 { ok: true, provider, id, priority: number, preset: string | null }
 ```
 
-### `ocx account main <subcommand>`
+### `orl account main <subcommand>`
 
-管理具名的原生 Codex main-login 設定檔，不變更 OpenCodex account-pool 路由：
+管理具名的原生 Codex main-login 設定檔，不變更 OpenRelay account-pool 路由：
 
 ```text
-ocx account main doctor [--json]
-ocx account main list [--json]
-ocx account main register <label> [--json]
-ocx account main add <label>
-ocx account main reauth --device [--no-wait] [--json]
-ocx account main reauth status --flow <id> [--json]
-ocx account main reauth cancel --flow <id> [--json]
-ocx account main switch <profile-id-or-label> --yes [--json]
-ocx account main recover [--rollback --yes] [--json]
+orl account main doctor [--json]
+orl account main list [--json]
+orl account main register <label> [--json]
+orl account main add <label>
+orl account main reauth --device [--no-wait] [--json]
+orl account main reauth status --flow <id> [--json]
+orl account main reauth cancel --flow <id> [--json]
+orl account main switch <profile-id-or-label> --yes [--json]
+orl account main recover [--rollback --yes] [--json]
 ```
 
-`ocx account main reauth --device --no-wait --json` 成功時只會向 stdout 輸出一個 JSON 物件，不會輸出供人閱讀的 `follow up:` 提示行。將回傳的 `flowId` 傳給 `ocx account main reauth status --flow <id> --json` 即可查看進度。
+`orl account main reauth --device --no-wait --json` 成功時只會向 stdout 輸出一個 JSON 物件，不會輸出供人閱讀的 `follow up:` 提示行。將回傳的 `flowId` 傳給 `orl account main reauth status --flow <id> --json` 即可查看進度。
 
 每個會變更狀態的命令都會回報執行中代理回傳的 canonical 有效 `CODEX_HOME`。這個路徑可能與
 呼叫端的 `CODEX_HOME` 不同；支援 JSON 的命令以 `effectiveCodexHome` 暴露同一個值。
@@ -297,35 +297,35 @@ Version 1 支援基於檔案的 Codex 認證，以 AES-256-GCM 加密儲存的�
 `doctor` 檢查設定檔狀態，使用 `recover` 完成或復原中斷的轉換。`switch` 接受設定檔 id
 或其 label。
 
-v1 復原矩陣涵蓋交易檔已透過 rename 發布後 OpenCodex 程序退出的情況。它不宣稱在 OS 或
+v1 復原矩陣涵蓋交易檔已透過 rename 發布後 OpenRelay 程序退出的情況。它不宣稱在 OS 或
 kernel 崩潰、突然斷電下仍具持久性：`atomicWriteFileAsync()` 不會 `fsync` 檔案或其父目錄。
 
 加密 vault、切換 journal、復原標記與 journal quarantine 位於 canonical
 `<real CODEX_HOME>/.opencodex-native-main-profiles` 目錄，因此共享該 Codex home 的每個
-OpenCodex 實例只看到一個 owner 與一個復原狀態。明文登入暫存保持隔離在各個
+OpenRelay 實例只看到一個 owner 與一個復原狀態。明文登入暫存保持隔離在各個
 `<OPENCODEX_HOME>/native-main-profile-staging` 目錄下。
 
 在原生 main 流量或 journal 復原被受理前，lifetime owner 取得獨佔的憑證請求，且只清除
 精確的 `auth.json.ocx.<pid>.<sequence>.tmp` crash 殘留。每個候選都必須是未變更 canonical
 `CODEX_HOME` 下的單一連結 regular file；它會被截斷、flush 再 unlink。link/reparse 替換、
 身分變更與其他歧義會讓原生 main 流量保持關閉，而近似名稱的檔案絕不會被自動移除。這保護
-的是合作的 OpenCodex 崩潰，不是已經以相同 OS 使用者身分執行的惡意程序。該使用者與含有
+的是合作的 OpenRelay 崩潰，不是已經以相同 OS 使用者身分執行的惡意程序。該使用者與含有
 `CODEX_HOME` 的檔案系統仍被視為可信，且截斷不保證從 copy-on-write 儲存、快照或 SSD
 殘留中實體抹除。
 
 Preview 建置使用 `<OPENCODEX_HOME>/native-main-profiles`。該配置絕不會被靜默匯入。如果
-`doctor` 回報舊版設定檔狀態，請停止共享相同 `CODEX_HOME` 的每個 OpenCodex proxy。然後
+`doctor` 回報舊版設定檔狀態，請停止共享相同 `CODEX_HOME` 的每個 OpenRelay proxy。然後
 把相符的 `*.vault.json`、`*.journal.json`、復原標記與任何被引用的 journal-quarantine
 檔案一起備份並移動到 canonical 目錄，同時保留 owner-only 權限；或移除舊 preview 組合並
-重新執行 `ocx account main register`。在多個舊 root 之間選擇，或在任何共享 proxy 作用中
+重新執行 `orl account main register`。在多個舊 root 之間選擇，或在任何共享 proxy 作用中
 時同時執行兩種配置，都不被允許。在 Windows 上，以舊的大小寫摺疊 home 身分為鍵的 preview
 狀態必須重設而不是移動，因為其加密 AAD 與 OS keyring 身分刻意不重複使用。
 
 ## 模型
 
-### `ocx models [subcommand]` · `ocx model <subcommand>`
+### `orl models [subcommand]` · `orl model <subcommand>`
 
-`ocx model` 是 `ocx models` 的別名。無子指令時，列出已設定供應商中靜態播種的模型。`--provider` 過濾一個已設定的供應商，而 `--json` 回傳模型中繼資料。`live` 讀取執行中的目錄；`add`、`edit`、`remove` 與 `list-custom` 管理手動目錄項目；`enable`、`disable` 與 `provider` 控制可見性；`selected` 控制供應商允許清單；`context` 控制供應商 context 上限；而 `shadow` 管理背景 shadow-call 攔截。
+`orl model` 是 `orl models` 的別名。無子指令時，列出已設定供應商中靜態播種的模型。`--provider` 過濾一個已設定的供應商，而 `--json` 回傳模型中繼資料。`live` 讀取執行中的目錄；`add`、`edit`、`remove` 與 `list-custom` 管理手動目錄項目；`enable`、`disable` 與 `provider` 控制可見性；`selected` 控制供應商允許清單；`context` 控制供應商 context 上限；而 `shadow` 管理背景 shadow-call 攔截。
 
 `add` 與 `remove` 預設儲存至本機；`--live` 修改執行中的代理。本機 `--json` 儲存時若無代理，回傳 `sync.status: "not-attempted"`、`needsSync: true`，結束碼為 0。實際嘗試的同步失敗時保留儲存結果，以非零碼結束。`list-custom` 是本機清單。`display-name` 使用原始上游 ID，`order` 使用 picker 的 public ID。完整排列、featured 前綴與 native 順序重設限制請見[英文步驟](/reference/cli/providers-accounts/#display-names-and-picker-identities)。
 
@@ -345,15 +345,15 @@ Preview 建置使用 `<OPENCODEX_HOME>/native-main-profiles`。該配置絕不�
 | `shadow <status\|set> [model\|-]` | `--enabled <on\|off>`, `--json` | 讀取或設定 Codex 背景 helper 呼叫的替換模型。`-` 清除模型。`status` 亦回報 `sourceModels`，即代理攔截的 helper slug（預設：`gpt-6-luna`, `gpt-5.6-luna`；0.144.x 以前的用戶端使用已退役的 `gpt-5.4-mini`，可透過 `sourceModels` 還原）。 |
 
 ```bash
-ocx models live --json                                  # Codex 目前實際可見的模型
-ocx models disable anthropic/claude-haiku-4             # 隱藏一個路由模型
-ocx models enable gpt-5.6-sol                           # 無斜線，因此被視為原生
-ocx models provider zenmux off                          # 批量隱藏一個吵雜的供應商
-ocx models selected anthropic --set claude-opus-5,claude-fable-5
-ocx models selected anthropic --clear                   # 再次卸下允許清單
-ocx models add deepseek deepseek-v4 --display-name 'DeepSeek V4' --context-window 128000 --modalities text,image
-ocx models list-custom --json                           # 讀取用於 edit/remove 的 custom-id
-ocx models remove deepseek/deepseek-v4 --yes
+orl models live --json                                  # Codex 目前實際可見的模型
+orl models disable anthropic/claude-haiku-4             # 隱藏一個路由模型
+orl models enable gpt-5.6-sol                           # 無斜線，因此被視為原生
+orl models provider zenmux off                          # 批量隱藏一個吵雜的供應商
+orl models selected anthropic --set claude-opus-5,claude-fable-5
+orl models selected anthropic --clear                   # 再次卸下允許清單
+orl models add deepseek deepseek-v4 --display-name 'DeepSeek V4' --context-window 128000 --modalities text,image
+orl models list-custom --json                           # 讀取用於 edit/remove 的 custom-id
+orl models remove deepseek/deepseek-v4 --yes
 ```
 
 帶斜線的模型選擇器為路由（`anthropic/claude-opus-5`）；裸 id 被視為原生 OpenAI 模型，因此 `--native` 僅在需要對一個否則看起來是路由的 id 強制該判讀時才需要。

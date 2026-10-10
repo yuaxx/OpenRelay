@@ -8,7 +8,7 @@ import {
 } from "./gui-pair-client";
 import type { RuntimeApiDeps } from "./runtime-api";
 
-const GUI_USAGE = "ocx gui [pair --origin <browser-origin> [--json]]";
+const GUI_USAGE = "orl gui [pair --origin <browser-origin> [--json]]";
 const PAIRING_WARNING = "Pairing grants are secret, single-use, and expire quickly. Do not save them.";
 
 export interface GuiCommandDeps extends RuntimeApiDeps {
@@ -67,7 +67,7 @@ export async function runGuiCommand(args: string[], deps: GuiCommandDeps): Promi
   }
   const target = await (deps.findLiveProxy ?? findLiveProxy)();
   if (!target) {
-    console.error("No running attested OpenCodex proxy is available for GUI pairing.");
+    console.error("No running attested OpenRelay proxy is available for GUI pairing.");
     return 1;
   }
   if ((config.runtimeRole ?? "standalone") === "standalone"
@@ -81,7 +81,7 @@ export async function runGuiCommand(args: string[], deps: GuiCommandDeps): Promi
   });
   if (result.kind !== "created") {
     console.error(result.reason === "local-intent"
-      ? "GUI pairing requires write access to the private OpenCodex home; no code was issued."
+      ? "GUI pairing requires write access to the private OpenRelay home; no code was issued."
       : `GUI pairing failed (${result.reason}).`);
     return 1;
   }

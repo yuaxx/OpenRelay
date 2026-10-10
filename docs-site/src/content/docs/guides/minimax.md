@@ -1,29 +1,29 @@
 ---
 title: MiniMax clients
-description: Route MiniMax Code and MiniMax CLI text commands through OpenCodex without exposing MiniMax credentials.
+description: Route MiniMax Code and MiniMax CLI text commands through OpenRelay without exposing MiniMax credentials.
 ---
 
-MiniMax publishes two different command-line products. OpenCodex integrates each at
+MiniMax publishes two different command-line products. OpenRelay integrates each at
 the protocol boundary it actually exposes:
 
 - **MiniMax Code** (`mcode`) is a coding agent with custom Anthropic Messages providers.
 - **MiniMax CLI** (`mmx`) is a multimodal platform CLI. Only its `text` resource speaks
-  the Anthropic-compatible API that OpenCodex can route.
+  the Anthropic-compatible API that OpenRelay can route.
 
 ## MiniMax Code
 
-In the OpenCodex Models page, both MiniMax Coding Plan regions advertise image input for
+In the OpenRelay Models page, both MiniMax Coding Plan regions advertise image input for
 `MiniMax-M3` and `MiniMax-M3.1-Flash-Preview`. A Combo's **Image / multimodal** switch is
 available only when every selected model supports image input. The switch controls image
 attachments; it does not enable video uploads.
 
 Install and sign in to MiniMax Code using MiniMax's instructions first. Then start
-OpenCodex and connect the reversible file integration:
+OpenRelay and connect the reversible file integration:
 
 ```bash
-ocx start
-ocx integration client enable --client mcode
-ocx mcode
+orl start
+orl integration client enable --client mcode
+orl mcode
 ```
 
 ![MiniMax Code integration shown with isolated example data](/screenshots/minimax-code-integration.png)
@@ -50,26 +50,26 @@ custom_provider:
 The real generated model list and its known context windows and reasoning-effort ladders
 come from the running OpenCodex catalog. A model with no authoritative context window or
 effort ladder omits that field instead of receiving a guessed value. MCode keeps the
-currently selected effort in the session, so OpenCodex exports `effortOptions` without
+currently selected effort in the session, so OpenRelay exports `effortOptions` without
 overwriting that selection. The block does not write a real key, does not replace
 `defaultModel`, and does not change your MiniMax login. In MCode, choose a model under
 `custom_provider:opencodex/...`.
 
-`ocx mcode` verifies that this provider points at the currently running proxy before it
-launches the client. After the one-time enable, `ocx sync` refreshes the owned block when
+`orl mcode` verifies that this provider points at the currently running proxy before it
+launches the client. After the one-time enable, `orl sync` refreshes the owned block when
 the port or catalog capabilities change. Automatic sync never creates an unowned block,
-recreates one you removed, or overwrites a file that changed after OpenCodex wrote it; use
+recreates one you removed, or overwrites a file that changed after OpenRelay wrote it; use
 the enable command when you intentionally want to reconnect. Disable or restore it through
 the same audited integration system:
 
 ```bash
-ocx integration client disable --client mcode
-ocx integration client history --client mcode
-ocx integration client restore --op <opId> [--confirm-drift]
+orl integration client disable --client mcode
+orl integration client history --client mcode
+orl integration client restore --op <opId> [--confirm-drift]
 ```
 
 `MINIMAX_DATA_DIR` and the legacy `MAVIS_DATA_DIR` are honored. Relative overrides are
-refused because OpenCodex and MCode may start in different working directories.
+refused because OpenRelay and MCode may start in different working directories.
 
 ## MiniMax CLI (`mmx`)
 
@@ -80,14 +80,14 @@ npm install -g mmx-cli
 mmx --version
 ```
 
-Route a text command through OpenCodex by using the wrapper and an OpenCodex model id:
+Route a text command through OpenRelay by using the wrapper and an OpenRelay model id:
 
 ```bash
-ocx mmx text chat \
+orl mmx text chat \
   --model anthropic/claude-opus-5 \
   --message "Explain this function"
 
-ocx mmx --output json text chat \
+orl mmx --output json text chat \
   --model openai/gpt-5.6-sol \
   --message "Return a JSON summary"
 ```
@@ -95,8 +95,8 @@ ocx mmx --output json text chat \
 MMX hard-codes `/anthropic/v1/messages` below its API base URL. The wrapper starts a
 temporary loopback bridge for the lifetime of the child process. It accepts only POST
 requests to that Messages path and `/anthropic/v1/messages/count_tokens`, mapping them
-to OpenCodex's existing `/v1/messages` and `/v1/messages/count_tokens` data plane while
-preserving request bodies and query data. Canonical OpenCodex request translation,
+to OpenRelay's existing `/v1/messages` and `/v1/messages/count_tokens` data plane while
+preserving request bodies and query data. Canonical OpenRelay request translation,
 usage accounting and configured downstream provider authentication remain in effect;
 providers receive `x-api-key` or bearer transport according to their configuration.
 Streaming preserves Anthropic message and content events. Before forwarding, the bridge
@@ -113,12 +113,12 @@ The following limits are intentional:
 - Only `text chat` and `text repl` are routed through OpenCodex.
 - `--api-key`, `--base-url` and `--region` are refused by the wrapper so caller
   credentials or destination selectors cannot conflict with the isolated bridge.
-- The wrapper is loopback-only because MMX cannot send OpenCodex's dedicated
+- The wrapper is loopback-only because MMX cannot send OpenRelay's dedicated
   `x-opencodex-api-key` admission header for a remote bind.
 - Run plain `mmx` for `image`, `video`, `speech`, `music`, `vision`, `search`, `quota`,
-  `auth`, `config`, `file` and `update`; those call MiniMax-specific APIs that OpenCodex
+  `auth`, `config`, `file` and `update`; those call MiniMax-specific APIs that OpenRelay
   does not emulate.
 
 `mmx` defaults its text model to `MiniMax-M3`. Pass `--model <provider/model>` when you
-want a specific OpenCodex route; otherwise normal OpenCodex model routing rules decide
+want a specific OpenRelay route; otherwise normal OpenRelay model routing rules decide
 whether the default id is available.

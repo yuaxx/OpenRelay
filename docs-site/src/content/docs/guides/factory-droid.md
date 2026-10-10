@@ -1,11 +1,11 @@
 ---
 title: Factory Droid bridge
-description: Connect Factory Droid models to opencodex through a local Responses-compatible bridge.
+description: Connect Factory Droid models to OpenRelay through a local Responses-compatible bridge.
 ---
 
 Factory Droid is an agent runtime, not a documented OpenAI-compatible inference endpoint. If a
 custom provider pointed at an internal Factory LLM URL returns `403 Forbidden`, changing only the
-opencodex adapter or adding provider headers does not make that private route a supported public API.
+OpenRelay adapter or adding provider headers does not make that private route a supported public API.
 
 The working integration is:
 
@@ -17,7 +17,7 @@ Text-only Responses client
   -> Factory account and selected model
 ```
 
-This keeps the Factory credential inside the official Droid client. OpenCodex receives a separate,
+This keeps the Factory credential inside the official Droid client. OpenRelay receives a separate,
 local-only bridge token.
 
 ## What failed and why
@@ -28,7 +28,7 @@ local-only bridge token.
 | `404` at `/models/models` | The provider base URL already ended in `/models` | Use an API root as `baseUrl`; never include the discovery path |
 | Model search fails | The bridge does not expose a complete live catalog | Set `liveModels: false` and provide a static `models` list |
 | Loopback provider is rejected | Private-network access is denied by default | Set `allowPrivateNetwork: true` only for the loopback bridge |
-| `${DROID_BRIDGE_TOKEN}` is unresolved | The variable is missing from the opencodex service environment | Inject it into the service process, not only an interactive shell |
+| `${DROID_BRIDGE_TOKEN}` is unresolved | The variable is missing from the OpenRelay service environment | Inject it into the service process, not only an interactive shell |
 | `OutputTextDelta without active item` | The bridge emitted a text delta before opening an output item and content part | Emit the complete Responses SSE lifecycle in order |
 
 The same Factory credential can therefore work in `droid exec` while a direct request to an
@@ -108,12 +108,12 @@ response.completed
 Do not expose the bridge on `0.0.0.0` and do not reuse the Factory credential as the bridge bearer
 token.
 
-## OpenCodex provider configuration
+## OpenRelay provider configuration
 
 Create the custom provider with the explicit provider ID `droid`:
 
 ```bash
-ocx provider add droid \
+orl provider add droid \
   --adapter openai-responses \
   --base-url http://127.0.0.1:11435/v1 \
   --default-model glm-5.2 \
@@ -145,8 +145,8 @@ After saving a provider or changing its static catalog, synchronize and restart 
 sessions read the updated catalog:
 
 ```bash
-ocx sync --restart-codex
-ocx doctor
+orl sync --restart-codex
+orl doctor
 ```
 
 `--restart-codex` restarts matching app-servers and fully quits and relaunches the Codex desktop
@@ -159,8 +159,8 @@ Check each boundary separately:
 
 ```bash
 curl -fsS http://127.0.0.1:11435/healthz
-ocx doctor
-ocx access test droid/glm-5.2 --protocol responses
+orl doctor
+orl access test droid/glm-5.2 --protocol responses
 ```
 
 A provider row or model-picker entry proves only catalog visibility. The integration is working only
@@ -174,5 +174,5 @@ tool definitions even when a prompt says not to call tools, and the current Code
 flag that removes those definitions. The minimal bridge must reject those requests with the `400`
 contract above. Tool definitions, tool calls, tool results, permissions, cancellation, and rich
 Droid events require a stateful bridge built on Factory's stream JSON-RPC mode or an official Droid
-SDK. Treat `ocx access test` success as text-path verification, not Codex agent or tool-path
+SDK. Treat `orl access test` success as text-path verification, not Codex agent or tool-path
 verification.

@@ -40,7 +40,7 @@ export interface CodexConnectShimInspectionDeps {
 const CODEX_TOKEN_NOTE = "The connected Codex config uses OPENCODEX_API_AUTH_TOKEN; "
   + "without a working shim or when a PATH wrapper replaces it, Codex may fail with "
   + '"Missing environment variable".';
-const CODEX_TOKEN_ACTION = `${CODEX_TOKEN_NOTE} Run 'ocx codex-shim install' to repair it.`;
+const CODEX_TOKEN_ACTION = `${CODEX_TOKEN_NOTE} Run 'orl codex-shim install' to repair it.`;
 
 export function codexConnectShimReadiness(inputs: {
   diagnosis: Pick<CodexShimDiagnostic, "installed" | "healthy" | "summary" | "runnable" | "active">;
@@ -52,7 +52,7 @@ export function codexConnectShimReadiness(inputs: {
       return {
         status: "unverified",
         message: `PATH activation could not be verified. Shim state: ${inputs.diagnosis.summary}. `
-          + `Check PATH and retry 'ocx connect'. ${CODEX_TOKEN_NOTE}`,
+          + `Check PATH and retry 'orl connect'. ${CODEX_TOKEN_NOTE}`,
       };
     }
     if (!inputs.diagnosis.active) {
@@ -77,9 +77,9 @@ export function codexConnectShimReadiness(inputs: {
     // order (or the wrapper in front of it) can.
     return {
       status: "missing",
-      message: `not active; PATH resolves 'codex' to ${inputs.commandPath}, not an OpenCodex shim. `
+      message: `not active; PATH resolves 'codex' to ${inputs.commandPath}, not an OpenRelay shim. `
         + `Shim state: ${inputs.diagnosis.summary}. Put the directory of the tracked shim ahead of that command on PATH, `
-        + `or remove that wrapper; re-running 'ocx codex-shim install' will not change PATH order. ${CODEX_TOKEN_NOTE}`,
+        + `or remove that wrapper; re-running 'orl codex-shim install' will not change PATH order. ${CODEX_TOKEN_NOTE}`,
     };
   }
   if (inputs.diagnosis.installed && inputs.diagnosis.healthy) {
@@ -95,7 +95,7 @@ export function codexConnectShimReadiness(inputs: {
   if (inputs.commandPath) {
     return {
       status: "missing",
-      message: `not active; PATH resolves 'codex' to ${inputs.commandPath}, not an OpenCodex shim. ${CODEX_TOKEN_ACTION}`,
+      message: `not active; PATH resolves 'codex' to ${inputs.commandPath}, not an OpenRelay shim. ${CODEX_TOKEN_ACTION}`,
     };
   }
   return {
@@ -120,7 +120,7 @@ export function inspectCodexShimForConnect(
     return {
       status: "unverified",
       message: `PATH activation could not be verified. Shim state: ${diagnosis.summary}. `
-        + `Check PATH and retry 'ocx connect'. ${CODEX_TOKEN_NOTE}`,
+        + `Check PATH and retry 'orl connect'. ${CODEX_TOKEN_NOTE}`,
     };
   }
   return codexConnectShimReadiness({
@@ -145,16 +145,16 @@ export function codexShimReadinessWarnings(
   if (inputs.routingKind === "unknown") {
     warnings.push(
       inputs.externalProvider
-        ? `Codex still selects ${provider}. The shim can start OpenCodex, but it does not redirect that provider; point it at the live OpenCodex /v1 endpoint with wire_api = "responses", or switch to the built-in openai provider and run 'ocx sync'.`
-        : "Codex routing could not be verified. The shim can start OpenCodex, but it may not redirect Codex; run 'ocx doctor' before relying on autostart.",
+        ? `Codex still selects ${provider}. The shim can start OpenRelay, but it does not redirect that provider; point it at the live OpenRelay /v1 endpoint with wire_api = "responses", or switch to the built-in openai provider and run 'orl sync'.`
+        : "Codex routing could not be verified. The shim can start OpenRelay, but it may not redirect Codex; run 'orl doctor' before relying on autostart.",
     );
   } else if (inputs.routingKind === "custom-local") {
     warnings.push(
-      `Codex uses ${provider} through a user-owned local gateway. The shim can start OpenCodex, but OpenCodex does not own that route; run 'ocx doctor' to verify its lifecycle.`,
+      `Codex uses ${provider} through a user-owned local gateway. The shim can start OpenRelay, but OpenRelay does not own that route; run 'orl doctor' to verify its lifecycle.`,
     );
   } else if (inputs.routingKind === "custom-remote") {
     warnings.push(
-      `Codex uses ${provider} through a remote gateway. The shim only starts a local OpenCodex proxy and will not affect those requests.`,
+      `Codex uses ${provider} through a remote gateway. The shim only starts a local OpenRelay proxy and will not affect those requests.`,
     );
   }
 

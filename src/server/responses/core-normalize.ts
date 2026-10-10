@@ -76,7 +76,7 @@ export function warnFastWireCapabilityGap(providerName: string, modelId: string)
   }
   warnedFastWireCapabilityGaps.add(key);
   console.warn(
-    `[opencodex] Fast policy for ${safeProvider}/${safeModel} has service-tier capability but no Fast wire; preserving only caller-permitted tier behavior`,
+    `[openrelay] Fast policy for ${safeProvider}/${safeModel} has service-tier capability but no Fast wire; preserving only caller-permitted tier behavior`,
   );
 }
 
@@ -295,10 +295,10 @@ export async function applyFinalRouteRequestNormalization(args: {
     if (guidance) {
       injectDeveloperMessage(parsed, guidance);
       if (isInjectionDebugEnabled()) {
-        injectionDebugLog(`[opencodex] ${route.modelId}: multi-agent guidance injected (surface=${collabSurface(parsed)}, guidanceEnabled=${multiAgentGuidanceEnabled(config)}, ${guidance.length} chars)`);
+        injectionDebugLog(`[openrelay] ${route.modelId}: multi-agent guidance injected (surface=${collabSurface(parsed)}, guidanceEnabled=${multiAgentGuidanceEnabled(config)}, ${guidance.length} chars)`);
       }
     } else if (isInjectionDebugEnabled() && collabSurface(parsed) !== null) {
-      injectionDebugLog(`[opencodex] ${route.modelId}: collab surface=${collabSurface(parsed)}, guidance silent (effort=${parsed.options.reasoning ?? "unset"}, injectionModel=${config.injectionModel ?? "unset"})`);
+      injectionDebugLog(`[openrelay] ${route.modelId}: collab surface=${collabSurface(parsed)}, guidance silent (effort=${parsed.options.reasoning ?? "unset"}, injectionModel=${config.injectionModel ?? "unset"})`);
     }
   }
 
@@ -308,7 +308,7 @@ export async function applyFinalRouteRequestNormalization(args: {
     if (pinned) {
       logCtx.requestedEffort = pinned.from ? `${pinned.from}->${pinned.to}` : pinned.to;
       if (isInjectionDebugEnabled()) {
-        injectionDebugLog(`[opencodex] ${route.modelId}: pinned reasoning effort applied (${pinned.from ?? "none"} -> ${pinned.to})`);
+        injectionDebugLog(`[openrelay] ${route.modelId}: pinned reasoning effort applied (${pinned.from ?? "none"} -> ${pinned.to})`);
       }
     }
   }
@@ -323,7 +323,7 @@ export async function applyFinalRouteRequestNormalization(args: {
       if (applied) {
         logCtx.requestedEffort = applied.from ? `${applied.from}->${applied.to}` : applied.to;
         if (isInjectionDebugEnabled()) {
-          injectionDebugLog(`[opencodex] ${route.modelId}: memory ${phase} effort applied (${applied.from ?? "none"} -> ${applied.to})`);
+          injectionDebugLog(`[openrelay] ${route.modelId}: memory ${phase} effort applied (${applied.from ?? "none"} -> ${applied.to})`);
         }
       }
     }
@@ -337,11 +337,11 @@ export async function applyFinalRouteRequestNormalization(args: {
       if (capped) {
         logCtx.requestedEffort = `${capped.from}->${capped.to}`;
         if (isInjectionDebugEnabled()) {
-          injectionDebugLog(`[opencodex] ${route.modelId}: effort cap applied (${capped.from} -> ${capped.to}, ${capped.subagent ? "sub-agent" : "main"} turn)`);
+          injectionDebugLog(`[openrelay] ${route.modelId}: effort cap applied (${capped.from} -> ${capped.to}, ${capped.subagent ? "sub-agent" : "main"} turn)`);
         }
       }
     } else if (isInjectionDebugEnabled() && (config.effortCap || config.subagentEffortCap)) {
-      injectionDebugLog(`[opencodex] ${route.modelId}: effort cap skipped (surface=${surface ?? "none"}, v2 feature only)`);
+      injectionDebugLog(`[openrelay] ${route.modelId}: effort cap skipped (surface=${surface ?? "none"}, v2 feature only)`);
     }
   }
 

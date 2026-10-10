@@ -90,6 +90,11 @@ if (process.platform === "darwin") {
 }
 
 cpSync(guiDist, join(output, "gui", "dist"), { recursive: true });
+// Identical executables keep installed legacy launchers on the same CLI implementation.
+for (const name of target.startsWith("bun-windows-") ? ["ocx.exe", "opencodex.exe"] : ["ocx", "opencodex"]) {
+  cpSync(executable, join(output, name));
+}
+cpSync(join(repoRoot, "src", "compression", "rtk", "NOTICE.md"), join(output, "RTK-NOTICE.md"));
 const digest = createHash("sha256").update(readFileSync(executable)).digest("hex");
 writeFileSync(join(output, "SHA256SUMS"), `${digest}  ${executable.split(/[\\/]/).pop()}\n`);
 console.log(`Built ${executable}`);

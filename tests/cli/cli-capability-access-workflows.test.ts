@@ -50,7 +50,7 @@ function transport(payload: unknown = {}) {
 
 describe("access capability workflows preserve consent and handler grammar", () => {
   test("published key listing requires the explicit action before JSON", async () => {
-    expect(capability("access key").usage).toBe("ocx access key list [--json]");
+    expect(capability("access key").usage).toBe("orl access key list [--json]");
     const io = transport({ keys: [] });
     expect(await handleAccessCommand(["key", "--json"], io.deps)).toBe(2);
     expect(io.requests).toEqual([]);
@@ -100,7 +100,7 @@ describe("access capability workflows preserve consent and handler grammar", () 
   });
   test.each(["commit", "abort"])("rotation %s requires both IDs before transport", async operation => {
     const leaf = capability("access key rotate " + operation);
-    expect(leaf.usage).toBe("ocx access key rotate " + operation + " <id> <rotation-id> [--json]");
+    expect(leaf.usage).toBe("orl access key rotate " + operation + " <id> <rotation-id> [--json]");
     expect(leaf.routes).toEqual([{ method: operation === "commit" ? "POST" : "DELETE", path: operation === "commit" ? "/api/keys/rotate/commit" : "/api/keys/rotate" }]);
     const io = transport();
     expect(await handleAccessCommand(["key", "rotate", operation, "fixture-id", "--json"], io.deps)).toBe(2);
@@ -142,7 +142,7 @@ describe("access capability workflows preserve consent and handler grammar", () 
   test("secret-returning actions are family handoffs, never executable headings", () => {
     const family = capability("access key");
     expect(family.mutates).toBe(true);
-    expect(family.usage).toBe("ocx access key list [--json]");
+    expect(family.usage).toBe("orl access key list [--json]");
     for (const leaf of ACCESS_REMOTE_CAPABILITIES) {
       const key = leaf.command.join(" ");
       expect(key).not.toBe("access key create");
@@ -163,7 +163,7 @@ describe("access capability workflows preserve consent and handler grammar", () 
     }
     for (const leaf of rows) {
       if (leaf.command.join(" ") === "config export") expect(leaf.usage).toBeUndefined();
-      else expect(leaf.usage?.startsWith("ocx " + leaf.command.join(" "))).toBe(true);
+      else expect(leaf.usage?.startsWith("orl " + leaf.command.join(" "))).toBe(true);
       expect(leaf.flags.map(flag => flag.name)).not.toContain("--live");
     }
   });

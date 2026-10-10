@@ -9,7 +9,7 @@ import {
 import type { RuntimeApiDeps } from "./runtime-api";
 
 export const HUB_USAGE =
-  "ocx hub invite [--json] [--data-url <origin>] [--management-url <origin>] [--clients codex,claude]";
+  "orl hub invite [--json] [--data-url <origin>] [--management-url <origin>] [--clients codex,claude]";
 
 const PAIRING_WARNING = "Pairing codes are secret, single-use, and expire quickly. Do not save them.";
 
@@ -132,8 +132,8 @@ export function configSetHubLines(
   field: "managementPublicOrigin" | "dataPublicOrigin",
   example: string,
 ): string[] {
-  const set = `ocx config set hub.${field} '${JSON.stringify(example)}'`;
-  return config.hub ? [set] : ["ocx config set hub '{}'", set];
+  const set = `orl config set hub.${field} '${JSON.stringify(example)}'`;
+  return config.hub ? [set] : ["orl config set hub '{}'", set];
 }
 
 /**
@@ -149,7 +149,7 @@ export function appendCorsAllowOriginsCommand(
 ): string {
   const current = config.corsAllowOrigins ?? [];
   const next = current.includes(origin) ? current : [...current, origin];
-  return `ocx config set corsAllowOrigins '${JSON.stringify(next)}'`;
+  return `orl config set corsAllowOrigins '${JSON.stringify(next)}'`;
 }
 
 export type HubDataOriginResolution =
@@ -212,7 +212,7 @@ export function inviteBoundOriginNotes(
   const port = parsed.port || (parsed.protocol === "https:" ? "443" : "80");
   notes.push(
     `That is NOT ${DEFAULT_CLIENT_BROWSER_ORIGIN}, which is what an unconfigured client sends: the other machine `
-      + `must already be running on port ${port} ('ocx config set port ${port}' there) before it runs the line `
+      + `must already be running on port ${port} ('orl config set port ${port}' there) before it runs the line `
       + "below, or the hub refuses the exchange and the code is spent.",
   );
   notes.push(
@@ -230,7 +230,7 @@ export function hubInviteCommand(
 ): string {
   const shellQuote = (value: string): string => `'${value.replaceAll("'", `'"'"'`)}'`;
   const clientsFlag = clients.length > 0 ? ` --clients ${shellQuote(clients.join(","))}` : "";
-  return `echo ${shellQuote(code)} | ocx connect ${shellQuote(dataUrl)} --management-url ${shellQuote(managementUrl)}${clientsFlag} --pairing-code-stdin`;
+  return `echo ${shellQuote(code)} | orl connect ${shellQuote(dataUrl)} --management-url ${shellQuote(managementUrl)}${clientsFlag} --pairing-code-stdin`;
 }
 
 async function runInvite(args: string[], deps: HubCommandDeps): Promise<number> {
@@ -247,8 +247,8 @@ async function runInvite(args: string[], deps: HubCommandDeps): Promise<number> 
   const config = deps.loadConfig();
   if (config.runtimeRole !== "hub") {
     console.error(
-      `ocx hub invite runs on a hub; this machine's runtimeRole is "${config.runtimeRole ?? "standalone"}". `
-        + "A client machine runs 'ocx connect' with the code its hub printed.",
+      `orl hub invite runs on a hub; this machine's runtimeRole is "${config.runtimeRole ?? "standalone"}". `
+        + "A client machine runs 'orl connect' with the code its hub printed.",
     );
     return 1;
   }
@@ -296,14 +296,14 @@ async function runInvite(args: string[], deps: HubCommandDeps): Promise<number> 
     // entries this hub already has -- a one-element literal would tell the operator to drop them.
     console.error(
       "No loopback browser origin is admitted for pairing. Add the connecting machine's local origin "
-        + "(this keeps the entries already configured; 'ocx config get corsAllowOrigins' shows them): "
+        + "(this keeps the entries already configured; 'orl config get corsAllowOrigins' shows them): "
         + appendCorsAllowOriginsCommand(config, DEFAULT_CLIENT_BROWSER_ORIGIN),
     );
     return 1;
   }
   const target = await (deps.findLiveProxy ?? findLiveProxy)();
   if (!target) {
-    console.error("No running attested OpenCodex hub was found. Check 'ocx service status', then 'ocx service repair'.");
+    console.error("No running attested OpenRelay hub was found. Check 'orl service status', then 'orl service repair'.");
     return 1;
   }
   const resolved = resolveHubDataOrigin(
@@ -322,7 +322,7 @@ async function runInvite(args: string[], deps: HubCommandDeps): Promise<number> 
     for (const line of configSetHubLines(config, "dataPublicOrigin", "https://hub.tailnet.ts.net:8443")) {
       console.error(`  ${line}`);
     }
-    console.error("  ...or, for this invite only: ocx hub invite --data-url https://hub.tailnet.ts.net:8443");
+    console.error("  ...or, for this invite only: orl hub invite --data-url https://hub.tailnet.ts.net:8443");
     return 1;
   }
   const dataUrl = resolved.dataUrl;

@@ -1,9 +1,9 @@
 ---
 title: Entegrasyonlar
-description: Kontrol panelinden OpenCode, Pi, OMP, Hermes, OpenClaw, Kimi Code, gjc, DeepSeek Harness, MiniMax Code, ZCode, Prime Agent, Aside, Raycast, omo, Cline CLI, Kilo, Command Code ve Factory Droid'u opencodex'e bağlayın — istemci başına tek bir anahtar ve her yazmadan önce alınan bir yedek.
+description: Kontrol panelinden OpenCode, Pi, OMP, Hermes, OpenClaw, Kimi Code, gjc, DeepSeek Harness, MiniMax Code, ZCode, Prime Agent, Aside, Raycast, omo, Cline CLI, Kilo, Command Code ve Factory Droid'u OpenRelay'e bağlayın — istemci başına tek bir anahtar ve her yazmadan önce alınan bir yedek.
 ---
 
-**Bağlantı** sekmesi, opencodex'in sağlayıcı bloğunu istemcinin kendi
+**Bağlantı** sekmesi, OpenRelay'in sağlayıcı bloğunu istemcinin kendi
 yapılandırma dosyasına yazar ve tekrar kaldırır. On sekiz istemci bu şekilde
 çalışır, her biri bir anahtarla:
 
@@ -32,7 +32,7 @@ Desteklenen akıl yürütme düzeylerine sahip GJC modelleri, GJC'nin düzey se�
 
 Yönetilen DSH desteğinin en düşük uyumlu sürümü **DSH 0.1.0-rc.6**'dır. DSH 0.1.7 ve üzeri, sağlayıcı rotalarını
 `$DSH_HOME/profiles/desktop/cordis.patch.yml` dosyasındaki `[id=llm-pi-ai].config.providers.opencodex` satırından okur.
-Desktop profili ve yaması varsa OpenCodex yalnızca bu satırı yazar.
+Desktop profili ve yaması varsa OpenRelay yalnızca bu satırı yazar.
 `$DSH_HOME/profiles/desktop/package.json` varsa ancak `cordis.patch.yml` yoksa Uygula işlemi reddedilir:
 `[]` içeren bir `cordis.patch.yml` oluşturun (DSH’nin yeni bir profil için yazdığı boş yama), ardından
 entegrasyonu yeniden etkinleştirin. Yalnızca Desktop profili yoksa
@@ -53,9 +53,9 @@ yönettiği geçerli çaba seçimi korunur.
 
 Raycast'in iki ön koşulu vardır. Özel sağlayıcılar (Custom Providers) bir **Raycast Pro**
 özelliğidir: ücretsiz planda dosya yine yazılır, ancak Raycast onu okumayacağı için
-`ocx integration client status --client raycast` ve **Bağlantı** sayfası bir uyarı
+`orl integration client status --client raycast` ve **Bağlantı** sayfası bir uyarı
 bildirir. Ayrıca Raycast `ai` klasörünü yalnızca Raycast → Settings → AI →
-**Reveal Providers Config** seçeneğini bir kez açtığınızda oluşturur; opencodex bu
+**Reveal Providers Config** seçeneğini bir kez açtığınızda oluşturur; OpenRelay bu
 klasörü kurulum sinyali olarak kullanır ve klasör var olana kadar istemciyi kurulu değil
 olarak bildirir. Raycast, `~/.config/raycast/ai/providers.yaml` dosyasını macOS ve
 Windows'ta aynı şekilde okur ve `XDG_CONFIG_HOME` değerini dikkate almaz; bu nedenle bu
@@ -66,11 +66,11 @@ Yönetilen blok, dosyanın `providers` dizisindeki tek bir öğedir: `id: openco
 yönlendirilen her model — dışa aktarma kuralı olarak `tools` ve `system_message` değeri `true` olur, `vision`
 kataloğun giriş modalitelerini izler, `reasoning_effort` modelin bir çaba merdiveni
 varsa ayarlanır ve `temperature` akıl yürütme modelleri için kapatılır. Dosyadaki diğer
-sağlayıcılar korunur ve devre dışı bırakma yalnızca OpenCodex öğesini kaldırır. Raycast
+sağlayıcılar korunur ve devre dışı bırakma yalnızca OpenRelay öğesini kaldırır. Raycast
 değişikliği dosya kaydedilir kaydedilmez, yeniden başlatma gerekmeden alır; modeller
-Raycast'in model seçicisinde **OpenCodex** altında gruplanmış olarak görünür. Raycast şeması
-isteğe bağlı `api_keys` alanını destekler; OpenCodex bu alanı bilerek yazmaz ve geri döngü
-dışı veya kimlik doğrulaması gerektiren hedefleri reddeder. Bu entegrasyon OpenCodex'in
+Raycast'in model seçicisinde **OpenRelay** altında gruplanmış olarak görünür. Raycast şeması
+isteğe bağlı `api_keys` alanını destekler; OpenRelay bu alanı bilerek yazmaz ve geri döngü
+dışı veya kimlik doğrulaması gerektiren hedefleri reddeder. Bu entegrasyon OpenRelay'in
 zorunlu kabul başlığını sağlayamaz. macOS'taki özel tercih yalnızca bir Pro ipucudur;
 Windows bu tercihi hiç okumaz ve durumu bilinmiyor olarak bildirir. Bu bilgi yazmayı engellemez.
 Dışa aktarılan meta veriler her modelin araç desteğini doğrulamaz. Diğer sağlayıcıların
@@ -80,7 +80,7 @@ adresinde belgelenmiştir.
 
 Raycast CLI dışa aktarmaları ve panel indirmeleri, yapılandırılmış kimlik doğrulamasız
 geri döngü dinleyicisi dahil çalışan sunucunun adresini ve kabul politikasını kullanır.
-`ocx ensure`, çalışan sunucudan farklı olabilecek kayıtlı yapılandırma kopyasıyla Raycast'i
+`orl ensure`, çalışan sunucudan farklı olabilecek kayıtlı yapılandırma kopyasıyla Raycast'i
 yenilemez. Sunucu başlangıcı ve açık senkronizasyon katalog yenilemeye devam eder.
 
 
@@ -113,15 +113,15 @@ Bunlar **mutlak yollar** olmalı veya `~` ile başlamalıdır. Göreli bir yol
 anlamına gelirdi — ve bu yol yedekle birlikte saklanır, bu yüzden yarın da bugün
 olduğu gibi aynı dosyayı adlandırmalıdır.
 
-opencodex bunları kendi ortamından okur. Ağ geçidiniz bir profil veya taşınmış
-bir ev dizini ile çalışıyorsa, opencodex'i aynı değişkenler ayarlanmış olarak
+OpenRelay bunları kendi ortamından okur. Ağ geçidiniz bir profil veya taşınmış
+bir ev dizini ile çalışıyorsa, OpenRelay'i aynı değişkenler ayarlanmış olarak
 başlatın; aksi takdirde doğru şekilde farklı bir kurulumu takip eder.
 
 ## Diğer beş yüzey anahtar değildir
 
-**API Anahtarları (API Keys)** opencodex'in kendi kimlik bilgilerini yönetir ve
+**API Anahtarları (API Keys)** OpenRelay'in kendi kimlik bilgilerini yönetir ve
 hiçbir şekilde bir istemci değildir. **Codex CLI**, proxy servisinin kendisi
-tarafından bağlanır — opencodex'i başlatmak uygular, durdurmak yerel
+tarafından bağlanır — OpenRelay'i başlatmak uygular, durdurmak yerel
 yönlendirmeyi geri yükler — bu nedenle dosya başına değiştirilecek bir şey
 yoktur. **Claude** kendi etkinleştirme bayrağını ve Desktop'ın Kaydet/Uygula
 akışını korur; **Grok Build** ise seç ve uygula model çitini korur. Bu
@@ -145,7 +145,7 @@ sahip olduğunuz durum her zaman kurtarılabilir:
   dosyaları kaldırılır ve geçmiş satırlarında **Yedek süresi doldu (Backup
   expired)** yazar.
 
-Devre dışı bırakma, yalnızca opencodex'in kendisine ait olarak kaydettiği
+Devre dışı bırakma, yalnızca OpenRelay'in kendisine ait olarak kaydettiği
 girdileri kaldırır. Dosyanız biz yazdıktan sonra değiştiyse, ne olacağı kendi
 girdilerimizin hâlâ bozulmamış olup olmadığına ve dosyanın biçimine bağlıdır.
 Katı JSON yapılandırmalarında (OpenCode, Pi), bloğumuzun **yanında** yapılan bir
@@ -228,7 +228,7 @@ yapılandırması şimdilik yönetilen entegrasyonun dışındadır.
 yerine `opencodex-loopback` yer tutucusu taşır. Hiçbir istemci yapılandırmasına
 asla gerçek bir kimlik bilgisi yazılmaz.
 
-**`ocx opencode` için başlatıcının sağlayıcı bloğu kazanır.** Bu başlatıcı,
+**`orl opencode` için başlatıcının sağlayıcı bloğu kazanır.** Bu başlatıcı,
 `provider.opencodex`'i diskteki aynı girdiden üstün olan
 `OPENCODE_CONFIG_CONTENT` aracılığıyla enjekte eder — opencode yapılandırmanızın
 geri kalanı her zamanki gibi geçerli olmaya devam eder. Başlatıcının yazdığı bloklar,
@@ -242,17 +242,17 @@ bilinmiyorsa şemanın zorunlu 32000 yedeğine (bağlama göre kırpılmış) d�
 Aynı işlemler başsız (headless) olarak da mevcuttur:
 
 ```bash
-ocx integration client status
-ocx integration client enable --client hermes
-ocx integration client disable --client hermes
-ocx integration client history --client hermes
-ocx integration client restore --op <opId> [--confirm-drift]
+orl integration client status
+orl integration client enable --client hermes
+orl integration client disable --client hermes
+orl integration client history --client hermes
+orl integration client restore --op <opId> [--confirm-drift]
 ```
 
 `--overwrite-conflict`, **Replace** eyleminin terminal karsiligidir:
 
 ```bash
-ocx integration client enable --client zcode --overwrite-conflict
+orl integration client enable --client zcode --overwrite-conflict
 ```
 
 `--confirm-drift` gibi asla varsayilmaz: bayrak yazilmadan catisma yine reddedilir.
@@ -262,11 +262,11 @@ yazmadigimiz bir blogu silecegi icin bu birlesim reddedilir.
 MiniMax Code için sağlayıcıyı bir kez bağlayın ve denetimli başlatıcı üzerinden çalıştırın:
 
 ```bash
-ocx integration client enable --client mcode
-ocx mcode
+orl integration client enable --client mcode
+orl mcode
 ```
 
-Bağlandıktan sonra `ocx sync` ve `POST /api/sync`, yönetilen MCode, Pi, Aside,
+Bağlandıktan sonra `orl sync` ve `POST /api/sync`, yönetilen MCode, Pi, Aside,
 Raycast, omo, OpenCode ve Kilo kataloglarını yeniler. Proxy başlangıcı da yönetilen Raycast
 kataloğunu yeniler. Model görünürlüğü, sağlayıcı veya ön ayar değişiklikleri Pi,
 Aside, Raycast, omo, OpenCode ve Kilo kataloglarını günceller. Eksik, dışarıdan düzenlenmiş, güvenli olmayan
@@ -275,12 +275,12 @@ entegrasyonu açıkça etkinleştirin. Güncellenen dosyayı yüklemek için yen
 Pi, OpenCode veya Kilo oturumu başlatın.
 
 Ayrı MiniMax platform CLI'si (`mmx`) bir dosya anahtarı entegrasyonu değildir.
-Metin komutları MiniMax'ın Anthropic uyumlu uç noktasını kullandığı için OpenCodex,
+Metin komutları MiniMax'ın Anthropic uyumlu uç noktasını kullandığı için OpenRelay,
 kimlik bilgilerini yalıtan ve yalnızca geri döngüde çalışan bir başlatıcı sağlar:
 
 ```bash
-ocx mmx text chat --model anthropic/claude-opus-5 --message "Hello"
-ocx mmx text repl --model openai/gpt-5.6-sol
+orl mmx text chat --model anthropic/claude-opus-5 --message "Hello"
+orl mmx text repl --model openai/gpt-5.6-sol
 ```
 
 Yalnızca `mmx text chat` ve `mmx text repl` proxy üzerinden yönlendirilir. MiniMax'a
@@ -307,23 +307,23 @@ entegrasyonun yazdığı `~/.zcode/v2/config.json` dosyasına artık yalnızca, 
 bir kez bile başlatılmış her kurulumda bu içe aktarma çoktan tükenmiştir ve `config.json` dosyasına
 yazmak hiçbir şeye ulaşmaz.
 
-opencodex artık mümkün olduğunda `provider_config.json` dosyasını doğrudan yazıyor. Entegrasyonu
+OpenRelay artık mümkün olduğunda `provider_config.json` dosyasını doğrudan yazıyor. Entegrasyonu
 etkinleştirmek bu dosyaya `opencodex` sağlayıcı kuralını ekler, katalog yenilemesi onu günceller ve
-devre dışı bırakmak opencodex'in oraya koyduğu şeyi tam olarak kaldırır. Dosyadaki diğer her kural
+devre dışı bırakmak OpenRelay'in oraya koyduğu şeyi tam olarak kaldırır. Dosyadaki diğer her kural
 olduğu gibi kalır; buna başka bir sağlayıcının, bizde de bulunan bir model kimliği için tuttuğu
-kural da dahildir. opencodex'in yazmadığı, `opencodex` kimliğini taşıyan bir kural devralınacak bir
+kural da dahildir. OpenRelay'in yazmadığı, `opencodex` kimliğini taşıyan bir kural devralınacak bir
 şey değil, bir çakışmadır: ZCode içinde çözün ya da açık üzerine yazmayı kullanın.
 
-İki durum hâlâ yazmak yerine reddeder. ZCode deposunu taşımadan önce opencodex'in yazdığı bir blok,
+İki durum hâlâ yazmak yerine reddeder. ZCode deposunu taşımadan önce OpenRelay'in yazdığı bir blok,
 entegrasyonu `config.json` üzerinde tutar: önce orada devre dışı bırakın, sonra yeni depoyu yazmak
-için yeniden etkinleştirin. `schemaVersion` değeri opencodex'in gözlemlediklerinden biri olmayan
+için yeniden etkinleştirin. `schemaVersion` değeri OpenRelay'in gözlemlediklerinden biri olmayan
 bir `provider_config.json` ise birleştirilmez, bildirilir: o dosya ZCode'un tüm sağlayıcılarını
 tutar ve oraya bir şekil dayatmak sessiz bir etkisizliği sessiz bir kayıpla değiştirirdi. Durum
 ekranı, entegrasyon o dosyayı yazmadığı her durumda ZCode'un okuduğu dosyayı adlandırır.
 
 Bu ikinci durumda sağlayıcıyı ZCode'un kendi ayarlarından ekleyin: temel URL
 `http://127.0.0.1:10100/v1` (bağlantı noktasını kendi bağınıza göre ayarlayın), boş olmayan
-herhangi bir anahtar ve `ocx export --client zcode` çıktısındaki model kimlikleri. ZCode'un içe
+herhangi bir anahtar ve `orl export --client zcode` çıktısındaki model kimlikleri. ZCode'un içe
 aktarmasını yeniden tetiklemek için `provider_config.json` dosyasını silmek desteklenmez: bu,
 ZCode'un orada sakladığı tüm sağlayıcıları yok eder.
 
@@ -332,23 +332,23 @@ ZCode'un orada sakladığı tüm sağlayıcıları yok eder.
 Cline CLI providers.json ve models.json kullanır. Değişiklik veya eşitleme öncesinde Cline’ı kapatın, sonra yeniden başlatın. Geri al iki özgün dosyayı geri yükler. Varsayılan sağlayıcı değişmez. Eski VS Code uzantısının depolaması taşınmaz.
 
 ```bash
-ocx integration client enable --client cline
-ocx integration client history --client cline
-ocx integration client restore --op <operation-id>
+orl integration client enable --client cline
+orl integration client history --client cline
+orl integration client restore --op <operation-id>
 ```
 
 [CLI / rollback / CLINE_PROVIDER_SETTINGS_PATH](/guides/integrations/#cline-cli).
 
 ## Kilo
 
-Kilo yalnızca `~/.config/kilo` altındaki ilk mevcut genel dosyada `provider.opencodex` yazar (`XDG_CONFIG_HOME` bu dizini taşır; hiçbir aday yoksa `kilo.jsonc` oluşturulur). Başka bir aday dosya da `provider.opencodex` tanımlıyorsa durum çakışma bildirir ve Uygula işlemi reddedilir. Diğer anahtarlar değişmez. Modellerin akıl yürütme seçenekleri, sağlayıcı bloğu içinde bir varyant haritası olarak OpenCode dışa aktarımıyla aynı geçerli kanonik meta veriden yazılır. `ocx sync` ve `POST /api/sync` OpenCodex'e ait Kilo bloğunu yeniler; güncellenen dosyayı yeni bir Kilo oturumu yükler. Uygula dosyanın tamamını yeniden yazar; yorumlar ve sondaki virgüller korunmaz. Kilo’da `opencodex/<model>` seçin.
+Kilo yalnızca `~/.config/kilo` altındaki ilk mevcut genel dosyada `provider.opencodex` yazar (`XDG_CONFIG_HOME` bu dizini taşır; hiçbir aday yoksa `kilo.jsonc` oluşturulur). Başka bir aday dosya da `provider.opencodex` tanımlıyorsa durum çakışma bildirir ve Uygula işlemi reddedilir. Diğer anahtarlar değişmez. Modellerin akıl yürütme seçenekleri, sağlayıcı bloğu içinde bir varyant haritası olarak OpenCode dışa aktarımıyla aynı geçerli kanonik meta veriden yazılır. `orl sync` ve `POST /api/sync` OpenRelay'e ait Kilo bloğunu yeniler; güncellenen dosyayı yeni bir Kilo oturumu yükler. Uygula dosyanın tamamını yeniden yazar; yorumlar ve sondaki virgüller korunmaz. Kilo’da `opencodex/<model>` seçin.
 
-Başka bir aday çakışsa veya ayrıştırılamasa bile Devre Dışı Bırak, kaydedilen dosyadaki OpenCodex'e ait bloğu kaldırabilir; diğer aday dosya değişmez.
+Başka bir aday çakışsa veya ayrıştırılamasa bile Devre Dışı Bırak, kaydedilen dosyadaki OpenRelay'e ait bloğu kaldırabilir; diğer aday dosya değişmez.
 
 ```bash
-ocx integration client enable --client kilo
+orl integration client enable --client kilo
 ```
 
 ## Factory Droid
 
-Factory Droid, `~/.factory/settings.json` dosyasını (Windows'ta `%USERPROFILE%\.factory\settings.json`) kullanır. `ocx integration client enable --client droid` komutuyla açıkça etkinleştirin, ardından `/model` içinde özel bir model seçin. Yönetilen satırlar anahtarsızdır ve yalnızca geri döngü bağlantısında çalışır. Devre dışı bırakma yönetilen satırları kaldırır; Undo kaydedilen baytları geri yükler. Eski `config.json` dosyasında OpenCodex satırları varsa veya `settings.local.json`, `customModels` değerini geçersiz kılıyorsa etkinleştirmeden önce çakışmayı giderin. [Factory BYOK belgelerine](https://docs.factory.ai/model-independence/byok) bakın.
+Factory Droid, `~/.factory/settings.json` dosyasını (Windows'ta `%USERPROFILE%\.factory\settings.json`) kullanır. `orl integration client enable --client droid` komutuyla açıkça etkinleştirin, ardından `/model` içinde özel bir model seçin. Yönetilen satırlar anahtarsızdır ve yalnızca geri döngü bağlantısında çalışır. Devre dışı bırakma yönetilen satırları kaldırır; Undo kaydedilen baytları geri yükler. Eski `config.json` dosyasında OpenRelay satırları varsa veya `settings.local.json`, `customModels` değerini geçersiz kılıyorsa etkinleştirmeden önce çakışmayı giderin. [Factory BYOK belgelerine](https://docs.factory.ai/model-independence/byok) bakın.

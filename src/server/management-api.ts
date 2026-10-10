@@ -58,6 +58,7 @@ import { isAllowedManagementOrigin, jsonResponse, providerManagementConfigError,
 import { applySystemEnvToggle } from "./system-env";
 
 import type { ManagementApiDeps } from "./management/context";
+import { handleRtkRoutes } from "./management/rtk-routes";
 import { handleConfigRoutes } from "./management/config-routes";
 import { handleLogsUsageRoutes } from "./management/logs-usage-routes";
 import { handleStorageLogGuardRoutes } from "./management/storage-log-guard-routes";
@@ -338,6 +339,7 @@ export async function handleManagementAPI(
     ??     handleSessionRoutes(ctx)
     ??     (await handleLinkRoutesOnDemand(ctx))
     ??     (await handleRemoteWorkspaceRoutesOnDemand(ctx))
+    ??     (await handleRtkRoutes(ctx))
     ??     (await handleConfigRoutes(ctx))
     ??     (await handleStorageLogGuardRoutes(ctx))
     ??     (await handleLogsUsageRoutes(ctx))
@@ -488,7 +490,7 @@ export async function handleManagementAPI(
       try {
         shutdownSucceeded = await drainAndShutdown(undefined, config.shutdownTimeoutMs ?? 5000);
       } catch {
-        console.warn("[opencodex] shutdown drain failed");
+        console.warn("[openrelay] shutdown drain failed");
       }
       // A drained proxy whose shared teardown failed did not finish the job. Exiting 0
       // told a supervisor the stop was clean while native Codex or the Grok fence was

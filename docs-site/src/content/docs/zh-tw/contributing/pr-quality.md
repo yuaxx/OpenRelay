@@ -1,6 +1,6 @@
 ---
 title: Pull request 品質合約
-description: OpenCodex pull request 的審查就緒門檻、貢獻者責任、信任通道與關閉政策。
+description: OpenRelay pull request 的審查就緒門檻、貢獻者責任、信任通道與關閉政策。
 ---
 
 ## 你不需要先取得許可才能修東西

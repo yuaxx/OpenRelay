@@ -101,9 +101,9 @@ Bunlar uyarıdır ve kaydetmeyi asla engellemez. Codex'i geçersiz kılmak
 istiyorsanız bunu yapabilirsiniz; uyarı yalnızca bunun bir kaza değil, bilinçli
 bir karar olmasını sağlar.
 
-## opencodex dışında yazılan talimatlar
+## OpenRelay dışında yazılan talimatlar
 
-`developer_instructions` zaten varsa ve opencodex tarafından yazılmadıysa panel
+`developer_instructions` zaten varsa ve OpenRelay tarafından yazılmadıysa panel
 bunun üzerine yazmaz. Bunun yerine metni bir katman olarak içe aktarmayı önerir:
 önce mevcut değeri görürsünüz ve siz onaylayana kadar hiçbir şey yazılmaz.
 
@@ -122,14 +122,14 @@ başlangıçta kullandığı istem ayarlarını korur.
 
 ## Bu sayfa neyi okur, neyi okumaz?
 
-opencodex tek bir yapılandırma dosyasını, yani `config.toml` dosyanızı okur.
+OpenRelay tek bir yapılandırma dosyasını, yani `config.toml` dosyanızı okur.
 Codex ayarlarını birkaç katmandan çözümler; dolayısıyla buradaki bir değer,
 Codex'in sonunda hesapladığı değer olmak zorunda değil, SİZİN dosyanızda yazan
 değerdir.
 
 ## Bu sayfanın yazdığı anahtarlar
 
-Bunlar opencodex'in kendi yapılandırmasında değil, Codex'in `config.toml` dosyasında bulunur.
+Bunlar OpenRelay'in kendi yapılandırmasında değil, Codex'in `config.toml` dosyasında bulunur.
 
 | Anahtar | Varsayılan | Katman |
 |---|---|---|
@@ -140,6 +140,6 @@ Bunlar opencodex'in kendi yapılandırmasında değil, Codex'in `config.toml` do
 | `skills.include_instructions` | `true` | Beceriler |
 | `developer_instructions` | ayarlanmamış | Sırayla birleştirilen özel katmanlarınız |
 
-Yazma işlemi satır bazlıdır: yorumlarınız ve biçimlendirmeniz korunur, opencodex'in tanımadığı bir anahtar silinmek yerine olduğu gibi bırakılır.
+Yazma işlemi satır bazlıdır: yorumlarınız ve biçimlendirmeniz korunur, OpenRelay'in tanımadığı bir anahtar silinmek yerine olduğu gibi bırakılır.
 
 Bulunmayan bir anahtar `false` olarak değil, varsayılanı olarak okunur. Panel dosyanızda gerçekten bulunan değeri gösterir ve bir anahtar ayarlanmamışsa bunu belirtir.

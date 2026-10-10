@@ -1,21 +1,21 @@
 ---
 title: Grok Build
-description: xAI Grok Build CLI içerisinden opencodex ile yönlendirilen herhangi bir modeli kullanın — proxy çalışırken modeller ~/.grok/config.toml içine otomatik olarak kaydedilir.
+description: xAI Grok Build CLI içerisinden OpenRelay ile yönlendirilen herhangi bir modeli kullanın — proxy çalışırken modeller ~/.grok/config.toml içine otomatik olarak kaydedilir.
 ---
 
-opencodex, yerel portunda OpenAI uyumlu bir `POST /v1/chat/completions` (ve
+OpenRelay, yerel portunda OpenAI uyumlu bir `POST /v1/chat/completions` (ve
 `/v1/responses`) sunar ve Grok Build, OpenAI uyumlu sunuculara karşı özel
-modelleri destekler. Bu entegrasyonla başlayarak opencodex, görünür kataloğunun
+modelleri destekler. Bu entegrasyonla başlayarak OpenRelay, görünür kataloğunun
 tamamını otomatik olarak Grok Build'e kaydeder — manuel yapılandırma düzenlemesi
 gerekmez.
 
 ## Otomatik Kayıt (Auto-registration)
 
-`~/.grok` dizini mevcut olduğunda `ocx start` (ve `ocx ensure` / `ocx restart`),
+`~/.grok` dizini mevcut olduğunda `orl start` (ve `orl ensure` / `orl restart`),
 `~/.grok/config.toml` dosyasına yönetilen bir blok yazar:
 
 ```toml
-# >>> opencodex managed block — do not edit (removed by `ocx stop`) >>>
+# >>> opencodex managed block — do not edit (removed by `orl stop`) >>>
 [model_providers.opencodex]
 base_url = "http://127.0.0.1:10100/v1"
 api_backend = "responses"
@@ -44,16 +44,16 @@ default = true
 - **Eklemelidir (Additive):** çitin dışındaki kendi yapılandırmanıza asla
   dokunulmaz. Önceden var olan bir dosyaya ilk enjeksiyondan önce
   `~/.grok/config.toml.bak-opencodex` konumuna tek seferlik bir yedek yazılır.
-- **Eşkuvvetlidir (Idempotent):** her `ocx start` (ve otomatik başlatma
-  etkinleştirildiğinde `ocx ensure`), çitle çevrili bloğu geçerli katalogla
+- **Eşkuvvetlidir (Idempotent):** her `orl start` (ve otomatik başlatma
+  etkinleştirildiğinde `orl ensure`), çitle çevrili bloğu geçerli katalogla
   değiştirir.
-- **Kaldırıldığında temizlenir:** `ocx stop`, `ocx eject`, `ocx uninstall` ve
+- **Kaldırıldığında temizlenir:** `orl stop`, `orl eject`, `orl uninstall` ve
   zarif servis dışı arka plan programı kapatması, çitle çevrili bloğu kaldırır
   ve dosyanızı bayt bayt geri yükler. Bir servis yöneticisi altında kaldırma
-  `ocx stop`/`ocx uninstall` üzerinden gerçekleşir (servis modu süreçleri
+  `orl stop`/`orl uninstall` üzerinden gerçekleşir (servis modu süreçleri
   kasıtlı olarak yeniden başlatmalar boyunca bloğu korur).
 - **Çakışma güvenlidir:** kendi `[model.*]` tablolarınız tarafından zaten
-  tanımlanmış takma adlara saygı duyulur (opencodex kendi girdilerine sonek
+  tanımlanmış takma adlara saygı duyulur (OpenRelay kendi girdilerine sonek
   ekler); hasarlı bir çit (bitiş işareti olmayan başlangıç işareti) herhangi bir
   otomatik değişikliği reddeder ve manuel onarım ister.
 
@@ -73,7 +73,7 @@ bildiren modeller için çalışır: model listesi getirme işlemi ham `GET
 `reasoning_efforts` menü seçeneklerini taşımalıdır. Merdivenin Grok ile uyumlu
 bir izdüşümü, yönetilen her `[model.*]` tablosuna `supports_reasoning_effort`, varsayılan
 `reasoning_effort` ve `[[model.<alias>.reasoning_efforts]]` seçim satırlarıyla
-yazılır. Yönlendirilen model girdileri için opencodex, yapılandırılmış sağlayıcı
+yazılır. Yönlendirilen model girdileri için OpenRelay, yapılandırılmış sağlayıcı
 katmanlarını (`reasoningEfforts` / `modelReasoningEfforts` ve
 `modelDefaultReasoningEfforts` varsayılanı) yansıtır. Bu meta veriler proxy
 tarafından yapılandırılmış merdiveni açıklar; adaptörler akıl yürütmeyi taklit
@@ -84,7 +84,7 @@ geçerli Grok katmanları, `none` ve `minimal` dahil olmak üzere korunur. Codex
 `ultra` dahil desteklenmeyen veya yinelenen katmanlar dosyadan çıkarılır; yazılan her
 seçenek seçilebilir durumda kalır.
 
-Grok Build, opencodex ile Responses API üzerinden konuşur. Bir rota akıl yürütme
+Grok Build, OpenRelay ile Responses API üzerinden konuşur. Bir rota akıl yürütme
 merdivenini bildirdiğinde, Responses passthrough `reasoning.summary` değerini
 yapılandırıldığı şekilde iletir; böylece akıl yürütme izleri Responses reasoning
 öğeleri olarak Grok'a doğrudan ulaşır. Modelin akıl yürütmesini sürdürüp izi
@@ -95,18 +95,18 @@ Açıkça belirtilen `reasoning.summary`, rotanın varsayılan değerine üstün
 
 Grok Build, geri döngüde (loopback) bile özel modeller için boş olmayan bir API
 anahtarı gerektirir. Enjekte edilen girdiler bir yer tutucu
-(`opencodex-loopback`) taşır — opencodex geri döngü bağlantıları için kabul
+(`opencodex-loopback`) taşır — OpenRelay geri döngü bağlantıları için kabul
 anahtarlarını yok sayar, bu nedenle gerçek bir sır söz konusu değildir.
 
-**Otomatik kayıt yalnızca geri döngü içindir.** opencodex geri döngü olmayan bir
+**Otomatik kayıt yalnızca geri döngü içindir.** OpenRelay geri döngü olmayan bir
 ana bilgisayarı bağladığında — her arabirimi açığa çıkaran `0.0.0.0` ve `::`
 joker karakterleri dahil — istekler gerçek kabul belirtecinize ihtiyaç duyar ve
 yönetilen bir blok bunu güvenli bir şekilde taşıyamaz. Değişmezi yazmak
 sırrınızı `~/.grok/config.toml` dosyasına koyar ve bir sonraki `ocx
 start`/`ensure`/`restart` sırasında orada ayarladığınız her şeyin üzerine yazar.
-Bu nedenle opencodex bu durumda hiçbir şey yazmaz (ve daha önceki bir geri döngü
+Bu nedenle OpenRelay bu durumda hiçbir şey yazmaz (ve daha önceki bir geri döngü
 bağlantısından kalan tüm blokları kaldırır) ve modelleri yönetilen işaretçilerin
-dışında kendiniz yapılandırırsınız, burada opencodex'in yaptığı hiçbir şey
+dışında kendiniz yapılandırırsınız, burada OpenRelay'in yaptığı hiçbir şey
 onları ezemez. Tam tablo için [Manuel
 tarif](#otomatik-kayıt-olmadan-manuel-tarif) bölümüne bakın ve hem `base_url`
 (gerçekte `grok` çalıştırdığınız yerden erişilebilen bir ana bilgisayar) hem de
@@ -119,14 +119,14 @@ gönderir; bu da bir LAN dağıtımı için xAI olmayan düz metin bir HTTP uç
 noktasıdır.
 
 Provider girdisine enjekte edilen `api_key`, bu modeller için Grok'un kimlik bilgisi
-zincirinde ilk sırada yer alır; bu nedenle opencodex'e karşı yapılan dönüşler ek
+zincirinde ilk sırada yer alır; bu nedenle OpenRelay'e karşı yapılan dönüşler ek
 bir Grok girişi gerektirmez. Yerel grok modelleri ve doğrudan xAI ile iletişim
 kuran herhangi bir donanım özelliği için normal `grok login` / `XAI_API_KEY`
 kurulumunuzu koruyun.
 
 ## Otomatik kayıt olmadan manuel tarif
 
-`~/.grok/config.toml` dosyasını kendiniz yönetiyorsanız — veya opencodex geri
+`~/.grok/config.toml` dosyasını kendiniz yönetiyorsanız — veya OpenRelay geri
 döngü olmayan bir bağlantıdaysa — `# >>> opencodex managed block`
 işaretçilerinin dışına bir `[model_providers.opencodex]` bloğu ve bunu
 referans alan model başına tablolar ekleyin:
@@ -164,7 +164,7 @@ adlar bu nedenle noktalardan tamamen kaçınır.
 
 ## Bilinen sınırlamalar
 
-- **Servis kurulu `ocx restart`:** çalışan proxy yeniden başlatma
+- **Servis kurulu `orl restart`:** çalışan proxy yeniden başlatma
   yetkilendirmesine ve tahliye koordinasyonuna sahiptir, kurulu servis
   yöneticisi ise eski süreç çıktıktan sonra yenisini başlatır. Servis denetimi
   kurulu kalır. Geri döngü otomatik kaydında, yönetilen blok devir teslim
@@ -173,7 +173,7 @@ adlar bu nedenle noktalardan tamamen kaçınır.
   üzerinde farklı, kimliği doğrulanmış bir süreç sağlıklı olduğunda başarılı
   olur.
 - **Yapılandırma okuma zamanlaması:** en öngörülebilir sonuçlar için önce
-  opencodex'i başlatın, ardından `grok`'u başlatın. Grok Build
+  OpenRelay'i başlatın, ardından `grok`'u başlatın. Grok Build
   `~/.grok/config.toml` dosyasını izler ve `[model]` tablosu gerçekten
   değiştiğinde (içeriğe göre karşılaştırılan yaklaşık bir saniyelik bir gecikme)
   yeniden yükler, böylece yenilenen bir blok yeniden başlatma olmadan açık bir
@@ -182,7 +182,7 @@ adlar bu nedenle noktalardan tamamen kaçınır.
   reddettiği herhangi bir alan hakkında uyarır. Çözümlenen model listesini
   yazdırmaz. Güncel Grok Build, geçersiz model alanlarını uyarıyla atlar ve model
   girdisinin kalanını korur. Bir TOML sözdizimi hatası dosyanın yüklenmesini
-  engeller. opencodex dosyayı atomik olarak yazar; Grok her yeniden yüklemede
+  engeller. OpenRelay dosyayı atomik olarak yazar; Grok her yeniden yüklemede
   eksiksiz bir belge görür.
 - **Katalog güncellemeleri:** çitle çevrili blok, enjeksiyon anındaki kataloğu
   yansıtır. Sağlayıcılar veya modeller ekledikten sonra yenilemek için `ocx

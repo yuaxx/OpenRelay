@@ -1,6 +1,6 @@
 ---
 title: Провайдеры
-description: Все способы, которыми opencodex аутентифицируется и общается с LLM-провайдером — OAuth, API-ключ, форвард ChatGPT и локальные серверы.
+description: Все способы, которыми OpenRelay аутентифицируется и общается с LLM-провайдером — OAuth, API-ключ, форвард ChatGPT и локальные серверы.
 ---
 
 **Провайдер** — это одна вышестоящая конечная точка LLM плюс способ подключения к ней: адаптер,
@@ -94,25 +94,25 @@ account id, OpenAI beta/originator/session — см. [Адаптеры](/ru/refe
 ## 2. Вход по аккаунту (OAuth)
 
 Пресеты провайдеров могут использовать вход по аккаунту — в том числе GitHub Copilot через
-экспериментальный неофициальный мост device flow. opencodex хранит их учётные данные в
-`~/.opencodex/auth.json` и обновляет их автоматически. CLI входа принимает и `ocx login codex`, но это
+экспериментальный неофициальный мост device flow. OpenRelay хранит их учётные данные в
+`~/.opencodex/auth.json` и обновляет их автоматически. CLI входа принимает и `orl login codex`, но это
 не один из провайдеров выше: команда направляется во вход пула аккаунтов Codex (тот же поток, что и
-`ocx account login codex`). У пула отдельный реестр аккаунтов, поэтому такому входу нужен запущенный
+`orl account login codex`). У пула отдельный реестр аккаунтов, поэтому такому входу нужен запущенный
 прокси. `chatgpt` и `openai` — псевдонимы того же маршрута.
 
 ```bash
-ocx login xai          # xAI Grok
-ocx login anthropic    # Anthropic Claude (Pro/Max)
-ocx login kimi         # Moonshot Kimi
-ocx login nous         # Nous Portal (device grant; модели free + paid)
-ocx login kiro         # импорт учётных данных kiro-cli (с фолбэком на токен)
-ocx login google-antigravity
-ocx login cursor       # отдельный PKCE-вход Cursor
-ocx login command-code # браузерный OAuth Command Code (или импорт ~/.commandcode/auth.json)
-ocx login devin       # Cognition/Devin: сначала импорт данных Devin CLI, иначе вход через браузер Auth0
-ocx login github-copilot  # device flow GitHub → токен Copilot (Copilot Pro/Business)
-ocx login codex        # пул аккаунтов Codex (псевдонимы: chatgpt, openai; нужен запущенный прокси)
-ocx logout <provider>
+orl login xai          # xAI Grok
+orl login anthropic    # Anthropic Claude (Pro/Max)
+orl login kimi         # Moonshot Kimi
+orl login nous         # Nous Portal (device grant; модели free + paid)
+orl login kiro         # импорт учётных данных kiro-cli (с фолбэком на токен)
+orl login google-antigravity
+orl login cursor       # отдельный PKCE-вход Cursor
+orl login command-code # браузерный OAuth Command Code (или импорт ~/.commandcode/auth.json)
+orl login devin       # Cognition/Devin: сначала импорт данных Devin CLI, иначе вход через браузер Auth0
+orl login github-copilot  # device flow GitHub → токен Copilot (Copilot Pro/Business)
+orl login codex        # пул аккаунтов Codex (псевдонимы: chatgpt, openai; нужен запущенный прокси)
+orl logout <provider>
 ```
 
 | Провайдер | Адаптер | Базовый URL | Примечания |
@@ -122,10 +122,10 @@ ocx logout <provider>
 | `kimi` | `openai-chat` | `https://api.kimi.com/coding/v1` | Модели Kimi Code. Алиас `kimi-for-coding` теперь указывает на K2.8 Preview: контекст до 1 млн токенов, уровни рассуждения `low`/`high`/`max`, текстовый и графический ввод. У `k3-256k` фиксированный предел 256K. |
 | `kimi-responses` | `openai-responses` | `https://api.kimi.com/coding/v1` | Использует тот же вход OAuth и список моделей, что и `kimi`, но через протокол Responses. Содержимое рассуждений остаётся зашифрованным на сервере; вызовы инструментов и их результаты видны. |
 | `nous` | `openai-chat` | `https://inference-api.nousresearch.com/v1` | Шлюз подписки Nous Research (тот же бэкенд, что использует Hermes Agent). Вход по device grant против `portal.nousresearch.com`; access-токен — это JWT для каждого запроса к inference. Смешанный каталог платных + `:free` моделей (`tencent/hy3:free`, `stepfun/step-3.7-flash:free`, …) обнаруживается вживую по авторизованному аккаунту. Refresh-токены одноразовые и ротируются при каждом обновлении. |
-| `kiro` | `kiro` | `https://runtime.us-east-1.kiro.dev` | Первый вход импортирует существующую сессию после установки Kiro CLI (в Unix: `curl -fsSL https://cli.kiro.dev/install` &#124; `bash`; в Windows PowerShell: `irm 'https://cli.kiro.dev/install.ps1'` &#124; `iex`; затем выполните `kiro-cli login`). **Добавить аккаунт** выполняет выход из `kiro-cli`, запускает новый вход через браузер, переключает аккаунт самого `kiro-cli` и сохраняет метаданные профиля отдельно для каждого аккаунта. Существующие аккаунты OpenCodex сохраняются; при отмене или сбое восстанавливается предыдущая сессия `kiro-cli`. |
+| `kiro` | `kiro` | `https://runtime.us-east-1.kiro.dev` | Первый вход импортирует существующую сессию после установки Kiro CLI (в Unix: `curl -fsSL https://cli.kiro.dev/install` &#124; `bash`; в Windows PowerShell: `irm 'https://cli.kiro.dev/install.ps1'` &#124; `iex`; затем выполните `kiro-cli login`). **Добавить аккаунт** выполняет выход из `kiro-cli`, запускает новый вход через браузер, переключает аккаунт самого `kiro-cli` и сохраняет метаданные профиля отдельно для каждого аккаунта. Существующие аккаунты OpenRelay сохраняются; при отмене или сбое восстанавливается предыдущая сессия `kiro-cli`. |
 | `google-antigravity` | `google` | `https://daily-cloudcode-pa.googleapis.com` | Google OAuth поверх протокола Cloud Code Assist. Живое обнаружение использует аутентифицированный CCA-эндпоинт `v1internal:fetchAvailableModels` и публикует только agent-модели, доступные текущему аккаунту; поддерживаемый каталог остаётся резервным вариантом. |
 | `cursor` | `cursor` | `https://api2.cursor.sh` | Экспериментальный PKCE-вход, живой транспорт HTTP/2 и обнаружение моделей с фильтрацией по аккаунту. |
-| `devin` | `devin` | `https://server.codeium.com` | Экспериментальный неофициальный мост к Cognition/Devin. Вход сначала импортирует учётные данные, которые уже хранит установленный Devin CLI (`devin auth login` записывает `devin-session-token` в его `credentials.toml`); если их нет — открывает страницу Auth0 в браузере и обменивает вставленный токен через `RegisterUser` на долгоживущий API-ключ. `ocx login devin-cli` продолжает работать как устаревший алиас. Список моделей запрашивается для каждой учётной записи через `GetCascadeModelConfigs`; потоковая передача идёт только по пути `runTurn` поверх Connect-RPC. В пресете панели по умолчанию отсутствует. |
+| `devin` | `devin` | `https://server.codeium.com` | Экспериментальный неофициальный мост к Cognition/Devin. Вход сначала импортирует учётные данные, которые уже хранит установленный Devin CLI (`devin auth login` записывает `devin-session-token` в его `credentials.toml`); если их нет — открывает страницу Auth0 в браузере и обменивает вставленный токен через `RegisterUser` на долгоживущий API-ключ. `orl login devin-cli` продолжает работать как устаревший алиас. Список моделей запрашивается для каждой учётной записи через `GetCascadeModelConfigs`; потоковая передача идёт только по пути `runTurn` поверх Connect-RPC. В пресете панели по умолчанию отсутствует. |
 | `github-copilot` | `openai-chat` | `https://api.githubcopilot.com` | Экспериментально. Device flow GitHub + обмен `copilot_internal` (OAuth-клиент VS Code). Требуется активная подписка Copilot; это не официальный сторонний API. |
 
 Проверки квот аккаунтов и провайдера Google Antigravity используют фиксированные адреса Google, включая резервный запрос списка моделей. Для этих адресов поддерживается прозрачный Fake-IP DNS с сохранением проверки TLS, запрета перенаправлений и проверки частных адресов. Пользовательский base URL меняет только запросы моделей; `NO_PROXY` сохраняет политику прямого подключения.
@@ -133,10 +133,10 @@ ocx logout <provider>
 ### Диагностика потерь схем инструментов Google
 
 Объявления инструментов Google компилируются для выбранного класса конечной точки. Когда отладка
-провайдера включена командой `ocx debug provider on`, переключателем Logs в дашборде или переменной
+провайдера включена командой `orl debug provider on`, переключателем Logs в дашборде или переменной
 `OCX_DEBUG=1`, потеря схемы при преобразовании совместимости на пути с отсутствующей политикой или
 `compatible` записывает событие
-`[ocx:google:google-tool-schema-loss]` (следите за ним через `ocx debug provider logs -f`). Оно
+`[ocx:google:google-tool-schema-loss]` (следите за ним через `orl debug provider logs -f`). Оно
 содержит только версию отчёта, класс конечной точки, индикатор `lossy`, ограниченный счётчик
 неопределённых сравнений, фиксированные категории потерь с ограниченными счётчиками и признак усечения. Имена инструментов и свойств, пути, значения
 и текст схемы не включаются. При отсутствии политики или `compatible` преобразование только
@@ -150,13 +150,13 @@ ocx logout <provider>
 [справочник команд отладки](/ru/reference/cli/agents/).
 
 
-После терминального сбоя обновления Nous выполните `ocx login nous`, чтобы пройти повторную аутентификацию.
+После терминального сбоя обновления Nous выполните `orl login nous`, чтобы пройти повторную аутентификацию.
 
 Для канонических пресетов Kimi Coding Plan (вход через аккаунт `kimi` и API-ключ `kimi-code`)
-opencodex передаёт в запрос Chat Completions только стабильный `prompt_cache_key`, предоставленный
+OpenRelay передаёт в запрос Chat Completions только стабильный `prompt_cache_key`, предоставленный
 вызывающей стороной, и никогда не создаёт его сам. Документация Kimi требует стабильный ключ
 сессии/задачи для повышения доли попаданий в кэш Code Plan; запрос без ключа остаётся без ключа.
-Если включённый провайдер отклоняет поле, opencodex не удаляет его для повторной попытки и не
+Если включённый провайдер отклоняет поле, OpenRelay не удаляет его для повторной попытки и не
 изменяет сохранённую конфигурацию. Для остальных провайдеров действует deny-by-default.
 
 Стоимость `k3`, `k3[1m]` и `k3-256k` для `kimi`, `kimi-code` и `kimi-responses` — оценка по
@@ -180,22 +180,22 @@ OAuth-провайдеры, чьи учётные данные содержат 
 
 ### Импорт Cockpit Tools Antigravity
 
-В v1 OpenCodex импортирует только JSON-экспорт **Cockpit Tools Antigravity** для провайдера `google-antigravity`. На вкладке «Аккаунты» этого провайдера в панели Providers выберите локальный JSON-файл. Панель не показывает содержимое файла или значения учётных данных: она выводит только числа импортированных, обновлённых, ошибочных и неподдерживаемых записей. Другие провайдеры Cockpit в v1 не поддерживаются.
+В v1 OpenRelay импортирует только JSON-экспорт **Cockpit Tools Antigravity** для провайдера `google-antigravity`. На вкладке «Аккаунты» этого провайдера в панели Providers выберите локальный JSON-файл. Панель не показывает содержимое файла или значения учётных данных: она выводит только числа импортированных, обновлённых, ошибочных и неподдерживаемых записей. Другие провайдеры Cockpit в v1 не поддерживаются.
 
 CLI принимает экспорт только из файла или stdin — не вставляйте его в аргумент команды:
 
 ```bash
-ocx account import google-antigravity --format cockpit-tools --file <path> [--json]
-cat accounts.json | ocx account import google-antigravity --format cockpit-tools --stdin [--json]
+orl account import google-antigravity --format cockpit-tools --file <path> [--json]
+cat accounts.json | orl account import google-antigravity --format cockpit-tools --stdin [--json]
 ```
 
 Inline JSON и лишние позиционные аргументы отклоняются. Храните экспортированные файлы приватно и удаляйте их или защищайте после импорта.
 
 ### Импорт учётных данных Kiro
 
-Для входа Kiro требуется Kiro CLI: в Unix установите его командой `curl -fsSL https://cli.kiro.dev/install | bash`, в Windows PowerShell — `irm 'https://cli.kiro.dev/install.ps1' | iex`, затем сначала выполните `kiro-cli login`. Если сессии `kiro-cli` нет, `ocx login kiro` использует вставленный токен доступа или переменную окружения `KIRO_ACCESS_TOKEN`.
+Для входа Kiro требуется Kiro CLI: в Unix установите его командой `curl -fsSL https://cli.kiro.dev/install | bash`, в Windows PowerShell — `irm 'https://cli.kiro.dev/install.ps1' | iex`, затем сначала выполните `kiro-cli login`. Если сессии `kiro-cli` нет, `orl login kiro` использует вставленный токен доступа или переменную окружения `KIRO_ACCESS_TOKEN`.
 
-Обычный импорт `ocx login kiro` открывает базу SQLite CLI только для чтения и не изменяет базу, WAL или SHM.
+Обычный импорт `orl login kiro` открывает базу SQLite CLI только для чтения и не изменяет базу, WAL или SHM.
 
 - `KIROCLI_DB_PATH` выбирает нестандартную базу SQLite Kiro CLI; указанная база должна уже существовать.
 - `KIROCLI_TOKEN_KEY` выбирает точный ключ строки `auth_kv`, если найдено несколько неоднозначных строк с токенами. Без выбора вход завершается ошибкой, а не пытается угадать строку.
@@ -206,7 +206,7 @@ Inline JSON и лишние позиционные аргументы откло
 
 ## 3. Каталог API-ключей
 
-opencodex поставляется с 103 встроенными пресетами: 84 на основе ключей, 15 OAuth, три локальных и
+OpenRelay поставляется с 103 встроенными пресетами: 84 на основе ключей, 15 OAuth, три локальных и
 один пресет ChatGPT-форварда по умолчанию. Селектор **Add provider** в дашборде открывает страницу
 выдачи ключей провайдера, проверяет ключ и сохраняет его; проверка зависит от провайдера.
 Наиболее заметные записи:
@@ -214,10 +214,10 @@ opencodex поставляется с 103 встроенными пресета�
 **ClinePass** подключается с помощью Cline API key к [официальному каталогу подписки](https://docs.cline.bot/getting-started/clinepass)
 и [Chat Completions endpoint](https://docs.cline.bot/api/chat-completions). Оператор — Cline Bot Inc., указанный в
 [условиях Cline](https://cline.bot/tos). Маршрут вида `cline-pass/cline-pass/kimi-k3`
-намеренный: первая часть выбирает провайдера opencodex, а полный slug `cline-pass/kimi-k3`
+намеренный: первая часть выбирает провайдера OpenRelay, а полный slug `cline-pass/kimi-k3`
 отправляется upstream. Использование учитывается в общих для аккаунта скользящем 5-часовом,
 недельном и месячном лимитах. Проверка живого API 2026-08-13 подтвердила, что все статические модели ClinePass
-принимают на входе шлюза `low`, `medium`, `high`, `xhigh` и `max`. opencodex сохраняет запрошенный tier без изменения;
+принимают на входе шлюза `low`, `medium`, `high`, `xhigh` и `max`. OpenRelay сохраняет запрошенный tier без изменения;
 нормализация для конкретного backend остаётся ответственностью ClinePass.
 
 **Cline** использует тот же ключ и эндпоинт с оплатой по мере использования и доступом к 100+ моделям
@@ -280,7 +280,7 @@ opencodex поставляется с 103 встроенными пресета�
 `GET /v1/models`, оставляя активные модели Chat Completions (а также `openai/o3-pro`, доступную только через Responses и направляемую в Responses). Модели, обслуживаемые Sionic,
 `deepseek/deepseek-v4.1-flash-ultrafast` и `z-ai/glm-5.3-flash-ultrafast`, показаны первыми.
 Создайте ключ в [панели OpenGateway](https://opengateway.ai/api-keys), затем выполните
-`ocx provider add opengateway` или выберите **OpenGateway** в панели. Chat-запросы используют
+`orl provider add opengateway` или выберите **OpenGateway** в панели. Chat-запросы используют
 настроенный Bearer-ключ; публичный список не подтверждает действительность ключа.
 
 **OpenCode Zen** (`opencode-zen`) и бесключевой пресет **OpenCode Free** используют один
@@ -288,22 +288,22 @@ opencodex поставляется с 103 встроенными пресета�
 примерно 15–20 запросов в минуту (оценка сообщества; OpenCode не публикует RPM).
 Zen может отвечать общими 429 без заголовков `Retry-After` / `X-RateLimit-*`. Это отдельно от
 бесключевой десктопной квоты (~200 запросов Big Pickle/бесплатных моделей за 5 часов на
-`opencode-free`). Когда Zen опускает `Retry-After` на таком 429, opencodex добавляет пояснение
+`opencode-free`). Когда Zen опускает `Retry-After` на таком 429, OpenRelay добавляет пояснение
 в ошибку клиента и синтетический `Retry-After`; при наличии upstream `Retry-After` он имеет
 приоритет. Повтор с тем же ключом по-прежнему включается через [`retryOn429`](/ru/reference/configuration/).
 
 **Бесключевой уровень `opencode-free` сейчас закрыт для сторонних клиентов.** Zen отклоняет любой
 запрос без заголовка `x-opencode-session`, возвращая тип ошибки `MissingSessionID` и сообщение
 «OpenCode's free tier can only be used in OpenCode». Проверяется только наличие заголовка, поэтому
-прокси мог бы пройти её, выдумав значение, — opencodex так не делает. Подделать идентификатор сессии
+прокси мог бы пройти её, выдумав значение, — OpenRelay так не делает. Подделать идентификатор сессии
 и версионный User-Agent `opencode/<version>` значит объявить себя клиентом OpenCode, а OpenCode не
 публикует договор о стороннем подключении к этому бесключевому уровню; полученный так HTTP 200 —
-это обойдённая проверка допуска, а не разрешение. Поэтому opencodex сообщает об ограничении вместо
+это обойдённая проверка допуска, а не разрешение. Поэтому OpenRelay сообщает об ограничении вместо
 обхода: запрос к `opencode-free` возвращает ошибку с объяснением.
 
 Поддерживаемый путь к тем же моделям — провайдер **`opencode-zen`** с ключом OpenCode Zen API,
 полученным на [opencode.ai/auth](https://opencode.ai/auth). Если OpenCode позже опубликует сторонний
-путь для бесключевого уровня, opencodex сможет его использовать; до тех пор пресет документирует
+путь для бесключевого уровня, OpenRelay сможет его использовать; до тех пор пресет документирует
 ограничение. Условия вышестоящего сервиса: [opencode.ai/docs/zen](https://opencode.ai/docs/zen/).
 
 Большинство провайдеров использует адаптер `openai-chat` с bearer-ключом; пресеты с поддержкой
@@ -311,7 +311,7 @@ Zen может отвечать общими 429 без заголовков `Re
 У Xiaomi также есть пресет OpenAI Chat `xiaomi-mimo` и пресет токенного плана `mimo`. Все три по
 умолчанию используют MiMo V2.6 (`mimo-v2.6-pro`, а `xiaomi-mimo` — `mimo-v2.6-flash`). 2026-10-21
 Xiaomi прекратит поддержку `mimo-v2.5` и `mimo-v2.5-pro` без перенаправления. До этой даты смените
-сохранённую модель V2.5 по умолчанию: opencodex не изменит её автоматически.
+сохранённую модель V2.5 по умолчанию: OpenRelay не изменит её автоматически.
 Volcengine Coding Plan и Agent Plan используют нативные конечные точки Responses через адаптер `openai-responses`. В проверенных продолжениях с вызовом инструментов на Ark Coding Plan повторная отправка элемента `reasoning`, возвращённого предыдущим ходом, даёт `400 InvalidParameter`, поэтому пресет Coding Plan удаляет такие элементы перед пересылкой входа продолжения. Состояние reasoning того хода при этом теряется; отключается через `dropResponsesReasoningItems: false`. Уже сохранённая конфигурация Coding Plan с `openai-chat` не переписывается и остаётся на Chat: чтобы перейти, вручную смените `adapter` на `openai-responses` и `responsesPath` на `/responses` либо удалите и заново добавьте пресет.
 
 > **Три маршрута тарификации Volcengine:** `volcengine` — Ark API с оплатой по факту,
@@ -355,7 +355,7 @@ Service token Nscale создаётся в [Nscale Console](https://console.nsca
 
 **Discovery для Command Code.** Пресет читает список `/provider/v1/models` с фиксированного хоста
 Provider API, сохраняет исходные идентификаторы моделей и ограничивает размер каталога 256 KiB и
-256 исходными строками. `ocx login command-code` поддерживает вход через OAuth в браузере и может
+256 исходными строками. `orl login command-code` поддерживает вход через OAuth в браузере и может
 импортировать локальные учётные данные CLI из `~/.commandcode/auth.json` для пользователей Command Code
 CLI. После входа каталог моделей загружается через аутентифицированную конечную точку discovery и
 зависит от учётной записи. Пресет Provider API (`commandcode`) отправляет активный настроенный ключ:
@@ -370,9 +370,9 @@ CLI. После входа каталог моделей загружается 
 или фильтрации ответа разметка остаётся текстом. Ключи Provider API создаются в
 [Command Code Studio](https://commandcode.ai/studio/).
 
-**Квота Command Code.** Дашборд и `ocx account refresh` опрашивают окна `/alpha/billing/credits` (5 часов и неделя) на каноническом хосте `https://api.commandcode.ai`. OAuth-пресет (`command-code`) использует сохранённый bearer аккаунта; пресет Provider-API ключа (`commandcode`) — активный настроенный ключ. Пользовательски изменённый похожий base URL не опрашивается. Если Command Code также сообщает расход за период, оставшиеся monthly / purchased / free credits показываются как USD-окно.
+**Квота Command Code.** Дашборд и `orl account refresh` опрашивают окна `/alpha/billing/credits` (5 часов и неделя) на каноническом хосте `https://api.commandcode.ai`. OAuth-пресет (`command-code`) использует сохранённый bearer аккаунта; пресет Provider-API ключа (`commandcode`) — активный настроенный ключ. Пользовательски изменённый похожий base URL не опрашивается. Если Command Code также сообщает расход за период, оставшиеся monthly / purchased / free credits показываются как USD-окно.
 
-При входе в OrcaRouter через браузер (`ocx login orcarouter-oauth`) тело успешного ответа при обмене
+При входе в OrcaRouter через браузер (`orl login orcarouter-oauth`) тело успешного ответа при обмене
 кода на ключ должно быть корректным JSON в UTF-8 размером не более 64 KiB. Действующий 30-секундный
 лимит этого запроса охватывает получение заголовков и всего тела ответа; слишком большое или
 некорректное тело отклоняется до сохранения ключа. Эти ограничения относятся только к обмену кода
@@ -446,7 +446,7 @@ plan. Ключ создаётся в [дашборде Featherless](https://feat
 
 Пользовательский провайдер с `openai-chat`, `authMode: "key"` и каноническим адресом
 `https://api.a6api.com` или `https://api.a6api.com/v1` показывает расход кредитов A6API в
-дашборде и в `ocx account refresh <provider>`. Имя провайдера может быть любым. Единицы токенов
+дашборде и в `orl account refresh <provider>`. Имя провайдера может быть любым. Единицы токенов
 пересчитываются в USD по hard credit limit учётной записи; отображаются процент расхода и остаток. Срок действия токена не считается
 сбросом квоты, поскольку он не означает пополнение. Только активный ключ отправляется на
 канонический хост, перенаправления отклоняются, а отрицательные или несогласованные итоги биллинга
@@ -470,14 +470,14 @@ Providers, сохраняется в `provider.apiKeyPool`, становится
 
 ### Переключение аккаунтов из терминала
 
-Используйте `ocx account list`, `ocx account current` и `ocx account use`, чтобы просматривать и
+Используйте `orl account list`, `orl account current` и `orl account use`, чтобы просматривать и
 переключать те же пулы Codex, OAuth и API-ключей, не открывая дашборд. Команды, JSON-вывод и
 поведение в новых сессиях описаны в разделе
 [Справочник CLI](/ru/reference/cli/providers-accounts/#ocx-account-subcommand).
 
 ### Превью-маршруты GPT-5.6
 
-GPT-5.6 Sol/Terra/Luna заранее внесены в резервные списки провайдеров, чтобы `ocx sync` сохранял
+GPT-5.6 Sol/Terra/Luna заранее внесены в резервные списки провайдеров, чтобы `orl sync` сохранял
 модели видимыми, даже когда живые каталоги отстают:
 
 | Маршрут Codex | Предзаданные id моделей | Контекст, видимый Codex |
@@ -494,19 +494,19 @@ Luna есть `max`, но нет `ultra`). Маршрутизируемые за
 предзаданный список до моделей, доступных вошедшему аккаунту.
 
 :::note[Шлюзы и прокси по подписке]
-Провайдер попадает в список, когда у opencodex есть подходящий wire-адаптер, а **не** в зависимости
+Провайдер попадает в список, когда у OpenRelay есть подходящий wire-адаптер, а **не** в зависимости
 от того, является ли он «агентским» продуктом. Текущие id адаптеров: `openai-chat`,
 `openai-responses`, `anthropic`, `google` (режимы AI Studio, Vertex и Antigravity/Cloud Code
 Assist), `azure` / `azure-openai`, `kiro` и `cursor`. Проприетарный API без одной из этих
 реализаций — например, нативный Amazon Bedrock — напрямую не поддерживается.
-**GitHub Copilot** — это OAuth-провайдер (`ocx login github-copilot`), который обменивает вход
+**GitHub Copilot** — это OAuth-провайдер (`orl login github-copilot`), который обменивает вход
 через device flow GitHub на короткоживущий API-токен Copilot, а не принимает вставленный API-ключ.
 **GitLab Duo** остаётся шлюзом с ключом/токеном подписки на своей OpenAI-совместимой конечной
 точке. **Cloudflare AI Gateway** требует подставить в URL id аккаунта и шлюза.
 
 Copilot предоставляет каталог со смешанными проводами: модели (`gpt-5.3-codex`,
 `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.5`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-6-astra`, `grok-4.5`, `grok-4.6`, `mai-code-1.1-flash`, `mai-code-1-flash-picker`)
-отклоняют `/chat/completions` для агентного трафика, поэтому opencodex по умолчанию
+отклоняют `/chat/completions` для агентного трафика, поэтому OpenRelay по умолчанию
 маршрутизирует эти модели через Responses API, а все остальные модели Copilot остаются на
 chat completions. Приоритет: жёсткий wire-пин → явная запись
 [`modelAdapters`](/ru/reference/configuration/providers/) → дефолт реестра → adapter всего
@@ -514,9 +514,9 @@ chat completions. Приоритет: жёсткий wire-пин → явная 
 Responses, задайте `"modelAdapters": { "gpt-5.4-nano": "openai-responses" }`.
 
 Cursor отслеживается отдельно как экспериментальный адаптер. `adapter: "cursor"` появляется в
-`ocx init` и в селекторе Add Provider дашборда как экспериментальная запись локальной конфигурации
+`orl init` и в селекторе Add Provider дашборда как экспериментальная запись локальной конфигурации
 с метаданными статического резервного каталога моделей Cursor. Когда настроен токен доступа Cursor,
-opencodex использует живой транспорт HTTP/2 Cursor. Его встроенный резервный список включает
+OpenRelay использует живой транспорт HTTP/2 Cursor. Его встроенный резервный список включает
 `gpt-5.6-sol` / `terra` / `luna` (контекст 1M), обычные/Fast-строки Grok 4.5, 4.6 и 4.7 (500K) и
 `kimi-k3` (262K); живое обнаружение решает, какие из них останутся видимыми для аккаунта. Для
 Grok 4.6 и 4.7 в обеих формах доступны `low` / `medium` / `high` / `xhigh`, а для 4.5 — только до `high`.
@@ -533,7 +533,7 @@ Kimi K3 только через wire id с суффиксом усилия, по
 экспериментов (или через **Providers → Cursor → Edit JSON** в дашборде). Полный пример см. в
 [справочнике по конфигурации](/ru/reference/configuration/providers/#провайдер-cursor-adapter-cursor).
 MCP, запись экрана и computer-use доступны как хуки исполнителя; без настроенного локального
-исполнителя opencodex возвращает типизированные результаты «нет исполнителя», а не блокирует запрос
+исполнителя OpenRelay возвращает типизированные результаты «нет исполнителя», а не блокирует запрос
 политикой. Для этого экспериментального адаптера включены Cursor OAuth и живое обнаружение моделей;
 при этом Cursor по-прежнему не показывается в списках входа по ключу.
 :::
@@ -542,10 +542,10 @@ MCP, запись экрана и computer-use доступны как хуки 
 
 Ollama Cloud — это размещённая в облаке (не локальная) Ollama. Укажите адрес
 `https://ollama.com/v1` и ключ со страницы
-[ollama.com/settings/keys](https://ollama.com/settings/keys). opencodex обращается к ней через
+[ollama.com/settings/keys](https://ollama.com/settings/keys). OpenRelay обращается к ней через
 собственный REST API Ollama (`POST /api/chat`), а не через OpenAI-совместимую поверхность, и
 получает список моделей от провайдера, поэтому новые модели Ollama Cloud появляются без
-изменения конфигурации. opencodex классифицирует её облачную
+изменения конфигурации. OpenRelay классифицирует её облачную
 линейку по поддержке изображений, чтобы [vision-сайдкар](/ru/guides/sidecars/) включался
 только для текстовых моделей. Текстовые модели (например, `glm-5.2`, `deepseek-v4-flash`, `gpt-oss`,
 `qwen3-coder`, `minimax-m2.x`, `nemotron-3-*`) перечислены в `noVisionModels`; модели с нативной
@@ -554,13 +554,13 @@ Ollama Cloud — это размещённая в облаке (не локал�
 `gpt-oss` покрывает и `gpt-oss:120b`, и `gpt-oss:20b`.
 
 Ollama в документации указывает, что структурированный вывод сейчас не поддерживается на Ollama
-Cloud. Поэтому для канонического `ollama-cloud` opencodex отклоняет такие запросы
+Cloud. Поэтому для канонического `ollama-cloud` OpenRelay отклоняет такие запросы
 (`text.format`) явной ошибкой, а не молча возвращает свободную прозу; локальные и пользовательские
 `ollama-native` конечные точки сохраняют нативное поведение `format` Ollama.
 
 ## 4. Локальные провайдеры
 
-Направьте opencodex на локальный OpenAI-совместимый сервер — обычно с пустым ключом:
+Направьте OpenRelay на локальный OpenAI-совместимый сервер — обычно с пустым ключом:
 
 | Провайдер | Базовый URL |
 | --- | --- |
@@ -571,6 +571,6 @@ Cloud. Поэтому для канонического `ollama-cloud` opencodex
 ## Любая OpenAI-совместимая конечная точка
 
 Если провайдер поддерживает Chat Completions, с ним справится адаптер `openai-chat` — выберите
-**Custom** в дашборде или `custom` в `ocx init` и введите базовый URL. Все поля провайдера
+**Custom** в дашборде или `custom` в `orl init` и введите базовый URL. Все поля провайдера
 (`headers`, `noReasoningModels`, `noVisionModels`, `models`, …) описаны в
 [справочнике по конфигурации](/ru/reference/configuration/).

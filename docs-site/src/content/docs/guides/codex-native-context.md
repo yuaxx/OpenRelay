@@ -3,14 +3,14 @@ title: Native context compatibility
 description: Eligibility, authenticated trial configuration, and limits of the Codex history and notes relay.
 ---
 
-OpenCodex already relays native Codex history and notes. This is not a general memory service
+OpenRelay already relays native Codex history and notes. This is not a general memory service
 for routed providers, and exposing its HTTP endpoints does not establish that a particular
 Codex build, account, or model can use them. See [Codex integration](/guides/codex-integration/)
 for the relay's ownership, cancellation, and credential boundaries.
 
 ## Two independent requirements
 
-Codex must activate the extension, and OpenCodex must identify the caller. Changing the backend
+Codex must activate the extension, and OpenRelay must identify the caller. Changing the backend
 URL solves neither requirement by itself.
 
 The inspected upstream Codex contract requires a model whose native catalog entry advertises
@@ -20,7 +20,7 @@ providers using `env_key`, `experimental_bearer_token`, command-backed `auth`, o
 The inspected eligibility predicate accepts ChatGPT Plus, Pro, and ProLite; this is not a claim
 that every account on those plans has working backend history endpoints.
 
-OpenCodex additionally requires an active **data-plane API key** on both the successful model
+OpenRelay additionally requires an active **data-plane API key** on both the successful model
 request and the subsequent context requests. Default built-in loopback injection does not send
 that key, so it can serve models while context calls fail with `context_principal_required`
 (403). The authenticated remote provider-table form alone is not a native-context solution
@@ -29,14 +29,14 @@ Never remove the principal or account-ownership checks to hide either problem.
 
 ## Explicit opt-in syntax
 
-OpenCodex accepts both persisted root feature forms that Codex's `FeatureToml` accepts:
+OpenRelay accepts both persisted root feature forms that Codex's `FeatureToml` accepts:
 
 ```toml
 [features]
 context_management = true
 ```
 
-The equivalent table form also works and is the compatible spelling for older OpenCodex
+The equivalent table form also works and is the compatible spelling for older OpenRelay
 versions that did not yet recognize the boolean form:
 
 ```toml
@@ -54,13 +54,13 @@ This is a **source-checked trial configuration, not a real-account end-to-end ce
 Back up the Codex configuration and keep a durable task checkpoint before testing. Use a new,
 throwaway thread; do not change the provider identity of an existing working thread.
 
-Supply an existing active OpenCodex data-plane key in `OCX_CONTEXT_API_KEY` in the environment
+Supply an existing active OpenRelay data-plane key in `OCX_CONTEXT_API_KEY` in the environment
 of the Codex process. Do not use a management/admin token or store the key in TOML. A service's
 environment is not automatically inherited by a separately launched desktop application.
 Keep the normal native Codex ChatGPT login available; the extra header does not replace OAuth.
 
 With the root feature opt-in above, the canonical ChatGPT forward provider configured in
-OpenCodex, and a current native model catalog, merge this **additional** provider and profile
+OpenRelay, and a current native model catalog, merge this **additional** provider and profile
 into the same Codex config. Adjust the port to the actual local proxy. Leave the root
 `model_provider` and existing provider tables unchanged.
 
@@ -93,7 +93,7 @@ the local key; it does not forward that key to ChatGPT.
 
 The root opt-in also affects other eligible native profiles. **During this trial, do not continue
 ordinary built-in loopback threads that lack the extra key.** Turn the root feature off and run
-`ocx sync` before returning to those threads. This is not an automatic or default integration
+`orl sync` before returning to those threads. This is not an automatic or default integration
 change, and this CLI profile is not a claim about desktop profile-selection support.
 
 ## Verify before resetting context
@@ -107,9 +107,9 @@ Keep the external checkpoint even when the trial succeeds.
 - **409 `context_account_unavailable`:** ownership is missing or inconsistent; do not substitute
   the current active account or retry a write blindly.
 - **404:** distinguish the proxy's disabled/unknown-endpoint response from an upstream 404.
-  The latter is not proof of an OpenCodex routing defect or an account-wide outage.
+  The latter is not proof of an OpenRelay routing defect or an account-wide outage.
 
-A successful model call or `ocx ready` is not proof that notes, history, or state restoration
+A successful model call or `orl ready` is not proof that notes, history, or state restoration
 works. Model routing, account changes, proxy restarts, and upstream endpoint availability remain
 separate concerns. No local flag can grant missing backend eligibility, and a failed context
 operation must not be reported as a successful reset. Remove the trial tables and unset the

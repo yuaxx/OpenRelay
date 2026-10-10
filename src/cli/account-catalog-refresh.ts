@@ -1,5 +1,5 @@
 export const CODEX_CATALOG_REFRESH_PENDING_WARNING =
-  "Warning: the account change was saved, but the Codex model catalog refresh is pending. Run 'ocx sync' to retry.";
+  "Warning: the account change was saved, but the Codex model catalog refresh is pending. Run 'orl sync' to retry.";
 
 /** Read only the public completion flag from an account mutation response. */
 export function codexCatalogRefreshPending(value: unknown): boolean {

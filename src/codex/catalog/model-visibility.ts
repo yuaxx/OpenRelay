@@ -185,7 +185,7 @@ export function warnDroppedConfiguredIdsOnce(name: string, droppedConfiguredIds:
   if (lastDropWarnSignature.get(name) === signature) return;
   lastDropWarnSignature.set(name, signature);
   console.warn(
-    `[opencodex] Provider model discovery for "${name}" omitted configured model ids; dropping them from the authoritative live catalog: ${droppedConfiguredIds.join(", ")}.`,
+    `[openrelay] Provider model discovery for "${name}" omitted configured model ids; dropping them from the authoritative live catalog: ${droppedConfiguredIds.join(", ")}.`,
   );
 }
 export function shouldExposeProviderModel(providerName: string, modelId: string): boolean {

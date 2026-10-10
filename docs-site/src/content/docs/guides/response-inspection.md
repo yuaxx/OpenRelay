@@ -3,7 +3,7 @@ title: Response inspection and large responses
 description: How bounded diagnostic retention and streaming inspection interact with response delivery.
 ---
 
-OpenCodex keeps response diagnostics bounded without making the logging limit a
+OpenRelay keeps response diagnostics bounded without making the logging limit a
 limit on the bytes delivered to your client. Other provider, request and transport
 limits still apply independently.
 

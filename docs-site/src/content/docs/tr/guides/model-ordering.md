@@ -1,9 +1,9 @@
 ---
 title: Model Sıralaması
-description: opencodex'in Codex seçicisindeki ve spawn_agent model geçersiz kılmalarındaki model sırasını nasıl belirlediği.
+description: OpenRelay'in Codex seçicisindeki ve spawn_agent model geçersiz kılmalarındaki model sırasını nasıl belirlediği.
 ---
 
-Codex model seçicisi, opencodex yapılandırmasındaki sağlayıcı bildirimlerinin
+Codex model seçicisi, OpenRelay yapılandırmasındaki sağlayıcı bildirimlerinin
 veya model dizilerinin sırasını korumaz. Nihai sırası, aynı önceliği paylaşan
 yönlendirilmiş modeller için belirleyici bir alfabetik sırayla birlikte katalog
 önceliklerinden gelir.
@@ -15,7 +15,7 @@ Codex'in models-manager'ı, seçicide görünen katalog girdilerini artan sırad
 bir JSON dizisinde bir girdiyi daha öne taşımak onu seçicide daha öne taşımaz.
 Uygulama bu kısıtlamayı doğrudan `src/codex/catalog/sync.ts` içine kaydeder.
 
-Bu nedenle opencodex, dizi konumuna güvenmek yerine daha düşük öncelikler
+Bu nedenle OpenRelay, dizi konumuna güvenmek yerine daha düşük öncelikler
 atayarak öne çıkan yerleşimi denetler. Aksi belirtilmedikçe, aşağıdaki sabit
 öncelikler ve işlenmiş örnek, uygun Codex hesap seçicisi olmayan bir kataloğu
 açıklar. `N` uygun seçici ile öne çıkan öncelikler adım olarak `N` kullanır:
@@ -89,7 +89,7 @@ olduğunda ortaya çıkan sıra şöyledir:
    modeller.
 
 `subagentModels` olmadan yönlendirilen modeller `5` önceliğinde kalır, yerel GPT
-girdileri normal önceliklerini kullanır (opencodex tarafından oluşturulan
+girdileri normal önceliklerini kullanır (OpenRelay tarafından oluşturulan
 girdiler için normalde `9`) ve yönlendirilen grup sağlayıcı/kimlik olarak
 alfabetik kalır.
 
@@ -129,8 +129,8 @@ seçimler seçici nitelikli gruplara genişletildikten sonra geçerlidir.
 Öndeki model sırasını özelleştirmenin desteklenen yolu `subagentModels`'ı
 yeniden sıralamaktır. Kontrol panelinin **Alt Ajanlar** sayfası yalın yerel ve
 yönlendirilen kimlikleri yeniden sıralayabilir. Tam
-`<seçici>/<yerel-openai-modeli>` seçimleri için `ocx agent subagents set`
-kullanın veya opencodex yapılandırmasını düzenleyin; kontrol paneli bu seçimleri
+`<seçici>/<yerel-openai-modeli>` seçimleri için `orl agent subagents set`
+kullanın veya OpenRelay yapılandırmasını düzenleyin; kontrol paneli bu seçimleri
 önceden kaydedilen kimlikleri, kullanılamasalar bile korur. En fazla beş yapılandırılmış
 kimlik kullanın. Hesap seçicileriyle tek bir yalın yerel seçenek birden çok
 seçici nitelikli katalog satırına genişleyebilir, bu nedenle yapılandırılmış
@@ -166,7 +166,7 @@ Eski, yalnızca yönlendirilmiş satırlara uygulanan davranışı korumak için
 Tanımlanmamış, boş, yalnızca boşluk girdileri içeren veya yalnızca yönlendirilmiş kimliklerden oluşan
 listeler önceki davranışlarını korur.
 
-`modelPickerOrder`, OpenCodex'in alt ajan rehberliği için doğal önceliğe göre en fazla beş tercih
+`modelPickerOrder`, OpenRelay'in alt ajan rehberliği için doğal önceliğe göre en fazla beş tercih
 edilen adayı seçen hesaplamasını korur. Taşınan her satırın doğal önceliği, yerel `priority` değerinden
 ayrı saklanır; yalnızca seçici sırasını değiştirmek bu hesaplamanın sonucunu değiştirmemelidir.
 Tam model adıyla geçersiz kılma uygunluğunu da kısıtlamaz: tanıtılan liste bir izin listesi değildir.
@@ -174,9 +174,9 @@ Mevcut kimlik doğrulama, model, effort ve arka uç kısıtlamaları geçerlili�
 
 Yerel Codex, `spawn_agent` içinde tanıtılacak beş modeli yerel `priority` sırasındaki uygun ve
 seçicide görünür modellerden seçer. Bu, V1 ve model geçersiz kılmalarının sunulduğu V2 için geçerlidir.
-Dolayısıyla OpenCodex'in tercih edilen adayları değişmese bile, tanıtılan beş model seçici sırasıyla
-birlikte değişebilir. V1'e OpenCodex tercih listesi enjekte edilmez. V2, istemci katalog durumu izin
-verdiğinde ek olarak doğal önceliğe dayalı OpenCodex rehberliği alabilir; bu rehberlik yerel aracın
+Dolayısıyla OpenRelay'in tercih edilen adayları değişmese bile, tanıtılan beş model seçici sırasıyla
+birlikte değişebilir. V1'e OpenRelay tercih listesi enjekte edilmez. V2, istemci katalog durumu izin
+verdiğinde ek olarak doğal önceliğe dayalı OpenRelay rehberliği alabilir; bu rehberlik yerel aracın
 tanıttığı listeyi yeniden sıralamaz.
 
 `disabledModels` ve her sağlayıcının `selectedModels` alanı
@@ -188,4 +188,4 @@ görünürlüğü denetler. Ayrı bir `modelOrder`, `providerOrder` veya önceli
 
 `GET/PUT /api/subagent-models`, devre dışı veya eksik kayıtlı seçimleri `chosen` ve `available` içinde korur; `pickerAvailable` uygun yönlendirilmiş kimliklerdir. Models yalnızca `pickerOrder` ve `pickerOrderMode` gönderir, `models` göndermez. Yalnız kadroyu kaydetmek sırayı değiştirmez. Geçersiz giriş veya kayıt hatası önceki durumu korur.
 
-Öne çıkan ve yerel öncelik aralıkları korunur. Sıra Codex kataloğu ve Claude keşfinin yönlendirilmiş gruplarına uygulanır; Claude yerel öneki, açık Desktop profilleri ve alias sahipliği korunur. OpenCodex rehberlik sıraları ve fallback ayarları değişmez; yerel Codex aracının sunduğu ilk beş seçenek ve önerilen varsayılan değişebilir. Kayıt istemcileri yeniden başlatmaz; katalog yenilemesi bekleyebilir ve eski kataloğu gösteren istemcinin yeniden açılması gerekebilir.
+Öne çıkan ve yerel öncelik aralıkları korunur. Sıra Codex kataloğu ve Claude keşfinin yönlendirilmiş gruplarına uygulanır; Claude yerel öneki, açık Desktop profilleri ve alias sahipliği korunur. OpenRelay rehberlik sıraları ve fallback ayarları değişmez; yerel Codex aracının sunduğu ilk beş seçenek ve önerilen varsayılan değişebilir. Kayıt istemcileri yeniden başlatmaz; katalog yenilemesi bekleyebilir ve eski kataloğu gösteren istemcinin yeniden açılması gerekebilir.

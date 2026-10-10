@@ -9,7 +9,7 @@ description: 透過有界的增量 vacuum，手動回收 Codex 診斷日誌 SQLi
 
 ## 空間回收的工作內容
 
-OpenCodex 會執行有界的離線維護程序：
+OpenRelay 會執行有界的離線維護程序：
 
 1. 透過 Codex 實際使用的 `sqlite_home` 找到正式的 `logs_2.sqlite`；
 2. 驗證檔案身分及已知的 Codex 日誌結構；
@@ -42,29 +42,29 @@ OpenCodex 會執行有界的離線維護程序：
 - 對未知的未來日誌結構繼續操作；或
 - 在 SQLite 完整性檢查失敗後繼續。
 
-若 Log Guard 鎖、SQLite 寫入權或初始 checkpoint 忙碌，系統會明確拒絕，不會在背景重試。若只在某批增量 vacuum 已提交後才發生 checkpoint 爭用，OpenCodex 會把已完成的工作回報為成功的部分結果，並標示 `stopReason: "busy"`，不會宣稱資料毫無變動。
+若 Log Guard 鎖、SQLite 寫入權或初始 checkpoint 忙碌，系統會明確拒絕，不會在背景重試。若只在某批增量 vacuum 已提交後才發生 checkpoint 爭用，OpenRelay 會把已完成的工作回報為成功的部分結果，並標示 `stopReason: "busy"`，不會宣稱資料毫無變動。
 
 ## CLI
 
 先檢查可回收空間：
 
 ```bash
-ocx storage codex-logs status
+orl storage codex-logs status
 ```
 
 執行一次有界的維護：
 
 ```bash
-ocx storage codex-logs compact
+orl storage codex-logs compact
 ```
 
 取得機器可讀的前後指標：
 
 ```bash
-ocx storage codex-logs compact --json
+orl storage codex-logs compact --json
 ```
 
-若結果顯示仍有可回收空間，除非你明確希望再執行一次有界處理，否則到此為止。OpenCodex 不會無限循環，也不會替你排程下一次處理。
+若結果顯示仍有可回收空間，除非你明確希望再執行一次有界處理，否則到此為止。OpenRelay 不會無限循環，也不會替你排程下一次處理。
 
 ## 管理 API
 

@@ -86,9 +86,9 @@ Codex 會分層組裝提示詞：它自己的基礎指令、你的專案文件�
 這些只是警告，絕不會阻止儲存。如果你確實想覆寫 Codex，也可以這樣做；警告只是讓它成為
 一個有意的決定，而不是意外。
 
-## 在 opencodex 外部寫入的指令
+## 在 OpenRelay 外部寫入的指令
 
-如果 `developer_instructions` 已經存在，且不是由 opencodex 寫入，面板不會覆寫它。
+如果 `developer_instructions` 已經存在，且不是由 OpenRelay 寫入，面板不會覆寫它。
 面板會改為提供將文字匯入為一層的選項：你會先看到現有值，在確認之前不會寫入任何內容。
 
 ## 內容不同步時
@@ -103,12 +103,12 @@ Codex 會分層組裝提示詞：它自己的基礎指令、你的專案文件�
 
 ## 此頁面讀取什麼，又不讀取什麼
 
-opencodex 只讀取一個設定檔——你的 `config.toml`。Codex 會從多個層解析設定，因此這裡的值
+OpenRelay 只讀取一個設定檔——你的 `config.toml`。Codex 會從多個層解析設定，因此這裡的值
 表示的是你的檔案所寫的內容，不一定是 Codex 最終計算出的值。
 
 ## 此頁面寫入的鍵
 
-這些鍵位於 Codex 的 `config.toml` 中，而不是 opencodex 自身的設定。
+這些鍵位於 Codex 的 `config.toml` 中，而不是 OpenRelay 自身的設定。
 
 | 鍵 | 預設值 | 層 |
 |---|---|---|
@@ -119,6 +119,6 @@ opencodex 只讀取一個設定檔——你的 `config.toml`。Codex 會從多�
 | `skills.include_instructions` | `true` | 技能 |
 | `developer_instructions` | 未設定 | 依序連接的自訂層 |
 
-寫入採用逐行編輯，你的註解與格式會保留；opencodex 無法辨識的鍵會原樣保留，而不會被刪除。
+寫入採用逐行編輯，你的註解與格式會保留；OpenRelay 無法辨識的鍵會原樣保留，而不會被刪除。
 
 缺少的鍵會以預設值讀取，而不是 `false`。面板顯示檔案中實際存在的值，並在鍵未設定時說明這一點。

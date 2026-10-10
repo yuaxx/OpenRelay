@@ -1,5 +1,6 @@
 import { nativeSteeringUnavailableReason, nativeResponseControlMode, type NativeResponseControl } from "../responses/native-response-control";
 import { NativeInjectionChannel } from "../responses/native-injection";
+import { createNativeRtk } from "../../compression/rtk/native";
 import { NativeSteeringChannel, NativeSteeringError } from "../responses/native-steering";
 import { createNativeSteeringLogObserver } from "../responses/native-steering-log";
 import type { Server, ServerWebSocket } from "bun";
@@ -261,6 +262,7 @@ export function createWebsocketHandler(
         ws.data.turnId = turnId;
         const isCurrent = () => ws.data.turnId === turnId;
         const turnAbort = new AbortController();
+        if (nativeControl) nativeControl.rtk = createNativeRtk(() => config.rtk?.enabled === true, { signal: turnAbort.signal });
         const cancelTurn = () => {
           turnAbort.abort("websocket turn superseded or closed");
         };

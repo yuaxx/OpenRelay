@@ -5,6 +5,7 @@
  * can become undefined through an ESM cycle. This is not an execution sandbox.
  */
 import { CAPABILITIES as BASE_CAPABILITIES } from "./capabilities-base";
+import { CLI_NAME } from "../lib/brand";
 import type { Capability } from "./capability-types";
 import { PROVIDER_MODEL_CAPABILITIES } from "./capabilities-provider-models";
 import { ACCOUNT_CAPABILITIES } from "./capabilities-accounts";
@@ -50,5 +51,5 @@ export function capabilityRouteKeys(): Set<string> {
 
 /** Rendered command path, e.g. `ocx account pause`. */
 export function capabilityInvocation(cap: Capability): string {
-  return `ocx ${cap.command.join(" ")}`;
+  return `${CLI_NAME} ${cap.command.join(" ")}`;
 }

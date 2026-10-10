@@ -5,21 +5,21 @@ description: OpenAI harici bir model üzerinden Grok Imagine Video ile videolar 
 
 ## Genel Bakış
 
-Video Köprüsü, opencodex tarafından yönlendirilen herhangi bir OpenAI harici
+Video Köprüsü, OpenRelay tarafından yönlendirilen herhangi bir OpenAI harici
 model aracılığıyla xAI'ın Grok Imagine Video üretimini kullanmanızı sağlar.
 Etkinleştirildiğinde sohbete sentetik bir `video_gen` aracı enjekte edilir.
-Model bunu herhangi bir fonksiyon aracı gibi çağırır; opencodex çağrıyı yakalar,
+Model bunu herhangi bir fonksiyon aracı gibi çağırır; OpenRelay çağrıyı yakalar,
 xAI'a bir video üretim görevi gönderir, tamamlanana kadar yoklar ve sonucu
 indirir.
 
 ## Ön Koşullar
 
-- Bir **API anahtarına** sahip bir `xai` sağlayıcı kaydı (`ocx login xai` tek
+- Bir **API anahtarına** sahip bir `xai` sağlayıcı kaydı (`orl login xai` tek
   başına yeterli değildir — video köprüsü OAuth değil, anahtar kimlik
   doğrulaması gerektirir)
 - Yönlendirilen sağlayıcınız olarak OpenAI harici bir model (örn. Anthropic
   Claude, Google Gemini)
-- opencodex'in OpenAI harici sağlayıcı üzerinden yönlendirilecek şekilde
+- OpenRelay'in OpenAI harici sağlayıcı üzerinden yönlendirilecek şekilde
   yapılandırılmış olması
 
 > **⚠ Sağlayıcı anahtarı gereklidir:** Video köprüsü yalnızca `xai` sağlayıcısı API anahtarı kimlik doğrulaması kullandığında devreye girer. Yapılandırmanıza şunu ekleyin:
@@ -32,7 +32,7 @@ indirir.
 > }
 > ```
 >
-> `ocx login xai` (OAuth) ile katıldıysanız sağlayıcı `authMode: "oauth"` modunda kalır ve köprü sessizce devreye girmez. Ortamda `XAI_API_KEY` ayarlayın **veya** anahtarı yukarıda gösterildiği gibi sabit kodlayın.
+> `orl login xai` (OAuth) ile katıldıysanız sağlayıcı `authMode: "oauth"` modunda kalır ve köprü sessizce devreye girmez. Ortamda `XAI_API_KEY` ayarlayın **veya** anahtarı yukarıda gösterildiği gibi sabit kodlayın.
 
 ## Yapılandırma
 
@@ -59,10 +59,10 @@ indirir.
 
 ## Nasıl Çalışır?
 
-1. opencodex, `videoBridgeEnabled: true` etkinken OpenAI harici yönlendirilen
+1. OpenRelay, `videoBridgeEnabled: true` etkinken OpenAI harici yönlendirilen
    bir modeli algılar
 2. Sohbete sentetik bir `video_gen` fonksiyon aracı enjekte edilir
-3. Model `video_gen`'i çağırdığında opencodex xAI'ın `/videos/generations` uç
+3. Model `video_gen`'i çağırdığında OpenRelay xAI'ın `/videos/generations` uç
    noktasına bir görev gönderir
 4. Köprü akışı canlı tutmak için kalp atışı mesajları göndererek her 5-15
    saniyede bir görev durumunu yoklar

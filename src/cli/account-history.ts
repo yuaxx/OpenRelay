@@ -22,7 +22,7 @@ export async function cmdAccountHistory(args: string[], deps: AccountDeps): Prom
     } else valid = false;
   }
   if (!valid) {
-    console.error("Usage: ocx account history openai <pool-account-id> [--limit <1-200>] [--json]");
+    console.error("Usage: orl account history openai <pool-account-id> [--limit <1-200>] [--json]");
     return 1;
   }
   const baseUrl = await resolveBaseUrl(deps);

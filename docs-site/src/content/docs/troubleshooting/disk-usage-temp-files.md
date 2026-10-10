@@ -4,12 +4,12 @@ description: What responses-state.json.ocx.*.tmp files are, why they could accum
 ---
 
 Some users found many gigabytes of files named like
-`responses-state.json.ocx.<pid>.<seq>.tmp` in their opencodex home
+`responses-state.json.ocx.<pid>.<seq>.tmp` in their OpenRelay home
 (`~/.opencodex` by default), growing after every reboot.
 
 ## What these files are
 
-opencodex keeps a continuation cache so `previous_response_id` chains survive a
+OpenRelay keeps a continuation cache so `previous_response_id` chains survive a
 proxy restart. It writes that snapshot atomically: content goes to a temp file
 first, then replaces the real file in one step. That is what stops a crash
 mid-write from leaving a half-written snapshot.
@@ -40,7 +40,7 @@ After a reboot the operating system routinely reissues the same process IDs, so
 an old file could be permanently mistaken for one belonging to a running
 process. That is why the growth tracked reboots.
 
-## What opencodex does now
+## What OpenRelay does now
 
 The cleanup repeats on the proxy's normal background timer instead of running
 once at startup, so a running proxy reclaims abandoned files on its own. It also
@@ -64,7 +64,7 @@ whose contents or permissions changed underneath the proxy is rewritten through 
 hardening path rather than left alone.
 
 Each ordinary background cadence performs at most one full atomic rewrite. If the
-continuation cache changes while that write is in progress, opencodex schedules one
+continuation cache changes while that write is in progress, OpenRelay schedules one
 follow-up on the normal delayed cadence instead of rewriting the whole snapshot again
 immediately. Graceful shutdown keeps its bounded retry behavior after in-flight
 requests have drained so the final snapshot can catch up before the process exits.
@@ -86,7 +86,7 @@ If the proxy will **not** start — the case where the pile grows fastest — ch
 and reclaim from the command line:
 
 ```bash
-ocx doctor
+orl doctor
 ```
 
 The "Response-state temp files" section reports how many files are reclaimable
@@ -95,7 +95,7 @@ and how much space they hold. It only reports; it changes nothing.
 To actually remove them:
 
 ```bash
-ocx doctor --reclaim-response-temps
+orl doctor --reclaim-response-temps
 ```
 
 Both commands work without a running proxy. Files currently locked by another
@@ -113,7 +113,7 @@ their own temp files with a similar name, and those are not touched here.
 
 A sibling directory, `~/.opencodex/responses-state-spill/`, holds spilled
 conversation continuations. When the in-memory continuation cache outgrows its
-resident budget, opencodex moves the oldest payloads to these files and keeps
+resident budget, OpenRelay moves the oldest payloads to these files and keeps
 only a small stub in `responses-state.json`. This is what keeps the snapshot
 small without dropping long `previous_response_id` chains.
 
@@ -130,12 +130,12 @@ removed with them.
 **Restart preserves every spill file the snapshot still references.** A restart
 reloads the stubs and re-owns the files behind them, so nothing needed is lost
 by rebooting. A file becomes garbage only when it is no longer referenced —
-crash leftovers and failed cleanups — and opencodex reclaims those itself after
+crash leftovers and failed cleanups — and OpenRelay reclaims those itself after
 a 15-minute grace period.
 
 **Do not delete spill files manually.** Files still referenced are part of a
 live continuation chain, and the reclaim already handles the unreferenced ones.
-`ocx doctor` reports the split without touching anything: a "Response-state
+`orl doctor` reports the split without touching anything: a "Response-state
 spill files" section shows total files and bytes on disk, how much is still
 owned by the store or the persisted snapshot, and how much sits as reclaimable
 orphan candidates. The same counts are on the management API at

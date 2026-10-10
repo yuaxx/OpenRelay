@@ -13,7 +13,7 @@ yardımcı özellikleri nasıl çalıştıracağını kontrol eder.
 | --- | --- | --- | --- |
 | `port` | `number` | `10100` | Proxy dinleme portu. |
 | `hostname?` | `string` | `"127.0.0.1"` | Bağlama adresi. Geri döngü olmayan bağlamalar `OPENCODEX_API_AUTH_TOKEN` gerektirir. |
-| `proxy?` | `string` | — | Giden HTTP(S) veya SOCKS5 proxy URL'si (`socks5://host:port`) ya da `${ENV_VAR}`. HTTP URL'leri değişkenler boşsa `HTTP_PROXY` / `HTTPS_PROXY`'ye yazılır. SOCKS5 URL'leri yerleşik gerçek SOCKS5 tünelini kullanır ve `ALL_PROXY`'ye de yazılır (`ocx start --socks5`); bu süreçte miras `HTTP(S)_PROXY` temizlenir. Geri döngü `NO_PROXY` içinde kalır. |
+| `proxy?` | `string` | — | Giden HTTP(S) veya SOCKS5 proxy URL'si (`socks5://host:port`) ya da `${ENV_VAR}`. HTTP URL'leri değişkenler boşsa `HTTP_PROXY` / `HTTPS_PROXY`'ye yazılır. SOCKS5 URL'leri yerleşik gerçek SOCKS5 tünelini kullanır ve `ALL_PROXY`'ye de yazılır (`orl start --socks5`); bu süreçte miras `HTTP(S)_PROXY` temizlenir. Geri döngü `NO_PROXY` içinde kalır. |
 | `emptyCompletionRetry?` | `boolean` | `false` | Metin veya araç çağrısı içermeyen bir Responses tamamlamasını aynı istekle bir kez yeniden denemeyi açıkça etkinleştirir. Yeniden deneme ücretlendirilebilir. `OCX_EMPTY_COMPLETION_RETRY=0`, yapılandırmayı değiştirmeden devre dışı bırakır; combo ve routed-compaction turları hariçtir. |
 | `stallTimeoutSec?` | `number` | `300` (public) / kapalı (local) | Akış kesilmeden önce anlamlı üst sunucu ilerlemesi olmadan geçen saniye (Responses ve yerel Chat). Ayarlanmamışsa **yerel** üst sunucu (loopback, private, `.local`/`.lan` adı) için varsayılan kapalı, genel üst sunucu için 300 sn; pozitif değer ikisine de uygulanır (en az 1 sn); `0` sessizlik watchdog'unu her yerde kapatır. Canonical ChatGPT SSE'yi akışsız JSON'a katlayan Responses isteklerinde watchdog kapalı olsa bile bağımsız 15 dakikalık toplam tur sınırı kalır. `/v1/responses/compact` için bekleyen gövde okumaları bu bütçeyi paylaşır ama yerel üst sunucuda bile varsayılan 300 sn'dir; açık değer (`0` dahil) önceliklidir. |
 | `connectTimeoutMs?` | `number` | `200000` | Deneme başına DNS/TCP/TLS/nihai başlık son tarihi; gövde üretiminden önce biter. |
@@ -24,9 +24,9 @@ yardımcı özellikleri nasıl çalıştıracağını kontrol eder.
 | `storageCleanupPolicy?` | `StorageCleanupPolicy` | devre dışı | İsteğe bağlı arşivlenmiş oturum temizleme politikası. Asla örtük olarak etkinleştirilmez. |
 | `appOwnedMemoryBudgetMb?` | `number` | `256` | Çıkarılabilir uygulamaya ait günlükler, önbellekler, bloblar ve devam yükleri için MiB cinsinden sınır. Aralık 64–4096; bir RSS sınırı değildir. |
 | `metricsExport.enabled?` | `boolean` | `false` | Kimliği doğrulanmış `GET /api/metrics` üzerinde süreç yerel toplu istek metriklerini etkinleştirir. Yeniden başlatma gerekir; devre dışıyken yol 404 döndürür ve dışa aktarıcı etkinliği başlamaz. |
-| `codexAutoStart?` | `boolean` | `true` | Codex dolgusunun Codex'i başlatmadan önce `ocx ensure` çalıştırmasına izin verin. False, ensure'ı bir işlem yapmayan (no-op) hale getirir. |
+| `codexAutoStart?` | `boolean` | `true` | Codex dolgusunun Codex'i başlatmadan önce `orl ensure` çalıştırmasına izin verin. False, ensure'ı bir işlem yapmayan (no-op) hale getirir. |
 | `codexShimAutoRestore?` | `boolean` | `true` | Tamamlanan harici bir Codex güncellemesi değiştirdikten sonra kurulu bir dolguyu geri yükleyin. Ortam vazgeçmesi: `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0`. |
-| `syncResumeHistory?` | `boolean` | `true` | Tersine çevrilebilir Codex App geçmişi uyumluluğu. Orijinal meta veriler yedeklenir ve `ocx stop` / `ocx restore` tarafından geri yüklenir. |
+| `syncResumeHistory?` | `boolean` | `true` | Tersine çevrilebilir Codex App geçmişi uyumluluğu. Orijinal meta veriler yedeklenir ve `orl stop` / `orl restore` tarafından geri yüklenir. |
 | `shadowCallIntercept?` | `{ enabled?: boolean; model?: string; sourceModels?: string[] }` | kapalı | Tanınan Codex yardımcı/gölge çağrılarını, istek için yapılandırılan akıl yürütme çabasını koruyarak seçilen bir modele yeniden yönlendirin. Varsayılan kaynak öneki `gpt-6-luna`, `gpt-5.6-luna`'dır; 0.144.x'e kadar olan eski istemciler `sourceModels`'ın geri yükleyebileceği `gpt-5.4-mini` kullanmıştır. |
 | `webSearchSidecar?` | `OcxWebSearchSidecarConfig` | kullanılabilir olduğunda açık | Web arama sidecar seçenekleri. |
 | `visionSidecar?` | `OcxVisionSidecarConfig` | kullanılabilir olduğunda açık | Görsel açıklama sidecar seçenekleri. |
@@ -34,7 +34,7 @@ yardımcı özellikleri nasıl çalıştıracağını kontrol eder.
 
 Daha eski bir geliştirme derlemesi yedekleme desteği var olmadan önce devam
 geçmişi meta verilerini değiştirdiyse yerel sağlayıcı kurtarmasını zorlamak için
-`ocx recover-history --legacy-openai --yes` çalıştırın.
+`orl recover-history --legacy-openai --yes` çalıştırın.
 Komut, geçerli dedicated-provider geçmişi de dahil olmak üzere kullanıcı iletisi bulunan tüm `opencodex` satırlarını yeniden etiketler; çalıştırmadan önce lifecycle başvurusundaki tam kapsam uyarısını okuyun.
 
 ### Yerel Chat zaman aşımı ve tamamlanma
@@ -49,7 +49,7 @@ doğrulaması gerektirir. Başlamadan önce belirteci dışa aktarın:
 
 ```bash
 export OPENCODEX_API_AUTH_TOKEN="your-secret-token"
-ocx start
+orl start
 ```
 
 Proxy bu değişken olmadan uzak bir bağlamayı reddeder. Bir arka plan servisi
@@ -106,7 +106,7 @@ arayanlar yine de belirtece ihtiyaç duyar.
 }
 ```
 
-`ocx sync` daha sonra yönetilen Codex sağlayıcı bloğuna `base_url =
+`orl sync` daha sonra yönetilen Codex sağlayıcı bloğuna `base_url =
 "http://127.0.0.1:10200/v1"` yazar ve kimlik doğrulama başlığını atlar, böylece
 doğrudan oluşturulan bir app-server herhangi bir kimlik bilgisi aktarımı olmadan
 çalışır.
@@ -156,10 +156,10 @@ ssh -L 20100:localhost:10100 -L 1455:localhost:1455 you@remote
 ```
 
 Kayıtlı bir geri arama portu zaten kullanımdaysa ve oturum açma yüzeyi manuel
-girdi sunuyorsa OpenCodex kayıtlı yönlendirme URI'sini tutar ve yine de
+girdi sunuyorsa OpenRelay kayıtlı yönlendirme URI'sini tutar ve yine de
 sağlayıcı yetkilendirme URL'sini döndürür. Sağlayıcı girişini tamamlayın,
 ardından tarayıcı adres çubuğundaki son yönlendirme URL'sini veya yetkilendirme
-kodunu OpenCodex'e yapıştırın. Bekleyen akış durumu ve PKCE doğrulamasını korur.
+kodunu OpenRelay'e yapıştırın. Bekleyen akış durumu ve PKCE doğrulamasını korur.
 Manuel girdisi olmayan arayanlar yine de kapalı olarak başarısız olur.
 
 :::caution[Yönlendirilen geri döngü kimliği doğrulanmamıştır]
@@ -183,7 +183,7 @@ tetikleyin.
 
 ## Claude Code (`claudeCode`)
 
-Bu ayarlar `/v1/messages`, `/v1/messages/count_tokens`, `ocx claude` başlatıcısı
+Bu ayarlar `/v1/messages`, `/v1/messages/count_tokens`, `orl claude` başlatıcısı
 ve Claude kontrol paneli sayfasını yönetir.
 
 | Anahtar | Tip | Varsayılan | Açıklama |
@@ -192,7 +192,7 @@ ve Claude kontrol paneli sayfasını yönetir.
 | `claudeCode.bodyMaxBytes?` | `number` | `67108864` | Akışlı ve arabelleğe alınmış yanıtlar için kümülatif yerel doğrudan geçiş gövdesi sınırı. Tam olarak `0` devre dışı bırakır. |
 | `claudeCode.authMode?` | `"proxy" \| "subscription"` | auto | Başlatmanın `ANTHROPIC_AUTH_TOKEN`'ı nasıl işlediği. Auto her başlatmada kimlik doğrulamasını algılar; açık bir değer asla geçersiz kılınmaz. |
 | `claudeCode.authModeMigratedAt?` | `string` | ayarlanmamış | Dahili tek seferlik yükseltme işaretçisi. Manuel olarak ayarlamayın. |
-| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` | inherit | Oluşturulan `~/.claude/agents/ocx-*.md` dosyasına yazılan çaba; Codex rehberliğinden ve proxy sınırlarından ayrıdır. Yeniden oluşturmak için `ocx claude` üzerinden yeniden başlatın. |
+| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` | inherit | Oluşturulan `~/.claude/agents/ocx-*.md` dosyasına yazılan çaba; Codex rehberliğinden ve proxy sınırlarından ayrıdır. Yeniden oluşturmak için `orl claude` üzerinden yeniden başlatın. |
 
 Otomatik kimlik doğrulama saklanan Claude kimlik doğrulaması bulunduğunda
 subscription'ı, hiçbiri bulunmadığında proxy'yi ve algılama yetersiz olduğunda
@@ -246,7 +246,7 @@ Images API yollarını ve yanıt şeklini uygulamalıdır.
 
 | Alan | Tip | Varsayılan | Anlamı |
 | --- | --- | --- | --- |
-| `enabled?` | `boolean` | kullanılabilir olduğunda açık | Ana anahtar. `false` olduğunda OpenCodex `web_search` yakalamayı bırakır ve Codex entegrasyonu `~/.codex/config.toml` dosyasına `web_search = "disabled"` yazar. |
+| `enabled?` | `boolean` | kullanılabilir olduğunda açık | Ana anahtar. `false` olduğunda OpenRelay `web_search` yakalamayı bırakır ve Codex entegrasyonu `~/.codex/config.toml` dosyasına `web_search = "disabled"` yazar. |
 | `backend?` | `"openai" \| "anthropic" \| "xai" \| "gemini" \| "exa"` | `openai` | Açık değer kazanır; ayarlanmadığında her zaman `openai` seçilir. `anthropic` ve `xai` yalnızca açıkça yapılandırıldığında çalışır; `gemini` ve `exa` executor'ları sunulana kadar ayrılmıştır. |
 | `model?` | `string` | arka uca bağlı | OpenAI için `gpt-5.6-luna`, Anthropic için `claude-sonnet-5` veya xAI için `grok-4.6`. Eski açık `gpt-5.4-mini` başlangıçta geçirilir. |
 | `exaApiKey?` | `string` | yok | `exa` arka ucu için operatör anahtarı. Yalnızca yazılır; yönetim okumaları saklanan değeri asla döndürmez. |
@@ -293,7 +293,7 @@ anahtarlanan sınırlı bir önbellek kullanır. İsabetler ve aynı turdaki kop
 sınırı tüketmez. Uzak `https:` görselleri ve başarısız veya boş açıklamalar
 önbelleğe alınmaz.
 
-Anthropic OAuth sidecar'ları opencodex'in mevcut Claude Code OAuth parmak izini
+Anthropic OAuth sidecar'ları OpenRelay'in mevcut Claude Code OAuth parmak izini
 yeniden kullanır. Hedeflenen hesap ve iş yükünü kapsamlı bir şekilde test edin.
 
 ## Remote Hub anahtarları ve varsayılanlar
@@ -310,7 +310,7 @@ Ana Codex hesabının satırındaki `quotaRefresh`, kalan kotayı veya model eri
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

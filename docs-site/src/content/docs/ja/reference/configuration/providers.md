@@ -3,7 +3,7 @@ title: プロバイダーの構成
 description: プロバイダー エントリ、認証、エンドポイント、モデル カタログ、クォータ、コンテキスト キャップ、およびプロバイダー固有のオプション。
 ---
 
-プロバイダーは、opencodex に、モデルが存在する場所、モデルが通信するワイヤー アダプター、およびリクエストの認証方法を伝えます。
+プロバイダーは、OpenRelay に、モデルが存在する場所、モデルが通信するワイヤー アダプター、およびリクエストの認証方法を伝えます。
 
 ## 初回登録時のモデル選択
 
@@ -12,13 +12,13 @@ description: プロバイダー エントリ、認証、エンドポイント、
 初回のプロバイダー登録にのみ適用され、更新、再ログイン、キー交換で既存の選択をリセットしません。初期設定後は Models または以下の CLI で必要なモデルを有効にできます。後から追加されるモデルのポリシーは変更しません。`<model-id>` を一覧の ID に置き換えてください。
 
 ```sh
-ocx models live --provider openrouter
-ocx models enable '<model-id>'
-ocx models disable '<model-id>'
-ocx models provider openrouter on
+orl models live --provider openrouter
+orl models enable '<model-id>'
+orl models disable '<model-id>'
+orl models provider openrouter on
 ```
 
-GUI で登録または OAuth ログインが完了すると、Models ページへ移動できる案内が表示されます。CLI はモデル管理コマンドを出力し、JSON にも次の操作を含めます。`--no-wait` は完了ではなくログイン待機を示します。ライブモデルのコマンドを使う前に `ocx start` でプロキシを起動してください。
+GUI で登録または OAuth ログインが完了すると、Models ページへ移動できる案内が表示されます。CLI はモデル管理コマンドを出力し、JSON にも次の操作を含めます。`--no-wait` は完了ではなくログイン待機を示します。ライブモデルのコマンドを使う前に `orl start` でプロキシを起動してください。
 
 ## プロバイダー関連のトップレベルフィールド
 
@@ -35,7 +35,7 @@ GUI で登録または OAuth ログインが完了すると、Models ページ�
 | `codexAccountNamespaces?` | `Record<string, string>` | — | 任意の公開 model selector を保存済み Codex アカウント target に対応付ける任意の map。account-qualified picker row が有効な場合、target が存在する各 selector は Codex picker に個別の `<selector>/<native-openai-model>` row を追加し、各 row はそのアカウントだけを使用します。selector が 1 つでも有効な場合、bare native row は picker で非表示になりますが、明示的に無効化されない限り id は引き続き routing でき、raw `/v1/models` にも表示されます。 |
 | `codexAccountPickerEnabled?` | `boolean` | map が空なら off | 有効な `codexAccountNamespaces` mapping から account-qualified Codex picker row を生成するかを制御します。`true` は mapping された行の表示を許可します。空でない map で省略した場合は後方互換性のため有効として扱われ、map が空なら off です。`false` は mapping を削除せず、明示的な `<selector>/<native-openai-model>` routing も無効にせずに、生成行を非表示にして picker の bare native 行を復元します。 |
 | `activeCodexAccountId?` | `string` | — |次のリクエスト用に手動で選択されたプール アカウント。選択するとスレッドのアフィニティがクリアされます。実行中のリクエストでは、取得された資格情報が保持されます。 |
-| `codexAccountPriorities?` | `Record<string,number>` | — | Codex pool のアカウント別選択順。アカウント ID → `-100` から `100` の整数で、**大きいほど先に使われ**、未設定は `0` です。これは eligibility ではなく順序の境界です。選択は適格なアカウントを、まだ quota に余裕がある最上位 tier に絞り込み、その tier の中を `accountPoolStrategy` が選びます。tier が飛ばされるのは、そのメンバー全員が自身の 0 以外の実効しきい値（アカウント別上書き、未設定ならグローバル値）以上、cooldown 中、soft-avoid、一時停止、または再認証待ちのときだけで、usage 不明が tier を drain させることはありません。順序付けが不適格なアカウントを選択可能にすることはなく、すでにアカウントが結び付いた thread を再 bind することもありません。メインの `__main__` も同じ条件で参加するため、Codex Desktop ログインを最後に使わせられます。エントリが 1 つもなければ挙動は従来どおりです。map が不正な場合は警告を出して順序付けを無効にします（config の修復処理は走りません）。`ocx account priority` と Codex Auth ページで管理します。 |
+| `codexAccountPriorities?` | `Record<string,number>` | — | Codex pool のアカウント別選択順。アカウント ID → `-100` から `100` の整数で、**大きいほど先に使われ**、未設定は `0` です。これは eligibility ではなく順序の境界です。選択は適格なアカウントを、まだ quota に余裕がある最上位 tier に絞り込み、その tier の中を `accountPoolStrategy` が選びます。tier が飛ばされるのは、そのメンバー全員が自身の 0 以外の実効しきい値（アカウント別上書き、未設定ならグローバル値）以上、cooldown 中、soft-avoid、一時停止、または再認証待ちのときだけで、usage 不明が tier を drain させることはありません。順序付けが不適格なアカウントを選択可能にすることはなく、すでにアカウントが結び付いた thread を再 bind することもありません。メインの `__main__` も同じ条件で参加するため、Codex Desktop ログインを最後に使わせられます。エントリが 1 つもなければ挙動は従来どおりです。map が不正な場合は警告を出して順序付けを無効にします（config の修復処理は走りません）。`orl account priority` と Codex Auth ページで管理します。 |
 | `autoSwitchThreshold?` | `number` | `80` | 使用量ベースのプロアクティブ切り替えしきい値。`quota` は未紐付けタスクの次のリクエストを再評価できます。紐付け済みタスクは既定（`pool.cacheAffinity`）ではしきい値を超えても同じアカウントを維持し、アカウントが使い切られるか処理できなくなったときだけ離れ、その場合も実際に quota 余裕があり usage がより低いアカウントへだけ移ります。`pool.cacheAffinity: false` にするとしきい値で紐付け済みタスクも再評価します。`fill-first` は未紐付け割り当ての使い切り基準としてのみ使用し、通常の `round-robin` 選択は使用しません。既知の 5 時間、週次、30 日 quota window の最大スコアを使います。`0` は使用量ベースの切り替えだけを無効にし、未紐付け割り当てや障害回復は無効にしません。 |
 | `codexAccountAutoSwitchThresholds?` | `Record<string,number>` | — | `autoSwitchThreshold` のアカウント別上書き（アカウント ID → `0`〜`100` の整数）。未設定はグローバル値を継承し、`0` はそのアカウントからの使用量ベース切り替えだけを無効にします。メインの `__main__` も指定できます。Codex Auth の各アカウントカードで管理します。 上書きを有効にすると、現在のグローバルしきい値が固定のアカウント別値としてコピーされます。`0` を含む上書き値は、その後グローバル値が変更されても優先されます。無効にすると `threshold: null` を送信してエントリを削除し、現在のグローバルしきい値と今後の変更を継承する状態に戻ります。 |
 | `accountPoolStrategy?` | `"quota" \| "round-robin" \| "fill-first" \| "reset-first"` | `"quota"` | 新規/未紐付け Codex リクエストの割り当て戦略。live な `(parent thread id, quota scope)` affinity がなければ未紐付けで、プロキシ再起動や affinity リセット後は既存の表示タスクも未紐付けになり得ます。`quota` はアクティブアカウントがなければ既知 usage 最小の適格アカウントを選び、適格なアクティブアカウントが `autoSwitchThreshold` 未満なら維持します。しきい値到達後は未紐付けリクエストを移せます。紐付け済みタスクは既定ではアカウントが使い切られるか（既知 usage 100%）処理できなくなるまで維持され、離れるときは実際に quota 余裕があり usage がより低いアカウントへだけ移ります。フラグをオフにすると、しきい値で紐付け済みタスクの次のリクエストも実際に quota 余裕があり usage がより低い適格アカウントへ移せます。`round-robin` は未紐付けリクエストを均等分散し、`fill-first` は cooldown、使用不可、または drain threshold までアクティブアカウントへ割り当てます。  `reset-first`: 使用率のしきい値未満から、次の5時間枠または週次枠のリセットが最も近いアカウントを選びます。紐付け済みタスクは設定されたアフィニティ方針に従います。独立したモデル枠は使用率順です。 月次リセットはこの順序に使用しません。 |
@@ -52,7 +52,7 @@ GUI で登録または OAuth ログインが完了すると、Models ページ�
 
 各戦略で使う実効しきい値は、アカウントの `codexAccountAutoSwitchThresholds` があればその値、なければグローバルの `autoSwitchThreshold` です。0 は使用量による先行切り替えだけを無効にし、起動時のバインド、ハードロック、クールダウン、モデル利用資格の確認、障害復旧は引き続き適用されます。
 
-selector 名はユーザーが選ぶ公開 label であり、opencodex はアカウント role の意味を付与しません。
+selector 名はユーザーが選ぶ公開 label であり、OpenRelay はアカウント role の意味を付与しません。
 `codexAccountNamespaces` のキーは長さ 1〜64 文字、先頭と末尾は ASCII
 英数字、内部には英数字、`.`、`_`、`-` を使用でき、予約済み JavaScript object 名は拒否されます。
 値は有効な pool account id（内部 `__main__` は不可）、または Codex Desktop アカウントを示す
@@ -71,7 +71,7 @@ account を削除しても mapping は保持され、同じ id を再追加す�
 
 `openai` および `openai-apikey` は固定予約 ID です。 `openai.codexAccountMode` はデフォルトでは `"pool"` で、メインアカウントと追加アカウント全体を選択します。 `"direct"` は、現在の呼び出し元/メイン ログインのみを使用します。 API は、設定された API キーまたはキー プールのみを使用します。ベア モデルまたは `openai-apikey/<model>` を使用します。クロスルート認証情報のフォールバックはありません。 API GPT-5.6 行は 1,050,000 コンテキスト / 最大 922,000 入力メタデータを伝送し、Pro 仮想 ID は `reasoning.mode: "pro"` を使用してベース ワイヤー モデルに書き換えられます。
 
-`openaiProviderTierVersion: 2` は、現在の単一プロバイダーの投影をマークします。出荷された v1 設定を移行する前に、opencodex は別のバックアップを置き換えずに `config.json.pre-openai-tiers-v2.bak` を作成し、既知の名前空間で選択された既知のレガシー ID を裸の ID に書き換えます。
+`openaiProviderTierVersion: 2` は、現在の単一プロバイダーの投影をマークします。出荷された v1 設定を移行する前に、OpenRelay は別のバックアップを置き換えずに `config.json.pre-openai-tiers-v2.bak` を作成し、既知の名前空間で選択された既知のレガシー ID を裸の ID に書き換えます。
 
 ## プロバイダー名前空間のエイリアス
 
@@ -159,7 +159,7 @@ account を削除しても mapping は保持され、同じ id を再追加す�
 
 プロバイダーの登録・置換（`POST /api/providers`）では、メモリやファイルの設定を変更する前に `responsesPath` と `chatCompletionsPath` を検証します。`PATCH /api/providers?name=<provider>` はリクエスト本文を保存済みのプロバイダーにマージします。`disabled` 以外のフィールドを変更する更新（`requestPacing` のみの更新を除く）では、保存前にマージ後のプロバイダーのパスを同じ方法で検証し、保持されているパスが無効な場合は `400` を返して設定を変更しません。設定ファイルの読み込みにも同じ経路の規則が適用されます。
 
-API キープロバイダーは、リテラルキーまたは環境参照を保持する場合があります。 OAuth プロバイダーは、`ocx login` によって設定された資格情報ストアを使用します。サブスクリプションに基づくクロード コードの起動動作は、[`claudeCode.authMode`](/ja/reference/configuration/server/#claude-code-claudecode) で構成されます。
+API キープロバイダーは、リテラルキーまたは環境参照を保持する場合があります。 OAuth プロバイダーは、`orl login` によって設定された資格情報ストアを使用します。サブスクリプションに基づくクロード コードの起動動作は、[`claudeCode.authMode`](/ja/reference/configuration/server/#claude-code-claudecode) で構成されます。
 
 ### プロバイダーの保存で保持されるもの
 
@@ -177,9 +177,9 @@ API キープロバイダーは、リテラルキーまたは環境参照を保�
 
 ## プロバイダーによるアウトバウンドの安全性診断
 
-ダッシュボード接続テストとライブ モデル検出では、制限された GET 専用トランスポートが使用されます。送信プロキシを使用しない場合、opencodex はホスト名を一度解決し、その検証されたアドレスにのみ接続します。 HTTPS は元のホスト、SNI、および証明書の検証を保持します。プロバイダー設定では証明書チェックを無効にすることはできません。
+ダッシュボード接続テストとライブ モデル検出では、制限された GET 専用トランスポートが使用されます。送信プロキシを使用しない場合、OpenRelay はホスト名を一度解決し、その検証されたアドレスにのみ接続します。 HTTPS は元のホスト、SNI、および証明書の検証を保持します。プロバイダー設定では証明書チェックを無効にすることはできません。
 
-これらの操作は[サーバーで設定された送信 fetch](/ja/reference/configuration/server/)を使用します。`config.proxy` で設定された、または SOCKS5 `ALL_PROXY` から継承したサーバーの SOCKS5 プロキシは、宛先が `NO_PROXY` に一致しない場合に OpenCodex の組み込みトンネルを使用します。`HTTP_PROXY` と `HTTPS_PROXY` は Bun のネイティブ HTTP(S) 処理を維持しますが、SOCKS 以外の `ALL_PROXY` はネイティブ HTTP fetch の経路にはなりません。URL とリテラル アドレスのチェックは引き続き実行されますが、選択されたプロキシが最終ルート、DNS 応答、ピアを決めるため、opencodex はそのピアを固定したり検証したりできません。これは明示的なセキュリティ制限です。
+これらの操作は[サーバーで設定された送信 fetch](/ja/reference/configuration/server/)を使用します。`config.proxy` で設定された、または SOCKS5 `ALL_PROXY` から継承したサーバーの SOCKS5 プロキシは、宛先が `NO_PROXY` に一致しない場合に OpenRelay の組み込みトンネルを使用します。`HTTP_PROXY` と `HTTPS_PROXY` は Bun のネイティブ HTTP(S) 処理を維持しますが、SOCKS 以外の `ALL_PROXY` はネイティブ HTTP fetch の経路にはなりません。URL とリテラル アドレスのチェックは引き続き実行されますが、選択されたプロキシが最終ルート、DNS 応答、ピアを決めるため、OpenRelay はそのピアを固定したり検証したりできません。これは明示的なセキュリティ制限です。
 
 プライベート/ローカル宛先には `allowPrivateNetwork: true` が必要で、送信プロキシがアクティブな場合は、一致する `NO_PROXY` エントリが必要です。ループバックは自動的に追加されます。 CIDR エントリは解釈されないため、各 LAN ホストを明示的にリストします。マッチャーは、正確なホスト、ドメイン サフィックス、オプションのポート、括弧で囲まれた IPv6、および `*` をサポートします。たとえば、`192.168.1.50` を明示的にリストします。メタデータとリンクローカル宛先はブロックされたままになります。診断リクエストはリダイレクトを拒否し、資格情報が剥奪されたターゲットを報告します。通常のプロバイダー要求のリダイレクト レビューは、この診断ガードとは独立したままになります。
 
@@ -228,14 +228,14 @@ affinity を維持します。これらの戦略は provider enforcement を回�
 共有の5時間・週次クォータが拒否された429だけがアカウントのクールダウンと切り替えを行います。一時的な速度制限はアフィニティを維持して送信受付だけを停止し、リクエストごとに短い同一アカウント再試行1回と別の対象アカウントへの切り替え1回までです。根拠ヘッダーのない429は同一アカウントで1回だけ再試行し、アカウントを冷却せず、Retry-Afterも生成しません。既定の単一アカウント動作は変わりません。Fable専用の拒否はSonnetを制限しません。手動選択とアフィニティもリクエストモデルの共有・ファミリークォータを確認します。パッシブなファミリー情報は30分または既知のリセットで期限切れとなり、1つの送信リクエストで再確認します。使用量しきい値はソフトな優先設定で、全候補消耗時のフォールバックを維持します。使用量・課金のハード上限ではありません。アフィニティはプロセスローカルであり、サイズ制限があります。トークン更新の失敗は既存の再認証ルールに従います。確認済みの契約・アカウント請求の 403 は出力前に別アカウントへ切り替え、`Retry-After` または既定の10分間のクールダウンを記録します。一般的な権限拒否では切り替えません。すべての対象となるアカウントが冷却されている場合、クライアントは、既知の場合、認証エラーではなく、`Retry-After` を含む 429 を受け取ります。
 
 :::caution[実験的]
-Anthropic アカウント ポリシーのリスクを理解していない限り、これは無効のままにしてください。不明な場合は、`ocx account use anthropic <id>` を手動で切り替えることをお勧めします。
+Anthropic アカウント ポリシーのリスクを理解していない限り、これは無効のままにしてください。不明な場合は、`orl account use anthropic <id>` を手動で切り替えることをお勧めします。
 :::
 
 ### Anthropic · Pool 2 (`anthropic2`)
 
 `anthropic2`（「Anthropic · Pool 2」）は、独自のアカウントプールを持つ 2 つ目の組み込み Anthropic OAuth プロバイダーです。`anthropic` と同じ Anthropic 実装（同じログインフロー、ワイヤ形式、ネイティブ Messages と Responses ブリッジ、モデルメタデータ）で動作し、分かれているのはアカウントとそれを囲むプールだけです。プールはモデルの接頭辞で選びます。`anthropic/claude-sonnet-5` はプライマリプール、`anthropic2/claude-sonnet-5` は Pool 2 を使います。
 
-Pool 2 は追加するまで休止状態です。`ocx login anthropic2` でログインするか、ダッシュボードのプロバイダーページで **Anthropic · プール2** を追加します。最初のログインが成功すると、マーカー `"anthropicOAuthInstance": "anthropic2"` 付きの `providers.anthropic2` が作成されます。Pool 2 が既定のプロバイダーになることはありません。接頭辞のない `claude-*` モデル名、既定モデル、Claude Code の呼び出し元転送は引き続き `anthropic` に解決されます。以前に自分で作成したマーカーのない `anthropic2` エントリは独自の意味を保ちます。ログインは名前の衝突を拒否し、エントリも資格情報も書き換えません。
+Pool 2 は追加するまで休止状態です。`orl login anthropic2` でログインするか、ダッシュボードのプロバイダーページで **Anthropic · プール2** を追加します。最初のログインが成功すると、マーカー `"anthropicOAuthInstance": "anthropic2"` 付きの `providers.anthropic2` が作成されます。Pool 2 が既定のプロバイダーになることはありません。接頭辞のない `claude-*` モデル名、既定モデル、Claude Code の呼び出し元転送は引き続き `anthropic` に解決されます。以前に自分で作成したマーカーのない `anthropic2` エントリは独自の意味を保ちます。ログインは名前の衝突を拒否し、エントリも資格情報も書き換えません。
 
 Pool 2 はプール設定を自身のプロバイダーエントリから読み取ります。キー、既定値、動作は上記のトップレベル `anthropicAccountPool` と同じで、プライマリプールからは何も継承しません。`providers.anthropic.anthropicAccountPool` や、他のプロバイダー上の同じフィールドは拒否されます。
 
@@ -254,7 +254,7 @@ Pool 2 はプール設定を自身のプロバイダーエントリから読み�
 }
 ```
 
-2 つのプールは opencodex 内で分離されています。
+2 つのプールは OpenRelay 内で分離されています。
 
 - **資格情報:** Pool 2 のアカウントは、保護された資格情報ストアの独自キー `anthropic2` に保存されます。トークンまたは検証済み Anthropic アカウントがもう一方のプールに既に保存されているログインは拒否されます。
 - **プール設定と実行時状態:** 選択、セッションアフィニティ、クールダウン、一時停止、モデルルート、アカウント別しきい値は 1 つのプールに属します。ルートの `fallback: true` は同じプール内でのみ範囲を広げます。
@@ -262,11 +262,11 @@ Pool 2 はプール設定を自身のプロバイダーエントリから読み�
 - **リセット付与:** Pool 2 は、変更されないプライマリプールのジャーナルの隣に独自のジャーナル（`anthropic2-reset-grant-ledger.json`）を持ちます。
 - **復旧:** `anthropic2/<model>` への直接リクエストがプライマリプールにフォールバックすることはなく、Pool 2 のレート制限や拒否がプライマリプールのアカウントをクールダウンさせることもありません。両方のプールを指定した明示的なコンボは、宣言したターゲットを維持します。
 
-この分離は opencodex 内のルーティング境界です。Anthropic によるアカウントの扱いや、上記のアカウントポリシーのリスクは変わりません。
+この分離は OpenRelay 内のルーティング境界です。Anthropic によるアカウントの扱いや、上記のアカウントポリシーのリスクは変わりません。
 
 Pool 2 のアカウントはブラウザー OAuth でのみ追加できます。`anthropic` と異なり、Pool 2 は Claude Code CLI のトークンをインポート、採用、書き戻しすることはありません。この違いは意図的です。Pool 2 は空の状態で始まり、使用可能な Pool 2 アカウントがない Pool 2 リクエストは、プライマリプールや Claude Code の資格情報を借りずに認証エラーで失敗します。
 
-アカウントコマンドと管理 API はプールを名前で指定します: `ocx account pool anthropic2 …`、`ocx account auto-switch anthropic2 …`、`ocx account routes anthropic2 …`、`ocx account anthropic-reset-grants --provider anthropic2`。プール設定とリセット付与のエンドポイントは `provider: "anthropic2"` を受け付け、省略するとプライマリプールのままです。
+アカウントコマンドと管理 API はプールを名前で指定します: `orl account pool anthropic2 …`、`orl account auto-switch anthropic2 …`、`orl account routes anthropic2 …`、`orl account anthropic-reset-grants --provider anthropic2`。プール設定とリセット付与のエンドポイントは `provider: "anthropic2"` を受け付け、省略するとプライマリプールのままです。
 
 #### ヘルパーのプール選択 (`anthropicInstance`)
 
@@ -321,7 +321,7 @@ Pool 2 のないバージョンは `anthropic2` エントリを理解しませ�
 
 アダプターは、解決された URL を後で調整できます。たとえば、Kiro は、インポートされた資格情報の正規 `runtime.{region}.kiro.dev` の API リージョンに従います。 [アダプター](/reference/adapters/)を参照してください。
 
-ルーティングで `baseUrl` が破棄されると、opencodex はレジストリ エンドポイントと構成された起点のみをログに記録します。構成されたパス自体に資格情報が含まれる場合があります。未使用の URL を削除するか、目的のリージョンに一致するプロバイダー エントリを選択します。 `alibaba-token-plan` は北京に固定されていますが、`alibaba-token-plan-intl` は国際エンドポイントをカバーしています。
+ルーティングで `baseUrl` が破棄されると、OpenRelay はレジストリ エンドポイントと構成された起点のみをログに記録します。構成されたパス自体に資格情報が含まれる場合があります。未使用の URL を削除するか、目的のリージョンに一致するプロバイダー エントリを選択します。 `alibaba-token-plan` は北京に固定されていますが、`alibaba-token-plan-intl` は国際エンドポイントをカバーしています。
 
 壊れた `openai-responses` ゲートウェイの場合、修復はプロバイダー オブジェクトに属します。
 
@@ -346,7 +346,7 @@ Pool 2 のないバージョンは `anthropic2` エントリを理解しませ�
 
 ## Cursor プロバイダー (`adapter: "cursor"`)
 
-カーソルブリッジは実験的なものです。 `ocx login cursor` の後に、`providers.cursor` を追加または編集します。ピッカーはカーソル固有のモデル パラメーターをレンダリングできないため、カーソル ルーターの最適化ラダーは別の Codex ID として公開されます。
+カーソルブリッジは実験的なものです。 `orl login cursor` の後に、`providers.cursor` を追加または編集します。ピッカーはカーソル固有のモデル パラメーターをレンダリングできないため、カーソル ルーターの最適化ラダーは別の Codex ID として公開されます。
 
 |Codexモデル |カーソル ルーターモード |
 | --- | --- |
@@ -391,7 +391,7 @@ Pool 2 のないバージョンは `anthropic2` エントリを理解しませ�
 
 Grok 4.7 は OAuth で Fast を利用でき、`low` / `medium` / `high` / `xhigh` と 500,000 トークンのコンテキストを提供します。[xAI の標準料金](https://docs.x.ai/developers/models/grok-4.7)は 100 万トークンあたり入力 2.00 ドル、キャッシュ入力 0.50 ドル、出力 6.00 ドルです。コンテキストが 200,000 トークン以上の場合は 4.00 / 1.00 / 12.00 ドルになります。
 
-プロバイダーの `fastWire` を明示的に設定していない場合、`allowedModels` で制限した opencodex API キーの OAuth Fast リクエストには、`xai/grok-4.7-build-fast`（またはプロバイダー名を除いたモデル ID）の許可が必要です。`xai/grok-4.7` だけの許可では、この Fast モデルを利用できません。Fast モデルだけを許可したキーでも利用できますが、通常のリクエストや Fast が無効な場合には `xai/grok-4.7` の許可が必要です。`fastWire` を明示的に設定した場合は、実際に送信されるモデルを許可してください。例えば、`service-tier` 方式では `xai/grok-4.7` が維持され、そのモデルの許可が必要です。プロバイダーの制限も引き続き適用されます。
+プロバイダーの `fastWire` を明示的に設定していない場合、`allowedModels` で制限した OpenRelay API キーの OAuth Fast リクエストには、`xai/grok-4.7-build-fast`（またはプロバイダー名を除いたモデル ID）の許可が必要です。`xai/grok-4.7` だけの許可では、この Fast モデルを利用できません。Fast モデルだけを許可したキーでも利用できますが、通常のリクエストや Fast が無効な場合には `xai/grok-4.7` の許可が必要です。`fastWire` を明示的に設定した場合は、実際に送信されるモデルを許可してください。例えば、`service-tier` 方式では `xai/grok-4.7` が維持され、そのモデルの許可が必要です。プロバイダーの制限も引き続き適用されます。
 
 ## OpenRouter プロバイダーのルーティング
 
@@ -421,7 +421,7 @@ OpenRouter は、複数の推論プロバイダーを通じて 1 つのモデル
 }
 ```
 
-モデル キーは、外部の opencodex プロバイダー プレフィックスを除いた、正確なネイティブ OpenRouter ID です。 `openrouter/anthropic-claude-sonnet-5` を選択すると、モデル ルールを適用する前のネイティブ `anthropic/claude-sonnet-5` が復元されます。
+モデル キーは、外部の OpenRelay プロバイダー プレフィックスを除いた、正確なネイティブ OpenRouter ID です。 `openrouter/anthropic-claude-sonnet-5` を選択すると、モデル ルールを適用する前のネイティブ `anthropic/claude-sonnet-5` が復元されます。
 
 ## Vercel AI Gateway プロバイダーのルーティング
 
@@ -452,7 +452,7 @@ Vercel AI Gateway は、1 つのモデルを複数の基盤となる推論プロ
 }
 ```
 
-モデル キーは、外側の opencodex プロバイダー プレフィックスを除いた Vercel の公開モデル セレクターです。`vercel-ai-gateway/zai-glm-5.2` を選択すると、モデル ルールを適用する前にネイティブの `zai/glm-5.2` が復元されます。ネイティブの `vercel/<model-id>` セレクターにも同じマッピングが適用されます。opencodex ではエンコードされた `vercel-ai-gateway/vercel-<model-id>` セレクターを使用し、モデル キーには `vercel/<model-id>` を指定してください。
+モデル キーは、外側の OpenRelay プロバイダー プレフィックスを除いた Vercel の公開モデル セレクターです。`vercel-ai-gateway/zai-glm-5.2` を選択すると、モデル ルールを適用する前にネイティブの `zai/glm-5.2` が復元されます。ネイティブの `vercel/<model-id>` セレクターにも同じマッピングが適用されます。OpenRelay ではエンコードされた `vercel-ai-gateway/vercel-<model-id>` セレクターを使用し、モデル キーには `vercel/<model-id>` を指定してください。
 
 ## 静的モデルのホワイトリスト
 

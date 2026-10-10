@@ -204,6 +204,29 @@
   min-height: 64px;
 }
 
+.pws-dashboard-quota-group + .pws-dashboard-quota-group {
+  border-top: 1px solid var(--border-soft);
+}
+
+.pws-dashboard-account-list {
+  display: grid;
+  gap: 8px;
+  padding: 4px 6px 12px 36px;
+}
+
+.pws-dashboard-account-heading {
+  color: var(--fg-muted, #888);
+  font-size: 0.72rem;
+}
+
+.pws-dashboard-account {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding-left: 8px;
+  border-left: 2px solid var(--border-soft);
+}
+
 .pws-capacity-label,
 .pws-capacity-recovery,
 .pws-capacity-incomplete {

@@ -85,7 +85,7 @@ export async function checkProxyHealth(target: ListenTarget): Promise<HealthChec
     }
     const body = await response.json().catch(() => null) as { service?: unknown; status?: unknown; version?: unknown; uptime?: unknown } | null;
     if (!isOpencodexHealthz(body)) {
-      const message = "responded, but not an opencodex proxy";
+      const message = "responded, but not an OpenRelay proxy";
       return { ok: false, url, message, label: `${url} ${message}` };
     }
     const version = typeof body?.version === "string" ? ` v${body.version}` : "";

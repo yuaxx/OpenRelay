@@ -1,9 +1,9 @@
 ---
 title: Codex App 모델 선택기
-description: 공유 Codex 카탈로그를 통해 opencodex 모델이 Codex App, Codex CLI, Codex TUI에 표시되는 방식.
+description: 공유 Codex 카탈로그를 통해 OpenRelay 모델이 Codex App, Codex CLI, Codex TUI에 표시되는 방식.
 ---
 
-opencodex는 Codex App을 직접 고치지 않습니다. Codex CLI/TUI와 같은 Codex 설정과 모델 카탈로그를
+OpenRelay는 Codex App을 직접 고치지 않습니다. Codex CLI/TUI와 같은 Codex 설정과 모델 카탈로그를
 씁니다. app-server는 이 공유 상태를 읽지만, 일부 Codex Desktop 릴리스는 renderer에서 추가 remote
 allowlist를 적용해 routed row를 picker에서 제거할 수 있습니다. 명시적 `nativeAlias: true` combo가
 이 업스트림 버그를 위한 호환 모드입니다.
@@ -12,7 +12,7 @@ OpenAI 항목에는 네이티브 Codex 로그인과 네임스페이스가 붙은
 경로라는 두 가지 credential 경로가 있습니다. `codexAccountMode`만 Pool과 Direct 사이에서 바꾸는 것은
 선택기 id를 바꾸지 않습니다. 하지만 `codexAccountPickerEnabled`로 계정 한정 선택기 행이 활성화되어 있고
 `codexAccountNamespaces`에 대상 계정이 존재하는 selector가 있으면,
-opencodex는 매핑된 계정별로 `<selector>/<native-openai-model>` 행을 추가하고 선택기에서 bare native 행을
+OpenRelay는 매핑된 계정별로 `<selector>/<native-openai-model>` 행을 추가하고 선택기에서 bare native 행을
 숨깁니다. Selector 이름은 사용자가 정하는 공개 label이며 내장된 계정 역할 의미가 없습니다. `selector`가
 붙은 행을 선택하면 매핑된 계정만 사용하고 활성 Pool 계정은 바뀌지 않습니다. 대상 계정을 사용할 수 없으면
 다른 계정으로 전환하지 않고 요청이 실패합니다. 자세한 내용은 [명시적 Codex 계정 selector](/reference/configuration/routing/#exact-codex-account-selectors)를
@@ -76,13 +76,13 @@ cp ~/.opencodex/config.json.pre-openai-tiers-v2.bak ~/.opencodex/config.json
 
 ## 통합 경로
 
-`ocx init`, `ocx start`, `ocx sync`는 공유 Codex 설정과 카탈로그를 프록시에 연결합니다. 설정 주입,
+`orl init`, `orl start`, `orl sync`는 공유 Codex 설정과 카탈로그를 프록시에 연결합니다. 설정 주입,
 카탈로그 동기화, shim, WebSocket 폴백, 복원 메커니즘은 [Codex 통합](/guides/codex-integration/)을
 참고하세요.
 
 ## 라우팅 모델이 표시되는 이유
 
-Codex의 모델 선택기는 Codex 형식의 카탈로그 항목을 기대합니다. opencodex는 네이티브 Codex 모델
+Codex의 모델 선택기는 Codex 형식의 카탈로그 항목을 기대합니다. OpenRelay는 네이티브 Codex 모델
 템플릿을 복제한 뒤 라우팅된 모델의 식별자만 바꿉니다.
 
 ```text
@@ -92,7 +92,7 @@ visibility = "list"
 ```
 
 복제본에는 reasoning level, shell type, API 지원 플래그, base instructions처럼 엄격한 파서가 요구하는
-필드가 그대로 남습니다. 그다음 opencodex는 해당 라우트가 감당할 수 없는 OpenAI service-tier 메타데이터
+필드가 그대로 남습니다. 그다음 OpenRelay는 해당 라우트가 감당할 수 없는 OpenAI service-tier 메타데이터
 같은 네이티브 전용 기능을 제거합니다.
 
 ## 현재 안정 모델 범위
@@ -166,7 +166,7 @@ service_tier = "fast"
 fast_mode = true
 ```
 
-하지만 모델 카탈로그와 런타임 요청 tier id는 `priority`를 씁니다. opencodex는 이 분리를 그대로
+하지만 모델 카탈로그와 런타임 요청 tier id는 `priority`를 씁니다. OpenRelay는 이 분리를 그대로
 유지합니다. 네이티브 OpenAI passthrough 모델은 fast 지원을 유지하고, 라우팅된 프로바이더는
 케이퍼빌리티로 게이트되어 프로바이더가 `supportsServiceTier: false`를 선언한 경우에만
 `service_tier`가 제거됩니다(레지스트리가 정식 OpenAI를 `true`, DeepSeek과 Volcengine Ark를 `false`로 분류). 미분류 커스텀 게이트웨이는 호출자가 준 값을 그대로 보존하고 주입도 받지 않습니다. 따라서
@@ -179,7 +179,7 @@ Codex는 선택기에 보이는 카탈로그 항목을 `priority` 오름차순�
 routed `provider/model` id를 최대 다섯 개 선택하고 저장할 수 있습니다. 수동으로 설정한
 `subagentModels`는 account-qualified `<selector>/<native-openai-model>` id도 지원하지만,
 대시보드는 이러한 exact id를 제공하지 않으며 페이지를 저장하면 목록이 대시보드에 표시되는 선택 항목으로
-교체됩니다. opencodex는 선택한 순서대로 낮은 카탈로그 priority를 부여합니다. 계정 한정 선택기 행이
+교체됩니다. OpenRelay는 선택한 순서대로 낮은 카탈로그 priority를 부여합니다. 계정 한정 선택기 행이
 활성화되어 있으면 bare native 선택은 selector-qualified 그룹으로 확장됩니다. 다른 모델도 정확한 id로
 직접 호출할 수 있습니다.
 
@@ -191,7 +191,7 @@ override를 정할 뿐, 모델을 고르거나 delegation을 시작하지는 않
 Codex Desktop의 원격 서버 모드는 클라이언트 자체 `available_models` 허용 목록으로 picker를
 필터링합니다(원격 `use_hidden_models` 설정이 켜져 있을 때 적용). 라우팅된 카탈로그 항목은
 여전히 로드되고 제공됩니다. `model/list`가 항목을 반환하고 번들 CLI도 읽을 수 있지만, Desktop
-렌더러는 표시 전에 이 네이티브 전용 허용 목록에 없는 항목을 버립니다. opencodex는 이 목록에
+렌더러는 표시 전에 이 네이티브 전용 허용 목록에 없는 항목을 버립니다. OpenRelay는 이 목록에
 개입할 수 없습니다. 업스트림 버그는
 [openai/codex#19694](https://github.com/openai/codex/issues/19694)에서 추적됩니다.
 
@@ -205,9 +205,9 @@ Desktop이 허용 목록을 제어할 수 있게 될 때까지:
 ## 모델 상태 새로고침
 ## 네이티브 쿼터 폴백 제한
 
-Codex 앱이 네이티브 5시간 쿼터를 다 쓰면 리저브 폴백 모델로 넘어가면서 피커의 다른 줄을 회색으로 만들 수 있습니다. [#2813](https://github.com/lidge-jun/opencodex/issues/2813)에 보고된 이 차단은 opencodex가 넣은 라우팅 줄까지 가립니다. 그 줄들은 관계없는 프로바이더 자격 증명을 쓰고 ChatGPT 쿼터를 전혀 쓰지 않습니다.
+Codex 앱이 네이티브 5시간 쿼터를 다 쓰면 리저브 폴백 모델로 넘어가면서 피커의 다른 줄을 회색으로 만들 수 있습니다. [#2813](https://github.com/lidge-jun/opencodex/issues/2813)에 보고된 이 차단은 OpenRelay가 넣은 라우팅 줄까지 가립니다. 그 줄들은 관계없는 프로바이더 자격 증명을 쓰고 ChatGPT 쿼터를 전혀 쓰지 않습니다.
 
-이 차단은 요청이 프록시에 닿기 전에 클라이언트가 적용하므로 opencodex가 풀 수 없습니다. 라우팅 줄은 `visibility: "list"`로 기록되고, 카탈로그 필터링은 `disabledModels`와 프로바이더별 `selectedModels`만 봅니다. 쿼터 값은 라우팅 줄의 노출에 관여하지 않습니다.
+이 차단은 요청이 프록시에 닿기 전에 클라이언트가 적용하므로 OpenRelay가 풀 수 없습니다. 라우팅 줄은 `visibility: "list"`로 기록되고, 카탈로그 필터링은 `disabledModels`와 프로바이더별 `selectedModels`만 봅니다. 쿼터 값은 라우팅 줄의 노출에 관여하지 않습니다.
 
 라우팅 모델을 직접 지정하는 경로는 피커를 거치지 않습니다. `config.toml`에 모델을 적습니다.
 
@@ -218,17 +218,17 @@ model = "anthropic/claude-sonnet-5"
 또는 바로 보냅니다.
 
 ```bash
-ocx access test anthropic/claude-sonnet-5 --protocol responses
+orl access test anthropic/claude-sonnet-5 --protocol responses
 ```
 
-두 경로 모두 **요청이 프록시에 도달한 뒤에는** 정상 라우팅되고, 이건 테스트로 덮여 있습니다. 다만 Codex 데스크톱 앱은 리저브 모드에서 설정한 모델을 보내지 않습니다. 앱이 자체 `wham/usage` 폴링(`luna_reserve` 업셀과 허용 상태의 `gpt-reserve` 추가 한도)으로 리저브를 판정하고, 요청이 나가기 전에 모델 설정을 `gpt-reserve`로 강제하기 때문에 `config.toml` 경로는 앱 안에서 덮어써집니다. 윈도우가 리셋될 때까지는 `ocx access test`, 프록시를 통한 Claude Code(`ocx claude`), 직접 `/v1` 클라이언트를 쓰세요. [Codex 리저브 모드에서의 라우팅 모델](/guides/codex-integration/#routed-models-during-codex-reserve-mode)도 참고하세요.
+두 경로 모두 **요청이 프록시에 도달한 뒤에는** 정상 라우팅되고, 이건 테스트로 덮여 있습니다. 다만 Codex 데스크톱 앱은 리저브 모드에서 설정한 모델을 보내지 않습니다. 앱이 자체 `wham/usage` 폴링(`luna_reserve` 업셀과 허용 상태의 `gpt-reserve` 추가 한도)으로 리저브를 판정하고, 요청이 나가기 전에 모델 설정을 `gpt-reserve`로 강제하기 때문에 `config.toml` 경로는 앱 안에서 덮어써집니다. 윈도우가 리셋될 때까지는 `orl access test`, 프록시를 통한 Claude Code(`orl claude`), 직접 `/v1` 클라이언트를 쓰세요. [Codex 리저브 모드에서의 라우팅 모델](/guides/codex-integration/#routed-models-during-codex-reserve-mode)도 참고하세요.
 
 
 picker에 오래된 항목이 계속 보이면 카탈로그를 새로 쓰고 대상 Codex 서피스를 다시 시작합니다:
 
 ```bash
-ocx sync
+orl sync
 ```
 
-opencodex는 카탈로그의 visibility, priority, metadata가 바뀔 때마다 `models_cache.json`을 의도적으로
+OpenRelay는 카탈로그의 visibility, priority, metadata가 바뀔 때마다 `models_cache.json`을 의도적으로
 오래된 cache wrapper로 다시 씁니다. 다음 Codex 모델 새로고침이 새 카탈로그를 읽도록 하기 위해서입니다.

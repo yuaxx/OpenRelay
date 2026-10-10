@@ -1,23 +1,23 @@
 ---
 title: 設定リファレンス
-description: opencodex が設定を保存する場所、編集の適用方法、およびすべての設定領域へのリンク。
+description: OpenRelay が設定を保存する場所、編集の適用方法、およびすべての設定領域へのリンク。
 ---
 
-opencodex は、永続的な設定を `$OPENCODEX_HOME/config.json` (通常は `~/.opencodex/config.json`) に保存します。 Windows では、デフォルトは `%USERPROFILE%\.opencodex\config.json` です。
+OpenRelay は、永続的な設定を `$OPENCODEX_HOME/config.json` (通常は `~/.opencodex/config.json`) に保存します。 Windows では、デフォルトは `%USERPROFILE%\.opencodex\config.json` です。
 
 ## 設定の編集方法
 
 タスクに合った編集チャンネルを選択してください。
 
 - **ダッシュボード:** ガイド付きプロバイダー、モデル、エージェント、アクセス、ストレージ設定には Web UI を使用します。
-- **CLI:** `ocx init` は初期ファイルを作成しますが、`ocx provider`、`ocx models`、
-`ocx combo`、`ocx agent`、および `ocx config` は、独自の設定を更新または検査します。
+- **CLI:** `orl init` は初期ファイルを作成しますが、`orl provider`、`orl models`、
+`orl combo`、`orl agent`、および `orl config` は、独自の設定を更新または検査します。
 - **ファイル:** 専用の UI または CLI コマンドを使用せずに、フィールドに対して `config.json` を直接編集します。ファイルは次のとおりです。
 有効な JSON を維持します。
 
 ダッシュボード、管理 API、および変更可能な CLI コマンドはすべて同じファイルに保持されます。それらのチャンネルを優先するか、手動で編集する前にプロキシを停止してください。実行中のプロセスは設定をメモリに保持するため、後でライブ保存すると、スナップショットから無関係な手動編集を書き換えることができます。ライブ保存では、外部で編集された `claudeCode` とリスナー バインディング フィールドがマージされ、これらのパスには明示的な競合保護が設定されていますが、その保護はすべてのサブツリーをカバーするわけではありません。
 
-ファイルを解析できない場合、opencodex はファイルを `config.json.invalid-<timestamp>` としてバックアップし、コンソールに警告を表示し、デフォルトで起動します。欠落しているファイルでも、新規インストールのデフォルトである 1 つの `openai` フォワード プロバイダーが使用されます。
+ファイルを解析できない場合、OpenRelay はファイルを `config.json.invalid-<timestamp>` としてバックアップし、コンソールに警告を表示し、デフォルトで起動します。欠落しているファイルでも、新規インストールのデフォルトである 1 つの `openai` フォワード プロバイダーが使用されます。
 
 ## 優先順位とデフォルト
 
@@ -41,5 +41,5 @@ opencodex は、永続的な設定を `$OPENCODEX_HOME/config.json` (通常は `
 API キーには `${ENV_VAR}` 参照を優先します。リテラルの `apiKey`、`apiKeyPool[].key`、および `apiKeys[].key` 値は秘密です。コミットしたり、ログに貼り付けたり、共有したりしないでください。 OAuth およびフォワード プロバイダー トークンは、`config.json` ではなく別の資格情報ストアに保存されます。アカウント ID と電子メールも非公開にしておく必要があります。サポートされている場合は、パブリック セレクター エイリアスを使用します。
 
 :::note[アトミック書き込み]
-opencodex は、一時ファイルを介して管理対象の `config.toml` および `opencodex-catalog.json` ファイルを書き込み、その後名前を変更します (`atomicWriteFile`)。これにより、`ocx stop` やプロキシ シャットダウン ハンドラーなどの同時ライターが Codex を同時に復元するときに、部分的なファイルが生成されるのを防ぎます。
+OpenRelay は、一時ファイルを介して管理対象の `config.toml` および `opencodex-catalog.json` ファイルを書き込み、その後名前を変更します (`atomicWriteFile`)。これにより、`orl stop` やプロキシ シャットダウン ハンドラーなどの同時ライターが Codex を同時に復元するときに、部分的なファイルが生成されるのを防ぎます。
 :::

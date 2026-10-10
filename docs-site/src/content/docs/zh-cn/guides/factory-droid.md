@@ -1,9 +1,9 @@
 ---
 title: Factory Droid 桥接
-description: 通过本地兼容 Responses 的桥接服务，将 Factory Droid 模型接入 opencodex。
+description: 通过本地兼容 Responses 的桥接服务，将 Factory Droid 模型接入 OpenRelay。
 ---
 
-Factory Droid 是代理运行时，并非有文档支持的 OpenAI 兼容推理端点。如果指向 Factory 内部 LLM URL 的自定义 provider 返回 `403 Forbidden`，仅更换 opencodex adapter 或添加 provider header，也不能使这条私有路径成为受支持的公开 API。
+Factory Droid 是代理运行时，并非有文档支持的 OpenAI 兼容推理端点。如果指向 Factory 内部 LLM URL 的自定义 provider 返回 `403 Forbidden`，仅更换 OpenRelay adapter 或添加 provider header，也不能使这条私有路径成为受支持的公开 API。
 
 可行的集成方式如下：
 
@@ -15,7 +15,7 @@ Text-only Responses client
   -> Factory account and selected model
 ```
 
-这样 Factory 凭据始终留在官方 Droid 客户端中。OpenCodex 则接收独立的、仅供本地桥接使用的 token。
+这样 Factory 凭据始终留在官方 Droid 客户端中。OpenRelay 则接收独立的、仅供本地桥接使用的 token。
 
 ## 失败现象及原因
 
@@ -25,7 +25,7 @@ Text-only Responses client
 | `/models/models` 返回 `404` | provider 的 base URL 已经以 `/models` 结尾 | 将 `baseUrl` 设为 API 根路径；不要包含发现路径 |
 | 模型搜索失败 | 桥接服务没有提供完整的实时目录 | 设置 `liveModels: false` 并提供静态 `models` 列表 |
 | loopback provider 被拒绝 | 默认禁止访问私有网络 | 只为 loopback 桥接设置 `allowPrivateNetwork: true` |
-| `${DROID_BRIDGE_TOKEN}` 无法解析 | opencodex 服务环境中缺少该变量 | 将变量注入服务进程，而不只是交互式 shell |
+| `${DROID_BRIDGE_TOKEN}` 无法解析 | OpenRelay 服务环境中缺少该变量 | 将变量注入服务进程，而不只是交互式 shell |
 | `OutputTextDelta without active item` | 桥接服务在打开输出项及内容部分之前发送了文本增量 | 按顺序发送完整的 Responses SSE 生命周期 |
 
 因此，同一 Factory 凭据可能在 `droid exec` 中正常工作，但直接请求无文档支持的 LLM URL 仍返回 `403`。两者测试的是不同产品，不应视为矛盾。
@@ -90,12 +90,12 @@ response.completed
 
 不要在 `0.0.0.0` 上公开桥接服务，也不要把 Factory 凭据复用为桥接 bearer token。
 
-## OpenCodex provider 配置
+## OpenRelay provider 配置
 
 使用明确的 provider ID `droid` 创建自定义 provider：
 
 ```bash
-ocx provider add droid \
+orl provider add droid \
   --adapter openai-responses \
   --base-url http://127.0.0.1:11435/v1 \
   --default-model glm-5.2 \
@@ -124,8 +124,8 @@ JSON**，并将该 provider 的值替换为：
 保存 provider 或修改静态目录后，同步并重启 Codex，让新会话读取更新后的目录：
 
 ```bash
-ocx sync --restart-codex
-ocx doctor
+orl sync --restart-codex
+orl doctor
 ```
 
 `--restart-codex` 会重启匹配的 app-server，并完全退出及重新启动 Codex 桌面应用，从而结束正在进行的对话。使用 `--restart-app-server-only` 可让桌面应用继续运行。请先完成或保存这些会话，再执行重启。
@@ -136,12 +136,12 @@ ocx doctor
 
 ```bash
 curl -fsS http://127.0.0.1:11435/healthz
-ocx doctor
-ocx access test droid/glm-5.2 --protocol responses
+orl doctor
+orl access test droid/glm-5.2 --protocol responses
 ```
 
 provider 行或模型选择器条目只能证明目录可见。只有 Responses 探测通过 `droid/<model>` 路由返回后，才能确认集成可用。
 
 ## 当前限制
 
-上述最小桥接只转换文本及 Responses SSE 生命周期，**没有**实现完整的双向 Codex function/tool-call 协议。Codex App 和 `codex exec` 通常会发送工具定义，即使提示词要求不要调用工具；当前 Codex CLI 也没有移除这些定义的通用标志。最小桥接必须按上述 `400` 契约拒绝此类请求。工具定义、工具调用、工具结果、权限、取消和丰富的 Droid 事件，需要基于 Factory 流式 JSON-RPC 模式或官方 Droid SDK 构建有状态桥接服务。应将 `ocx access test` 的成功视为文本路径验证，而非 Codex 代理或工具路径验证。
+上述最小桥接只转换文本及 Responses SSE 生命周期，**没有**实现完整的双向 Codex function/tool-call 协议。Codex App 和 `codex exec` 通常会发送工具定义，即使提示词要求不要调用工具；当前 Codex CLI 也没有移除这些定义的通用标志。最小桥接必须按上述 `400` 契约拒绝此类请求。工具定义、工具调用、工具结果、权限、取消和丰富的 Droid 事件，需要基于 Factory 流式 JSON-RPC 模式或官方 Droid SDK 构建有状态桥接服务。应将 `orl access test` 的成功视为文本路径验证，而非 Codex 代理或工具路径验证。

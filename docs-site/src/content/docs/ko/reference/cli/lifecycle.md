@@ -3,11 +3,11 @@ title: CLI 수명 주기
 description: 설정, 시작, 중지, 서비스, 진단, 동기화, 업데이트 명령입니다.
 ---
 
-이 명령들은 로컬 opencodex 프록시와 Codex 연동을 설치, 실행, 점검, 복구, 업데이트합니다.
+이 명령들은 로컬 OpenRelay 프록시와 Codex 연동을 설치, 실행, 점검, 복구, 업데이트합니다.
 
 ## 설정
 
-### `ocx init` · `ocx setup`
+### `orl init` · `orl setup`
 
 대화형 설정 마법사입니다 (`setup`은 `init`의 별칭입니다). 공급자(프리셋 또는 사용자 지정),
 API 키(리터럴 또는 `${ENV}`), 기본 모델, 프록시 포트를 묻고 `~/.opencodex/config.json`에 저장합니다.
@@ -16,37 +16,37 @@ Codex 자동 시작 shim도 설치합니다.
 
 ## 프록시 수명 주기
 
-### `ocx start [--port <port>] [--socks5 [host:port] | --socks5-off]`
+### `orl start [--port <port>] [--socks5 [host:port] | --socks5-off]`
 
 프록시 서버를 시작합니다(권장 포트는 `10100`). PID와 런타임 포트 상태를 기록하고, 두 번째 활성
 인스턴스는 시작하지 않습니다. 권장 포트가 이미 사용 중이면 `start`가 점유자를 확인한 뒤 어느 경우든
-실행을 멈춥니다. opencodex가 응답하면 시작을 거부하고, 그렇지 않으면 점유자를 식별할 수 없다고
+실행을 멈춥니다. OpenRelay가 응답하면 시작을 거부하고, 그렇지 않으면 점유자를 식별할 수 없다고
 알립니다. 첫 번째 프록시를 실행한 채 Codex가 두 번째 프록시를 가리키게 되므로, 리스너를 다른 포트로
 자동 이동하지 않습니다. 활성 프록시와 같은 `OPENCODEX_HOME`을 사용하면 다른 `--port`를 명시해도
 시작을 거부합니다. 관찰 전용과 제한 적용 모드 모두 같은 지출 저널에 기록하기 때문입니다. 독립된 형제
 인스턴스에는 별도의 `OPENCODEX_HOME`을 사용하세요. `port: 0`은 포트만 OS에 맡기며 상태를 분리하지
 않습니다. 시작할 때는 각 공급자의 모델을 Codex 카탈로그로 동기화합니다. 종료할 때는
 기본 Codex를 복원합니다. 단, 관리형 서비스로 실행한 경우(`OCX_SERVICE=1`)는 예외입니다. 이미 실행 중인
-프록시 옆에서 시작한 형제 인스턴스는 `ocx stop`이나 시그널로 멈출 때도 동기화와 복원을 하지 않고 자신의
-포트에서 직접 요청만 처리하며, Codex, Grok, Claude는 원래 실행 중이던 프록시를 계속 가리킵니다. 별도의 `OPENCODEX_HOME`에서 시작할 때는 기본 홈의 런타임 기록과 OpenCodex가 관리하는 Grok·Codex 루프백 주소로 활성 프록시를 확인합니다. 활성 소유자가 없는 단독 사용자 지정 홈은 평소대로 동기화하며, 명시적인 `ocx sync`와 `ocx grok apply`도 계속 사용할 수 있습니다.
+프록시 옆에서 시작한 형제 인스턴스는 `orl stop`이나 시그널로 멈출 때도 동기화와 복원을 하지 않고 자신의
+포트에서 직접 요청만 처리하며, Codex, Grok, Claude는 원래 실행 중이던 프록시를 계속 가리킵니다. 별도의 `OPENCODEX_HOME`에서 시작할 때는 기본 홈의 런타임 기록과 OpenRelay가 관리하는 Grok·Codex 루프백 주소로 활성 프록시를 확인합니다. 활성 소유자가 없는 단독 사용자 지정 홈은 평소대로 동기화하며, 명시적인 `orl sync`와 `orl grok apply`도 계속 사용할 수 있습니다.
 
 `--socks5`(기본값 `127.0.0.1:10808`)는 SOCKS5 URL을 `config.proxy`에 저장하고 실제 SOCKS5
 터널을 통해 송신 HTTP(S) 요청을 전달합니다. `--socks5-off`는 저장된 SOCKS5 프록시만 지우며
-HTTP 프록시는 삭제하지 않습니다. 값은 구성에 저장되므로 `ocx update` 후에도 유지됩니다. URL에
+HTTP 프록시는 삭제하지 않습니다. 값은 구성에 저장되므로 `orl update` 후에도 유지됩니다. URL에
 사용자 이름과 비밀번호를 포함할 수 있지만 시작 로그에서는 숨겨집니다.
 
 ```bash
-ocx start
-ocx start --port 8080
-ocx start --port 10100 --socks5
-ocx start --socks5-off
+orl start
+orl start --port 8080
+orl start --port 10100 --socks5
+orl start --socks5-off
 ```
 
-### `ocx stop`
+### `orl stop`
 
 실행 중인 프록시를 PID 기준으로 중지하고, PID 파일을 삭제한 뒤 기본 Codex를 복원합니다. 관리형
-백그라운드 서비스가 설치되어 있으면 `ocx stop`이 먼저 그 서비스를 중지하므로 프록시가 다시
-올라올 수 없습니다. 웹 대시보드의 **Stop** 버튼도 같은 동작(`POST /api/stop`)을 하지만, Windows 작업 스케줄러는 예외입니다. 작업이 끝나도 래퍼가 프록시를 다시 띄울 수 있어서, 대시보드는 `respawnable_service`로 거절하고 아무것도 바꾸지 않은 채 `ocx stop` 실행을 안내합니다.
+백그라운드 서비스가 설치되어 있으면 `orl stop`이 먼저 그 서비스를 중지하므로 프록시가 다시
+올라올 수 없습니다. 웹 대시보드의 **Stop** 버튼도 같은 동작(`POST /api/stop`)을 하지만, Windows 작업 스케줄러는 예외입니다. 작업이 끝나도 래퍼가 프록시를 다시 띄울 수 있어서, 대시보드는 `respawnable_service`로 거절하고 아무것도 바꾸지 않은 채 `orl stop` 실행을 안내합니다.
 
 프록시가 종료된 것만으로 Codex/Grok 공유 설정 복원까지 성공했다고 판단하지 않습니다. 종료 응답이
 실패를 보고하거나, 읽을 수 없거나, 요청한 복원 처리 방식을 확인해 주지 않으면 기존 소유권·재시작
@@ -54,14 +54,14 @@ ocx start --socks5-off
 넘어가지 않습니다. 영수증에 근거한 지연 복원도 최종 복원과 영수증 정리를 부모가 담당하며,
 부모의 공유 설정 복원이 실패하면 종료 실패로 남기고 미완료 영수증을 보존합니다.
 
-### `ocx restart`
+### `orl restart`
 
 프록시가 실행 중이면 확인된 정확한 PID와 포트에 in-place 재시작을 요청하고, 정상 드레인을
 기다린 뒤 같은 포트에 다른 런타임 PID가 올라왔는지 확인합니다. 이 과정에서 관리형 라우팅과
 서비스 감시는 유지되며, 요청 결과가 불확실해도 별도의 stop/start로 재실행하지 않습니다.
 실행 중인 프록시가 없을 때만 일반 `ensure` 시작 동작으로 전환합니다.
 실행 중인 리스너를 런타임 PID로 증명할 수 없으면(업데이트 전 프록시 포함) `ensure`나
-stop/start 대체 동작 없이 안전하게 실패합니다. 소유권을 확인한 뒤 `ocx stop`과 `ocx start`를
+stop/start 대체 동작 없이 안전하게 실패합니다. 소유권을 확인한 뒤 `orl stop`과 `orl start`를
 순서대로 한 번 실행하세요.
 
 중지·업데이트 후 포트 회수 중에는 종료 전에 기록한 PID라도 OCX 프로세스 확인 실패를 무시하지 않습니다.
@@ -69,12 +69,12 @@ stop/start 대체 동작 없이 안전하게 실패합니다. 소유권을 확�
 계속 확인할 수 없으면 포트가 사용 중인 채로 대기 제한 시간에 도달할 수 있습니다.
 현재 포트 사용 프로세스를 확인하고 충돌을 해소한 뒤 재시작을 다시 시도하세요.
 
-### `ocx ensure`
+### `orl ensure`
 
 백그라운드 프록시가 실행 중인지 멱등적으로 보장한 다음, 살아 있는 모델 카탈로그를 동기화합니다.
 `codexAutoStart`가 `false`이면 자동 시작이 비활성화되었다고 출력하고 아무것도 하지 않습니다.
 
-### `ocx restore [back]` · `ocx eject [back]`
+### `orl restore [back]` · `orl eject [back]`
 
 프록시를 중지하지 않고 기본 Codex를 **복원**합니다. 주입된 설정 줄과 라우팅된 카탈로그 항목을
 제거하므로 일반 `codex`가 다시 네이티브로 동작합니다. `eject`는 `restore`의 별칭입니다.
@@ -91,11 +91,11 @@ stop/start 대체 동작 없이 안전하게 실패합니다. 소유권을 확�
 연결하되, 프록시 수명 주기는 바꾸지 않습니다.
 
 ```bash
-ocx restore back
-ocx eject back
+orl restore back
+orl eject back
 ```
 
-### `ocx recover-history --legacy-openai --yes`
+### `orl recover-history --legacy-openai --yes`
 
 역방향 복구 지원이 생기기 전, 초기 개발 빌드에서 Codex App 기록을 재매핑하던 오래된 빌드를 위한
 명시적 복구 명령입니다. 기록 데이터베이스가 잠겨 있으면 먼저 Codex를 종료해 주세요.
@@ -104,24 +104,24 @@ ocx eject back
 thread를 `openai`로 바꾸고, `exec`를 `cli`로 정규화하며 event marker를 설정합니다. 정상적인
 dedicated-provider history도 포함됩니다. 상태를 백업하고 이 전체 범위를 의도한 경우에만 실행하세요.
 
-### `ocx recover-history --ocx-compaction <thread-id> --yes`
+### `orl recover-history --ocx-compaction <thread-id> --yes`
 
 라우팅된 provider를 통해 압축된 작업을 native Codex에서 다시 열기 전에 해당 기록을 복구합니다. 이 명령은 UUID로 정확히 하나의 작업을 선택하고 비공개 바이트 단위 백업을 저장한 뒤, OpenCodeX가 소유한 `ocx1:` 압축 상태만 native Codex가 재생할 수 있는 일반 요약으로 변환합니다. native 암호화 콘텐츠와 다른 작업은 변경하지 않습니다. 실행 전에 선택한 작업을 닫으십시오. 처리 중 rollout이 변경되면 파일을 교체하지 않고 복구를 중단합니다.
 
-### `ocx uninstall` · `ocx remove`
+### `orl uninstall` · `orl remove`
 
 서비스와 프록시를 중지하고, 서비스와 Codex shim을 제거한 뒤, 기본 Codex를 복원합니다. 그 다음
-복원 단계가 모두 성공했을 때만 opencodex 로컬 설정을 제거합니다. `remove`는 `uninstall`의
+복원 단계가 모두 성공했을 때만 OpenRelay 로컬 설정을 제거합니다. `remove`는 `uninstall`의
 별칭입니다. 설정 정리에는 새 설치로 만들어진 소유권 메타데이터가 필요하며, 오래된 디렉터리나
 공유 디렉터리는 그대로 남깁니다.
 
 ## 상태 및 헬스
 
-### `ocx status [--json]`
+### `orl status [--json]`
 
-status와 `ocx doctor`는 현재 CLI와 실행 중인 프록시의 버전을 비교합니다. CLI가 더 새로우면
-원하는 최신 설치로 프록시를 재시작하십시오. 백그라운드 서비스라면 `ocx service restart`를
-실행합니다. macOS에서는 버전 불일치가 서비스 정의를 바이트 단위로 그대로 두기 때문에 `ocx service repair`는 아무것도
+status와 `orl doctor`는 현재 CLI와 실행 중인 프록시의 버전을 비교합니다. CLI가 더 새로우면
+원하는 최신 설치로 프록시를 재시작하십시오. 백그라운드 서비스라면 `orl service restart`를
+실행합니다. macOS에서는 버전 불일치가 서비스 정의를 바이트 단위로 그대로 두기 때문에 `orl service repair`는 아무것도
 reload하지 않고 예전 프로세스가 계속 서비스합니다. 프록시가 더 새로우면 CLI를 업그레이드하거나
 `PATH`가 원하는 설치를 가리키도록 수정하십시오. 이 진단은 서비스를 복구하거나 요청 허용
 여부를 바꾸지 않습니다.
@@ -145,8 +145,8 @@ JSON의 `versionSkew`에도 같은 안내가 들어가며 필드는 `cliVersion`
 이메일은 절대 출력하지 않습니다. `--json` 계약에는 이 헬스 블록이 아직 포함되지 않습니다.
 
 ```bash
-ocx status
-ocx status --json
+orl status
+orl status --json
 ```
 
 축약 예시 형태는 다음과 같습니다.
@@ -199,13 +199,13 @@ ocx status --json
 
 실시간 읽기는 제한된 서비스 진단이 끝날 때까지 기다립니다. 진단 캐시가 비어 있거나 만료되면 macOS/Linux에서는 최대 6.5초, Windows에서는 최대 16.5초입니다. 캐시된 결과는 신속하게 반환됩니다. 시간 초과 시에는 기존대로 로컬 진단으로 전환합니다. `/healthz`가 정상이라는 사실만으로 재시작 보호가 유효함을 확인할 수는 없습니다.
 
-### `ocx health [--json]`
+### `orl health [--json]`
 
 실행 중인 프록시의 신원 확인을 수행합니다. 일반 출력은 PID/포트를 보고하고, `--json`은
 `{ok, pid, port}`를 내보냅니다. 이 명령은 정상일 때만 종료 코드 0을, 그렇지 않으면 1을 반환하므로
 서비스 프로브에 적합합니다.
 
-### `ocx ready [--json] [--wait [--timeout <seconds>]]`
+### `orl ready [--json] [--wait [--timeout <seconds>]]`
 
 인증이 필요 없는 `GET /readyz` 엔드포인트로 동기화 후 준비 상태를 확인합니다. 준비되면 `200`,
 `pending` 또는 종단 상태인 `failed`이면 `Retry-After: 1`과 함께 `503`을 반환합니다. HTTP의 정제된
@@ -217,7 +217,7 @@ probe이며, `--wait`는 준비 또는 timeout까지 polling하지만 종단 `fa
 `unreachable` 중 하나입니다. 종료 코드는 ready가 0, not-ready/pending/failed/timeout/unreachable이
 1, 잘못된 인수가 64입니다.
 
-### `ocx doctor`
+### `orl doctor`
 
 읽기 전용 환경 및 연결 진단을 실행합니다. 상태 경로와 파일시스템 유형, WSL 이중 설치, 프록시
 환경/설정, ChatGPT 도달 가능성, Codex 플러그인 및 프로젝트 설정 경고, 보류 중인 기록 마이그레이션이
@@ -236,7 +236,7 @@ single-flight/lock 파일을 만들 수 있는지, 건강하지 않은 OAuth 또
 
 ## 카탈로그 동기화
 
-### `ocx sync [--restart-codex] [--restart-app-server-only]`
+### `orl sync [--restart-codex] [--restart-app-server-only]`
 
 설정된 모든 공급자에서 라이브 모델 목록을 가져와 병합된 카탈로그를 Codex에 다시 주입합니다.
 공급자를 추가한 뒤나 사용 가능한 모델을 새로 고칠 때 실행합니다.
@@ -260,14 +260,14 @@ app-server / code-mode-host 프로세스에만 `SIGTERM`을 보내고 데스크�
 명령을 Codex 앱 안에서 실행하면 재시작은 분리된 helper에 넘기고, 이 세션은 앱과 함께
 종료됩니다.
 
-### `ocx sync-cache [--restart-codex] [--restart-app-server-only]`
+### `orl sync-cache [--restart-codex] [--restart-app-server-only]`
 
-Codex의 로컬 모델 선택기 캐시를 무효화하여, 활성 opencodex 카탈로그에서 다시 빌드되게 합니다.
-`ocx sync`와 같은 오래된 `app-server` 경고와 선택적 재시작 플래그가 적용됩니다.
+Codex의 로컬 모델 선택기 캐시를 무효화하여, 활성 OpenRelay 카탈로그에서 다시 빌드되게 합니다.
+`orl sync`와 같은 오래된 `app-server` 경고와 선택적 재시작 플래그가 적용됩니다.
 
-### `ocx catalog pull <https-url> [--auth-env <NAME>] [--json] [--restart-codex] [--restart-app-server-only]`
+### `orl catalog pull <https-url> [--auth-env <NAME>] [--json] [--restart-codex] [--restart-app-server-only]`
 
-다른 OpenCodex 인스턴스의 `/v1/catalog` 엔드포인트가 제공하는 완성된 카탈로그를 설치한 뒤
+다른 OpenRelay 인스턴스의 `/v1/catalog` 엔드포인트가 제공하는 완성된 카탈로그를 설치한 뒤
 `models_cache.json`을 맞춥니다. URL은 HTTPS여야 하고 HTTP는 루프백만 허용합니다. URL에 박힌
 자격증명, 쿼리, 프래그먼트, 리다이렉트, 크기를 넘는 응답, 잘못된 카탈로그는 로컬에 쓰기 전에
 거절합니다. 인증은 선택이며 환경변수 이름(`--auth-env`)으로만 읽고 argv로는 받지 않습니다.
@@ -277,21 +277,21 @@ Codex의 로컬 모델 선택기 캐시를 무효화하여, 활성 opencodex 카
 카탈로그와 캐시는 공유 Codex 카탈로그 잠금 아래에서 쓰고, 실패하면 직전까지 정상이던 파일을
 그대로 둡니다. 바이트가 같으면 mtime까지 건드리지 않는 no-op입니다. `--restart-codex`,
 `--restart-app-server-only`, 폐기 예정 별칭 `--restart-desktop-app`은 실제로 쓴 뒤에만
-적용되며, `ocx sync` / `ocx sync-cache`와 같은 뜻입니다. `ETag` 조건부 요청은 이 명령에
+적용되며, `orl sync` / `orl sync-cache`와 같은 뜻입니다. `ETag` 조건부 요청은 이 명령에
 없습니다. `--json` envelope 필드와 종료 코드는 [영문 레퍼런스](/reference/cli/lifecycle/)를
 보세요.
 
 ## 백그라운드 서비스
 
-### `ocx service [install|repair|restart|start|stop|status|uninstall|remove]`
+### `orl service [install|repair|restart|start|stop|status|uninstall|remove]`
 
-로그인 관리형 백그라운드 서비스로 opencodex를 실행합니다(macOS **launchd**, Linux **systemd** 사용자
+로그인 관리형 백그라운드 서비스로 OpenRelay를 실행합니다(macOS **launchd**, Linux **systemd** 사용자
 유닛, Windows **Task Scheduler**). 로그인 시 자동 시작하고 충돌 시 자동 재시작합니다. 서비스 실행은
 `OCX_SERVICE=1`을 설정하므로 재시작해도 Codex 설정이 흔들리지 않습니다.
 
 Windows 작업 스케줄러로 설치하는 서비스는 보통 프로세스 우선순위(`Priority=4`)를 사용합니다.
 이전의 백그라운드 우선순위(`7`, 생략 시에도 스케줄러 기본값은 `7`)에서는 CPU 경합으로 상태 확인 응답이
-늦어져 프로세스가 살아 있어도 트레이에 Offline이 표시될 수 있습니다. 업그레이드 후 `ocx service repair`를
+늦어져 프로세스가 살아 있어도 트레이에 Offline이 표시될 수 있습니다. 업그레이드 후 `orl service repair`를
 실행하면 등록된 해당 우선순위를 변경하고 서비스를 재시작합니다. 이 과정에서 UAC 승인이 필요할 수 있습니다.
 이미 보통 또는 높음 우선순위인 경우 우선순위만을 이유로 다시 등록하지 않습니다.
 
@@ -304,17 +304,17 @@ Linux에서 systemd 유닛은 설치 시 `PATH`에서 찾은 첫 번째 일반 �
 
 macOS에서 launchd는 대신 설치 또는 repair 때 선택한 패키지 내부 Bun 및 CLI 경로를 사용합니다.
 이는 가변 PATH shim이 이후 재시작에서 서비스 API 토큰과 구성된 프록시 환경을 받지 못하게 합니다.
-버전 관리자 설치를 업그레이드한 뒤에는 서비스를 재시작하기 전에 `ocx service repair`를 실행해
+버전 관리자 설치를 업그레이드한 뒤에는 서비스를 재시작하기 전에 `orl service repair`를 실행해
 해당 경로를 새로 고치세요.
 
 이 변경 이전에 설치된 정의는 여전히 이전 버전 경로를 지니고 스스로 마이그레이션할 수 없습니다.
-이전 실행 파일이 삭제되면 이를 고칠 opencodex 코드가 실행되지 않습니다. 업그레이드 후
-`ocx service repair`를 한 번 실행하세요. 이후 Linux 서비스 시작은 런처를 따르고, macOS repair는
+이전 실행 파일이 삭제되면 이를 고칠 OpenRelay 코드가 실행되지 않습니다. 업그레이드 후
+`orl service repair`를 한 번 실행하세요. 이후 Linux 서비스 시작은 런처를 따르고, macOS repair는
 새 패키지 경로를 launchd 정의에 기록합니다. 이미 실행 중인 프록시는 외부 업그레이드로 교체되지
-않습니다. 설치된 CLI가 실행 중인 프록시보다 새로우면 새 빌드가 서비스하도록 `ocx service restart`를
+않습니다. 설치된 CLI가 실행 중인 프록시보다 새로우면 새 빌드가 서비스하도록 `orl service restart`를
 실행하세요. macOS에서는 이 경우 `repair`로 충분하지 않습니다. 정의가 바뀌지 않았고, 아무것도
 바꾸지 않는 repair는 아무것도 reload하지 않습니다. 반대로 프록시가 더 새로우면
-[`ocx status`](#ocx-status---json)에 설명된 대로 CLI 설치와 `PATH`를 확인하세요.
+[`orl status`](#ocx-status---json)에 설명된 대로 CLI 설치와 `PATH`를 확인하세요.
 
 | 하위 명령 | 동작 |
 | --- | --- |
@@ -329,19 +329,19 @@ macOS에서 launchd는 대신 설치 또는 repair 때 선택한 패키지 내�
 | `remove` | `uninstall`의 별칭입니다. |
 
 ```bash
-ocx service
-ocx service install
-ocx service repair
-ocx service restart
-ocx service status
-ocx service uninstall
+orl service
+orl service install
+orl service repair
+orl service restart
+orl service status
+orl service uninstall
 ```
 
-Windows에서는 bare `ocx service`가 Task Scheduler와 WinSW 양쪽 모두 부재가 입증된 후에만 설치
-경로를 실행합니다. 상태 조회 중 하나라도 불확실하면 아무것도 등록하지 않고 `ocx service status`
-실행을 안내합니다. 부재를 확인한 뒤에만 명시적인 `ocx service install`을 사용하세요.
+Windows에서는 bare `orl service`가 Task Scheduler와 WinSW 양쪽 모두 부재가 입증된 후에만 설치
+경로를 실행합니다. 상태 조회 중 하나라도 불확실하면 아무것도 등록하지 않고 `orl service status`
+실행을 안내합니다. 부재를 확인한 뒤에만 명시적인 `orl service install`을 사용하세요.
 
-Windows에서는 `ocx service status`가 Task Scheduler 등록 상태를 ID가 검증된 OpenCodex 프록시
+Windows에서는 `orl service status`가 Task Scheduler 등록 상태를 ID가 검증된 OpenRelay 프록시
 도달 가능성과 별도로 보고합니다. 로컬라이즈된 `schtasks` 표는 출력하지 않으므로, 요약은 Windows
 코드 페이지에서도 읽기 쉽습니다.
 
@@ -351,15 +351,15 @@ Windows에서 Task Scheduler 항목을 만들려면 권한 상승이 필요합�
 않은 토큰의 확인이 필요합니다. 그러면 대시보드의 Startup Safety 작업이 UAC를 자동으로 요청할 수
 있습니다. 그 대체 경로로도 토큰 상태를 판별할 수 없으면 원래 스케줄러 오류를 유지합니다. 외부
 작업이나 외부 연산은 자동 권한 상승 표시를 절대 내지 못합니다. 대시보드 UAC 프롬프트를 승인하거나
-상승된 PowerShell 창에서 `ocx service install`을 다시 실행해 주세요.
+상승된 PowerShell 창에서 `orl service install`을 다시 실행해 주세요.
 
-시작할 때 `another process owns the runtime mutation lease`가 보고되거나 `ocx service status`에 `Runtime mutation lease busy`가 표시되면, 프록시가 실행 중이 아니더라도 이 리스가 시작이나 서비스 변경을 막고 있는 것입니다. 메시지에는 잠금 경로, 기록된 PID, 그 PID가 현재 살아 있는지 여부, 확인할 수 있는 경우 실행 파일 이름, 리스 경과 시간이 들어 있습니다. 프로세스의 신원은 검증되지 않습니다. PID가 재사용되었을 수 있으므로, 생존 여부와 실행 파일 이름은 지금 그 PID를 쓰고 있는 프로세스에 대한 정보입니다. 작업이 끝날 때까지 기다린 뒤 다시 시도하세요. 이 PID만 보고 잠금을 삭제하거나 프로세스를 중지하지 마세요. 리스 경과 시간이 30초를 넘고 기록된 PID가 더 이상 살아 있지 않으면 이후의 변경 시도가 오래된 리스를 회수할 수 있습니다. `ocx service status`는 리스를 확인만 합니다.
+시작할 때 `another process owns the runtime mutation lease`가 보고되거나 `orl service status`에 `Runtime mutation lease busy`가 표시되면, 프록시가 실행 중이 아니더라도 이 리스가 시작이나 서비스 변경을 막고 있는 것입니다. 메시지에는 잠금 경로, 기록된 PID, 그 PID가 현재 살아 있는지 여부, 확인할 수 있는 경우 실행 파일 이름, 리스 경과 시간이 들어 있습니다. 프로세스의 신원은 검증되지 않습니다. PID가 재사용되었을 수 있으므로, 생존 여부와 실행 파일 이름은 지금 그 PID를 쓰고 있는 프로세스에 대한 정보입니다. 작업이 끝날 때까지 기다린 뒤 다시 시도하세요. 이 PID만 보고 잠금을 삭제하거나 프로세스를 중지하지 마세요. 리스 경과 시간이 30초를 넘고 기록된 PID가 더 이상 살아 있지 않으면 이후의 변경 시도가 오래된 리스를 회수할 수 있습니다. `orl service status`는 리스를 확인만 합니다.
 
 Windows에서는 이 공용 Node/Bun 진단 경로가 실행 파일 이름 조회용 프로그램을 실행하지 않습니다. 기록된 PID, 생존 여부, 리스 경과 시간과 복구 안내는 계속 표시됩니다.
 
-### `ocx codex-shim <install|status|uninstall|remove>`
+### `orl codex-shim <install|status|uninstall|remove>`
 
-macOS와 Linux에서 `ocx codex-shim install`은 확정된 OpenCodex 홈에 전용 wrapper `<OPENCODEX_HOME>/bin/codex`와 셸에서 읽을 `<OPENCODEX_HOME>/codex-shell-env.sh`를 설치합니다. 원래 런처는 brew, npm, fnm이 설치한 위치에 그대로 있어 패키지 관리자 업데이트와 버전 롤백 뒤에도 다시 감쌀 필요가 없습니다. Windows는 기존처럼 스크립트 런처를 제자리에서 감싸며 실제 `codex.exe`는 건드리지 않습니다. Windows에서 `codex.exe`만 제공된다면 `ocx service install`을 사용하세요.
+macOS와 Linux에서 `orl codex-shim install`은 확정된 OpenRelay 홈에 전용 wrapper `<OPENCODEX_HOME>/bin/codex`와 셸에서 읽을 `<OPENCODEX_HOME>/codex-shell-env.sh`를 설치합니다. 원래 런처는 brew, npm, fnm이 설치한 위치에 그대로 있어 패키지 관리자 업데이트와 버전 롤백 뒤에도 다시 감쌀 필요가 없습니다. Windows는 기존처럼 스크립트 런처를 제자리에서 감싸며 실제 `codex.exe`는 건드리지 않습니다. Windows에서 `codex.exe`만 제공된다면 `orl service install`을 사용하세요.
 
 brew/fnm 등의 PATH 설정이 끝난 뒤 설치 명령이 출력한 활성화 명령을 실행하세요. 기본 홈에서는 다음과 같습니다.
 
@@ -367,17 +367,17 @@ brew/fnm 등의 PATH 설정이 끝난 뒤 설치 명령이 출력한 활성화 �
 . "$HOME/.opencodex/codex-shell-env.sh"
 ```
 
-사용자 지정 홈에서는 출력된 따옴표 포함 경로를 사용하세요. 여러 번 읽어도 전용 bin의 중복 항목을 제거하고 PATH 맨 앞에 배치합니다. 이후 셸에서도 사용하려면 셸 시작 파일의 PATH 설정 뒤에 이 줄을 직접 추가하세요. OpenCodex는 셸 시작 파일을 수정하지 않으며 설치 명령은 부모 셸의 PATH를 바꿀 수 없습니다. wrapper가 실행 가능하면 현재 셸에서 아직 활성화되지 않아도 설치는 성공합니다. 설치가 거부되거나 wrapper를 실행할 수 없으면 실패 종료 코드를 반환합니다. `ocx status`, `ocx codex-shim status`, `ocx doctor`, `ocx connect`는 PATH에서 선택되지 않은 wrapper를 **not active**로 표시하고 활성화 명령을 안내합니다. connect 경고는 종료 상태를 바꾸지 않습니다. 별칭, 함수, 데스크톱과 서비스 실행 환경은 별도 설정이 필요합니다.
+사용자 지정 홈에서는 출력된 따옴표 포함 경로를 사용하세요. 여러 번 읽어도 전용 bin의 중복 항목을 제거하고 PATH 맨 앞에 배치합니다. 이후 셸에서도 사용하려면 셸 시작 파일의 PATH 설정 뒤에 이 줄을 직접 추가하세요. OpenRelay는 셸 시작 파일을 수정하지 않으며 설치 명령은 부모 셸의 PATH를 바꿀 수 없습니다. wrapper가 실행 가능하면 현재 셸에서 아직 활성화되지 않아도 설치는 성공합니다. 설치가 거부되거나 wrapper를 실행할 수 없으면 실패 종료 코드를 반환합니다. `orl status`, `orl codex-shim status`, `orl doctor`, `orl connect`는 PATH에서 선택되지 않은 wrapper를 **not active**로 표시하고 활성화 명령을 안내합니다. connect 경고는 종료 상태를 바꾸지 않습니다. 별칭, 함수, 데스크톱과 서비스 실행 환경은 별도 설정이 필요합니다.
 
-설치나 복구를 확정하기 전에 OpenCodex는 서비스 시작을 우회한 상태에서 저장된 런처를
+설치나 복구를 확정하기 전에 OpenRelay는 서비스 시작을 우회한 상태에서 저장된 런처를
 `--version`으로 실행합니다. 런처가 `codex`를 shim으로 다시 해석해 재귀하거나, 0이 아닌 코드로
 종료하거나, 5초를 초과하거나, 실행 중인 자식 프로세스를 남기거나, 안전하게 검증·정리할 수 없으면
 변경을 거부하고 롤백합니다. 따라서 `codex-shim install`은 무조건 성공하는 명령이 아닙니다. 거부되면
 PATH 항목이 구체적인 실행 파일 또는 런처를 가리키도록 Codex를 다시 설치한 뒤 재시도하세요. 동적
-명령 관리자의 런처가 이 검증을 충족할 수 없다면 대신 `ocx service install`을 사용하세요.
-기존 Unix 제자리 shim은 명시적인 `ocx codex-shim install`로만 이전합니다. 기록된 원래 런처를 복원하되 이미 있는 더 최신 런처는 덮어쓰지 않고, 이후 전용 wrapper를 설치합니다. 원래 런처 복원 후 전용 설치가 실패해도 복원된 런처는 유지되며 재시도할 수 있습니다. 기록된 런처가 없거나 실행 불가능하면 패키지 관리자로 복구하세요. 다른 설치를 임의로 선택하거나 패키지 관리자 경로를 다시 감싸지 않습니다.
+명령 관리자의 런처가 이 검증을 충족할 수 없다면 대신 `orl service install`을 사용하세요.
+기존 Unix 제자리 shim은 명시적인 `orl codex-shim install`로만 이전합니다. 기록된 원래 런처를 복원하되 이미 있는 더 최신 런처는 덮어쓰지 않고, 이후 전용 wrapper를 설치합니다. 원래 런처 복원 후 전용 설치가 실패해도 복원된 런처는 유지되며 재시도할 수 있습니다. 기록된 런처가 없거나 실행 불가능하면 패키지 관리자로 복구하세요. 다른 설치를 임의로 선택하거나 패키지 관리자 경로를 다시 감싸지 않습니다.
 
-Unix 자동 복구는 전용 wrapper만 갱신하며 패키지 관리자 런처를 다시 작성하거나 기존 제자리 shim을 이전하지 않습니다. Windows에서는 완료된 외부 업데이트가 shim을 덮어쓰면 다음 일반 `ocx` 명령이 안정적인 새 런처를 백업하고 shim을 복원합니다. 변경 중인 런처는 건드리지 않고 나중에 재시도합니다. `ocx status`, `ocx doctor`, `ocx codex-shim status`, `ocx system codex-cli-update check`와 해당 예약 namespace의 잘못된 호출은 shim 자동 복구를 실행하지 않습니다. 복구 실패는 요청한 명령의 종료 상태를 바꾸지 않고 경고만 표시합니다. 수동 복구 명령은 `ocx codex-shim install`입니다. `codexShimAutoRestore`를 `false`로 설정하거나 프로세스별로 `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0`을 설정하면 자동 복구를 끕니다.
+Unix 자동 복구는 전용 wrapper만 갱신하며 패키지 관리자 런처를 다시 작성하거나 기존 제자리 shim을 이전하지 않습니다. Windows에서는 완료된 외부 업데이트가 shim을 덮어쓰면 다음 일반 `ocx` 명령이 안정적인 새 런처를 백업하고 shim을 복원합니다. 변경 중인 런처는 건드리지 않고 나중에 재시도합니다. `orl status`, `orl doctor`, `orl codex-shim status`, `orl system codex-cli-update check`와 해당 예약 namespace의 잘못된 호출은 shim 자동 복구를 실행하지 않습니다. 복구 실패는 요청한 명령의 종료 상태를 바꾸지 않고 경고만 표시합니다. 수동 복구 명령은 `orl codex-shim install`입니다. `codexShimAutoRestore`를 `false`로 설정하거나 프로세스별로 `OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0`을 설정하면 자동 복구를 끕니다.
 
 | 하위 명령 | 동작 |
 | --- | --- |
@@ -387,9 +387,9 @@ Unix 자동 복구는 전용 wrapper만 갱신하며 패키지 관리자 런처�
 | `status` | shim 상태와 전용 wrapper의 PATH 활성화 여부를 보고합니다. |
 
 ```bash
-ocx codex-shim install
-ocx codex-shim status
-ocx codex-shim uninstall
+orl codex-shim install
+orl codex-shim status
+orl codex-shim uninstall
 ```
 
 Unix에서 제거한 뒤 셸 시작 파일의 source 줄을 삭제하고 셸을 다시 시작하거나 PATH에서 전용 bin을 제거하세요. 소유한 wrapper, 셸 환경 파일, 상태만 삭제하며 패키지 관리자 런처는 그대로 둡니다. 기존 제자리 Unix shim은 기록된 복원 정보를 이용해 해제합니다.
@@ -397,65 +397,65 @@ Unix에서 제거한 뒤 셸 시작 파일의 source 줄을 삭제하고 셸을 
 :::note[Windows 토큰 환경]
 새로 생성된 Windows CMD 및 PowerShell shim은 실행 후 호출자의 `OPENCODEX_API_AUTH_TOKEN`을 원래 상태로 복원합니다. Codex와 자식 프로세스는 여전히 토큰을 상속할 수 있습니다.
 
-OpenCodex를 업데이트한 뒤 기존 Windows shim에 이 동작을 적용하려면 `ocx codex-shim uninstall`을 실행한 다음 `ocx codex-shim install`로 다시 설치하세요. 일반 업데이트는 정상인 Windows shim을 다시 작성하지 않습니다.
+OpenRelay를 업데이트한 뒤 기존 Windows shim에 이 동작을 적용하려면 `orl codex-shim uninstall`을 실행한 다음 `orl codex-shim install`로 다시 설치하세요. 일반 업데이트는 정상인 Windows shim을 다시 작성하지 않습니다.
 :::
 
 :::tip[서비스와 shim]
-항상 켜져 있는 백그라운드 프록시에는 `ocx service`를 사용합니다(권장). 데몬 없이 가볍게 필요할
-때만 시작하려면 `ocx codex-shim`을 사용합니다. 이 경우 프록시는 `codex`를 실행할 때만 시작됩니다.
+항상 켜져 있는 백그라운드 프록시에는 `orl service`를 사용합니다(권장). 데몬 없이 가볍게 필요할
+때만 시작하려면 `orl codex-shim`을 사용합니다. 이 경우 프록시는 `codex`를 실행할 때만 시작됩니다.
 :::
 
 #### Codex에 토큰 주입
 
 루프백이 아닌 주소에 바인딩하면 주입된 공급자에 `env_key = "OPENCODEX_API_AUTH_TOKEN"`이 포함됩니다. 이 줄은 Codex가 읽을 변수를 지정할 뿐, 변수를 생성하지는 않습니다. 변수가 없으면 Codex는 요청 시작을 거부하며(`Missing environment variable: OPENCODEX_API_AUTH_TOKEN`), 요청은 프록시에 도달하지 않습니다. 값은 `$OPENCODEX_HOME/service-api-token`에 저장되며, 실행을 시작하는 프로세스가 Codex의 환경에 이 값을 제공해야 합니다.
 
-`ocx codex-shim install`로 설치되는 shim을 사용하세요. 실행 환경에서 이 shim이 선택되면 OpenCodex가 생성한 토큰 파일을 읽고 Codex에 변수를 제공합니다. 데스크톱, cron, 서비스에서 실행할 때는 shim을 선택하는 PATH 또는 실행기 경로를 사용해야 합니다. 설치 과정에서 이러한 환경이 자동으로 구성되지는 않습니다. Codex 자체의 자식 프로세스도 토큰을 상속할 수 있습니다.
+`orl codex-shim install`로 설치되는 shim을 사용하세요. 실행 환경에서 이 shim이 선택되면 OpenRelay가 생성한 토큰 파일을 읽고 Codex에 변수를 제공합니다. 데스크톱, cron, 서비스에서 실행할 때는 shim을 선택하는 PATH 또는 실행기 경로를 사용해야 합니다. 설치 과정에서 이러한 환경이 자동으로 구성되지는 않습니다. Codex 자체의 자식 프로세스도 토큰을 상속할 수 있습니다.
 
 이 Bearer 토큰을 셸 시작 파일에서 내보내거나 `config.toml`에 복사하지 마세요. `service-api-token` 파일에는 `NAME=value` 형식의 대입문이 아닌 토큰 원문이 들어 있으므로 systemd의 `EnvironmentFile=`로 직접 사용할 수 없습니다.
 
 `opencodex-proxy.service`의 `EnvironmentFile=` 또는 `OCX_API_TOKEN_FILE`은 프록시 프로세스만 구성하며, 별도로 실행된 `codex exec`에 전달되지 않습니다.
 
-Unix 패키지 관리자 업데이트는 전용 wrapper를 그대로 둡니다. 비활성 상태라면 출력된 활성화 파일을 읽으세요. Windows 또는 기존 제자리 shim에서는 런처를 교체하는 업데이트가 shim을 제거합니다. Windows에서는 다음 일반 `ocx` 명령이 shim을 복원하지만(위 내용 참조), 그보다 먼저 실행되는 `codex exec`는 실패합니다. `ocx doctor`는 이 상태와 비활성 wrapper(env_key 구성됨, 변수 미설정, shim 누락 또는 비정상, 토큰 파일 존재)를 "Codex env_key launch readiness" 항목에서 복구 또는 활성화 안내와 함께 보고하며, 토큰은 출력하지 않습니다. 토큰 파일 읽기는 주입된 `env_key`의 계약에 포함되지 않습니다. 실행을 시작하는 프로세스가 해당 변수를 제공해야 합니다.
+Unix 패키지 관리자 업데이트는 전용 wrapper를 그대로 둡니다. 비활성 상태라면 출력된 활성화 파일을 읽으세요. Windows 또는 기존 제자리 shim에서는 런처를 교체하는 업데이트가 shim을 제거합니다. Windows에서는 다음 일반 `ocx` 명령이 shim을 복원하지만(위 내용 참조), 그보다 먼저 실행되는 `codex exec`는 실패합니다. `orl doctor`는 이 상태와 비활성 wrapper(env_key 구성됨, 변수 미설정, shim 누락 또는 비정상, 토큰 파일 존재)를 "Codex env_key launch readiness" 항목에서 복구 또는 활성화 안내와 함께 보고하며, 토큰은 출력하지 않습니다. 토큰 파일 읽기는 주입된 `env_key`의 계약에 포함되지 않습니다. 실행을 시작하는 프로세스가 해당 변수를 제공해야 합니다.
 
-### `ocx tray <install|start|stop|status|uninstall|remove> [--json] [--no-start]`
+### `orl tray <install|start|stop|status|uninstall|remove> [--json] [--no-start]`
 
 Windows 상태 트레이 아이콘을 설치하고 제어합니다. Windows 로그인 시 시작되며, 프록시를 원클릭으로
 제어할 수 있습니다. `start`와 `stop`은 아이콘만 제어합니다. 프록시 제어는 메뉴를 사용하세요.
 `--no-start`는 `install`에 적용되며, 트레이를 바로 실행하지 않고 설치합니다.
-지원 중단 예정: OpenCodex 데스크톱 앱이 Windows, macOS, Linux에서 트레이를 제공합니다.
-`ocx tray`는 데스크톱 앱이 없는 설치를 위해 계속 사용할 수 있습니다.
+지원 중단 예정: OpenRelay 데스크톱 앱이 Windows, macOS, Linux에서 트레이를 제공합니다.
+`orl tray`는 데스크톱 앱이 없는 설치를 위해 계속 사용할 수 있습니다.
 새 패키지 버전이 확인되면 트레이는 온라인, 경고, 오프라인 아이콘에 파란 점을 표시하고 **Update available**을 보여 줍니다. 로컬 캐시 배지를 약 1분마다 확인하며, 오래되었거나 사용할 수 없는 결과가 되면 점을 제거합니다. 이 메뉴 항목은 대시보드를 열고 그곳에서 패키지 업데이트를 시작할 수 있게 합니다. 자동으로 설치하지는 않습니다.
 
 ## 대시보드
 
-### `ocx gui`
+### `orl gui`
 
 프록시가 실행 중이 아니면 자동으로 시작하면서 [웹 대시보드](/guides/web-dashboard/)를
 `http://localhost:<port>`에서 엽니다. 허브에서 관리 리스너를 켜 두면 `http://127.0.0.1:<관리 포트>`에서 엽니다.
 
 ## 업데이트
 
-`ocx update`는 OpenCodex 자체를 업데이트하며 Codex CLI를 업데이트하지 않습니다. [system 검사 명령](/ko/reference/cli/agents/)의 `ocx system codex-cli-update check`로 설정된 Codex CLI 후보의 provenance를 제한된 읽기 전용 방식으로 확인할 수 있습니다. 이 명령은 package registry를 조회하거나 업데이트를 설치하지 않습니다.
+`orl update`는 OpenRelay 자체를 업데이트하며 Codex CLI를 업데이트하지 않습니다. [system 검사 명령](/ko/reference/cli/agents/)의 `orl system codex-cli-update check`로 설정된 Codex CLI 후보의 provenance를 제한된 읽기 전용 방식으로 확인할 수 있습니다. 이 명령은 package registry를 조회하거나 업데이트를 설치하지 않습니다.
 
-### `ocx update [--tag latest|preview]`
+### `orl update [--tag latest|preview]`
 
-OpenCodex가 mise를 통해 설치된 경우 이 명령은 프록시를 중지하거나 패키지 파일을 변경하기 전에 실패하며 검증된 로컬 mise 별칭을 사용한 `mise upgrade <tool>`을 표시합니다. 업데이트 확인은 계속 사용할 수 있고 외부 관리 설치로 보고합니다. mise 소유권 메타데이터를 읽을 수 없거나 일관되지 않아도 도구 이름을 추측하지 않고 변경을 거부하며, `--tag preview`는 mise에 구성된 선택을 변경하지 않습니다.
+OpenRelay가 mise를 통해 설치된 경우 이 명령은 프록시를 중지하거나 패키지 파일을 변경하기 전에 실패하며 검증된 로컬 mise 별칭을 사용한 `mise upgrade <tool>`을 표시합니다. 업데이트 확인은 계속 사용할 수 있고 외부 관리 설치로 보고합니다. mise 소유권 메타데이터를 읽을 수 없거나 일관되지 않아도 도구 이름을 추측하지 않고 변경을 거부하며, `--tag preview`는 mise에 구성된 선택을 변경하지 않습니다.
 
-Linux에서 기록된 런처가 mise 패키지 런처(mise shim이 아닌 `<tool>/latest/node_modules/.bin/ocx`)인 백그라운드 서비스는 `mise upgrade`를 스스로 따라갑니다. 새 버전이 안정된 뒤 약 10초 안에 진행 중인 요청을 드레인하고 새 버전으로 재시작하며, 실행 중이던 버전을 mise가 나중에 정리해도 같은 방식으로 복구합니다. macOS, mise shim으로 설치한 서비스, 포그라운드 프록시는 업그레이드 후 직접 재시작하세요(macOS에서는 먼저 `ocx service repair`).
+Linux에서 기록된 런처가 mise 패키지 런처(mise shim이 아닌 `<tool>/latest/node_modules/.bin/ocx`)인 백그라운드 서비스는 `mise upgrade`를 스스로 따라갑니다. 새 버전이 안정된 뒤 약 10초 안에 진행 중인 요청을 드레인하고 새 버전으로 재시작하며, 실행 중이던 버전을 mise가 나중에 정리해도 같은 방식으로 복구합니다. macOS, mise shim으로 설치한 서비스, 포그라운드 프록시는 업그레이드 후 직접 재시작하세요(macOS에서는 먼저 `orl service repair`).
 
-npm에서 opencodex를 자체 업데이트합니다. 안정판 설치는 `@latest`를 사용하고, 미리보기 설치는
+npm에서 OpenRelay를 자체 업데이트합니다. 안정판 설치는 `@latest`를 사용하고, 미리보기 설치는
 `--tag latest|preview`를 주지 않으면 `@preview`를 유지합니다. 소스 체크아웃을 감지하면 대신
 `git pull && bun install`을 실행하라고 안내하고, 해당 태그에서 이미 최신 버전이면 아무 동작도 하지
 않습니다. npm 설치에서는 어떤 프로세스도 중지하기 전에 Unix 캐시의 소유권과 접근 가능성을 제한된
 범위에서 검사합니다. 중첩 심볼릭 링크는 `lstat`으로 확인하되 따라가지 않으며, Windows에서는 이
 Unix 전용 검사를 명시적으로 건너뜁니다. 검사에 실패하면 트레이와 프록시가 실행 중인 상태에서
 업데이트를 중단합니다. 그 다음 실행 중인 프록시가 있으면 파일을 교체하기 전에 중지합니다. 설치된
-서비스는 자동으로 다시 빌드해 시작하며, 포그라운드 설치에서는 다음 단계로 `ocx start`를 출력합니다.
+서비스는 자동으로 다시 빌드해 시작하며, 포그라운드 설치에서는 다음 단계로 `orl start`를 출력합니다.
 대시보드 업데이트 기록은 저장 전에 프로필/캐시 경로와 UID/GID 값을 가립니다.
 
 ```bash
-ocx update
-ocx update --tag preview
+orl update
+orl update --tag preview
 ```
 
 새 버전은 [Release workflow](https://github.com/lidge-jun/opencodex/actions/workflows/release.yml)가
@@ -463,8 +463,8 @@ npm에 게시하면 사용할 수 있게 됩니다.
 
 ## Remote Hub 클라이언트 라이프사이클
 
-`ocx connect <url> --pairing-code-stdin`, `ocx connect status`, `ocx sync`, `ocx connect rotate --pairing-code-stdin`을 사용합니다. `ocx disconnect`는 오프라인에서도 로컬 상태를 복원하지만 허브 키는 폐기하지 않습니다. 연결 중에는 `ocx connect revoke --admin-token-stdin`으로 저장된 `apiKeyId`를 폐기할 수 있고, 연결을 끊은 뒤에는 허브의 **연결 → API 키**를 사용해야 합니다. 비밀값은 stdin으로만 전달하고 argv에 넣지 마세요.
+`orl connect <url> --pairing-code-stdin`, `orl connect status`, `orl sync`, `orl connect rotate --pairing-code-stdin`을 사용합니다. `orl disconnect`는 오프라인에서도 로컬 상태를 복원하지만 허브 키는 폐기하지 않습니다. 연결 중에는 `orl connect revoke --admin-token-stdin`으로 저장된 `apiKeyId`를 폐기할 수 있고, 연결을 끊은 뒤에는 허브의 **연결 → API 키**를 사용해야 합니다. 비밀값은 stdin으로만 전달하고 argv에 넣지 마세요.
 
 ## Setup port validation
 
-`ocx init`의 포트는 1–65535 범위의 십진 정수입니다. Enter만 누르면 10100을 사용합니다. `0`, `10100oops`, `1.5` 같은 잘못된 값은 임의로 바꾸거나 자르지 않고, 오류를 알린 뒤 포트를 다시 묻습니다.
+`orl init`의 포트는 1–65535 범위의 십진 정수입니다. Enter만 누르면 10100을 사용합니다. `0`, `10100oops`, `1.5` 같은 잘못된 값은 임의로 바꾸거나 자르지 않고, 오류를 알린 뒤 포트를 다시 묻습니다.

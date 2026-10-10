@@ -9,13 +9,13 @@ import { redactUrlForLog } from "../lib/redact";
 import { CliUsageError, printData, rejectArgs, runCliAction, takeFlag } from "./runtime-api";
 
 const USAGE = `Usage:
-  ocx config [show] [--json] [--source]
-  ocx config get <dot.path> [--json]
-  ocx config set <dot.path> <json-or-string> [--json]
-  ocx config unset <dot.path> [--json]
-  ocx config validate [path|-] [--json]
-  ocx config export <path|-> [--json]
-  ocx config import <path|-> --yes [--json]`;
+  orl config [show] [--json] [--source]
+  orl config get <dot.path> [--json]
+  orl config set <dot.path> <json-or-string> [--json]
+  orl config unset <dot.path> [--json]
+  orl config validate [path|-] [--json]
+  orl config export <path|-> [--json]
+  orl config import <path|-> --yes [--json]`;
 
 /**
  * Keys whose VALUE is a credential and must never be printed by display commands.
@@ -61,10 +61,10 @@ export function remoteHubConfigNote(
   // that has the facts — so the note points there in every case, connected or not.
   const connected = connection.state === "connected" && connection.token === "owned";
   const note = connection.state !== "connected"
-    ? `this machine is configured as a client but its connection is ${connection.state}${connection.reason ? ` (${connection.reason})` : ""}; run ocx connect status`
+    ? `this machine is configured as a client but its connection is ${connection.state}${connection.reason ? ` (${connection.reason})` : ""}; run orl connect status`
     : connection.token !== "owned"
-      ? `this machine is configured as a client but its hub data-plane token is ${connection.token}; run ocx connect status`
-      : "provider credentials and model availability live on the hub; run ocx status";
+      ? `this machine is configured as a client but its hub data-plane token is ${connection.token}; run orl connect status`
+      : "provider credentials and model availability live on the hub; run orl status";
   return { connected, origin: config.client.serverUrl, note };
 }
 
@@ -217,7 +217,7 @@ export async function handleConfigCommand(argv: string[]): Promise<number> {
       rejectArgs(args, USAGE);
       const diagnostics = readConfigDiagnostics();
       if (diagnostics.source === "fallback" || diagnostics.error) {
-        console.error(`Warning: Config at ${getConfigPath()} is invalid or unreadable; defaults are being shown for invalid settings. Run: ocx config validate. Inspect: ocx config show --source.`);
+        console.error(`Warning: Config at ${getConfigPath()} is invalid or unreadable; defaults are being shown for invalid settings. Run: orl config validate. Inspect: orl config show --source.`);
         if (!source) outcome = 1;
       }
       const redacted = redact(diagnostics.config);
@@ -237,7 +237,7 @@ export async function handleConfigCommand(argv: string[]): Promise<number> {
       rejectArgs(args, USAGE);
       const diagnostics = readConfigDiagnostics();
       if (diagnostics.source === "fallback" || diagnostics.error) {
-        console.error(`Warning: Config at ${getConfigPath()} is invalid or unreadable; defaults are being shown for invalid settings. Run: ocx config validate. Inspect: ocx config show --source.`);
+        console.error(`Warning: Config at ${getConfigPath()} is invalid or unreadable; defaults are being shown for invalid settings. Run: orl config validate. Inspect: orl config show --source.`);
         outcome = 1;
       }
       const value = redact(getPath(diagnostics.config, path), pathSegments(path).at(-1));
@@ -322,7 +322,7 @@ export async function handleConfigCommand(argv: string[]): Promise<number> {
       if (!yes) throw new CliUsageError("import requires --yes", USAGE);
       rejectArgs(args, USAGE);
       saveConfig(validate(loadInput(path)));
-      printData({ ok: true, source: path }, wantsJson, [`Imported config from ${path}. Restart or run ocx sync if needed.`]);
+      printData({ ok: true, source: path }, wantsJson, [`Imported config from ${path}. Restart or run orl sync if needed.`]);
       return;
     }
     throw new CliUsageError(`unknown config command ${action}`, USAGE);

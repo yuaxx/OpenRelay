@@ -787,7 +787,7 @@ export async function windowsTrayCommand(args: string[]): Promise<void> {
   const values = args.filter(value => value !== "--json" && value !== "--no-start");
   const sub = values[0] ?? "status";
   if (args.includes("--no-start") && sub !== "install" || values.length > 1 || !["install", "start", "stop", "status", "uninstall", "remove"].includes(sub)) {
-    console.error("Usage: ocx tray <install|start|stop|status|uninstall|remove> [--json] [--no-start]");
+    console.error("Usage: orl tray <install|start|stop|status|uninstall|remove> [--json] [--no-start]");
     process.exitCode = 1;
     return;
   }

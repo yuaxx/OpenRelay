@@ -1,5 +1,7 @@
 # Components
 
+For the migrated shell, Dashboard and Providers, also follow [OpenRelay](./openrelay.md). Existing controls keep their behavioral contracts; the new shared presentation primitives are introduced incrementally.
+
 ## App shell and navigation
 
 - 데스크톱은 232px sidebar와 main content의 2열 구조다.

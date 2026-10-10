@@ -6,7 +6,7 @@ description: Control how Codex spawns and manages sub-agents across all models.
 ## What sub-agents are
 
 A sub-agent is a separate Codex worker that the main agent can create for a focused task. It has its
-own context and tools, so several independent tasks can run in parallel. opencodex controls which
+own context and tools, so several independent tasks can run in parallel. OpenRelay controls which
 Codex collaboration surface exposes those workers, which models Codex offers for them, and how a
 failed model can fall back. It does not decide when your main agent must delegate.
 
@@ -23,7 +23,7 @@ Choose the mode for **new sessions**. Existing sessions keep the surface they st
 On **v2**, an optional **Keep ChatGPT on v1** switch (`keepNativeChatGptOnV1`) leaves Sol/Terra
 on the v1 surface so they can still spawn Grok or Claude. ChatGPT-native parents encrypt v2
 `NEW_TASK` bodies; routed models cannot read them. Routed parents stay on v2, where child tasks
-are plaintext. OpenCodex disables the global `multi_agent_v2` override for this hybrid because
+are plaintext. OpenRelay disables the global `multi_agent_v2` override for this hybrid because
 Codex applies that override before per-model catalog pins. This is a switch *inside* v2, not a
 fourth catalog mode.
 
@@ -40,9 +40,9 @@ Codex can compact inherited history before the first turn of a side chat or afte
 One trigger compares the previous and destination models' `comp_hash` compatibility markers:
 when both are present and differ, Codex compacts even if the history fits the destination's context.
 
-OpenCodex represents unknown compatibility for routed models as `comp_hash: null`, instead of
+OpenRelay represents unknown compatibility for routed models as `comp_hash: null`, instead of
 inventing an `"opencodex"` marker or copying one from a native template. Catalog rebuilds also clear
-those old markers on OpenCodex rows retained during a provider discovery outage. Native models and
+those old markers on OpenRelay rows retained during a provider discovery outage. Native models and
 explicit Codex-forward aliases keep their upstream markers, so genuine native incompatibility
 checks still apply. This behavior is independent of the v1/v2 sub-agent surface and the model
 configured to perform compaction.
@@ -54,7 +54,7 @@ messages from an already compacted context. Provider content support remains a s
 ## External task input
 
 Codex can deliver a task's initial input or follow-up in a result-shaped envelope
-without a `call_id`. On translated routes, OpenCodex recognizes only the complete
+without a `call_id`. On translated routes, OpenRelay recognizes only the complete
 `function_call_output` shape with nonblank `id`, `name` and `namespace` and supported
 text/image output, then treats it as a user turn. This also starts the new conversation
 boundary during continuation and clears pending reasoning from the preceding turn.
@@ -72,7 +72,7 @@ The selected mode controls the `multi_agent_version` field in every catalog entr
 - **base** restores upstream pins. Unpinned entries follow the native `multi_agent_v2` feature flag.
 - **v2** stamps `multi_agent_version = "v2"` on every model, except when **Keep ChatGPT on v1** is enabled: ChatGPT-native rows stay `"v1"` and routed or combo rows stay `"v2"`.
 
-opencodex applies this as the final pass to both the live `/v1/models` catalog and the catalog synced
+OpenRelay applies this as the final pass to both the live `/v1/models` catalog and the catalog synced
 to disk. That is why a mode change affects newly created App, CLI, and TUI sessions consistently.
 
 For a v2 roster, eligibility has three states: an entry stamped `"v2"`, explicitly set to `null`, or
@@ -83,7 +83,7 @@ that the model belongs to the other collaboration surface.
 
 The dashboard's **Sub-agent delegation** controls three related settings:
 
-- `injectionModel` is the preferred worker model named in opencodex guidance.
+- `injectionModel` is the preferred worker model named in OpenRelay guidance.
 - `injectionEffort` is the optional `reasoning_effort` to request for that model.
 - `injectionPrompt` replaces the built-in v2 guidance text.
 
@@ -97,7 +97,7 @@ reasoning and the signals that would move it up or down. Nothing changes until y
 `multiAgentGuidanceEnabled` defaults to on and is the master switch for opencodex-authored guidance
 on both surfaces. Turning it off suppresses both the v2 designation block and v1 proactive text.
 
-For array-form stateless Responses requests, opencodex places generated guidance after leading
+For array-form stateless Responses requests, OpenRelay places generated guidance after leading
 system and developer metadata, including developer `additional_tools`, and before conversational
 input. Stateful `previous_response_id` continuations reuse tagged guidance only when it matches the latest
 tagged item in their trusted replay prefix. Other generated guidance is reused when an exact generated
@@ -118,41 +118,41 @@ Custom `injectionPrompt` text can use all four placeholders:
 | `{{roster}}` | The resolved picker-visible, surface-compatible roster |
 | `{{fallback}}` | The configured global fallback guidance |
 
-The built-in v2 guidance has a 700-character budget. If it would exceed the budget, opencodex drops
+The built-in v2 guidance has a 700-character budget. If it would exceed the budget, OpenRelay drops
 the roster first rather than truncating the core spawn instructions. Built-in guidance fires only
 when a preferred model, eligible roster, or fallback chain resolves. A configured `injectionModel`
 is sufficient to render a custom prompt; if a bare value cannot resolve uniquely, `{{model}}`
 expands to an empty string.
 
-On v1, opencodex injects the same proactive delegation guidance as the v2 recommended preset only
+On v1, OpenRelay injects the same proactive delegation guidance as the v2 recommended preset only
 at `max` or `ultra` effort. Only the delegation trigger changes: no separate delegation request is
 needed; user instructions, authority, task scope, and collaboration-tool rules still apply.
 It does not add a preferred model, roster, fallback list, or custom prompt on v1.
 
-The default-off `syncCodexSubagentDefaults` option is separate from guidance. When opencodex owns
+The default-off `syncCodexSubagentDefaults` option is separate from guidance. When OpenRelay owns
 active Codex routing, sync or restart can write the selected values as marker-owned
 `[agents] default_subagent_model` and `default_subagent_reasoning_effort` entries in Codex TOML.
-opencodex updates or removes only fields bearing its markers. If either target field is user-owned,
+OpenRelay updates or removes only fields bearing its markers. If either target field is user-owned,
 the pair is left unchanged rather than partially written; ambiguous TOML is rejected without a
 write. External provider managers and user-owned root routing also remain authoritative.
 
 ## Fallback chains
 
-For a spawned worker, opencodex builds this priority order:
+For a spawned worker, OpenRelay builds this priority order:
 
 1. The requested primary model.
-2. A per-model chain from `subagentModelFallbackByModel` in opencodex config, keyed by
+2. A per-model chain from `subagentModelFallbackByModel` in OpenRelay config, keyed by
    the requested primary model.
-3. The global `subagentModelFallback` list in opencodex config.
+3. The global `subagentModelFallback` list in OpenRelay config.
 
-Per-role fallback chains belong in opencodex config, not in
+Per-role fallback chains belong in OpenRelay config, not in
 `$CODEX_HOME/agents/*.toml`. Codex 0.146+ strictly deserializes agent role files and
 rejects `model_fallback` as an unknown field, which skips the entire role definition
-(#1190). opencodex can still read a legacy `model_fallback` line from the TOML for
-backwards compatibility, but `ocx doctor` warns about it and Codex itself will ignore
+(#1190). OpenRelay can still read a legacy `model_fallback` line from the TOML for
+backwards compatibility, but `orl doctor` warns about it and Codex itself will ignore
 the affected role.
 
-Duplicate model ids are removed while preserving the first occurrence. During selection, opencodex
+Duplicate model ids are removed while preserving the first occurrence. During selection, OpenRelay
 skips candidates that are disabled, unroutable, backed by a disabled provider, marked unhealthy,
 inside a cooldown, missing a usable pooled Codex account, or beyond the configured quota threshold.
 Availability probes are cached for `subagentModelFallbackPollMs` (60 seconds by default).
@@ -168,7 +168,7 @@ Codex may send a v2 native-to-routed child task only as backend-encrypted `encry
 payload can be read by the native ChatGPT backend, but not by an external provider. This is the
 known [#92 limitation](https://github.com/lidge-jun/opencodex/issues/92).
 
-opencodex fails safely instead of forwarding an empty or unreadable task:
+OpenRelay fails safely instead of forwarding an empty or unreadable task:
 
 - An ineligible direct non-native route returns HTTP 400 with
   `error.code = "unreadable_encrypted_agent_task"` and does not echo the ciphertext. An eligible
@@ -214,7 +214,7 @@ fallback, and cancellation never becomes an unreadable-task error.
 
 An upstream Responses server can reject encrypted parts in earlier function/custom-tool
 output or `agent_message` content with `Encrypted function output content could not be decrypted or decoded.`. Before
-any output is committed, opencodex replaces those parts with `[encrypted content omitted]`
+any output is committed, OpenRelay replaces those parts with `[encrypted content omitted]`
 and rebuilds the request once. The surrounding readable content stays intact; the
 omitted content is not decrypted or recovered by this retry.
 
@@ -234,30 +234,30 @@ recovery does not change the encrypted v2 task-delivery restrictions described a
 
 ### CLI
 
-Use `ocx v2` for the collaboration surface and native feature settings:
+Use `orl v2` for the collaboration surface and native feature settings:
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
-ocx v2 mode default
-ocx v2 mode v2
-ocx v2 threads 8
+orl v2 status
+orl v2 mode v1
+orl v2 mode default
+orl v2 mode v2
+orl v2 threads 8
 ```
 
-Use `ocx agent` for delegation, roster, effort-cap, and fallback settings:
+Use `orl agent` for delegation, roster, effort-cap, and fallback settings:
 
 ```bash
-ocx agent status
-ocx agent injection set --model anthropic/claude-sonnet-5 --effort xhigh
-ocx agent injection suggest "read-only searches across the repo" --apply
-ocx agent subagents set gpt-5.6-sol,anthropic/claude-sonnet-5
-ocx agent fallback set gpt-5.6-luna,xai/grok-4.5 --poll-ms 60000
-ocx effort set --subagent max
+orl agent status
+orl agent injection set --model anthropic/claude-sonnet-5 --effort xhigh
+orl agent injection suggest "read-only searches across the repo" --apply
+orl agent subagents set gpt-5.6-sol,anthropic/claude-sonnet-5
+orl agent fallback set gpt-5.6-luna,xai/grok-4.5 --poll-ms 60000
+orl effort set --subagent max
 ```
 
-The top-level `ocx effort` command is the canonical entry point for effort inspection and caps (e.g. `ocx effort high`, `ocx effort status`, `ocx effort clear`), with `ocx agent effort` preserved as a backward-compatible path. Note that `ocx effort clear` removes active main-agent and sub-agent caps while leaving delegation `injectionEffort` untouched (use `ocx effort set --injection -` or `ocx agent injection set --effort -` to clear injection effort).
+The top-level `orl effort` command is the canonical entry point for effort inspection and caps (e.g. `orl effort high`, `orl effort status`, `orl effort clear`), with `orl agent effort` preserved as a backward-compatible path. Note that `orl effort clear` removes active main-agent and sub-agent caps while leaving delegation `injectionEffort` untouched (use `orl effort set --injection -` or `orl agent injection set --effort -` to clear injection effort).
 
-Pass `-` to clear a nullable `ocx agent injection` value, or use the relevant `clear` action for a
+Pass `-` to clear a nullable `orl agent injection` value, or use the relevant `clear` action for a
 roster or fallback list. See the [CLI reference](/reference/cli/) for all command families.
 
 ### API
@@ -304,11 +304,11 @@ to v1. A `"v2"`, `null`, or absent surface value is eligible; a real `"v1"` pin 
 ### Do mode changes affect running sessions?
 
 No. Start a new Codex session after changing the mode. If a long-running App host still shows stale
-catalog state, run `ocx sync` and restart that Codex surface.
+catalog state, run `orl sync` and restart that Codex surface.
 
-### What happens when opencodex cannot trust the catalog?
+### What happens when OpenRelay cannot trust the catalog?
 
-opencodex compares the on-disk model catalog against the start time of every Codex app-server owned
+OpenRelay compares the on-disk model catalog against the start time of every Codex app-server owned
 by the current user, producing one of four states:
 
 | State | Meaning | v2 guidance |
@@ -318,7 +318,7 @@ by the current user, producing one of four states:
 | `stale` | At least one app-server predates the catalog | **No opencodex-authored model guidance** |
 | `unknown` | The comparison could not be made | **No opencodex-authored model guidance** |
 
-For `stale` and `unknown`, opencodex withholds its own disk-derived claims — preferred model, roster,
+For `stale` and `unknown`, OpenRelay withholds its own disk-derived claims — preferred model, roster,
 fallback and custom guidance — because the running Codex may not be able to spawn what the disk
 catalog advertises.
 
@@ -330,7 +330,7 @@ may well be fresh. The active tool schema stays authoritative.
 
 `unknown` is not a synonym for `stale`. It means the comparison itself failed — an unreadable catalog
 timestamp, an unreadable process start time, or a failed process enumeration — and it is reported
-separately by `ocx doctor`. `stale` clears only after every detected Codex app-server starts after
+separately by `orl doctor`. `stale` clears only after every detected Codex app-server starts after
 the final catalog write; it does not necessarily clear `unknown`.
 
 On Windows, this advisory check uses asynchronous PowerShell/CIM discovery on the v2 request path.
@@ -348,7 +348,7 @@ make a running Codex look stale.
 
 `injectionEffort` affects only delegated-worker guidance and, when explicitly enabled, native Codex
 sub-agent defaults. It does not change the parent session's effort. `ultra` is a client-facing top
-tier that Codex converts to `max`; opencodex then maps or clamps the value for the selected provider.
+tier that Codex converts to `max`; OpenRelay then maps or clamps the value for the selected provider.
 
 ### Context cap
 
@@ -369,7 +369,7 @@ response/debug state. Existing ciphertext is unchanged, and the option depends o
 ChatGPT and Codex behavior. See
 [Agent configuration: Plaintext v2 agent messages](/reference/configuration/agents/#plaintext-v2-agent-messages).
 If a streamed ChatGPT response carries no content type, or one that is neither `application/json`
-nor a recognizable event stream, opencodex checks a bounded Responses event prefix before restoring
+nor a recognizable event stream, OpenRelay checks a bounded Responses event prefix before restoring
 the message-tool names. An `application/json` response takes the bounded JSON path instead. The
 probe waits at most `stallTimeoutSec` for its prefix, and a body that stays silent, unrecognized, or
 unreadable fails closed rather than reaching Codex as a successful response.

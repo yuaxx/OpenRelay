@@ -1,20 +1,20 @@
 ---
 title: Codexの統合
-description: opencodex が自身を Codex に挿入し、モデル カタログを同期し、shim をインストールし、クリーンに復元する方法。
+description: OpenRelay が自身を Codex に挿入し、モデル カタログを同期し、shim をインストールし、クリーンに復元する方法。
 ---
 
-opencodex は、Codex が読み取る 2 つの内容 (構成 (`$CODEX_HOME/config.toml`、デフォルト `~/.codex/config.toml`) とそのモデル カタログ) を編集することで、プロキシを経由する Codex ルートを作成します。すべての編集は冪等であり、元に戻すことができます。
+OpenRelay は、Codex が読み取る 2 つの内容 (構成 (`$CODEX_HOME/config.toml`、デフォルト `~/.codex/config.toml`) とそのモデル カタログ) を編集することで、プロキシを経由する Codex ルートを作成します。すべての編集は冪等であり、元に戻すことができます。
 
 プロキシは、プール (デフォルト) およびダイレクト アカウント モードで 1 つのベア `openai` Codex ログイン ルートと、構成された API キーの `openai-apikey/<model>` を公開します。プールにはメインアカウントと追加アカウントが含まれます。直接は、発信者/メインベアラーのみを使用します。ルートは相互にフォールバックしません。出荷された v1 設定はマーカー 2 に移行され、手動復元用に `config.json.pre-openai-tiers-v2.bak` が保存されます。
 
 ## 設定の注入
 
-`ocx init`、`ocx start`、および `ocx sync` はインジェクターを呼び出します。デフォルトのループバック バインドでは、Codex の組み込み `openai` プロバイダー ID を保持し、そのプロバイダーを opencodex にポイントします。
+`orl init`、`orl start`、および `orl sync` はインジェクターを呼び出します。デフォルトのループバック バインドでは、Codex の組み込み `openai` プロバイダー ID を保持し、そのプロバイダーを OpenRelay にポイントします。
 
 ```toml
 # root keys, before the first table
 model_catalog_json = "/absolute/path/to/opencodex-catalog.json"
-# Auto-injected by opencodex (undo: ocx restore)
+# Auto-injected by opencodex (undo: orl restore)
 openai_base_url = "http://127.0.0.1:10100/v1"
 
 # fastMode を設定した場合のみ。未設定なら [features] は作られません
@@ -30,7 +30,7 @@ fast_mode = true
 
 ### 組み込みの画像生成 (`image_gen`)
 
-Codex の組み込み `image_gen` ツールは、`/v1/responses` を経由しません。codex-rs 拡張機能は、チャットに使用するものと同じ ChatGPT ベアラー認証を使用して、`{base_url}/images/generations` (または参照画像が添付されている場合は `/images/edits`) を直接 POST します。挿入された `base_url` は opencodex を指しているため、プロキシはそれらの呼び出しを OpenAI アップストリームに中継します。
+Codex の組み込み `image_gen` ツールは、`/v1/responses` を経由しません。codex-rs 拡張機能は、チャットに使用するものと同じ ChatGPT ベアラー認証を使用して、`{base_url}/images/generations` (または参照画像が添付されている場合は `/images/edits`) を直接 POST します。挿入された `base_url` は OpenRelay を指しているため、プロキシはそれらの呼び出しを OpenAI アップストリームに中継します。
 
 これは [イメージブリッジ](/guides/image-bridge/) とは別のもので、非 OpenAI モデルが選択されているときに **Responses** ターンでホストされた `image_generation` ツールがリストされた場合にのみアクティブになります。スタンドアロン `/images/generations` コールがそのブリッジに入ることはありません。
 
@@ -40,13 +40,13 @@ Codex の組み込み `image_gen` ツールは、`/v1/responses` を経由しま
 失敗。壊れた/期限切れのプール認証情報が、別途請求される API 使用量の背後に隠れることはありません。
 - **明示的なカスタム プロバイダー:** `images.provider` をカスタム API キーの ID に設定します。
 `openai-responses` プロバイダー。そのエンドポイントは OpenAI Images API を実装します。明示的な選択はクローズに失敗し、別の有料アップストリームにフォールバックすることはありません。レジストリで管理されているプロバイダー ID はここでは受け入れられません。組み込みの OpenAI 層を使用するには、`images.provider` を省略します。
-- **xAI Imagine (Grok OAuth) リレー:** `images.bridgeEnabled` が `true` で、`images.provider` が未設定、かつ `xai` プロバイダーが設定されている場合、`/v1/images/generations` と `/v1/images/edits` は `https://api.x.ai/v1` に送られます。使われる資格情報はプロバイダーの `authMode` で決まります。`"oauth"` なら `ocx login xai` の Grok CLI グラントを再利用し、それ以外ならプロバイダーの API キーを使います。OAuth ログインがキー方式のプロバイダーを有効にすることはなく、その逆もありません。ChatGPT の資格情報は転送されません。資格情報が無い場合、プロキシは ChatGPT に課金せず 400 を返します。`images.provider` を明示すると `/v1/images` はそのプロバイダーが受け持ち、その検証エラーがそのまま返され、xAI リレーは試行されません。リレーは Codex の `size` / `aspect_ratio` を xAI Imagine のボディに写し、同じ `{created, data:[{b64_json}]}` 形を返します。バッチ全体（インライン `b64_json` とダウンロードした URL）のデコード済みバイトと base64 エンコード出力は合わせて 100 MiB 未満です。上限を超えるバッチは 502 を返します。xAI がインラインのバイト列ではなく画像 URL を返した場合、プロキシは資格情報なしで自ら取得します。URL は公開 HTTPS でなければならず（リダイレクト、`file:`、ループバックやプライベートアドレスは不可）、1 ファイルあたり 50 MiB が上限で、結果はローカルのアーティファクトとして保存され、認証済みの管理エンドポイント経由でのみ配信されます。これは API キー専用の Responses Image Bridge ループとは独立です。
+- **xAI Imagine (Grok OAuth) リレー:** `images.bridgeEnabled` が `true` で、`images.provider` が未設定、かつ `xai` プロバイダーが設定されている場合、`/v1/images/generations` と `/v1/images/edits` は `https://api.x.ai/v1` に送られます。使われる資格情報はプロバイダーの `authMode` で決まります。`"oauth"` なら `orl login xai` の Grok CLI グラントを再利用し、それ以外ならプロバイダーの API キーを使います。OAuth ログインがキー方式のプロバイダーを有効にすることはなく、その逆もありません。ChatGPT の資格情報は転送されません。資格情報が無い場合、プロキシは ChatGPT に課金せず 400 を返します。`images.provider` を明示すると `/v1/images` はそのプロバイダーが受け持ち、その検証エラーがそのまま返され、xAI リレーは試行されません。リレーは Codex の `size` / `aspect_ratio` を xAI Imagine のボディに写し、同じ `{created, data:[{b64_json}]}` 形を返します。バッチ全体（インライン `b64_json` とダウンロードした URL）のデコード済みバイトと base64 エンコード出力は合わせて 100 MiB 未満です。上限を超えるバッチは 502 を返します。xAI がインラインのバイト列ではなく画像 URL を返した場合、プロキシは資格情報なしで自ら取得します。URL は公開 HTTPS でなければならず（リダイレクト、`file:`、ループバックやプライベートアドレスは不可）、1 ファイルあたり 50 MiB が上限で、結果はローカルのアーティファクトとして保存され、認証済みの管理エンドポイント経由でのみ配信されます。これは API キー専用の Responses Image Bridge ループとは独立です。
 - **Google Antigravity (CCA) フォールバック:** OpenAI 前方候補でもキー付きでもない場合
-プロバイダーが構成されている場合、`/v1/images/generations` (`/images/edits` ではありません) は、`gemini-3.1-flash-image` モデルを使用して Antigravity **Cloud Code Assist** エンドポイントにフォールバックします。フォールバックは、OpenAI 候補が構成されていない場合だけでなく、OpenAI 認証の解決が失敗した後 (ChatGPT 資格情報の期限切れまたは欠落など) にも起動されます。これには `ocx login google-antigravity` が必要です。 OAuth トークンは、固定された CCA レジストリ ホストにのみ送信され、構成レベルの `baseUrl` オーバーライドには送信されません。応答は、Codex が期待するのと同じ `{created, data:[{b64_json}]}` 形状で返されます。
+プロバイダーが構成されている場合、`/v1/images/generations` (`/images/edits` ではありません) は、`gemini-3.1-flash-image` モデルを使用して Antigravity **Cloud Code Assist** エンドポイントにフォールバックします。フォールバックは、OpenAI 候補が構成されていない場合だけでなく、OpenAI 認証の解決が失敗した後 (ChatGPT 資格情報の期限切れまたは欠落など) にも起動されます。これには `orl login google-antigravity` が必要です。 OAuth トークンは、固定された CCA レジストリ ホストにのみ送信され、構成レベルの `baseUrl` オーバーライドには送信されません。応答は、Codex が期待するのと同じ `{created, data:[{b64_json}]}` 形状で返されます。
 - **どちらでもない:** プロキシは一般的な 404 ではなく明確なエラーを返します。 ルーティングされたプロバイダー
 (Cursor、Gemini、Kiro など) は `image_generation` ツール リレーとして機能できません。このツールをまったく提供したくない場合は、Codex で `codex features disable image_generation` (`config.toml` では `[features] image_generation = false`) を使用してツールを無効にします。
 
-ツール宣言は引き続きモデルの応答リクエストとともに送信されます。 API キー応答プロバイダーの場合、opencodex は Codex のプライベート `image_gen` 名前空間をアップストリームで安全な `image_gen__<inner-name>` エイリアス (`image_gen__imagegen` など) に下げます。使用可能なエイリアスがクライアント宣言を置き換えると、opencodex は重複したホストされた `image_generation` 宣言を削除します。 Codex が関数呼び出しを認識する前に、関数呼び出しを明示的な `image_gen` 名前空間にマップし、後の履歴がアップストリームで再生されるときにネイティブ呼び出しを再度エンコードします。これにより、名前空間を予約したり、ドット付き関数名を拒否したりするパブリック互換のアップストリームで、クライアント側のイメージ生成を呼び出すことができるようになります。 ChatGPT 転送モードは変更されず、ネイティブの Responses Lite の形状が維持されます。
+ツール宣言は引き続きモデルの応答リクエストとともに送信されます。 API キー応答プロバイダーの場合、OpenRelay は Codex のプライベート `image_gen` 名前空間をアップストリームで安全な `image_gen__<inner-name>` エイリアス (`image_gen__imagegen` など) に下げます。使用可能なエイリアスがクライアント宣言を置き換えると、OpenRelay は重複したホストされた `image_generation` 宣言を削除します。 Codex が関数呼び出しを認識する前に、関数呼び出しを明示的な `image_gen` 名前空間にマップし、後の履歴がアップストリームで再生されるときにネイティブ呼び出しを再度エンコードします。これにより、名前空間を予約したり、ドット付き関数名を拒否したりするパブリック互換のアップストリームで、クライアント側のイメージ生成を呼び出すことができるようになります。 ChatGPT 転送モードは変更されず、ネイティブの Responses Lite の形状が維持されます。
 
 OpenAI 互換のカスタム ゲートウェイの場合は、専用プロバイダーを構成し、スタンドアロン イメージ リクエストに対してのみ選択します。
 
@@ -82,7 +82,7 @@ model_provider = "opencodex"
 model_catalog_json = "/absolute/path/to/opencodex-catalog.json"
 
 # appended at the end of the file
-# Auto-injected by opencodex (undo: ocx restore)
+# Auto-injected by opencodex (undo: orl restore)
 [model_providers.opencodex]
 name = "OpenCodex Proxy"
 base_url = "http://your-host:10100/v1"
@@ -92,7 +92,7 @@ env_key = "OPENCODEX_API_AUTH_TOKEN"
 # supports_websockets = true   # only when config.websockets is true
 ```
 
-OpenCodex がルーティングを所有している場合、どちらのモードも参照/フォールバック設定として `$CODEX_HOME/opencodex.config.toml` を書き込みます。ループバックでは、自動挿入が削除された場合に手動でマージできるルート キーが含まれています。非ループバックでは、専用のプロバイダー フォームが含まれます。外部プロバイダー モードでは、このプロファイルは変更されません。
+OpenRelay がルーティングを所有している場合、どちらのモードも参照/フォールバック設定として `$CODEX_HOME/opencodex.config.toml` を書き込みます。ループバックでは、自動挿入が削除された場合に手動でマージできるルート キーが含まれています。非ループバックでは、専用のプロバイダー フォームが含まれます。外部プロバイダー モードでは、このプロファイルは変更されません。
 
 :::caution
 `openai_base_url`、`model_provider`、`model_catalog_json` などのルート キーは、最初の `[table]` ヘッダーの前に**なければなりません**。インジェクターはその配置を保証し、それ自身の古い/重複したコピーを削除し、ユーザー所有のルート `openai_base_url` を決して上書きしません。存在する場合、sync はカタログを更新しますが、ルーティングが挿入されなかったことを報告します。
@@ -100,7 +100,7 @@ OpenCodex がルーティングを所有している場合、どちらのモー�
 
 ## 共有モデルカタログ
 
-Codex CLI、TUI、App、SDK はすべて同じ Codex ホームを読み取ります。 opencodex は、そのディレクトリを `CODEX_HOME` から解決して `~/.codex` にフォールバックし、以下を管理します。
+Codex CLI、TUI、App、SDK はすべて同じ Codex ホームを読み取ります。 OpenRelay は、そのディレクトリを `CODEX_HOME` から解決して `~/.codex` にフォールバックし、以下を管理します。
 
 ```text
 $CODEX_HOME/config.toml
@@ -109,19 +109,19 @@ $CODEX_HOME/opencodex-catalog.json
 $CODEX_HOME/models_cache.json
 ```
 
-WSL では、`CODEX_HOME` が設定されておらず、Linux の `~/.codex` ディレクトリが存在しないか、Codex の状態 (`config.toml`, `auth.json`, `sessions`, `history.jsonl`) を持たない場合、opencodex は `/mnt/c/Users/*/.codex/config.toml` にある単一の Windows Codex デスクトップ ホームもチェックします。候補が 1 つだけ存在する場合は、そのディレクトリが使用されるため、WSL アプリサーバー モードと Windows Codex デスクトップは同じ設定ファイルと認証ファイルを共有します。この検出をオーバーライドするには、`CODEX_HOME` を明示的に設定します。
+WSL では、`CODEX_HOME` が設定されておらず、Linux の `~/.codex` ディレクトリが存在しないか、Codex の状態 (`config.toml`, `auth.json`, `sessions`, `history.jsonl`) を持たない場合、OpenRelay は `/mnt/c/Users/*/.codex/config.toml` にある単一の Windows Codex デスクトップ ホームもチェックします。候補が 1 つだけ存在する場合は、そのディレクトリが使用されるため、WSL アプリサーバー モードと Windows Codex デスクトップは同じ設定ファイルと認証ファイルを共有します。この検出をオーバーライドするには、`CODEX_HOME` を明示的に設定します。
 
-Windows では、ChatGPT/Codex アプリが `%USERPROFILE%\\.codex` を読み取りながら、Orca シェルは `CODEX_HOME` と `ORCA_CODEX_HOME` の両方を Orca のバンドルされたランタイム ホームに設定できます。 `ocx status` および `ocx doctor` は、この正確な不一致について警告し、編集されたターゲット パスを出力します。バックグラウンド サービスが Orca シェルからインストールされている場合は、最初に元のシェルからアンインストールし、次に `CODEX_HOME` をアプリ ホームに設定し、`ORCA_CODEX_HOME` の設定を解除し、同期/復元を再実行して、サービスを再度インストールします。
+Windows では、ChatGPT/Codex アプリが `%USERPROFILE%\\.codex` を読み取りながら、Orca シェルは `CODEX_HOME` と `ORCA_CODEX_HOME` の両方を Orca のバンドルされたランタイム ホームに設定できます。 `orl status` および `orl doctor` は、この正確な不一致について警告し、編集されたターゲット パスを出力します。バックグラウンド サービスが Orca シェルからインストールされている場合は、最初に元のシェルからアンインストールし、次に `CODEX_HOME` をアプリ ホームに設定し、`ORCA_CODEX_HOME` の設定を解除し、同期/復元を再実行して、サービスを再度インストールします。
 
-専用プロバイダー モードでは、`requires_openai_auth = true` は Codex App/TUI アカウント ゲート サーフェスをネイティブ Codex と一致させます。 opencodex は WebSocket 経由で `/v1/responses` も提供します。専用プロバイダーは、`"websockets": true` の場合にのみ `supports_websockets = true` をアドバタイズします。ループバック時 Codex の組み込みプロバイダーは最初に WebSocket を試行し、無効になったプロキシが `426` を返すため、Codex は HTTP/SSE にフォールバックします。
+専用プロバイダー モードでは、`requires_openai_auth = true` は Codex App/TUI アカウント ゲート サーフェスをネイティブ Codex と一致させます。 OpenRelay は WebSocket 経由で `/v1/responses` も提供します。専用プロバイダーは、`"websockets": true` の場合にのみ `supports_websockets = true` をアドバタイズします。ループバック時 Codex の組み込みプロバイダーは最初に WebSocket を試行し、無効になったプロキシが `426` を返すため、Codex は HTTP/SSE にフォールバックします。
 
 ## スレッドのアイデンティティと履歴
 
-デフォルトのループバック形式では、Codex のネイティブ `openai` プロバイダーでタグ付けされた新しいスレッドが維持されるため、通常の再開履歴には再マッピングが必要ありません。同期と復元は、一致するバックアップマニフェストだけを適用し、各スレッドの元のプロバイダー、ソース、イベントマーカーを正確に復元します。マニフェストのない `opencodex` 行は変更されません。従来の再ラベル付けを明示的に強制する場合にだけ `ocx recover-history --legacy-openai --yes` を使用してください。このコマンドは意図的に広範囲です。ユーザーメッセージを持ち、現在 `opencodex` とタグ付けされているすべてのスレッドを `openai` に変更し、`exec` を `cli` に正規化してイベントマーカーを設定します。正当な専用プロバイダー履歴も対象です。状態をバックアップし、この全範囲を意図する場合にのみ使用してください。非ループバック専用プロバイダー モードでは、アクティブな間は `opencodex` プロバイダーの下で履歴がミラーリングされ、終了時にバックアップされたメタデータが復元されます。履歴を変更しないように `syncResumeHistory: false` を設定します。
+デフォルトのループバック形式では、Codex のネイティブ `openai` プロバイダーでタグ付けされた新しいスレッドが維持されるため、通常の再開履歴には再マッピングが必要ありません。同期と復元は、一致するバックアップマニフェストだけを適用し、各スレッドの元のプロバイダー、ソース、イベントマーカーを正確に復元します。マニフェストのない `opencodex` 行は変更されません。従来の再ラベル付けを明示的に強制する場合にだけ `orl recover-history --legacy-openai --yes` を使用してください。このコマンドは意図的に広範囲です。ユーザーメッセージを持ち、現在 `opencodex` とタグ付けされているすべてのスレッドを `openai` に変更し、`exec` を `cli` に正規化してイベントマーカーを設定します。正当な専用プロバイダー履歴も対象です。状態をバックアップし、この全範囲を意図する場合にのみ使用してください。非ループバック専用プロバイダー モードでは、アクティブな間は `opencodex` プロバイダーの下で履歴がミラーリングされ、終了時にバックアップされたメタデータが復元されます。履歴を変更しないように `syncResumeHistory: false` を設定します。
 
 ## モデルカタログの同期
 
-Codex には、ディスク上のカタログ (デフォルトでは `$CODEX_HOME/opencodex-catalog.json`) からのモデルが表示されます。起動時および `ocx sync`、opencodex:
+Codex には、ディスク上のカタログ (デフォルトでは `$CODEX_HOME/opencodex-catalog.json`) からのモデルが表示されます。起動時および `orl sync`、OpenRelay:
 
 1. **元のカタログを `~/.opencodex/catalog-backup.json` に一度バックアップ**します (したがって、フィーチャリングは
 可逆）。
@@ -139,10 +139,10 @@ Codex には、ディスク上のカタログ (デフォルトでは `$CODEX_HOM
 
 ネイティブではないルーティング済みカタログ項目は `tool_mode: "code_mode_only"` を使用します。これにより、
 Codex は公式の `exec` エントリポイントと、Browser や Computer Use を含むネストされた MCP ツールを公開できます。
-opencodex がルーティングするのはモデルの通常の function call だけです。ツールの実行、権限、確認は Codex 内に
-残り、opencodex が別のブラウザーやデスクトップ操作 executor を実装することはありません。
+OpenRelay がルーティングするのはモデルの通常の function call だけです。ツールの実行、権限、確認は Codex 内に
+残り、OpenRelay が別のブラウザーやデスクトップ操作 executor を実装することはありません。
 
-Codex の `exec` custom-tool grammar を受け付けない key-auth Responses provider に対しては、opencodex が宣言と
+Codex の `exec` custom-tool grammar を受け付けない key-auth Responses provider に対しては、OpenRelay が宣言と
 履歴を上流向けの function tool にエンコードし、ストリーミングされた function-call lifecycle を Codex に返す前に
 `custom_tool_call` へ復元します。ネイティブ OpenAI の forward routing と、対応済みの `apply_patch` custom tool は
 変更されません。
@@ -152,14 +152,14 @@ Codex の `exec` custom-tool grammar を受け付けない key-auth Responses pr
 同様のマーカー行で終わる単一の文字列を受け取ります。isolate では `import` を使用できず、
 長時間実行されるコマンドは `write_stdin` でポーリングします。ネイティブのルーティング済み Responses、
 Kiro、または Cursor の経路で、code-mode の exec 結果にホストの失敗メッセージがまだ含まれている場合、
-opencodex は該当する規則を示す 1 行のヒントを追加します。この変更でモデルのコードやパッチのテキストを
+OpenRelay は該当する規則を示す 1 行のヒントを追加します。この変更でモデルのコードやパッチのテキストを
 書き換えることはありません。
 
 選択した provider は function/tool calling をサポートしている必要があります。tool call に対応しない text-only
 provider では `exec`、Browser、Computer Use は使用できません。ネイティブ OpenAI の項目は上流の tool mode を
 そのまま維持します。
 
-`ocx sync` でこの metadata を変更した後は Codex App を再起動し、新しいタスクを開いてください。既存の
+`orl sync` でこの metadata を変更した後は Codex App を再起動し、新しいタスクを開いてください。既存の
 app-server process とタスクは、起動時に読み込んだ catalog と tool plan を保持している場合があります。
 
 ### カスタムモデルの表示名
@@ -169,7 +169,7 @@ app-server process とタスクは、起動時に読み込んだ catalog と too
 CLI から表示名を追加します (プロキシは、ライブ時にカタログをすぐに同期します)。
 
 ```bash
-ocx models add deepseek deepseek-v4 --display-name "DeepSeek V4" --context-window 128000
+orl models add deepseek deepseek-v4 --display-name "DeepSeek V4" --context-window 128000
 ```
 
 リモート Codex クライアントは、通常のデータプレーン キー（管理者トークンではなく、`/v1/responses` で既に使用しているものと同じ資格情報）で同じ生成済みカタログを取得できます。
@@ -180,7 +180,7 @@ tmp="$(mktemp "${dest}.XXXXXX")"
 curl -fsS -H "x-opencodex-api-key: $OPENCODEX_API_AUTH_TOKEN" \
   "https://proxy.example.com/v1/catalog" > "$tmp" \
   && mv "$tmp" "$dest"
-ocx sync-cache
+orl sync-cache
 ```
 
 応答は生の `opencodex-catalog.json` ドキュメント (プロバイダーの資格情報なし) です。利用可能な場合、`x-opencodex-codex-version` ヘッダーはサーバー上の Codex ランタイム バージョンを報告するため、クライアントはバージョンの偏りを特定できます。
@@ -189,13 +189,13 @@ ocx sync-cache
 
 `GET /v1/catalog` は、モデル一覧の読み取りに管理トークンを必要としないために存在します。読み取り専用（`GET` と `HEAD`）で、`x-opencodex-api-key`、bearer トークン、`x-api-key` を受け付け、管理ルートとまったく同じバイト列を返します。レスポンスには強い `ETag` が付き、`If-None-Match` で送り返すと全文ではなく `304` が返ります。また `Cache-Control: private, no-cache` が設定されます。ここで許可されたデータプレーンキーは、管理プレーンでは**何も**得られません。`/api/catalog` を含むすべての `/api/*` ルートは、引き続き管理トークンまたはダッシュボードセッションを要求します。
 
-表示名は **表示専用であり、再生成しても安定しています**。 `ocx sync` およびカタログが更新されるたびに、`config.json` (`customModels` を含む) からルーティングされたエントリが再取得されるため、設定された名前はルーティングされたスラッグに戻るのではなく、再適用されます。管理対象サービスの再起動でも、プロキシのバインド直後にこの同期が試行されます。オフライン ログイン中など、ベストエフォート型ブート同期が失敗した場合、以前に永続化されたカタログが保持され、次に成功した `ocx sync` が構成された名前を再適用します。本物のアップストリーム ネイティブ名 (例: `gpt-5.6-sol` → "GPT-5.6-Sol") は、固定されたアップストリーム スナップショットから取得され、カスタム表示名によって上書きされることはありません。
+表示名は **表示専用であり、再生成しても安定しています**。 `orl sync` およびカタログが更新されるたびに、`config.json` (`customModels` を含む) からルーティングされたエントリが再取得されるため、設定された名前はルーティングされたスラッグに戻るのではなく、再適用されます。管理対象サービスの再起動でも、プロキシのバインド直後にこの同期が試行されます。オフライン ログイン中など、ベストエフォート型ブート同期が失敗した場合、以前に永続化されたカタログが保持され、次に成功した `orl sync` が構成された名前を再適用します。本物のアップストリーム ネイティブ名 (例: `gpt-5.6-sol` → "GPT-5.6-Sol") は、固定されたアップストリーム スナップショットから取得され、カスタム表示名によって上書きされることはありません。
 
 ### 外部プロバイダーマネージャー
 
-`config.toml` がすでに `openai` または `opencodex` 以外のプロバイダーを選択している場合、OpenCodex はファイルを変更しないままにし、プロファイルの書き込み、カタログ/キャッシュの更新、および即時およびバックグラウンドの両方の Codex 履歴メタデータの復元をスキップします。カスタム プロバイダーを管理するツールは、多くの場合、既存のセッションにそのプロバイダー ID をタグ付けします。アクティブな ID を置き換えると、それらの無傷のセッションが Codex の履歴ビューから消える可能性があります。同じ保護が、レガシー ルート プロファイルによって選択された外部プロバイダーにも適用されます。
+`config.toml` がすでに `openai` または `opencodex` 以外のプロバイダーを選択している場合、OpenRelay はファイルを変更しないままにし、プロファイルの書き込み、カタログ/キャッシュの更新、および即時およびバックグラウンドの両方の Codex 履歴メタデータの復元をスキップします。カスタム プロバイダーを管理するツールは、多くの場合、既存のセッションにそのプロバイダー ID をタグ付けします。アクティブな ID を置き換えると、それらの無傷のセッションが Codex の履歴ビューから消える可能性があります。同じ保護が、レガシー ルート プロファイルによって選択された外部プロバイダーにも適用されます。
 
-1 つのツールを Codex プロバイダー設定の所有者として保持します。既存のプロバイダー マネージャーの背後で OpenCodex を使用するには、チャット完了変換ではなく、応答パススルー (Codex TOML では `wire_api = "responses"`) を使用して、そのプロバイダーを `http://127.0.0.1:10100/v1` に指定します。プロキシ API 認証が有効な場合は、上記の非ループバック プロバイダー フォームと一致して、`OPENCODEX_API_AUTH_TOKEN` から `x-opencodex-api-key` も渡します。 OpenCodex にルーティングを直接挿入させるには、まず Codex を組み込みの `openai` プロバイダーに戻し、ユーザー所有のルート `openai_base_url` を削除してから、`ocx start` を再実行します。
+1 つのツールを Codex プロバイダー設定の所有者として保持します。既存のプロバイダー マネージャーの背後で OpenRelay を使用するには、チャット完了変換ではなく、応答パススルー (Codex TOML では `wire_api = "responses"`) を使用して、そのプロバイダーを `http://127.0.0.1:10100/v1` に指定します。プロキシ API 認証が有効な場合は、上記の非ループバック プロバイダー フォームと一致して、`OPENCODEX_API_AUTH_TOKEN` から `x-opencodex-api-key` も渡します。 OpenRelay にルーティングを直接挿入させるには、まず Codex を組み込みの `openai` プロバイダーに戻し、ユーザー所有のルート `openai_base_url` を削除してから、`orl start` を再実行します。
 
 ### カタログのトラブルシューティング
 
@@ -215,24 +215,24 @@ ocx sync-cache
    これらの規則はライブ検出失敗時のフォールバックを変更しません。
 4. **Cursor `GetUsableModels`** — Cursor アダプターはその protobuf を通じてモデルを検出します。
 `/models` ではなく `GetUsableModels` RPC であるため、カーソル側の変更により、他のプロバイダーとは独立して表示される ID が変更される可能性があります。
-5. **キャッシュと `ocx sync`** - ライブ カタログは約 5 分間キャッシュされます (`modelCacheTtlMs`、
-デフォルト `300000`）。 `ocx sync` を実行して新しいフェッチを強制し、カタログをすぐに再書き込みします。
-6. **Codex `app-server` の実行** - 有効期間が長い Codex `app-server` (デスクトップ/CLI バックグラウンド ホスト) が以前のリストをメモリに保持している間は、ディスク上のカタログを書き換えるだけでは十分ではありません。 `ocx sync` および `ocx sync-cache` は、これらのプロセスが検出されると警告します。 `ocx sync --restart-codex` はそれらを再起動し、macOS、Linux、Windows で Codex デスクトップ アプリを完全に終了して再起動し、ピッカーがカタログを読み直すようにします。デスクトップ アプリを起動したままにするには `--restart-app-server-only` を渡すか、一致する `app-server` プロセスを自分で停止してください。
+5. **キャッシュと `orl sync`** - ライブ カタログは約 5 分間キャッシュされます (`modelCacheTtlMs`、
+デフォルト `300000`）。 `orl sync` を実行して新しいフェッチを強制し、カタログをすぐに再書き込みします。
+6. **Codex `app-server` の実行** - 有効期間が長い Codex `app-server` (デスクトップ/CLI バックグラウンド ホスト) が以前のリストをメモリに保持している間は、ディスク上のカタログを書き換えるだけでは十分ではありません。 `orl sync` および `orl sync-cache` は、これらのプロセスが検出されると警告します。 `orl sync --restart-codex` はそれらを再起動し、macOS、Linux、Windows で Codex デスクトップ アプリを完全に終了して再起動し、ピッカーがカタログを読み直すようにします。デスクトップ アプリを起動したままにするには `--restart-app-server-only` を渡すか、一致する `app-server` プロセスを自分で停止してください。
 
 :::caution[その他の地元作家]
-カタログ書き込み (`opencodex-catalog.json`、`config.toml`) はアトミック **内部** opencodex であり、opencodex が所有する 2 つのライターが競合する場合にのみ、ファイルの書きかけが防止されます。これは、opencodex が書き込まれた後に、別のローカル プロセス、ファイル ウォッチャー、または同期エージェントがカタログの可視性や順序を書き換えることを**阻止するものではありません。 Codex は個別の `models_cache.json` を保持しており、それを個別に更新して、`opencodex-catalog.json` を書き換えることなく表示リストを変更できます。プロキシの実行中にモデルが予期せず反転した場合は、競合するライターを停止または再構成してから、`ocx sync` を実行します。これは外部ライターの危険であり、確認された opencodex の欠陥ではありません。
+カタログ書き込み (`opencodex-catalog.json`、`config.toml`) はアトミック **内部** OpenRelay であり、OpenRelay が所有する 2 つのライターが競合する場合にのみ、ファイルの書きかけが防止されます。これは、OpenRelay が書き込まれた後に、別のローカル プロセス、ファイル ウォッチャー、または同期エージェントがカタログの可視性や順序を書き換えることを**阻止するものではありません。 Codex は個別の `models_cache.json` を保持しており、それを個別に更新して、`opencodex-catalog.json` を書き換えることなく表示リストを変更できます。プロキシの実行中にモデルが予期せず反転した場合は、競合するライターを停止または再構成してから、`orl sync` を実行します。これは外部ライターの危険であり、確認された OpenRelay の欠陥ではありません。
 :::
 
 ## プロキシ接続エラー
 
-Codex が再試行して `stream disconnected before completion: error sending request for url (http://127.0.0.1:10100/v1/responses)` のようなエラーで失敗した場合、または Claude Code が同様の接続エラーを報告した場合、opencodex プロキシは実行されていません。設定されたポートで何もリッスンしていないため、クライアントはその生の接続エラー自体を表示します。プロキシを再起動します。
+Codex が再試行して `stream disconnected before completion: error sending request for url (http://127.0.0.1:10100/v1/responses)` のようなエラーで失敗した場合、または Claude Code が同様の接続エラーを報告した場合、OpenRelay プロキシは実行されていません。設定されたポートで何もリッスンしていないため、クライアントはその生の接続エラー自体を表示します。プロキシを再起動します。
 
 ```bash
-ocx start              # foreground
-ocx service install    # persistent: auto-starts on login and respawns on crash
+orl start              # foreground
+orl service install    # persistent: auto-starts on login and respawns on crash
 ```
 
-`ocx status` は、プロキシが実行されているかどうかを示し、実行されていない場合は同じ再起動ヒントを出力します。 `ocx doctor` は再起動の安全性 (サービス/シム カバレッジ) を報告します。
+`orl status` は、プロキシが実行されているかどうかを示し、実行されていない場合は同じ再起動ヒントを出力します。 `orl doctor` は再起動の安全性 (サービス/シム カバレッジ) を報告します。
 
 ## サブエージェントピッカー
 
@@ -244,7 +244,7 @@ ocx service install    # persistent: auto-starts on login and respawns on crash
 
 新しい OAuth トークンによる使用量取得で5時間・週次・月次の上限到達が確認された場合、モデルを呼ばずに保存し、**検証待ち**と表示します。再起動やトークン更新後も使用できません。上限回復後に使用量を更新すると、十分な空き容量を示す完全な最新情報を確認してから小さなモデルリクエストを送り、完了した場合のみ使用可能になります。取得や検証の失敗では待機状態を維持します。通常の状態ポーリングは検証リクエストを送りません。初回登録時の使用量が不明な場合は通常の検証が必要です。
 
-`ocx account refresh openai` と `ocx account list openai --quota --refresh` は使用量のみを取得します。モデル検証はクォータを消費するため、人間のダッシュボードセッションが必要です。回復後に `ocx gui` を開き、**Refresh quotas** をクリックしてください。ヘッドレスホストでもブラウザーからそのダッシュボードにアクセスします。管理者トークンだけでは検証できません。一時停止中でも検証できますが、アカウントの再開や選択は行いません。モデル認証エラーは検証または再認証に成功するまで表示されます。
+`orl account refresh openai` と `orl account list openai --quota --refresh` は使用量のみを取得します。モデル検証はクォータを消費するため、人間のダッシュボードセッションが必要です。回復後に `orl gui` を開き、**Refresh quotas** をクリックしてください。ヘッドレスホストでもブラウザーからそのダッシュボードにアクセスします。管理者トークンだけでは検証できません。一時停止中でも検証できますが、アカウントの再開や選択は行いません。モデル認証エラーは検証または再認証に成功するまで表示されます。
 
 **Codex Set → Multi-auth** で **Codex Auth** 見出しの **Codex クレジット** スイッチを有効にすると、メインとプールの各アカウントで最後に取得したクレジットが Week の直下に表示されます。既定では無効で、`showCodexCredits` として保存されます。残高はロケールに合わせた数値で、報告があれば無制限または超過利用上限の警告を表示します。総上限が提供されないため、バーは割合ではなく利用可能な状態を示します。この設定は表示のみを制御し、新しいログインにはそのアカウントの取得結果が必要です。
 
@@ -261,7 +261,7 @@ ocx service install    # persistent: auto-starts on login and respawns on crash
 `codexPool.excludedPlans` は、自動的なプール選択がスキップするプランキーの一覧です。各アカウントに保存されたプランと大文字小文字を区別せずに照合します。既定では未設定なので、既存の環境のローテーションは変わりません。
 
 ```bash
-ocx config set codexPool '{"excludedPlans":["free"]}'
+orl config set codexPool '{"excludedPlans":["free"]}'
 ```
 
 これはブロックではなく選択ポリシーです。除外されたアカウントも資格情報・使用量履歴・スレッドアフィニティを保持し、アカウント一覧に表示され、`work/gpt-5.5` のような明示的な指定では引き続き利用できます。変わるのは自動ローテーションが選ばなくなる点で、すでにアクティブなアカウントやスレッドに紐づいている場合も含みます。サブスクリプションが失効した直後は、まさにその状態です。
@@ -269,23 +269,23 @@ ocx config set codexPool '{"excludedPlans":["free"]}'
 メイン Codex アカウントはプラン除外の対象外です。選択のみのルーティングは保護されたネイティブ資格情報を読みません。利用可能なプールアカウントがすべて除外されると、自動選択はアカウントを返しません。アカウントを明示したルートは引き続き利用でき、一時停止・認証・モデル権限の検査は維持されます。カードと CLI は資格情報の状態とは別に、除外されたルーティングプランを表示します。プランに全順序がないため `minimumPlan` 設定はありません。
 ## ネイティブ Codexの復元
 
-`ocx stop` はプロキシとインストール済みのバックグラウンドサービスを停止し、ネイティブ Codex の復元を試みます。OpenCodex は所有を確認できるルーティング設定を削除し、設定ファイルを安全に復元できない場合は未完了として報告します。
+`orl stop` はプロキシとインストール済みのバックグラウンドサービスを停止し、ネイティブ Codex の復元を試みます。OpenRelay は所有を確認できるルーティング設定を削除し、設定ファイルを安全に復元できない場合は未完了として報告します。
 
 現在の設定またはプロファイルが保存された元の内容と異なり、そのファイルの注入後の状態のハッシュがジャーナルにない場合、自動復元は両方のファイルとジャーナルを変更せずに残します。元の内容と同じファイルは再書き込みしません。ルーティング済み設定への再注入も、この未確認の状態では拒否されます。ネイティブ設定では新しいスナップショットを作成できます。[復元規則](/guides/codex-integration/#recovery-without-injection-hashes)を参照してください。
 
 ```bash
-ocx stop       # stop the proxy + service, restore native Codex
-ocx restore    # restore without stopping  (alias: ocx eject)
-ocx restore back # point plain Codex at the running proxy again
+orl stop       # stop the proxy + service, restore native Codex
+orl restore    # restore without stopping  (alias: orl eject)
+orl restore back # point plain Codex at the running proxy again
 ```
 
-opencodex が管理対象 [バックグラウンドサービス](/ja/reference/cli/lifecycle/#ocx-service-installrepairrestartstartstopstatusuninstallremove) として実行される場合、`OCX_SERVICE=1` が設定されるため、サービス主導の再起動によって Codex 設定がスラッシングされなくなります。明示的な `ocx stop` / `ocx service stop` のみがネイティブ Codex を復元します。
+OpenRelay が管理対象 [バックグラウンドサービス](/ja/reference/cli/lifecycle/#ocx-service-installrepairrestartstartstopstatusuninstallremove) として実行される場合、`OCX_SERVICE=1` が設定されるため、サービス主導の再起動によって Codex 設定がスラッシングされなくなります。明示的な `orl stop` / `orl service stop` のみがネイティブ Codex を復元します。
 
 ## ページ分割履歴の保護による拒否
 
-対象の履歴ストアがページ分割をサポートする場合、プロバイダー変更は `history_paginated_requires_native_writer` を返すことがあります。この理由では、Codex の設定、参照プロファイル、モデルカタログは拒否されません。`ocx sync` と `ocx start` はこれらのファイルを書き込み、`model_catalog_json` を設定するため、Codex のモデル選択には OpenCodex 経由のモデルがすべて表示され続けます。会話履歴の再ラベル付けを控えるのはこの理由だけの場合です。ページ分割された履歴の番号は Codex 自身の書き込み処理が割り当て、再試行しても変わりません。読み取れない状態データベース、識別子が変わった履歴、実行できなかった事前検査など、それ以外の履歴事前検査の理由では、後から成功する可能性があるため、遷移全体を拒否してロールバックします。この状態では OpenCodex はページ分割された履歴ファイルやスレッド行を変更しません。既存の会話はすでに付いているプロバイダーのまま移行されず、新しい会話は通常どおりプロキシ経由でルーティングされます。再ラベル付けを控えるとき、ホームに既にある `[model_providers.opencodex]` テーブルは廃止せず残します。ルート上書き（loopback）形式でも同じで、行が `opencodex` と付いている会話は、まだ存在するプロバイダー id を保てます。移行可能なストアの legacy 行も対象です。CLI は `Codex resume history: left to Codex's native writer (history_paginated_requires_native_writer)` と表示します。`ocx restore`、`ocx stop`、`ocx uninstall` は `history_paginated_requires_native_writer` で拒否しなくなりました。OpenCodex が書いたルートのルーティングキーをすべて取り除き、`[model_providers.opencodex]` の定義はディスクに残します。そのプロバイダーを指している会話は解決でき、素の `codex` はプロキシを向かなくなります。結果は残した行を示す部分復元として報告され、`ocx restore --remove-codex-provider-table` を使えばその行も削除できます。そのときは該当の会話が開かなくなります。また、`openai` と付いた会話を Codex がすでにページ分割したホームでプロバイダーテーブル形式の統合を有効にすると、以前は `history_paginated_openai_requires_native_writer` で全体が拒否され、何も書かれず統合も無効のままでした。現在は、管理対象のルート `openai_base_url` 上書きを `[model_providers.opencodex]` テーブルと一緒に残す形で移行を完了します。Codex はこの上書きを組み込みの `openai` プロバイダーに統合するため、それらの会話は再ラベル付けなしでプロキシに届き、履歴ファイルやスレッド行は変更されません。`x-opencodex-api-key` の受け入れヘッダーを必要とするルーティング形式だけは今も拒否されます。組み込みプロバイダーがそのヘッダーを運べないためで、そのメッセージは解決策を二つ名指しします。ループバックリスナー経由で Codex を接続して上書きを維持するか、`syncResumeHistory` を `false` にして、それらの会話が Codex 自身の OpenAI エンドポイントに向かうことを受け入れるかです。
+対象の履歴ストアがページ分割をサポートする場合、プロバイダー変更は `history_paginated_requires_native_writer` を返すことがあります。この理由では、Codex の設定、参照プロファイル、モデルカタログは拒否されません。`orl sync` と `orl start` はこれらのファイルを書き込み、`model_catalog_json` を設定するため、Codex のモデル選択には OpenRelay 経由のモデルがすべて表示され続けます。会話履歴の再ラベル付けを控えるのはこの理由だけの場合です。ページ分割された履歴の番号は Codex 自身の書き込み処理が割り当て、再試行しても変わりません。読み取れない状態データベース、識別子が変わった履歴、実行できなかった事前検査など、それ以外の履歴事前検査の理由では、後から成功する可能性があるため、遷移全体を拒否してロールバックします。この状態では OpenRelay はページ分割された履歴ファイルやスレッド行を変更しません。既存の会話はすでに付いているプロバイダーのまま移行されず、新しい会話は通常どおりプロキシ経由でルーティングされます。再ラベル付けを控えるとき、ホームに既にある `[model_providers.opencodex]` テーブルは廃止せず残します。ルート上書き（loopback）形式でも同じで、行が `opencodex` と付いている会話は、まだ存在するプロバイダー id を保てます。移行可能なストアの legacy 行も対象です。CLI は `Codex resume history: left to Codex's native writer (history_paginated_requires_native_writer)` と表示します。`orl restore`、`orl stop`、`orl uninstall` は `history_paginated_requires_native_writer` で拒否しなくなりました。OpenRelay が書いたルートのルーティングキーをすべて取り除き、`[model_providers.opencodex]` の定義はディスクに残します。そのプロバイダーを指している会話は解決でき、素の `codex` はプロキシを向かなくなります。結果は残した行を示す部分復元として報告され、`orl restore --remove-codex-provider-table` を使えばその行も削除できます。そのときは該当の会話が開かなくなります。また、`openai` と付いた会話を Codex がすでにページ分割したホームでプロバイダーテーブル形式の統合を有効にすると、以前は `history_paginated_openai_requires_native_writer` で全体が拒否され、何も書かれず統合も無効のままでした。現在は、管理対象のルート `openai_base_url` 上書きを `[model_providers.opencodex]` テーブルと一緒に残す形で移行を完了します。Codex はこの上書きを組み込みの `openai` プロバイダーに統合するため、それらの会話は再ラベル付けなしでプロキシに届き、履歴ファイルやスレッド行は変更されません。`x-opencodex-api-key` の受け入れヘッダーを必要とするルーティング形式だけは今も拒否されます。組み込みプロバイダーがそのヘッダーを運べないためで、そのメッセージは解決策を二つ名指しします。ループバックリスナー経由で Codex を接続して上書きを維持するか、`syncResumeHistory` を `false` にして、それらの会話が Codex 自身の OpenAI エンドポイントに向かうことを受け入れるかです。
 
-ルート URL 上書き方式に戻すとき、履歴の事前確認が成功していても、OpenCodex は設定を確定する前に既存の `[model_providers.opencodex]` 定義を保持します。確定後やバックグラウンドの履歴処理開始中に Codex が履歴形式を移行しても、以前の `opencodex` 会話はプロバイダーを引き続き解決できます。新しい会話は選択されたルートプロバイダーを使い、明示的な復元には従来の個別の削除チェックが適用されます。
+ルート URL 上書き方式に戻すとき、履歴の事前確認が成功していても、OpenRelay は設定を確定する前に既存の `[model_providers.opencodex]` 定義を保持します。確定後やバックグラウンドの履歴処理開始中に Codex が履歴形式を移行しても、以前の `opencodex` 会話はプロバイダーを引き続き解決できます。新しい会話は選択されたルートプロバイダーを使い、明示的な復元には従来の個別の削除チェックが適用されます。
 
 会話を移行しようとして使用中のページ分割履歴やスレッド行を書き換えないでください。復元前に対象の会話を閉じ、個人の履歴を公開せず正確なエラーとバージョンを報告してください。バックアップやスクリプトの成功だけでは表示の復元は証明されません。再度開いた Codex で確認してください。
 

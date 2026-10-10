@@ -12,7 +12,7 @@ description: 监听、远程访问、准入密钥、超时、存储、侧车、�
 | --- | --- | --- | --- |
 | `port` | `number` | `10100` | 代理监听端口。 |
 | `hostname?` | `string` | `"127.0.0.1"` | 绑定地址。非回环绑定需要 `OPENCODEX_API_AUTH_TOKEN`。 |
-| `proxy?` | `string` | — | 出站 HTTP(S) 或 SOCKS5 代理 URL（`socks5://host:port`），或 `${ENV_VAR}`。HTTP URL 仅在未设置时写入 `HTTP_PROXY` / `HTTPS_PROXY`。SOCKS5 URL 使用内置的真实 SOCKS5 隧道，也会写入 `ALL_PROXY`（`ocx start --socks5`）；并清除本进程继承的 `HTTP(S)_PROXY`。回环地址始终保留在 `NO_PROXY` 中。 |
+| `proxy?` | `string` | — | 出站 HTTP(S) 或 SOCKS5 代理 URL（`socks5://host:port`），或 `${ENV_VAR}`。HTTP URL 仅在未设置时写入 `HTTP_PROXY` / `HTTPS_PROXY`。SOCKS5 URL 使用内置的真实 SOCKS5 隧道，也会写入 `ALL_PROXY`（`orl start --socks5`）；并清除本进程继承的 `HTTP(S)_PROXY`。回环地址始终保留在 `NO_PROXY` 中。 |
 | `emptyCompletionRetry?` | `boolean` | `false` | 显式启用：当 Responses turn 既无文本也无工具调用时，使用相同请求重试一次，包括流在终止事件之前结束的情况。重试可能产生费用。`OCX_EMPTY_COMPLETION_RETRY=0` 可在不修改配置的情况下禁用；combo 与 routed-compaction turn 不参与。 |
 | `dropCodexSafetyBuffering?` | `boolean` | `false` | 从 Codex Responses 透传响应中移除 Codex safety-buffering 提示：`x-codex-safety-buffering-enabled` / `x-codex-safety-buffering-faster-model` 响应头、类型为 `safety_buffering` 的 `response.metadata` SSE 事件，以及其他 SSE 事件中的 `safety_buffering` 字段。Codex TUI 会将这些提示显示为“使用更快模型重试”的提示框，其默认操作会把会话切换到较弱的模型。其他 `x-codex-*` 响应头和其他所有 SSE 事件内容均保持不变，但会移除该字段。默认关闭。 |
 | `stallTimeoutSec?` | `number` | `300`（public）/ 禁用（local） | 上游无有效进展（Responses 和原生 Chat）多少秒后切断流。未设置时**本地**上游（loopback、private、`.local`/`.lan` 名称）默认禁用，公网上游默认 300 秒；正值对两者生效（最小 1 秒）；`0` 全面禁用静默 watchdog。对于把 canonical ChatGPT SSE 折叠为非流式 JSON 的 Responses 请求，即使 watchdog 已禁用，仍保留独立的 15 分钟整轮上限。`/v1/responses/compact` 的挂起响应体读取共享此预算，但即使本地上游也默认 300 秒；显式值（含 `0`）优先。 |
@@ -24,16 +24,16 @@ description: 监听、远程访问、准入密钥、超时、存储、侧车、�
 | `storageCleanupPolicy?` | `StorageCleanupPolicy` | disabled | 可选启用的归档会话清理策略。不会被隐式启用。 |
 | `appOwnedMemoryBudgetMb?` | `number` | `256` | 可逐出应用自有日志、缓存、blob 和续传载荷的内存上限，单位 MiB。范围 64–4096；不是 RSS 上限。 |
 | `metricsExport.enabled?` | `boolean` | `false` | 在经过认证的 `GET /api/metrics` 上启用进程本地的请求聚合指标。需要重启；禁用时该路径返回 404，且不会启动任何导出活动。 |
-| `codexAutoStart?` | `boolean` | `true` | 允许 Codex shim 在启动 Codex 之前运行 `ocx ensure`。设为 false 会让 ensure 变成无操作。 |
+| `codexAutoStart?` | `boolean` | `true` | 允许 Codex shim 在启动 Codex 之前运行 `orl ensure`。设为 false 会让 ensure 变成无操作。 |
 | `codexShimAutoRestore?` | `boolean` | `true` | 在完成外部 Codex 更新并覆盖安装的 shim 之后恢复该 shim。环境退出开关：`OPENCODEX_CODEX_SHIM_AUTO_RESTORE=0`。 |
-| `syncResumeHistory?` | `boolean` | `true` | 可逆的 Codex App 历史兼容性。原始元数据会被备份，并由 `ocx stop` / `ocx restore` 恢复。 |
+| `syncResumeHistory?` | `boolean` | `true` | 可逆的 Codex App 历史兼容性。原始元数据会被备份，并由 `orl stop` / `orl restore` 恢复。 |
 | `shadowCallIntercept?` | `{ enabled?: boolean; model?: string; sourceModels?: string[] }` | off | 将识别出的 Codex 辅助/影子调用重定向到选定模型，并保留为请求配置的推理强度。默认源前缀为 `gpt-6-luna`, `gpt-5.6-luna`；0.144.x 及更早客户端使用 `gpt-5.4-mini`，可通过 `sourceModels` 恢复。 |
 | `webSearchSidecar?` | `OcxWebSearchSidecarConfig` | 在可用时启用 | Web 搜索侧车选项。 |
 | `visionSidecar?` | `OcxVisionSidecarConfig` | 在可用时启用 | 图像描述侧车选项。 |
 | `images?` | `OcxImagesConfig` | 自动选择 OpenAI | 用于 Codex `image_gen` 的独立 Images 转发选项。 |
 
 如果较旧的开发版本在尚未提供备份支持之前修改过了 resume-history 元数据，请运行
-`ocx recover-history --legacy-openai --yes` 强制使用原生提供方恢复。
+`orl recover-history --legacy-openai --yes` 强制使用原生提供方恢复。
 此命令会重标所有包含用户消息的 `opencodex` 行，其中包括正常的专用提供方历史记录；执行前请查看生命周期参考中的完整范围警告。
 
 ### 原生 Chat 的超时与完成状态
@@ -47,11 +47,11 @@ description: 监听、远程访问、准入密钥、超时、存储、侧车、�
 
 ```bash
 export OPENCODEX_API_AUTH_TOKEN="your-secret-token"
-ocx start
+orl start
 ```
 
 如果没有这个变量，代理会拒绝远程绑定。对于后台服务，请在运行
-`ocx service install` 之前导出它，这样 launchd、systemd 或 Task Scheduler 都能接收到。客户端应发送：
+`orl service install` 之前导出它，这样 launchd、systemd 或 Task Scheduler 都能接收到。客户端应发送：
 
 ```text
 x-opencodex-api-key: your-secret-token
@@ -108,7 +108,7 @@ ssh -L 20100:localhost:10100 -L 1455:localhost:1455 you@remote
 
 ## Claude Code (`claudeCode`)
 
-这些设置控制 `/v1/messages`、`/v1/messages/count_tokens`、`ocx claude` 启动器，以及 Claude 仪表板页面。
+这些设置控制 `/v1/messages`、`/v1/messages/count_tokens`、`orl claude` 启动器，以及 Claude 仪表板页面。
 
 | 键 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -116,7 +116,7 @@ ssh -L 20100:localhost:10100 -L 1455:localhost:1455 you@remote
 | `claudeCode.bodyMaxBytes?` | `number` | `67108864` | 流式和缓冲响应的原生透传正文累计上限。精确的 `0` 会禁用。 |
 | `claudeCode.authMode?` | `"proxy" \| "subscription"` | auto | 启动流程如何处理 `ANTHROPIC_AUTH_TOKEN`。auto 会在每次启动时自动检测认证；显式值不会被覆盖。 |
 | `claudeCode.authModeMigratedAt?` | `string` | unset | 内部的一次性升级标记。不要手动设置。 |
-| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` | inherit | 写入生成的 `~/.claude/agents/ocx-*.md` 的努力级别；与 Codex 指引和代理上限相互独立。需通过 `ocx claude` 重新启动以重新生成。 |
+| `claudeCode.subagentEffort?` | `"low" \| "medium" \| "high" \| "xhigh" \| "max"` | inherit | 写入生成的 `~/.claude/agents/ocx-*.md` 的努力级别；与 Codex 指引和代理上限相互独立。需通过 `orl claude` 重新启动以重新生成。 |
 
 自动认证会在找到已保存的 Claude 认证时选择 subscription，在未找到时选择 proxy；如果检测结果不明确，则会选择 subscription 并给出警告。参见
 [Claude Code 认证模式](/guides/claude-code/#auth-mode)。
@@ -159,7 +159,7 @@ Codex 会为标题、提交信息等任务使用较小的辅助模型。启用
 
 | 字段 | 类型 | 默认值 | 含义 |
 | --- | --- | --- | --- |
-| `enabled?` | `boolean` | 在可用时启用 | 总开关。为 `false` 时，OpenCodex 停止拦截 `web_search`，并且 Codex 集成会把 `web_search = "disabled"` 写入 `~/.codex/config.toml`。 |
+| `enabled?` | `boolean` | 在可用时启用 | 总开关。为 `false` 时，OpenRelay 停止拦截 `web_search`，并且 Codex 集成会把 `web_search = "disabled"` 写入 `~/.codex/config.toml`。 |
 | `backend?` | `"openai" \| "anthropic" \| "xai" \| "gemini" \| "exa"` | `openai` | 显式配置优先；省略时始终使用 `openai`。`anthropic` 和 `xai` 仅在显式配置时运行；`gemini` 和 `exa` 在 executor 发布前仍为保留值。 |
 | `model?` | `string` | 依后端而定 | OpenAI 使用 `gpt-5.6-luna`，Anthropic 使用 `claude-sonnet-5`，xAI 使用 `grok-4.6`。旧的显式 `gpt-5.4-mini` 会在启动时迁移。 |
 | `exaApiKey?` | `string` | 无 | `exa` 后端的操作员密钥。仅可写入：管理读取绝不会返回已存储的值。 |
@@ -188,7 +188,7 @@ routed 重放会把主 ChatGPT 认证注入内部请求。Anthropic 后端使用
 
 支持的等级受上游提供方能力与所选模型公布的推理阶梯限制。Vision 只会对发送给其提供方 `noVisionModels` 中模型的图像生效。OpenAI 具有与 search 相同的登录/forward 要求；显式选择的 Anthropic 在没有可用凭据时会失败并关闭。成功的 `data:` 描述会使用一个受限缓存，其键由后端、模型、detail、图像字节以及规范化消息上下文组成；OpenAI 的键还会额外包含推理强度（Anthropic 键不含）。命中和同轮重复不会消耗限额。远程 `https:` 图像以及失败或空的描述不会被缓存。
 
-Anthropic OAuth 侧车会复用 opencodex 现有的 Claude Code OAuth 指纹。请对目标账户和负载进行 soak 测试。
+Anthropic OAuth 侧车会复用 OpenRelay 现有的 Claude Code OAuth 指纹。请对目标账户和负载进行 soak 测试。
 
 ## Remote Hub 密钥与默认值
 
@@ -206,7 +206,7 @@ Anthropic OAuth 侧车会复用 opencodex 现有的 Claude Code OAuth 指纹。�
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

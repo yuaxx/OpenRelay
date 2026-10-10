@@ -1,6 +1,6 @@
 ---
 title: 供應商
-description: opencodex 進行身分驗證並與 LLM 供應商通訊的所有方式——OAuth、API 金鑰、ChatGPT 轉送與本機。
+description: OpenRelay 進行身分驗證並與 LLM 供應商通訊的所有方式——OAuth、API 金鑰、ChatGPT 轉送與本機。
 ---
 
 **供應商（provider）** 是一個上游 LLM 端點，加上存取它的方式：adapter、base URL、認證模式，以及
@@ -84,23 +84,23 @@ ChatGPT passthrough catalog 也會加入 GPT-5.6 Sol/Terra/Luna 的裸 slug：`g
 ## 2. 帳號登入（OAuth）
 
 有八個 provider preset 使用 OAuth 登入，另加透過實驗性非官方 device-flow bridge 的 GitHub Copilot。
-opencodex 會把 credential 存在 `~/.opencodex/auth.json` 並自動 refresh。登入 CLI 也接受 `ocx login codex`，
-但它不是上面的 provider：它會轉到 Codex 帳號池登入（與 `ocx account login codex` 相同的流程）。該帳號池
+OpenRelay 會把 credential 存在 `~/.opencodex/auth.json` 並自動 refresh。登入 CLI 也接受 `orl login codex`，
+但它不是上面的 provider：它會轉到 Codex 帳號池登入（與 `orl account login codex` 相同的流程）。該帳號池
 有獨立的帳號 ledger，這條路徑需要 proxy 正在執行。`chatgpt` 與 `openai` 是同一條路徑的別名。
 
 ```bash
-ocx login xai          # xAI Grok
-ocx login anthropic    # Anthropic Claude (Pro/Max)
-ocx login kimi         # Moonshot Kimi
-ocx login nous         # Nous Portal（device grant；免費 + 付費模型）
-ocx login kiro         # 匯入 kiro-cli credential（或 token fallback）
-ocx login google-antigravity
-ocx login cursor       # 獨立 Cursor PKCE 登入
-ocx login command-code # Command Code browser OAuth（或匯入 ~/.commandcode/auth.json）
-ocx login devin       # Cognition/Devin：優先匯入 Devin CLI 憑證，否則走 Auth0 瀏覽器登入
-ocx login github-copilot  # GitHub device flow → Copilot token（Copilot Pro/Business）
-ocx login codex        # Codex 帳號池（別名：chatgpt、openai；需要 proxy 正在執行）
-ocx logout <provider>
+orl login xai          # xAI Grok
+orl login anthropic    # Anthropic Claude (Pro/Max)
+orl login kimi         # Moonshot Kimi
+orl login nous         # Nous Portal（device grant；免費 + 付費模型）
+orl login kiro         # 匯入 kiro-cli credential（或 token fallback）
+orl login google-antigravity
+orl login cursor       # 獨立 Cursor PKCE 登入
+orl login command-code # Command Code browser OAuth（或匯入 ~/.commandcode/auth.json）
+orl login devin       # Cognition/Devin：優先匯入 Devin CLI 憑證，否則走 Auth0 瀏覽器登入
+orl login github-copilot  # GitHub device flow → Copilot token（Copilot Pro/Business）
+orl login codex        # Codex 帳號池（別名：chatgpt、openai；需要 proxy 正在執行）
+orl logout <provider>
 ```
 
 | 供應商 | Adapter | Base URL | 備註 |
@@ -110,19 +110,19 @@ ocx logout <provider>
 | `kimi` | `openai-chat` | `https://api.kimi.com/coding/v1` | Kimi Code 模型。`kimi-for-coding` 目前指向 K2.8 Preview，支援 100 萬 token 上下文、`low`/`high`/`max` 推理及文字、圖片輸入。`k3-256k` 的上下文上限固定為 256K。 |
 | `kimi-responses` | `openai-responses` | `https://api.kimi.com/coding/v1` | 以 Responses 協定共用 `kimi` 的 OAuth 登入與模型清單。推理內容在伺服器端維持加密，工具呼叫及結果仍可見。 |
 | `nous` | `openai-chat` | `https://inference-api.nousresearch.com/v1` | Nous Research 訂閱 gateway（Hermes Agent 使用相同 backend）。透過 `portal.nousresearch.com` 做 device-grant 登入；access token 是每次請求使用的 inference JWT。混合付費與 `:free` 模型 catalog（`tencent/hy3:free`、`stepfun/step-3.7-flash:free` 等）會從已登入帳號即時探索。Refresh token 為單次使用，每次 refresh 都會輪換。 |
-| `kiro` | `kiro` | `https://runtime.us-east-1.kiro.dev` | 初次登入會匯入已安裝且已登入的 `kiro-cli` session。Unix 可用 `curl -fsSL https://cli.kiro.dev/install` &#124; `bash` 安裝；Windows PowerShell 使用 `irm 'https://cli.kiro.dev/install.ps1'` &#124; `iex`，再執行 `kiro-cli login`。**Add account** 會先登出 `kiro-cli`、啟動新的 browser login，切換 `kiro-cli` 所使用的帳號並保存 account-scoped profile metadata。既有 OpenCodex 帳號會保留；取消或失敗時會恢復先前的 `kiro-cli` session。 |
+| `kiro` | `kiro` | `https://runtime.us-east-1.kiro.dev` | 初次登入會匯入已安裝且已登入的 `kiro-cli` session。Unix 可用 `curl -fsSL https://cli.kiro.dev/install` &#124; `bash` 安裝；Windows PowerShell 使用 `irm 'https://cli.kiro.dev/install.ps1'` &#124; `iex`，再執行 `kiro-cli login`。**Add account** 會先登出 `kiro-cli`、啟動新的 browser login，切換 `kiro-cli` 所使用的帳號並保存 account-scoped profile metadata。既有 OpenRelay 帳號會保留；取消或失敗時會恢復先前的 `kiro-cli` session。 |
 | `google-antigravity` | `google` | `https://daily-cloudcode-pa.googleapis.com` | 透過 Cloud Code Assist wire 使用 Google OAuth。即時探索使用 CCA 經認證的 `v1internal:fetchAvailableModels` 端點，發布目前登入帳號可用的 agent 模型；維護中的 catalog 作為 fallback。 |
 | `cursor` | `cursor` | `https://api2.cursor.sh` | 實驗性 PKCE 登入、即時 HTTP/2 transport 與按帳號篩選的模型探索。 |
-| `devin` | `devin` | `https://server.codeium.com` | 實驗性的非官方 Cognition/Devin 橋接。登入會先匯入已安裝 Devin CLI 已持有的憑證（`devin auth login` 會把 `devin-session-token` 寫入它自己的 `credentials.toml`）；沒有則開啟 Auth0 瀏覽器頁面，再以 `RegisterUser` 將貼上的權杖換成長期 API 金鑰。`ocx login devin-cli` 仍作為已棄用別名可用。模型清單依帳號透過 `GetCascadeModelConfigs` 即時取得，串流僅走 Connect-RPC 上的 `runTurn` 路徑。預設不在儀表板預設集內，需手動啟用。 |
+| `devin` | `devin` | `https://server.codeium.com` | 實驗性的非官方 Cognition/Devin 橋接。登入會先匯入已安裝 Devin CLI 已持有的憑證（`devin auth login` 會把 `devin-session-token` 寫入它自己的 `credentials.toml`）；沒有則開啟 Auth0 瀏覽器頁面，再以 `RegisterUser` 將貼上的權杖換成長期 API 金鑰。`orl login devin-cli` 仍作為已棄用別名可用。模型清單依帳號透過 `GetCascadeModelConfigs` 即時取得，串流僅走 Connect-RPC 上的 `runTurn` 路徑。預設不在儀表板預設集內，需手動啟用。 |
 | `github-copilot` | `openai-chat` | `https://api.githubcopilot.com` | 實驗性。GitHub device flow + `copilot_internal` exchange（VS Code OAuth client）。需要有效 Copilot 訂閱；不是官方第三方 API。 |
 
 Google Antigravity 帳戶與供應商的配額查詢（包括模型清單備援）使用固定的 Google 計量端點。這些目標支援透明 Fake-IP DNS，同時保留 TLS 驗證、重新導向拒絕與私有位址檢查。自訂 base URL 只改變模型請求，不改變配額目標；`NO_PROXY` 仍使用直連政策。
 
 ### Google 工具結構描述損失診斷
 
-Google 工具宣告會依所選端點類別進行編譯。透過 `ocx debug provider on`、儀表板 Logs 開關或
+Google 工具宣告會依所選端點類別進行編譯。透過 `orl debug provider on`、儀表板 Logs 開關或
 `OCX_DEBUG=1` 啟用供應商偵錯後，在省略政策或使用 `compatible` 的路徑上，相容性轉換中的結構描述損失會輸出一筆
-`[ocx:google:google-tool-schema-loss]` 記錄（可用 `ocx debug provider logs -f` 持續查看），
+`[ocx:google:google-tool-schema-loss]` 記錄（可用 `orl debug provider logs -f` 持續查看），
 其中只包含報告版本、端點類別、`lossy` 指標、有上限的不確定比較計數、帶有上限計數的固定損失類別與截斷旗標，
 絕不包含工具名稱、屬性名稱、路徑、值或結構描述文字。省略政策或使用 `compatible` 時只觀察
 轉換。在 `reject-lossy` 下，若初始編譯有損或有界比較結果不確定，會在傳送前拒絕；被拒絕的
@@ -133,12 +133,12 @@ Vertex 或 Cloud Code Assist 修復會輸出同樣不含內容的 `google-tool-s
 [偵錯命令參考](/zh-tw/reference/cli/agents/)。
 
 
-終端 Nous refresh 失敗後，執行 `ocx login nous` 重新認證。
+終端 Nous refresh 失敗後，執行 `orl login nous` 重新認證。
 
-對 canonical Kimi Coding Plan preset（`kimi` 帳號登入與 `kimi-code` API key），opencodex 只會把 caller
+對 canonical Kimi Coding Plan preset（`kimi` 帳號登入與 `kimi-code` API key），OpenRelay 只會把 caller
 提供且穩定的 `prompt_cache_key` 轉送到 Chat Completions 請求，絕不自行產生。Kimi 文件指出，穩定的
 session／task key 有助提升 Code Plan cache hit rate；沒有 key 的請求仍保持 keyless。若已 opt-in 的上游
-拒絕此欄位，opencodex 不會移除欄位後重試，也不會修改已儲存設定。其他 provider 預設 deny-by-default。
+拒絕此欄位，OpenRelay 不會移除欄位後重試，也不會修改已儲存設定。其他 provider 預設 deny-by-default。
 
 `kimi`、`kimi-code` 和 `kimi-responses` 的 `k3`、`k3[1m]`、`k3-256k` 費用是採用預設五分鐘
 快取寫入費率的 [API 價格](https://platform.kimi.ai/docs/pricing/chat)估算，並非 Code Plan 的實際
@@ -166,8 +166,8 @@ Codex pool 帳號使用獨立 ledger。Token 仍存放在 `~/.opencodex/auth.jso
 CLI 只接受來自檔案或標準輸入的 export，絕不要直接貼進 command argument：
 
 ```bash
-ocx account import google-antigravity --format cockpit-tools --file <path> [--json]
-cat accounts.json | ocx account import google-antigravity --format cockpit-tools --stdin [--json]
+orl account import google-antigravity --format cockpit-tools --file <path> [--json]
+cat accounts.json | orl account import google-antigravity --format cockpit-tools --stdin [--json]
 ```
 
 inline JSON 與額外 positional argument 都會被拒絕。請將 export 檔案保持私密，匯入後安全刪除或妥善
@@ -175,7 +175,7 @@ inline JSON 與額外 positional argument 都會被拒絕。請將 export 檔案
 
 ### OAuth 可靠度
 
-opencodex 協調 token refresh 與 Codex pool 路由，避免並行請求競爭 credential store。這是可靠度與診斷
+OpenRelay 協調 token refresh 與 Codex pool 路由，避免並行請求競爭 credential store。這是可靠度與診斷
 工作，**不**代表能繞過 provider enforcement、rate limit 或帳號動作。
 
 **Refresh 協調。** 路由呼叫前，過期的 access token 每個 `(provider, account)` 只 refresh 一次：
@@ -202,23 +202,23 @@ response 後仍被固定在同一帳號。
 **Codex client metadata。** ChatGPT forward 路徑會轉送經篩選的 `FORWARD_HEADERS` allowlist
 （authorization、`chatgpt-account-id`、originator、session/thread id 與其他相關 Codex header，詳見
 [轉接器](/zh-tw/reference/adapters/)）。Pool 模式只覆寫 auth 與 `chatgpt-account-id`，讓它們符合選中的
-credential。caller 沒有送出時，opencodex **不會**捏造官方 client identity，例如 `originator`、session
+credential。caller 沒有送出時，OpenRelay **不會**捏造官方 client identity，例如 `originator`、session
 或 thread header。
 
-**診斷與重新認證。** 一般 `ocx status` 會印出 OAuth health 區塊，只顯示遮蔽後 account id，不含 token。
-`ocx doctor` 會新增 OAuth reliability 區段，包含 writable-store／single-flight check，以及帶 recovery
-Action 的 WARN row。OAuth provider 帳號需要重新認證時，執行 `ocx login <provider>`，或在儀表板使用
-Reauthenticate。Codex pool 帳號不是那些 provider 之一，但 `ocx login codex --reauth` 會轉到它們的帳號池
+**診斷與重新認證。** 一般 `orl status` 會印出 OAuth health 區塊，只顯示遮蔽後 account id，不含 token。
+`orl doctor` 會新增 OAuth reliability 區段，包含 writable-store／single-flight check，以及帶 recovery
+Action 的 WARN row。OAuth provider 帳號需要重新認證時，執行 `orl login <provider>`，或在儀表板使用
+Reauthenticate。Codex pool 帳號不是那些 provider 之一，但 `orl login codex --reauth` 會轉到它們的帳號池
 重新認證，儀表板的 Codex account pool 也做同一件事。
-相關命令請參見 CLI 參考的 [`ocx status` / `ocx doctor`](/zh-tw/reference/cli/)。
+相關命令請參見 CLI 參考的 [`orl status` / `orl doctor`](/zh-tw/reference/cli/)。
 
 ### Kiro credential 匯入
 
 Kiro 登入預期存在 Kiro CLI。Unix 可用 `curl -fsSL https://cli.kiro.dev/install | bash` 安裝；Windows
 PowerShell 使用 `irm 'https://cli.kiro.dev/install.ps1' | iex`；接著以 `kiro-cli login` 登入。若沒有
-`kiro-cli` session，`ocx login kiro` 會 fallback 到貼上的 access token 或 `KIRO_ACCESS_TOKEN` 環境變數。
+`kiro-cli` session，`orl login kiro` 會 fallback 到貼上的 access token 或 `KIRO_ACCESS_TOKEN` 環境變數。
 
-`ocx login kiro` 匯入流程會搜尋各平台的 Kiro CLI store，並以唯讀模式開啟 SQLite database。兩個環境
+`orl login kiro` 匯入流程會搜尋各平台的 Kiro CLI store，並以唯讀模式開啟 SQLite database。兩個環境
 變數可明確指定來源與 token row：
 
 - `KIROCLI_DB_PATH` 指定非標準 Kiro CLI SQLite database。路徑必須已存在；此匯入流程不會建立或修改
@@ -227,18 +227,18 @@ PowerShell 使用 `irm 'https://cli.kiro.dev/install.ps1' | iex`；接著以 `ki
   token key。未指定時會讓登入失敗，而不是猜測。
 
 Windows 匯入會尋找 `%LOCALAPPDATA%\Kiro-Cli\data.sqlite3`。forced／add-account login 也需要本機 CLI
-binary：opencodex 先使用 `PATH`，再 fallback 到 `%LOCALAPPDATA%\Kiro-Cli\kiro-cli.exe` 與
+binary：OpenRelay 先使用 `PATH`，再 fallback 到 `%LOCALAPPDATA%\Kiro-Cli\kiro-cli.exe` 與
 `C:\Program Files\Kiro-Cli\kiro-cli.exe`。
 若兩個資料夾都沒有 `kiro-cli.exe`，會改用同樣這兩個 `Kiro-Cli` 資料夾內的 `kiro.exe`。
-opencodex 絕不執行在 `PATH` 或 macOS/Linux 共用 bin 目錄中找到的 `kiro` 或 `kiro.exe`，
+OpenRelay 絕不執行在 `PATH` 或 macOS/Linux 共用 bin 目錄中找到的 `kiro` 或 `kiro.exe`，
 請在那裡以 `kiro-cli` 名稱安裝或連結 CLI。
 
-成功匯入後，opencodex 會把 credential 寫入 `~/.opencodex/auth.json`。
+成功匯入後，OpenRelay 會把 credential 寫入 `~/.opencodex/auth.json`。
 
 請將這些變數與所選 database 保持私密。不要把 database 檔案或原始登入診斷附在 bug report。
 
 **Add account** 是獨立的寫入流程：它會 snapshot 目前 session、登出 `kiro-cli`，再匯入新的 browser
-login。若登入取消或失敗，包括 OpenCodex 持久化 credential 期間失敗，rollback 會先替換 Kiro CLI
+login。若登入取消或失敗，包括 OpenRelay 持久化 credential 期間失敗，rollback 會先替換 Kiro CLI
 database 並移除目前的 WAL、SHM 與 journal sidecar，再發布先前的 session snapshot。
 
 由於 rollback 只能依賴 snapshot，若 session store 存在卻無法擷取，例如檔案不可讀、schema 不符或 token
@@ -249,14 +249,14 @@ database 並移除目前的 WAL、SHM 與 journal sidecar，再發布先前的 s
 
 ## 3. API 金鑰目錄
 
-opencodex 內建 103 個 preset：84 個 key-based、15 個 OAuth、3 個 local，以及 1 個預設 ChatGPT-forward
+OpenRelay 內建 103 個 preset：84 個 key-based、15 個 OAuth、3 個 local，以及 1 個預設 ChatGPT-forward
 preset。儀表板的 **Add provider** picker 會開啟 key provider 的 dashboard、驗證金鑰並儲存；驗證方式
 依 provider 而異。主要條目如下。
 
 **ClinePass** 使用 Cline API key，搭配[官方訂閱 catalog](https://docs.cline.bot/getting-started/clinepass)
 與 [Chat Completions endpoint](https://docs.cline.bot/api/chat-completions)，由 Cline Bot Inc. 依
 [Cline terms](https://cline.bot/tos) 提供。像 `cline-pass/cline-pass/kimi-k3` 這類 routed id 是刻意設計：
-第一段選擇 opencodex provider，後面的 `cline-pass/kimi-k3` 才是送往上游的完整 model slug。ClinePass
+第一段選擇 OpenRelay provider，後面的 `cline-pass/kimi-k3` 才是送往上游的完整 model slug。ClinePass
 quota 由帳號共用，包含 rolling 5-hour、weekly 與 monthly limit。2026-08-13 的 live probe 已確認所有
 靜態 ClinePass model 在 gateway input 都接受 `low`、`medium`、`high`、`xhigh` 與 `max`。符合 registry
 transport 的 canonical ClinePass 設定會保留 requested tier；同名 custom provider 則保留明確設定的
@@ -321,27 +321,27 @@ preset 透過公開 `GET /v1/models` 自動更新清單，只保留活躍的 Cha
 Sionic 提供的 `deepseek/deepseek-v4.1-flash-ultrafast` 與
 `z-ai/glm-5.3-flash-ultrafast` 排在最前。請在
 [OpenGateway 控制台](https://opengateway.ai/api-keys)建立金鑰，再執行
-`ocx provider add opengateway` 或在控制台選擇 **OpenGateway**。Chat 請求使用設定的
+`orl provider add opengateway` 或在控制台選擇 **OpenGateway**。Chat 請求使用設定的
 Bearer 金鑰；公開模型清單無法驗證金鑰有效性。
 
 **OpenCode Zen**（`opencode-zen`）與無 key 的 **OpenCode Free** preset 共用
 `https://opencode.ai/zen/v1`。該 gateway 的免費模型常遇到短時間 burst limit，約 15–20 requests/minute
 （社群實測；OpenCode 未公布 RPM）。Zen 可能回傳 generic rate-limit 429，而沒有 `Retry-After`／
 `X-RateLimit-*` header。這與 OpenCode 宣告的 keyless desktop quota 是不同限制：`opencode-free` 約每 5
-小時 200 次 Big Pickle／free-model request。Zen 在這類 429 省略 `Retry-After` 時，opencodex 會在 client
+小時 200 次 Big Pickle／free-model request。Zen 在這類 429 省略 `Retry-After` 時，OpenRelay 會在 client
 error 加入 provider guidance 與 synthetic `Retry-After`；若上游有 `Retry-After`，仍以上游值為準。
 same-key wait-and-retry 仍需透過 [`retryOn429`](/zh-tw/reference/configuration/) 明確 opt-in。
 
 **無 key 的 `opencode-free` tier 目前對第三方 client 關閉。** Zen 會拒絕任何沒有帶 `x-opencode-session`
 header 的 request，回傳 error type `MissingSessionID` 與訊息 "OpenCode's free tier can only be used in
-OpenCode"。這道 gate 只檢查該 header 是否存在，因此 proxy 大可捏造一個值通過，但 opencodex 不這麼做。
+OpenCode"。這道 gate 只檢查該 header 是否存在，因此 proxy 大可捏造一個值通過，但 OpenRelay 不這麼做。
 偽造 session identifier 並附上帶版本號的 `opencode/<version>` User-Agent，等於宣稱自己就是 OpenCode
 client，而 OpenCode 並未公布這個 keyless tier 的第三方整合合約；用這種方式取得的 HTTP 200 是繞過
-admission check，而不是取得授權。因此 opencodex 選擇如實回報限制：送往 `opencode-free` 的 request 會
+admission check，而不是取得授權。因此 OpenRelay 選擇如實回報限制：送往 `opencode-free` 的 request 會
 收到一則說明上游 gate 的 error。
 
 通往同一批模型的受支援路徑，是使用 [opencode.ai/auth](https://opencode.ai/auth) 取得的 OpenCode Zen API
-key，走帶 key 的 **`opencode-zen`** preset。若 OpenCode 日後公布 keyless tier 的第三方路徑，opencodex 可以
+key，走帶 key 的 **`opencode-zen`** preset。若 OpenCode 日後公布 keyless tier 的第三方路徑，OpenRelay 可以
 跟進；在此之前，這個 preset 的作用是記錄該限制。上游條款：[opencode.ai/docs/zen](https://opencode.ai/docs/zen/)。
 
 大多數 provider 使用帶 bearer key 的 `openai-chat` adapter；**Xiaomi MiMo**（`xiaomi`）等
@@ -349,11 +349,11 @@ key，走帶 key 的 **`opencode-zen`** preset。若 OpenCode 日後公布 keyle
 preset `xiaomi-mimo`，以及 token plan preset `mimo`。三者都預設使用 MiMo V2.6
 （`mimo-v2.6-pro`；`xiaomi-mimo` 使用 `mimo-v2.6-flash`）。Xiaomi 將於 2026-10-21 停用
 `mimo-v2.5` 和 `mimo-v2.5-pro`，且不提供重新導向；請在期限前更換已儲存的 V2.5 預設模型，
-opencodex 不會替你改寫。
+OpenRelay 不會替你改寫。
 在已驗證的 Ark Coding Plan 工具 continuation 中，把上一輪 Responses 回傳的 `reasoning` item 原樣送回會得到 `400 InvalidParameter`，因此 Coding Plan preset 會在轉送 continuation input 前移除這類 item；該輪的 reasoning 狀態會因此遺失，可用 `dropResponsesReasoningItems: false` 關閉。已經以 `openai-chat` 儲存的 Coding Plan 設定不會被改寫，仍走 Chat；要切換請手動把 `adapter` 改成 `openai-responses`、`responsesPath` 設為 `/responses`，或刪除後重新加入該 preset。Volcengine Coding Plan 與 Agent Plan 透過
 `openai-responses` 使用原生 Responses endpoint。內建 DeepSeek preset 也會把 `deepseek-v4-flash` 路由到
 原生 Responses endpoint，並保持上游 SSE streaming。若該模型完成所有 output item 卻省略最後的
-Responses event，opencodex 會套用 5 秒、model-scoped 的 grace repair；malformed 或 partial stream 會以
+Responses event，OpenRelay 會套用 5 秒、model-scoped 的 grace repair；malformed 或 partial stream 會以
 incomplete 關閉，不會被誤報為成功。
 第一方 `deepseek-flash` 模型原生宣告支援 `text` 與 `image` 輸入，因此圖片請求預設會直接送往
 DeepSeek，不經過 vision sidecar。明確的 `noVisionModels` 或純文字宣告仍然優先。第一方
@@ -370,7 +370,7 @@ DeepSeek，不經過 vision sidecar。明確的 `noVisionModels` 或純文字宣
 
 > **Volcengine Plan 使用限制：** Volcengine 文件指出 Coding Plan 與 Agent Plan quota 只能在受支援的
 > AI coding tool 內使用，並警告把 plan key 用於一般 API call 可能導致訂閱停權或帳號封鎖。透過
-> opencodex 路由 Codex 或 Claude Code 屬於文件所述用途；不要把 plan key 指向其他 automation。
+> OpenRelay 路由 Codex 或 Claude Code 屬於文件所述用途；不要把 plan key 指向其他 automation。
 > pay-as-you-go 的 `volcengine` 路徑沒有此限制。
 
 **Chutes 探索。** `chutes` preset 使用 Chutes 固定、共用的 OpenAI-compatible LLM gateway。它讀取公開的
@@ -400,7 +400,7 @@ Hyperbolic 另外的 image、audio 與 GPU endpoint 不在範圍內。可在
 
 **Command Code 探索。** preset 從固定的 Provider API 主機讀取 Command Code 的
 `/provider/v1/models` 清單，保留 provider 原生 ID，並將探索限制在 256 KiB／256 筆原始資料。
-`ocx login command-code` 支援透過瀏覽器登入 OAuth；既有 Command Code CLI 使用者也可選擇從
+`orl login command-code` 支援透過瀏覽器登入 OAuth；既有 Command Code CLI 使用者也可選擇從
 `~/.commandcode/auth.json` 匯入本機 CLI 憑證。模型目錄依帳號而定，登入後由經認證的探索端點取得。
 Provider-API preset（`commandcode`）會傳送目前設定的有效金鑰：多數模型 ID 使用 Chat Completions
 及 Bearer 標頭；`claude-*` ID 則使用 Anthropic Messages 及 `x-api-key`，因為 Command Code 只在
@@ -411,9 +411,9 @@ Provider-API preset（`commandcode`）會傳送目前設定的有效金鑰：多
 只會在正常結束後還原；中斷或遭過濾的回合則保留標記文字。Provider-API 金鑰可在
 [Command Code Studio](https://commandcode.ai/studio/) 建立。
 
-**Command Code 配額。** 儀表板與 `ocx account refresh` 會在正規主機 `https://api.commandcode.ai` 探測 `/alpha/billing/credits` 視窗（5 小時與每週）。OAuth preset (`command-code`) 使用已儲存的帳號 bearer；Provider-API key preset (`commandcode`) 使用目前設定的有效 key。使用者改寫過的仿冒 base URL 不會被探測。當 Command Code 同時回報週期消耗時，剩餘的 monthly / purchased / free credits 會顯示為 USD 視窗。
+**Command Code 配額。** 儀表板與 `orl account refresh` 會在正規主機 `https://api.commandcode.ai` 探測 `/alpha/billing/credits` 視窗（5 小時與每週）。OAuth preset (`command-code`) 使用已儲存的帳號 bearer；Provider-API key preset (`commandcode`) 使用目前設定的有效 key。使用者改寫過的仿冒 base URL 不會被探測。當 Command Code 同時回報週期消耗時，剩餘的 monthly / purchased / free credits 會顯示為 USD 視窗。
 
-OrcaRouter 瀏覽器登入（`ocx login orcarouter-oauth`）的金鑰交換成功回應本文必須是不超過
+OrcaRouter 瀏覽器登入（`orl login orcarouter-oauth`）的金鑰交換成功回應本文必須是不超過
 64 KiB 的有效 UTF-8 JSON。此交換請求原有的 30 秒時限涵蓋回應標頭與完整本文的接收；過大或
 格式錯誤的本文會在儲存金鑰前被拒絕。這些限制只適用於登入時的金鑰交換，不是推論請求酬載的
 限制。`scope` 驗證規則維持不變：允許省略，明確無效的值仍會被拒絕。
@@ -477,7 +477,7 @@ provider-wide parallel tool call 或 OpenAI `reasoning_effort`。可在
 
 使用 `authMode: "key"`，且 base URL 為 canonical `https://api.a6api.com` 或
 `https://api.a6api.com/v1` 的 custom `openai-chat` provider，會在 dashboard 與
-`ocx account refresh <provider>` 顯示 A6API credit meter。provider 名稱可自訂；偵測依據 canonical HTTPS
+`orl account refresh <provider>` 顯示 A6API credit meter。provider 名稱可自訂；偵測依據 canonical HTTPS
 endpoint。meter 會使用帳號的 hard credit limit，把 A6API token unit 換算成 USD，並顯示已使用百分比與
 剩餘 credit。Token 到期不會顯示為 quota reset，因為到期不代表 credit 會補充。
 
@@ -511,14 +511,14 @@ key-based provider 也能保存多個 key。透過 Providers 頁面新增 key �
 
 ### 從終端切換帳號
 
-不必開啟儀表板，即可用 `ocx account list`、`ocx account current` 與 `ocx account use` 檢視或切換
+不必開啟儀表板，即可用 `orl account list`、`orl account current` 與 `orl account use` 檢視或切換
 同一組 Codex、OAuth 與 API-key pool。完整 command、JSON output 與新 session 生效規則請參見
 [CLI 參考](/zh-tw/reference/cli/providers-accounts/#ocx-account-subcommand)。
 
 ### GPT-5.6 預覽路徑
 
 GPT-5.6 Sol/Terra/Luna 會預置在 provider fallback list 中，因此即使即時 catalog 暫時落後，
-`ocx sync` 仍可維持模型可見。
+`orl sync` 仍可維持模型可見。
 
 | Codex 路由 | 預置 model id | Codex 可見 context |
 | --- | --- | --- |
@@ -532,26 +532,26 @@ provider metadata 與 reasoning mapping。四條路徑最終都受上游權限�
 seed 篩到目前帳號真正能使用的模型。
 
 :::note[Gateway 與訂閱 proxy]
-是否納入某個 provider，取決於 opencodex 是否有匹配的 wire adapter，**不**取決於它是否是「agent」
+是否納入某個 provider，取決於 OpenRelay 是否有匹配的 wire adapter，**不**取決於它是否是「agent」
 產品。目前 adapter id 為 `openai-chat`、`openai-responses`、`anthropic`、`google`（AI Studio、Vertex、
 Antigravity／Cloud Code Assist 模式）、`azure` / `azure-openai`、`kiro`、`cursor`。像原生 Amazon Bedrock
 這類沒有對應實作的 proprietary API，不會被直接支援。
 
-**GitHub Copilot** 是 OAuth provider（`ocx login github-copilot`），會把 GitHub device-flow login 換成
+**GitHub Copilot** 是 OAuth provider（`orl login github-copilot`），會把 GitHub device-flow login 換成
 短效 Copilot API token，不是貼上 API key。**GitLab Duo** 仍是使用 OpenAI-compatible endpoint 的
 key／subscription-token gateway。**Cloudflare AI Gateway** 需要在 URL 填入 account 與 gateway id。
 
 Copilot 的 catalog 混合多種 wire：模型（`gpt-5.3-codex`、`gpt-5.4`、`gpt-5.4-mini`、
 `gpt-5.5`、`gpt-5.6-luna`、`gpt-5.6-sol`、`gpt-5.6-terra`、`gpt-6-astra`, `grok-4.5`, `grok-4.6`, `mai-code-1.1-flash`, `mai-code-1-flash-picker`）會拒絕 agent traffic 的
-`/chat/completions`，因此 opencodex 會依內建預設把這些模型路由到 Responses API；其他 Copilot 模型
+`/chat/completions`，因此 OpenRelay 會依內建預設把這些模型路由到 Responses API；其他 Copilot 模型
 仍使用 chat completions。優先順序為：hard wire pin → 你明確設定的
 [`modelAdapters`](/zh-tw/reference/configuration/providers/) → registry default → provider-wide adapter。
 若要讓沒有內建 default 的模型，例如 `gpt-5.4-nano`，改走 Responses，可設定
 `"modelAdapters": { "gpt-5.4-nano": "openai-responses" }`。
 
-Cursor 另以實驗性 adapter 追蹤。`adapter: "cursor"` 會在 `ocx init` 與 dashboard Add Provider picker
+Cursor 另以實驗性 adapter 追蹤。`adapter: "cursor"` 會在 `orl init` 與 dashboard Add Provider picker
 出現為實驗性 local config，並帶 Cursor static fallback model catalog metadata。設定 Cursor access token
-後，opencodex 使用 Cursor 即時 HTTP/2 transport。bundled fallback seed 包含 1M context 的
+後，OpenRelay 使用 Cursor 即時 HTTP/2 transport。bundled fallback seed 包含 1M context 的
 `gpt-5.6-sol`／`terra`／`luna`、500K 的 Grok 4.5/4.6/4.7 一般與 Fast 項目，以及 262K 的 `kimi-k3`；即時探索
 決定哪些模型對帳號保持可見。Grok 4.6 與 4.7 的兩種形式都提供 `low`／`medium`／`high`／`xhigh`，4.5 則最高到
 `high`。Grok 4.5 與 4.6 的 Fast 請求會傳送對應的基礎模型，並使用獨立的 `effort` 與 `fast=true`
@@ -563,7 +563,7 @@ Cursor server-driven native read/write/delete/ls/grep/shell/fetch execution 預�
 approval 與 sandbox 路徑；只有可信本機實驗才應在 `~/.opencodex/config.json` 的 `providers.cursor`
 物件設定 `unsafeAllowNativeLocalExec: true`，也可以透過儀表板 **Providers → Cursor → Edit JSON** 設定。
 完整範例參見[設定參考](/zh-tw/reference/configuration/providers/#cursor-供應商adapter-cursor)。MCP、螢幕錄製與
-computer-use 可透過 executor hook 使用；未設定本機 executor 時，opencodex 會回傳 typed no-executor
+computer-use 可透過 executor hook 使用；未設定本機 executor 時，OpenRelay 會回傳 typed no-executor
 result，而不是用 policy block request。Cursor OAuth 與即時 model discovery 已為此實驗性 adapter 啟用；
 Cursor 仍不會出現在 key-login list。
 :::
@@ -571,9 +571,9 @@ Cursor 仍不會出現在 key-login list。
 ### Ollama Cloud
 
 Ollama Cloud 是 hosted、不是 local 的 Ollama，設定位址為 `https://ollama.com/v1`，
-key 來自 [ollama.com/settings/keys](https://ollama.com/settings/keys)。opencodex 以 Ollama 自身的
+key 來自 [ollama.com/settings/keys](https://ollama.com/settings/keys)。OpenRelay 以 Ollama 自身的
 REST API（`POST /api/chat`）連線，而非 OpenAI-compatible 介面，並向 provider 動態探索模型清單，
-因此新的 Ollama Cloud 模型不需改設定就會出現。opencodex 依 vision capability 分類其
+因此新的 Ollama Cloud 模型不需改設定就會出現。OpenRelay 依 vision capability 分類其
 cloud lineup，讓 [vision sidecar](/zh-tw/guides/sidecars/) 只對純文字模型生效。純文字模型，例如
 `glm-5.2`、`deepseek-v4-flash`、`gpt-oss`、`qwen3-coder`、`minimax-m2.x`、`nemotron-3-*`，會列在
 `noVisionModels`；原生 vision 模型，例如 `kimi-k2.6`、`minimax-m3`、`gemma4`、`qwen3.5`、
@@ -581,12 +581,12 @@ cloud lineup，讓 [vision sidecar](/zh-tw/guides/sidecars/) 只對純文字模�
 `gpt-oss:120b` 與 `gpt-oss:20b`。
 
 Ollama 目前在文件中說明結構化輸出在 Ollama Cloud 上不受支援。因此對正典 `ollama-cloud`，
-opencodex 會以明確的錯誤拒絕結構化輸出請求（`text.format`），而不是悄悄回傳不受約束的
+OpenRelay 會以明確的錯誤拒絕結構化輸出請求（`text.format`），而不是悄悄回傳不受約束的
 散文式文字；本機 / 自訂 `ollama-native` 端點保留 Ollama 原生的 `format` 行為。
 
 ## 4. 本機供應商
 
-讓 opencodex 指向本機 OpenAI-compatible server，通常使用空 key：
+讓 OpenRelay 指向本機 OpenAI-compatible server，通常使用空 key：
 
 | 供應商 | Base URL |
 | --- | --- |
@@ -597,7 +597,7 @@ opencodex 會以明確的錯誤拒絕結構化輸出請求（`text.format`），
 ## 任意 OpenAI-compatible endpoint
 
 若 provider 使用 Chat Completions，`openai-chat` adapter 就能處理。可在儀表板選 **Custom**，或在
-`ocx init` 選 `custom` 並輸入 base URL。所有 provider 欄位（`headers`、`noReasoningModels`、
+`orl init` 選 `custom` 並輸入 base URL。所有 provider 欄位（`headers`、`noReasoningModels`、
 `noVisionModels`、`models` 等）請參見[設定參考](/zh-tw/reference/configuration/)。
 
 ## Providers 總覽的速率限制

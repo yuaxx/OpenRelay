@@ -10,7 +10,7 @@ description: 在使用非 OpenAI 提供方时，将 image_generation 托管工�
 ## 前提条件
 
 - **启用桥接**：在配置中设置 `images.bridgeEnabled: true`（默认关闭，以避免意外产生 xAI 费用 - 见下文的 [配置](#配置)）。
-- 配置一个带有 **API 密钥** 的 `xai` provider 条目。桥接会将执行固定到注册表中的 xAI Images 端点（`https://api.x.ai/v1`）；任何已配置的 `baseUrl` 覆盖都会被图像调用忽略。仅有 OAuth / `ocx login xai` **不会** 启用这条 sidecar 循环。同一项 `bridgeEnabled` 会启用另一条 Codex `/v1/images` 中继，让内置 `image_gen` 客户端用 Grok CLI 授权调用 Imagine — 见 [内置图像生成](/guides/codex-integration/#built-in-image-generation-image_gen)。若该授权（或 xAI API key）缺失，`/v1/images` 会返回错误，而不会落到 ChatGPT。只有在 `images.bridgeEnabled` 为 `true` 且未设置 `images.provider` 时，这条中继才拥有该路由；显式设置 `images.provider` 后，`/v1/images` 归该 provider 处理，其校验错误按原样返回，不会改由 xAI 重试。
+- 配置一个带有 **API 密钥** 的 `xai` provider 条目。桥接会将执行固定到注册表中的 xAI Images 端点（`https://api.x.ai/v1`）；任何已配置的 `baseUrl` 覆盖都会被图像调用忽略。仅有 OAuth / `orl login xai` **不会** 启用这条 sidecar 循环。同一项 `bridgeEnabled` 会启用另一条 Codex `/v1/images` 中继，让内置 `image_gen` 客户端用 Grok CLI 授权调用 Imagine — 见 [内置图像生成](/guides/codex-integration/#built-in-image-generation-image_gen)。若该授权（或 xAI API key）缺失，`/v1/images` 会返回错误，而不会落到 ChatGPT。只有在 `images.bridgeEnabled` 为 `true` 且未设置 `images.provider` 时，这条中继才拥有该路由；显式设置 `images.provider` 后，`/v1/images` 归该 provider 处理，其校验错误按原样返回，不会改由 xAI 重试。
 
   ```json
   {
@@ -53,9 +53,9 @@ Image Bridge 的选项位于 `~/.opencodex/config.json` 的 `images` 下。桥�
 
 Image Bridge 只会在 **Responses** 回合中生效，且仅当 `/v1/responses` 的 `tools` 数组里包含托管的 `image_generation` 工具，并且当前选择的是 **非 OpenAI** 模型时才会激活。它**不会**拦截 Codex 内置的 `image_gen` 工具，因为后者会直接 POST 到 `/v1/images/generations`（或 `/images/edits`） - 这条路径在 [Codex 集成](/guides/codex-integration/#built-in-image-generation-image_gen) 中单独覆盖。
 
-1. 当某个 Responses 请求在 `tools` 中列出 `image_generation` 时，OpenCodex 会在请求预处理阶段检测到它。
+1. 当某个 Responses 请求在 `tools` 中列出 `image_generation` 时，OpenRelay 会在请求预处理阶段检测到它。
 2. 托管工具会被替换为一个 **合成函数工具**，路由后的模型可以像正常工具一样调用它 - 模型看到的是一个可调用工具，而不是一个自己无法执行的、不可见的托管工具。
-3. 当模型调用该工具时，OpenCodex 会拦截这次调用，并将提示词发送到 xAI 的图像生成 API。
+3. 当模型调用该工具时，OpenRelay 会拦截这次调用，并将提示词发送到 xAI 的图像生成 API。
 4. 生成的图像会保存到 `~/.opencodex/artifacts/`，并将 **本地文件路径** 作为工具结果返回给模型。
 5. 模型随后会在了解生成图像及其位置的情况下继续对话。
 

@@ -6,7 +6,7 @@ import { refreshAsideProfilesThroughServer } from "./aside-profiles";
 import { runCatalogAction } from "./catalog-command-result";
 import { CliUsageError, RuntimeApiError, printData, takeFlag, takeOption, type RuntimeApiDeps } from "./runtime-api";
 
-const USAGE = "Usage: ocx integration client sync --client aside [--json]";
+const USAGE = "Usage: orl integration client sync --client aside [--json]";
 const refusalText = {
   not_installed: "Aside is not installed for this profile.",
   conflict: "Profile configuration conflicts with the managed integration.",

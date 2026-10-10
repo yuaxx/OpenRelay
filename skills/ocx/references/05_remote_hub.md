@@ -6,9 +6,9 @@ answers that are easy to guess wrong.
 
 ## Discover locally, manage the intended machine
 
-`ocx help connect`, `ocx help hub` and the
+`orl help connect`, `orl help hub` and the
 [access/remote chapter](01_surface_access-remote.md) are offline discovery.
-`ocx connect status --json` reports the local connection. Before live management,
+`orl connect status --json` reports the local connection. Before live management,
 run readiness and version checks on the machine serving the management API.
 A connected client's machine listener does not serve ordinary management routes;
 the CLI refuses that target rather than automatically forwarding the operation.
@@ -21,14 +21,14 @@ remote service are separate observations; retain partial/refused outcomes.
 
 ### Usage targets and companion views
 
-`ocx usage` on a connected client uses its enrolled data key for the Hub's
+`orl usage` on a connected client uses its enrolled data key for the Hub's
 self-scoped `/v1/usage` report. It does not expose account breakdowns or other
 clients' records. Exact provider/model filters and custom windows retain that
 scope; `--search` selects model rows locally after the scoped read and leaves
 its totals intact. `--api-key-id` is refused on connected clients; use the Hub's
 management host for an authorized selected-key report.
 
-`ocx companion usage --json` is a management read of saved companion settings
+`orl companion usage --json` is a management read of saved companion settings
 and today's/30-day usage on one pinned runtime. It applies that runtime's saved
 model selection and provider exclusions. This is distinct from connected-client
 self usage and from the inference-only loopback companion listener below.
@@ -36,7 +36,7 @@ It neither relays management through a connected client nor falls back to local
 usage. Inspect each range's availability, `partial`, and settings fallback flags;
 the three reads do not form an atomic snapshot. See [the recipe](03_recipes.md#29-read-the-saved-companion-usage-view).
 
-`ocx remote-workspace hub status`, `runtimes` and `sessions` inspect the serving
+`orl remote-workspace hub status`, `runtimes` and `sessions` inspect the serving
 runtime's Hub inventory. They can invoke its existing discovery/probe work.
 Available empty inventory differs from unavailable/nonzero. Remote browser
 navigation, browser-session controls and paired-session SSH/link flows remain
@@ -58,7 +58,7 @@ credential, through the **loopback companion listener**:
 ```
 
 `port` on that listener is optional, and its absence is the whole design. Omitted means
-"bind `127.0.0.1:<proxy port>`" — the address `ocx claude`, Claude Desktop, Cursor, the
+"bind `127.0.0.1:<proxy port>`" — the address `orl claude`, Claude Desktop, Cursor, the
 `system-env` injection and the routed vision helper already write, so nothing on the hub
 has to learn a new port. Setting a `port` (`{ "enabled": true, "port": 10104 }`) still
 works and puts the two surfaces on separate ports; local integrations then follow the
@@ -84,29 +84,29 @@ credential. Do not propose widening the listener to `/api/*` as a fix for anythi
 
 Changing this field needs a proxy restart — the sockets bind once at startup and the
 exported client files are written from the resolved port. On a background service the command
-is `ocx service restart`, which always restarts (on macOS it kickstarts an unchanged,
-already-loaded job in place); `ocx service repair` would correctly no-op and leave the old
-process serving. `ocx restart` is the separate verb for a proxy you started yourself.
+is `orl service restart`, which always restarts (on macOS it kickstarts an unchanged,
+already-loaded job in place); `orl service repair` would correctly no-op and leave the old
+process serving. `orl restart` is the separate verb for a proxy you started yourself.
 
 ### The hub gate on the hub's own clients
 
 A hub does **not** rewrite its own Codex/Grok/Claude configuration unless that listener is
-enabled. `ocx sync`, `ocx sync-cache`, `ocx ensure` and `ocx restore back` skip the write
+enabled. `orl sync`, `orl sync-cache`, `orl ensure` and `orl restore back` skip the write
 and say exactly this:
 
 > This machine is a hub; it does not rewrite its own Codex/Grok/Claude configs unless
 > unauthenticatedLoopbackListener is enabled.
 
 Read that as the gate, not as the operator's `clientIntegrations` toggle — it is claimed
-only when the toggle is ON and the gate is what stopped the write. A gated `ocx ensure`
+only when the toggle is ON and the gate is what stopped the write. A gated `orl ensure`
 leaves an existing managed Grok block in place instead of stripping it, and a gated
-`ocx restore back` reports the gate instead of blaming a competing writer. The fix is to
-enable the listener and restart (`ocx service restart` on a service install), or to accept
+`orl restore back` reports the gate instead of blaming a competing writer. The fix is to
+enable the listener and restart (`orl service restart` on a service install), or to accept
 that this hub leaves its own clients native.
 
 ### The hub's data token is not yours to produce
 
-The hub's data-admission token provisions itself. `ocx service install` on a non-loopback
+The hub's data-admission token provisions itself. `orl service install` on a non-loopback
 bind resolves it as: `OPENCODEX_API_AUTH_TOKEN` from the installing shell, then an existing
 owner-only `service-api-token` file, then 32 fresh random bytes. The result is written
 `0600` and the launch wrapper reads the file at start, so the value never enters a plist, a
@@ -118,12 +118,12 @@ Three consequences for an agent:
   the one time it was recommended, a *management admin* token went into
   `OPENCODEX_API_AUTH_TOKEN` and crash-looped the hub. The installer refuses an admin token
   in either place it can appear — the variable, or a reused `service-api-token` file — and
-  the remedy differs: unset the variable, or delete the file and run `ocx service repair`.
+  the remedy differs: unset the variable, or delete the file and run `orl service repair`.
   Both checks run even on a loopback bind, because the wrapper reads that file into the
   variable whatever the hostname.
 - **Never suggest regenerating it to fix something.** An existing file is reused on purpose;
   replacing it invalidates every per-client key already exchanged. Rotation is
-  `ocx connect rotate`'s job, on the client.
+  `orl connect rotate`'s job, on the client.
 - **Never copy the file to another machine.** Each client gets its own revocable key from the
   pairing exchange.
 
@@ -131,9 +131,9 @@ Three consequences for an agent:
 will not accept. Report it and let the operator fix the permissions; do not read, print, or
 rewrite the file.
 
-### `ocx status` answers most hub questions
+### `orl status` answers most hub questions
 
-On a hub, `ocx status` prints a `Hub:` block: the advertised data origin and whether it
+On a hub, `orl status` prints a `Hub:` block: the advertised data origin and whether it
 came from `hub.dataPublicOrigin` or the bind address, the loopback listener's state
 (`companion` / `ported` / `off`) and port, the management ingress, the management origin,
 the data token's state (`present (file)`, `unsafe (file)`, `admin-collision (file)`,
@@ -142,10 +142,10 @@ ports or tokens.
 
 The token state is always about the **file**, because the launch wrapper overwrites the
 environment from it before exec. A separate sub-line reports `OPENCODEX_API_AUTH_TOKEN`
-being set in the invoking shell, which decides only what a foreground `ocx start` in that
+being set in the invoking shell, which decides only what a foreground `orl start` in that
 shell would admit. `admin-collision (file)` is the incident shape: that file holds the
 management token, the hub fences its management API closed at boot, and the fix is to
-delete the file and run `ocx service repair` — **not** to unset anything.
+delete the file and run `orl service repair` — **not** to unset anything.
 
 ## Which parts need pairing (the common misconception)
 
@@ -182,7 +182,7 @@ neither loopback position nor Tailscale identity vouches for it.
 |---|---|
 | `standalone` (default) | No hub UI renders and no machine-plane request is issued. The feature is absent, not merely disabled — `gui/tests/api-targets.test.ts` pins zero requests at boot. |
 | `hub` | Holds models and credentials. Other machines connect to it. |
-| `client` | Connected to a hub. `ocx connect` puts a machine in this role. |
+| `client` | Connected to a hub. `orl connect` puts a machine in this role. |
 
 Minimum hub config for a browser-reachable hub:
 
@@ -221,15 +221,15 @@ secret in argv; there is no flag for it and adding one would defeat the design.
 
 | Command | Purpose |
 |---|---|
-| `ocx connect <url> --pairing-code-stdin` | Join a hub with a one-time pairing code |
-| `ocx connect <url> --admin-token-stdin` | Join a hub with the hub admin token (automation) |
-| `ocx connect status [--json]` | Inspect the connection |
-| `ocx connect rotate --pairing-code-stdin` | Rotate this client's data key |
-| `ocx connect revoke --admin-token-stdin` | Kill this client's key at the hub — works only while connected |
-| `ocx disconnect [--keep-catalog]` | Restore local state and clear the connection |
-| `ocx gui` | Open the dashboard |
-| `ocx gui pair --origin <browser-origin>` | Issue a pairing grant for a remote browser |
-| `ocx hub invite [--json]` | Hub-side: mint a code and print the whole `ocx connect` line for one more machine |
+| `orl connect <url> --pairing-code-stdin` | Join a hub with a one-time pairing code |
+| `orl connect <url> --admin-token-stdin` | Join a hub with the hub admin token (automation) |
+| `orl connect status [--json]` | Inspect the connection |
+| `orl connect rotate --pairing-code-stdin` | Rotate this client's data key |
+| `orl connect revoke --admin-token-stdin` | Kill this client's key at the hub — works only while connected |
+| `orl disconnect [--keep-catalog]` | Restore local state and clear the connection |
+| `orl gui` | Open the dashboard |
+| `orl gui pair --origin <browser-origin>` | Issue a pairing grant for a remote browser |
+| `orl hub invite [--json]` | Hub-side: mint a code and print the whole `orl connect` line for one more machine |
 
 Connect flags: `--clients codex,claude` (which client configs to point at the hub),
 `--management-url <url>` (when management lives at a different address),
@@ -238,13 +238,13 @@ connection when no management port can be opened), `--no-sync` (connect without 
 the catalog), and `--catalog-timeout <seconds>` (1–120 seconds of catalog-transfer
 inactivity before failing; arriving bytes reset the deadline).
 
-`ocx gui pair` refuses an origin that is not in `hub.managementPublicOrigin` or
+`orl gui pair` refuses an origin that is not in `hub.managementPublicOrigin` or
 `corsAllowOrigins`. Grants are single-use, expire in five minutes, are origin-bound,
 stored as digests, and rate-capped at 8/min. They are secrets: do not persist one.
 
-## Inviting a machine (`ocx hub invite`)
+## Inviting a machine (`orl hub invite`)
 
-Have the operator run `ocx hub invite` on the **hub** in a human-operated terminal outside
+Have the operator run `orl hub invite` on the **hub** in a human-operated terminal outside
 the agent session, then transfer the generated command directly to the joining machine.
 Both text and JSON output contain a plaintext pairing grant or a command embedding it;
 do not run either mode through an agent tool or ask for its secret-bearing output in chat.
@@ -252,7 +252,7 @@ The placeholder below illustrates the operator's command, not a request to relay
 
 ```text
 # Run on the other machine:
-echo '<code>' | ocx connect https://host.ts.net:8443 --management-url https://host.ts.net --pairing-code-stdin
+echo '<code>' | orl connect https://host.ts.net:8443 --management-url https://host.ts.net --pairing-code-stdin
 ```
 
 Origins: data from `--data-url`, then `hub.dataPublicOrigin`, then the bind address;
@@ -268,13 +268,13 @@ the `hub.dataPublicOrigin` fix. An explicit override is never second-guessed: a 
 origin is legitimate over an SSH tunnel.
 
 Every successful invite prints a non-secret `Bound browser origin:` line on stderr. The operator may report that line and the expiry for verification. A grant is bound to
-one origin and a remote `ocx connect` presents `Origin: http://localhost:<its own configured
+one origin and a remote `orl connect` presents `Origin: http://localhost:<its own configured
 port>`, so when the bound origin is not the default the other machine must already be running
 on that port. Relay that line; it is the difference between a working exchange and a spent
 code.
 
 `invite` needs no admin token and nothing exported into the shell: it drives the same
-attested local route `ocx gui pair` uses, authorized by the running proxy's own attestation
+attested local route `orl gui pair` uses, authorized by the running proxy's own attestation
 secret. It requires a running hub.
 
 It refuses **before** minting anything when the setup cannot work: `runtimeRole` is not
@@ -288,10 +288,10 @@ fix. The browser-origin one looks like this:
 
 ```text
 No loopback browser origin is admitted for pairing. Add the connecting machine's local origin:
-ocx config set corsAllowOrigins '["http://localhost:10100"]'
+orl config set corsAllowOrigins '["http://localhost:10100"]'
 ```
 
-`ocx connect` sends `Origin: http://localhost:<its own proxy port>` when it exchanges the
+`orl connect` sends `Origin: http://localhost:<its own proxy port>` when it exchanges the
 grant, and grants are origin-bound, so only `hub.managementPublicOrigin` itself or a
 loopback entry of `corsAllowOrigins` can ever match. Run the command it prints rather than a
 hand-written one: a whole-array set replaces the array, so the printed line carries the hub's
@@ -301,10 +301,10 @@ up.
 `--json` emits `{ code, expiresAt, dataUrl, managementUrl, command }` with `expiresAt` as
 ISO 8601; `--clients codex,claude` chooses which client configs the printed command points
 at the hub. The code goes to stdout and the "secret, single-use" warning to stderr, matching
-`ocx gui pair`. Treat it as a secret: five-minute TTL, one use, rate-capped. Do not persist
+`orl gui pair`. Treat it as a secret: five-minute TTL, one use, rate-capped. Do not persist
 it, and do not echo it back into a transcript you are keeping.
 
-## Reading `ocx connect status`
+## Reading `orl connect status`
 
 Disconnected is a single line. Connected prints hub, management URL and transport,
 protocol version, API key id, selected clients, and three health fields worth checking:
@@ -326,7 +326,7 @@ new key. So the contract is: apply the new key, verify the connection, then comm
 
 Raw access-key creation and rotation-start return plaintext and belong outside the agent
 session; follow [recipe 5](03_recipes.md#5-prepare-an-access-key-rotation-without-exposing-the-new-key)
-for the human handoff and separate revocation approval. The managed `ocx connect rotate`
+for the human handoff and separate revocation approval. The managed `orl connect rotate`
 flow returns non-secret status and is a distinct command, not permission to invoke the raw
 secret-returning endpoint from an agent tool.
 
@@ -337,20 +337,20 @@ commits only once both sides are confirmed to have accepted.
 
 This is the part that is most often done halfway.
 
-`ocx disconnect` is **local only**. It restores the pre-connect Codex config from the
+`orl disconnect` is **local only**. It restores the pre-connect Codex config from the
 journal, removes the service token, and clears the hub catalog (`--keep-catalog` keeps
 it). It then tells you plainly that the hub key is still valid and must be revoked from
 Integrations → API Keys.
 
 Revocation is the other half:
 
-- **Device still connected:** `ocx connect revoke --admin-token-stdin`, then `ocx disconnect`.
+- **Device still connected:** `orl connect revoke --admin-token-stdin`, then `orl disconnect`.
   `revoke` only works while connected, so it comes first.
 - **Device lost, already disconnected, or unreachable:** delete the key in the hub
   dashboard under Integrations → API Keys.
 
 To return the hub itself to a normal install, set `runtimeRole` to `standalone` and restart
-with `ocx service restart` (or `ocx restart` for a proxy you run yourself). Leftover `hub` and
+with `orl service restart` (or `orl restart` for a proxy you run yourself). Leftover `hub` and
 `remoteGui` blocks are inert outside the hub role.
 
 A remote browser logging itself out (`/api/session/logout`) is a third, separate action.
@@ -372,7 +372,7 @@ Do not work around these. Each one means unwinding would damage state that
 
 - *"Do I need to pair to set up the hub?"* No. Pairing is only for a remote browser that
   is neither on loopback nor covered by `remoteGui.allowedTailscaleUsers`.
-- *"I ran `ocx disconnect`, am I done?"* Not yet — the hub key is still valid. Revoke it
+- *"I ran `orl disconnect`, am I done?"* Not yet — the hub key is still valid. Revoke it
   at the hub, or delete it from Integrations → API Keys.
 - *"Why does rotation need two steps?"* Because the old key must outlive the moment the
   new one is issued, or a client that has not yet been updated is stranded.

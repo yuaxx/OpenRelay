@@ -1,22 +1,22 @@
 ---
 title: Web 儀表板
-description: 用於管理代理健康狀態、provider、模型、委派指引、認證池、usage 和日誌的 opencodex GUI。
+description: 用於管理代理健康狀態、provider、模型、委派指引、認證池、usage 和日誌的 OpenRelay GUI。
 ---
 
-opencodex 內建了一個由代理提供服務的本機 web 儀表板（`gui/` 下的 Vite/React 應用）。你可以在
+OpenRelay 內建了一個由代理提供服務的本機 web 儀表板（`gui/` 下的 Vite/React 應用）。你可以在
 這裡快速管理 provider、Codex/ChatGPT 帳號、目錄模型、sidecar、子代理設定和請求流量。
 
 ## 開啟儀表板
 
 ```bash
-ocx gui
+orl gui
 ```
 
 該命令會在瀏覽器中開啟 `http://localhost:<port>`；在啟用管理 ingress 的 hub 上則開啟 `http://127.0.0.1:<管理埠>`；如果代理尚未執行，會先自動啟動。開發時也可
 讓 GUI dev server 單獨連線到正在執行的代理：
 
 ```bash
-ocx start
+orl start
 bun run dev:gui
 ```
 
@@ -59,7 +59,7 @@ GUI session 簽發到服務的頁面中，並在到期或代理重啟時靜默�
 | **Maintenance** | 重新同步 Codex 模型目錄，檢視專案級設定繞過警告，檢查 latest/preview 版本，並可在更新後重啟代理。 在桌面 shell 中，該更新入口會開啟原生應用程式更新頁面，而不是執行套件更新器。 |
 | **啟動安全** | 顯示注入的 Codex 路由能否在重啟後繼續工作，並分別顯示服務、launcher shim 狀態和準確的修復命令。 |
 | **Windows 托盤** | 安裝使用者登入托盤，一鍵控制代理啟動、停止、重啟、面板和狀態。托盤不是代理重啟服務。 |
-| **Codex 自動啟動** | 允許已安裝的 Codex launcher shim 執行 `ocx ensure`。此開關不會安裝 shim 或後臺服務。 |
+| **Codex 自動啟動** | 允許已安裝的 Codex launcher shim 執行 `orl ensure`。此開關不會安裝 shim 或後臺服務。 |
 | **Providers** | 新增、編輯、啟用/停用、刪除 provider，並在支援時管理 OAuth 帳號池和 API key 池。 |
 | **Add provider** | 分頁上方的單一搜尋框可同時搜尋帳號、免費、本機、付費四個分頁。搜尋時選取的分頁不會跳轉，結果依分頁分組並顯示數量。本機執行環境（Ollama、vLLM、LM Studio、LiteLLM）有專屬分頁，過長的說明會截斷為兩行，點擊即可查看全文。 |
 | **Codex Auth** | 新增 ChatGPT/Codex 池帳號，選擇下一 session 的帳號，重新整理 5h / 每週 / 30d 配額，啟用或停用配額自動切換，設定其 1–100% 閾值和臨時故障 failover。 |
@@ -67,7 +67,7 @@ GUI session 簽發到服務的頁面中，並在到期或代理重啟時靜默�
 | **Models** | 開關原生 GPT 與路由模型，設定 provider allowlist、上下文上限、v1/base/v2 以及 v2 thread 數量。頁面會區分已儲存至中樞端、此用戶端已取得，以及已在執行中的用戶端生效這三種狀態。取得時間無法證明內容包含中樞端最新儲存，執行階段生效狀態會明確顯示為尚未驗證。 |
 | **Logs** | 自動重新整理近期請求，顯示 token、請求強度、實際模型、provider、狀態、request id、耗時和錯誤詳情。 |
 | **Usage / Debug** | 檢視 token usage 覆蓋率與趨勢，或啟用可選的 provider transport 和 usage 提取診斷。 |
-| **Stop** | 優雅地停止代理和已安裝的後臺服務，恢復原生 Codex 並退出（`POST /api/stop`）。在使用工作排程器後端的 Windows 上，儀表板會拒絕並提示改用 `ocx stop`：工作結束後包裝程序仍可能重新啟動 Proxy，只有執行在 Proxy 之外的 stop 才能在還原用戶端設定前確認這個重啟視窗。被拒絕時不會做任何變更。 |
+| **Stop** | 優雅地停止代理和已安裝的後臺服務，恢復原生 Codex 並退出（`POST /api/stop`）。在使用工作排程器後端的 Windows 上，儀表板會拒絕並提示改用 `orl stop`：工作結束後包裝程序仍可能重新啟動 Proxy，只有執行在 Proxy 之外的 stop 才能在還原用戶端設定前確認這個重啟視窗。被拒絕時不會做任何變更。 |
 
 用量、儀表板、供應商工作區、供應商目錄和 API 金鑰頁面會提示部分記錄被排除，即使沒有可讀取的記錄。次數、日期和使用排名僅反映可讀取的記錄。歷史不完整時，無法儲存模型的最常用排序；請選擇其他排序或修復歷史後重試。
 
@@ -106,7 +106,7 @@ Logs 可組合介面、被攔截請求、供應商、完整模型名稱、狀態
 ## 委派選擇器與生成路由的區別
 
 Dashboard 的 **Sub-agent delegation** 選擇器會儲存 `injectionModel`，以及可選的
-`injectionEffort`。在 v1 turn 中，opencodex 會注入一段指引，告訴父代理呼叫 `spawn_agent` 時應
+`injectionEffort`。在 v1 turn 中，OpenRelay 會注入一段指引，告訴父代理呼叫 `spawn_agent` 時應
 傳入哪個精確模型和 reasoning 強度。只要選定模型，無論父代理目前使用何種 reasoning 強度，都會
 啟用這段指引；清除模型時也會清除已儲存的強度。
 
@@ -156,12 +156,12 @@ Dashboard 的 **Sub-agent delegation** 選擇器會儲存 `injectionModel`，以
 
 ## 星標是你的決定，不是 agent 的
 
-側邊欄的星標按鈕——以及 `ocx start` 在互動式終端機中詢問的一次性問題——都透過 **你自己的
-`gh` 登入** 執行。opencodex 不持有任何 GitHub token，它唯一得知的是你的 yes 或 no。
+側邊欄的星標按鈕——以及 `orl start` 在互動式終端機中詢問的一次性問題——都透過 **你自己的
+`gh` 登入** 執行。OpenRelay 不持有任何 GitHub token，它唯一得知的是你的 yes 或 no。
 
 由於這會寫入你的 GitHub 帳號，agent 驅動的呼叫者會被拒絕，而不是被允許替你回答：
 
-- `ocx start` 與 `ocx service install` 在 agent 或 CI harness 驅動時 **完全略過該提示**
+- `orl start` 與 `orl service install` 在 agent 或 CI harness 驅動時 **完全略過該提示**
   （`CLAUDECODE`、`CODEX_THREAD_ID`、`CURSOR_TRACE_ID`、`CI` 等）。一次性 marker 保持未寫入，
   因此真正的提示仍會在你下次手動輸入時出現。agent 會被要求改為詢問你——而且是以你必須回答的
   簡單 Yes/No 選擇，而不是它可以繞過的軟性旁白。如果你一直沒有回答，agent 會被要求再次詢問，

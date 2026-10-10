@@ -3,7 +3,7 @@ title: 어댑터
 description: 7가지 프로바이더 어댑터의 대상, 요청 구성 방식, 고유 동작.
 ---
 
-**어댑터**는 opencodex의 내부 요청/응답 모델과 프로바이더 wire 형식 사이를 변환합니다. 모든
+**어댑터**는 OpenRelay의 내부 요청/응답 모델과 프로바이더 wire 형식 사이를 변환합니다. 모든
 어댑터는 `ProviderAdapter` 인터페이스(`src/adapters/base.ts`)를 구현합니다.
 
 ```ts
@@ -77,7 +77,7 @@ Ollama 공급자에 `adapter: "ollama-native"`로 설정할 수도 있습니다.
   closed**입니다. Ollama의 `/api/chat`에는 이를 강제할 `tool_choice` 필드가 없기 때문입니다.
 - **구조화 출력은 정식 Ollama Cloud에서 거부됩니다.** Ollama는 현재 Cloud에서 구조화 출력을
   지원하지 않는다고 문서화하고 있으며 Cloud는 `format` 필드를 강제하지 않습니다. 따라서
-  OpenCodex는 스키마가 지정된 요청에 자유 서술을 돌려주는 대신 요청을 닫고 실패시킵니다. 로컬 /
+  OpenRelay는 스키마가 지정된 요청에 자유 서술을 돌려주는 대신 요청을 닫고 실패시킵니다. 로컬 /
   커스텀 `ollama-native` 엔드포인트는 Ollama 네이티브 `format` 매핑(`json_object` → `"json"`,
   `json_schema` → schema 객체 자체)을 유지합니다.
 
@@ -200,7 +200,7 @@ discovery에 모두 적용됩니다.
   compaction, helper/shadow 격리, 계정/모델 불일치, 없는 ref, decode 실패,
   forced-fresh 복구, invalid_argument 재시도는 기존 full replay로 돌아갑니다. 프로세스 재시작은
   메모리 store를 버리고 full replay합니다. Cursor Connect는 권위 있는 cache_read_tokens를 주지
-  않으므로 OpenCodex usage만 보고 cache hit라고 단정하지 않습니다.
+  않으므로 OpenRelay usage만 보고 cache hit라고 단정하지 않습니다.
   범위가 제한된 Desktop 대체 식별자는 프로세스 로컬 HMAC 파생 소유자만 보관하며, 원본
   session/thread 헤더나 OAuth/authorization 자료를 checkpoint 상태에 쓰지 않습니다. OAuth 기반
   live transport와 계정별 live model discovery는 아직 실험 기능입니다. 로그인과 transport 설정은
@@ -221,7 +221,7 @@ discovery에 모두 적용됩니다.
 - 일반 fetch/parse 대신 `runTurn`을 씁니다. 요청과 서버 이벤트는 `devin/cloud-direct/wire.ts`의 수동 protobuf 프레이밍으로 다룹니다.
 - `GetCascadeModelConfigs`로 계정별 모델을 조회하고, 플랜에 없는 모델은 요청 시점이 아니라 목록에서 걸러집니다.
 - Cognition은 도구 설명 길이 제한과 정확 문구 차단 목록을 적용합니다. 어댑터가 알려진 문구를 바꾸고 긴 설명을 잘라냅니다.
-- 키는 갱신되지 않습니다. 만료되거나 폐기되면 `ocx login devin`을 다시 실행하세요.
+- 키는 갱신되지 않습니다. 만료되거나 폐기되면 `orl login devin`을 다시 실행하세요.
 - CLI 임포트 경로를 써도 로컬인 것은 자격뿐이며, 턴은 어느 경로든 Cognition으로 갑니다. 예전 빌드에는 `devin-cli` id 아래 로컬 `devin acp` 자식 프로세스에 Agent Client Protocol 세션으로 턴을 실행하는 두 번째 어댑터가 있었지만 제거됐습니다. 그 어댑터를 아직 가리키는 저장 설정은 스타트업에서 `devin`으로 리라이트되며, `"devin-acp"` 같은 커스텀 이름 행도 마찬가지입니다.
 
 ## `azure-openai` (별칭: `azure`)

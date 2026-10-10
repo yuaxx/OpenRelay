@@ -16,7 +16,7 @@ Image Bridge обнаруживает такие вызовы и прозрач�
   чтобы не создавать неожиданных расходов xAI — см. [Конфигурацию](#конфигурация) ниже).
 - Нужна запись провайдера `xai` с **API-ключом**. Bridge жёстко привязывает выполнение к
   registry-endpoint'у xAI Images (`https://api.x.ai/v1`); любой настроенный override `baseUrl`
-  для image-вызовов игнорируется. Одного OAuth / `ocx login xai` недостаточно, чтобы
+  для image-вызовов игнорируется. Одного OAuth / `orl login xai` недостаточно, чтобы
   включить этот sidecar-цикл. Тот же флаг `bridgeEnabled` включает отдельный relay Codex
   `/v1/images`, чтобы встроенный клиент `image_gen` мог вызывать Imagine с grant'ом Grok CLI —
   см. [Встроенную генерацию изображений](/guides/codex-integration/#built-in-image-generation-image_gen).
@@ -81,11 +81,11 @@ Image Bridge активируется только на **Responses**-ходах
 напрямую в `/v1/images/generations` (или `/images/edits`) — этот путь описан отдельно в
 [Интеграции с Codex](/guides/codex-integration/#built-in-image-generation-image_gen).
 
-1. Когда Responses-запрос перечисляет `image_generation` в `tools`, OpenCodex замечает это на
+1. Когда Responses-запрос перечисляет `image_generation` в `tools`, OpenRelay замечает это на
    этапе предобработки.
 2. Hosted tool заменяется на **синтетический function tool**, который маршрутизируемая модель
    может вызвать обычным образом — вместо непрозрачного hosted tool модель видит вызываемый tool.
-3. Когда модель вызывает этот tool, OpenCodex перехватывает вызов и отправляет prompt в API
+3. Когда модель вызывает этот tool, OpenRelay перехватывает вызов и отправляет prompt в API
    генерации изображений xAI.
 4. Сгенерированные изображения сохраняются в `~/.opencodex/artifacts/`, а **локальный путь к
    файлу** возвращается модели как результат tool.

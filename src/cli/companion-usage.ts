@@ -2,7 +2,7 @@
 import { ObservationError, withObserveStream, type ObserveStreamDeps } from "./observe-stream";
 import { printData, rejectArgs, runCliAction, takeFlag } from "./runtime-api";
 
-const USAGE = "Usage: ocx companion usage [--json]";
+const USAGE = "Usage: orl companion usage [--json]";
 const TOTAL_FIELDS = ["requests", "totalTokens", "inputTokens", "outputTokens", "cachedInputTokens", "cacheReadInputTokens", "estimatedCostUsd", "measuredRequests", "pricedRequests", "coverageRatio"] as const;
 type Totals = Partial<Record<typeof TOTAL_FIELDS[number], number>>;
 type Model = Totals & { model: string; provider: string };

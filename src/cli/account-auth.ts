@@ -38,11 +38,11 @@ function writeStdoutFully(text: string): void {
 }
 
 const USAGE = `Usage:
-  ocx account login <provider> [--id <account-id>] [--reauth] [--device] [--method builder-id|google|github] [--open-browser on|off] [--add-account on|off] [--code -] [--no-wait] [--json]
-  ocx account code <provider> [--flow <flow-id>] [--json]   (reads the code from stdin)
-  ocx account cancel <provider> [--flow <flow-id>] [--json] (--flow required for codex)
-  ocx account reset-credits <account-id|main> [--consume --yes [--operation-id <uuid>]] [--json]
-  ocx account grok-reset-coupons [<account-id>] [--consume --yes [--token-id <token-id>] [--operation-id <uuid>]] [--json]
+  orl account login <provider> [--id <account-id>] [--reauth] [--device] [--method builder-id|google|github] [--open-browser on|off] [--add-account on|off] [--code -] [--no-wait] [--json]
+  orl account code <provider> [--flow <flow-id>] [--json]   (reads the code from stdin)
+  orl account cancel <provider> [--flow <flow-id>] [--json] (--flow required for codex)
+  orl account reset-credits <account-id|main> [--consume --yes [--operation-id <uuid>]] [--json]
+  orl account grok-reset-coupons [<account-id>] [--consume --yes [--token-id <token-id>] [--operation-id <uuid>]] [--json]
 
 --device runs the OpenAI device-code login instead of the browser callback: use
 it when the proxy has no browser or nothing can reach localhost:1455, such as a
@@ -52,8 +52,8 @@ machine.
 The redirect URL or authorization code is a short-lived credential. Pipe it in
 rather than passing it as an argument, where it lands in shell history and is
 visible to anyone who can run ps:
-  pbpaste | ocx account code <provider> --flow <flow-id>
-  ocx account login <provider> --code -   (same, for the login flow)`;
+  pbpaste | orl account code <provider> --flow <flow-id>
+  orl account login <provider> --code -   (same, for the login flow)`;
 
 /**
  * The Codex account pool answers to three spellings, and a user reaches for whichever
@@ -307,9 +307,9 @@ async function login(argv: string[], deps: RuntimeApiDeps): Promise<number | voi
       if (start.flowId) state.flowId = start.flowId;
       if (state.status === "done") {
         if (state.validationPending === true) {
-          printData({ ...state, recoveryCommand: "ocx gui", recoveryAction: "After quota recovers, click Refresh quotas in the dashboard Codex account pool." }, wantsJson, [
+          printData({ ...state, recoveryCommand: "orl gui", recoveryAction: "After quota recovers, click Refresh quotas in the dashboard Codex account pool." }, wantsJson, [
             "Account registered; validation pending (routing disabled).",
-            "After quota recovers, open 'ocx gui' and click Refresh quotas to complete validation.",
+            "After quota recovers, open 'orl gui' and click Refresh quotas to complete validation.",
           ]);
         } else {
           printData({ ...state, modelSelection: modelSelectionNextSteps("openai") }, wantsJson, [`Logged in${state.email ? ` as ${String(state.email)}` : ""}.`, ...modelSelectionGuidance("openai")]);
@@ -402,7 +402,7 @@ async function cancel(argv: string[], deps: RuntimeApiDeps): Promise<void> {
   rejectArgs(args, USAGE);
   const codex = CODEX_NAMES.has(provider);
   if (codex && !flowId) {
-    throw new CliUsageError("Codex login cancel requires --flow <flow-id> (printed by 'ocx account login').", USAGE);
+    throw new CliUsageError("Codex login cancel requires --flow <flow-id> (printed by 'orl account login').", USAGE);
   }
   const result = await runtimeRequest(codex ? "/api/codex-auth/login/cancel" : "/api/oauth/login/cancel", {
     method: "POST",

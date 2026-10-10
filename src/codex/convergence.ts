@@ -680,7 +680,7 @@ export async function commitCodexCatalogCandidate(
         // or that belongs to another OPENCODEX_HOME, cannot publish a native-only catalog (#6529).
         if (state.routedRemoval !== null && !routedRemovalBackedByConfigFile(state.routedRemoval)) {
           auditRefusedCatalogReplacement(permit, state.home, state.catalog, "unbacked-routed-removal");
-          console.warn(`[opencodex] ${unbackedRoutedRemovalMessage(state.routedRemoval.namespaces.length)}`);
+          console.warn(`[openrelay] ${unbackedRoutedRemovalMessage(state.routedRemoval.namespaces.length)}`);
           return { kind: "refused", reason: "unbacked-routed-removal" } as const;
         }
         return fixedCommit(state, permit);
@@ -693,7 +693,7 @@ export async function commitCodexCatalogCandidate(
     if (acquired.reason === "foreign-owner" || acquired.reason === "owner-unknown") {
       // Not retryable: another OPENCODEX_HOME owns this Codex home until it restores (#6529).
       state.consumed = true;
-      console.warn(`[opencodex] ${acquired.reason === "foreign-owner"
+      console.warn(`[openrelay] ${acquired.reason === "foreign-owner"
         ? FOREIGN_CODEX_HOME_OWNER_MESSAGE : UNKNOWN_CODEX_HOME_OWNER_MESSAGE}`);
       return { kind: "refused", reason: acquired.reason };
     }

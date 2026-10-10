@@ -24,7 +24,7 @@ export function ConnectPairingForm({
   const activeRequest = useRef<AbortController | null>(null);
   useEffect(() => () => activeRequest.current?.abort(), []);
   const copyFeedback = useCopyFeedback<string>();
-  const command = `ocx gui pair --origin "${window.location.origin}"`;
+  const command = `orl gui pair --origin "${window.location.origin}"`;
   const copied = copyFeedback.outcomeFor(command);
 
   const submit = async (event: FormEvent) => {

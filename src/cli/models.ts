@@ -21,9 +21,9 @@ import { projectLocalSyncResult, type LocalSyncResult } from "./local-sync-resul
 
 export interface ModelsCommandDeps extends RuntimeApiDeps { syncModels?: typeof syncModelsToCodex; }
 
-const ADD_USAGE = "Usage: ocx models add <provider> <modelId> [--display-name <name>] [--context-window <tokens>] [--modalities text,image,audio] [--reasoning-efforts <none,minimal,low,medium,high,xhigh,max,ultra>] [--default-reasoning-effort <level>] [--live] [--json]";
-const REMOVE_USAGE = "Usage: ocx models remove <customId|provider/modelId> [--yes] [--live] [--json]";
-const LIST_CUSTOM_USAGE = "Usage: ocx models list-custom [--json]";
+const ADD_USAGE = "Usage: orl models add <provider> <modelId> [--display-name <name>] [--context-window <tokens>] [--modalities text,image,audio] [--reasoning-efforts <none,minimal,low,medium,high,xhigh,max,ultra>] [--default-reasoning-effort <level>] [--live] [--json]";
+const REMOVE_USAGE = "Usage: orl models remove <customId|provider/modelId> [--yes] [--live] [--json]";
+const LIST_CUSTOM_USAGE = "Usage: orl models list-custom [--json]";
 const ALLOWED_MODALITIES = new Set(["text", "image", "audio"]);
 
 import { parseReasoningArgs } from "./models-custom-input";
@@ -176,7 +176,7 @@ async function handleCustomAdd(args: string[], deps: ModelsCommandDeps): Promise
 
   const config = loadConfig();
   if (!hasOwnProvider(config.providers, provider)) {
-    fail(`provider "${provider}" is not configured. See: ocx provider list`);
+    fail(`provider "${provider}" is not configured. See: orl provider list`);
   }
 
   const displayName = displayNameValue?.trim() || undefined;
@@ -363,14 +363,14 @@ function handleConfiguredModels(args: string[]): void {
     } else {
       console.error(`Unexpected argument(s): ${shown.join(", ")}`);
     }
-    console.error("Usage: ocx models [--provider <name>] [--json]");
+    console.error("Usage: orl models [--provider <name>] [--json]");
     process.exit(1);
   }
 
   const config = loadConfig();
 
   if (providerFilter && !hasOwnProvider(config.providers, providerFilter)) {
-    console.error(`Provider "${providerFilter}" is not configured. See: ocx provider list`);
+    console.error(`Provider "${providerFilter}" is not configured. See: orl provider list`);
     process.exit(1);
   }
 

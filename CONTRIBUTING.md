@@ -1,85 +1,81 @@
-# Contributing
+# Contributing to OpenRelay
 
-Thanks for helping with opencodex.
+OpenRelay is an open-source, universal AI provider proxy for OpenAI Codex and Claude Code, forked from OpenCodex. We welcome thoughtful contributions, bug fixes, and documentation improvements.
 
-- Start with the canonical guide: [Contributing](https://opencodex.me/contributing/)
-- Pull-request quality contract: [Review readiness and author responsibility](https://opencodex.me/contributing/pr-quality/)
-- Public user docs live in [`docs-site/`](./docs-site)
-- Current maintainer invariants live in [`structure/`](./structure); start at [`structure/INDEX.md`](./structure/INDEX.md)
-- Maintainer roles and merge policy live in [`MAINTAINERS.md`](./MAINTAINERS.md)
-- Attribution for work landed through a maintainer carry lives in [`CREDITS.md`](./CREDITS.md)
-- Planning and investigation notes live in [`devlog/`](./devlog); older retired notes remain in git history
-- PR screenshots go in the pull request description, never on your branch: drag the image into the
-  description editor, or, with push access, commit it to the `pr-assets` branch and link it by commit SHA
-  (see that branch's README). Evidence images committed to a PR branch ride the squash merge into `dev`.
+## Development workflow
 
-## Branches
+- **Fork and branch**: Create a focused feature or fix branch from the current development branch.
+- **Target branch**: Open pull requests against the active development branch. Direct commits to `main` are reserved for maintainer releases.
+- **Upstream attribution**: OpenRelay is a fork of OpenCodex. Always preserve original copyright notices, upstream attribution, and references in [`CREDITS.md`](./CREDITS.md) and [`LICENSE`](./LICENSE).
 
-- `dev` — the only integration target for pull requests.
-- `main` — releases only; moves by maintainer-controlled promotion from `dev`.
-- `preview` — prerelease train.
+## Prerequisites and Bun versions
 
-The `dev2-go` Go native-port line has been retired. Its history is archived at
-[lidge-jun/opencodex-go-archive](https://github.com/lidge-jun/opencodex-go-archive),
-and everything now goes to `dev`. See [`MAINTAINERS.md`](./MAINTAINERS.md) for
-the reasoning.
-
-Rebase pull requests are welcome: bringing a stale branch onto the current head
-is normal contribution. Note the source commits in the description.
-
-Agent-facing repository and review rules live in [`AGENTS.md`](./AGENTS.md).
-
-For local development commands, architecture notes, and release workflow details, use the hosted
-contributing guide above instead of duplicating instructions here.
-
-Source development requires the `bun` CLI on your `PATH`. The published npm package bundles its own
-Bun runtime for end users. Package scripts such as `bun run test` and `bun run prepush` may resolve
-Bun through that bundled dependency.
-
-## Pull request contract
-
-A ready-for-review PR is the author's claim that the change is complete, understood, tested, and suitable for merging. Opening a PR does not transfer responsibility for the branch to maintainers.
-
-- **You do not need permission to fix something.** An unplanned PR for a bug you
-  hit is welcome, and several of this project's better fixes arrived exactly that
-  way. Opening an issue first helps for larger or design-shaped work, but it is
-  not an admission requirement.
-- Authors own CI failures, missing tests, merge conflicts, and review fixes.
-  Maintainers identify problems; they are not required to implement or debug the
-  fixes for contributors.
-- Behavior changes include focused regression tests. Claims such as "tested" or
-  "CI" without named commands and results are not evidence. The hygiene gate
-  checks this mechanically, and its failures are deterministic — read the message
-  and you know what to change.
-- Authentication, workflow, release automation, and dependency-installation
-  surfaces need a maintainer to sponsor the change (`maintainer-sponsored`)
-  before merge. Those are the places where a bad merge is expensive and hard to
-  unwind, which is why they are the only pre-approved surfaces here.
-- A PR that stalls with unresolved review feedback may be closed, with the reason
-  stated. A closed PR can be reopened once the stated reason is resolved, or
-  replaced with a clean one.
-
-## Local validation and hooks
+Source development requires the `bun` CLI on your `PATH`. The published npm package bundles its own Bun runtime for end users. Package scripts such as `bun run test` and `bun run prepush` may resolve Bun through that bundled dependency.
 
 The suite uses Bun 1.4.0 (`testRunnerBun`) while the shipped runtime is 1.4.2.
-`scripts/test.ts` finds a 1.4.0 binary on PATH or in `~/.bun/bin`, or uses
-`OCX_TEST_RUNNER_BUN`; install that version locally if it is missing.
+Install Bun 1.4.0 locally if you run the full test suite, or set `OCX_TEST_RUNNER_BUN` pointing to your 1.4.0 binary.
 
-Run `bun run test` before review readiness. If the full local suite is too costly
-for the task or available resources, run at least focused regression tests for
-the changed behavior. Document the reason, commands, results, and remaining
-coverage in the PR. Follow [AGENTS.md](./AGENTS.md#commands) for the complete
-validation policy; required CI must pass on the current PR head before merge.
-`bun run prepush` remains an optional comprehensive local check.
+## Installation
 
-```sh
-bun run setup:hooks
+Install dependencies at repository root and inside the GUI workspace:
+
+```bash
+# Root proxy runtime dependencies
+bun install
+
+# Web dashboard dependencies
+cd gui && bun install && cd ..
 ```
 
-This removes the unmodified, retired repository `pre-push` and `post-merge` hooks
-from Git's resolved hooks directory, including linked worktrees and
-`core.hooksPath` setups. Custom hooks are preserved. The managed post-merge hook
-was retired because it executed pulled code on every merge; rebuild the packaged
-dashboard explicitly with `bun run build:gui` after a merge that changes `gui/`
-sources. Validation no longer runs automatically on every push; existing
-contributors should rerun the setup command once to migrate their hooks.
+## Focused validation commands
+
+Before opening a pull request, run focused validation for the areas you touched:
+
+```bash
+# TypeScript strict typecheck
+bun run typecheck
+
+# Focused CLI & branding test
+bun test tests/cli/openrelay-branding.test.ts
+
+# Focused RTK compression tests
+bun test tests/responses/rtk-compression.test.ts
+
+# Repository structure & SSOT check
+bun run structure:check
+
+# Operating skill surface check
+bun run skill:surface:check
+
+# Whitespace and git diff hygiene check
+git diff --check
+```
+
+## GUI and visual checks
+
+When modifying files under `gui/`:
+
+```bash
+# Lint GUI components
+bun run lint:gui
+
+# Build GUI bundle
+cd gui && bun run build && cd ..
+```
+
+Include a screenshot of the UI change in your pull request description. Do not commit screenshot files into your git branch.
+
+## Test expectations and Windows platform notes
+
+- **Focused coverage**: Add focused regression tests near the changed subsystem in `tests/<domain>/`.
+- **Full suite exemption**: The complete test suite contains thousands of assertions across multiple platforms. Run focused regression tests for your change rather than running the full suite locally unless specifically needed.
+- **Windows EPERM / SID resolution**: On some Windows machines with non-default UAC or restricted PowerShell execution policies, Bun subprocess spawning can encounter an `EPERM` or `EACLIDENTITY` error during effective identity resolution or test queue locking. If you encounter this:
+  - Run tests with `OCX_TEST_NO_QUEUE=1` to bypass queue lock contention.
+  - Report the limitation in your PR's verification notes.
+  - Do not modify system UAC, NTFS ACLs, or certificate validation code to bypass this check.
+
+## Security, credentials, and privacy
+
+- **Zero credential leaks**: Never commit API keys, tokens, session cookies, passwords, or personal identifiers in code, fixtures, examples, or logs.
+- **Redaction**: Redact all private values from error reports and PR descriptions.
+- **Responsible disclosure**: For authentication bypasses or sensitive security vulnerabilities, consult [`SECURITY.md`](./SECURITY.md) and report privately.

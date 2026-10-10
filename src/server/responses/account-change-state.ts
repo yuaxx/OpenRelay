@@ -261,7 +261,7 @@ export function applyAccountChangeConversationStateScrub(
   }
   if (logCtx && logCtx.conversationStateScrub !== "account-change") {
     console.warn(
-      "[opencodex] dropped continuation state after a Codex pool account change; continuing fresh",
+      "[openrelay] dropped continuation state after a Codex pool account change; continuing fresh",
     );
     logCtx.conversationStateScrub = "account-change";
   } else if (logCtx) {

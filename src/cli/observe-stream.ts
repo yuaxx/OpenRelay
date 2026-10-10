@@ -88,7 +88,7 @@ export async function withObserveStream(
       live = found ? { ...found } : undefined;
       // Snapshot recovery comes from our observed target, never arbitrary transport text.
       if (context.kind === "snapshot") {
-        if (!found) throw new ObservationError("Proxy is not running. Start it with: ocx start");
+        if (!found) throw new ObservationError("Proxy is not running. Start it with: orl start");
         if (found.role === "client") throw new ObservationError("This listener runs in the client role and has no management API. Run this command on its serving hub, or open the hub dashboard.");
       }
       return found;

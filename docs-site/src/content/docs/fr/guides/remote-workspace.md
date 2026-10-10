@@ -5,7 +5,7 @@ description: Conservez Codex, Claude Code, Pi et leurs connexions sur un même O
 
 Pour les liaisons SSH entre machines, consultez [Liaison distante](/fr/guides/remote-link/).
 
-Remote Workspace permet à un OpenCodex Hub d'exécuter vos agents de programmation tandis qu'un
+Remote Workspace permet à un OpenRelay Hub d'exécuter vos agents de programmation tandis qu'un
 autre ordinateur fournit les fichiers du projet, les commandes, les tests et la puissance de
 calcul. Un téléphone ou un troisième ordinateur peut piloter la session depuis le tableau de
 bord du Hub.
@@ -33,12 +33,12 @@ Hub.
 ## Configurer le Hub
 
 L'ordinateur 1 détient toutes les connexions aux agents de programmation et toutes les sessions
-de modèle. Installez et connectez-y les agents voulus, puis démarrez OpenCodex comme Hub :
+de modèle. Installez et connectez-y les agents voulus, puis démarrez OpenRelay comme Hub :
 
 ```bash
-ocx config set runtimeRole hub
-OCX_REMOTE_WORKSPACE_ENABLED=1 ocx start
-ocx gui
+orl config set runtimeRole hub
+OCX_REMOTE_WORKSPACE_ENABLED=1 orl start
+orl gui
 ```
 
 Définissez `OCX_REMOTE_WORKSPACE_ENABLED=1` sur le processus du Hub lui-même. Le définir
@@ -64,15 +64,15 @@ ne configurez pas simultanément l'ancien bac à sable et un profil d'autorisati
 3. Sur l'ordinateur 2, placez-vous dans le répertoire du projet à exposer.
 4. Copiez la commande **Linux / macOS terminal** ou **Windows PowerShell** générée pour cet
    ordinateur. Elle associe le répertoire actuel et maintient
-   `ocx remote-workspace agent` connecté dans ce terminal.
+   `orl remote-workspace agent` connecté dans ce terminal.
 
 Le parcours manuel équivalent est :
 
 ```bash
 cd /path/to/project
-printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.example' \
+printf '%s\n' 'ONE-TIME-CODE' | orl remote-workspace pair 'https://your-hub.example' \
   --pairing-code-stdin --root "$PWD"
-ocx remote-workspace agent
+orl remote-workspace agent
 ```
 
 Sous Windows PowerShell, utilisez la commande affichée dans le tableau de bord. Sa forme
@@ -80,9 +80,9 @@ manuelle équivalente est :
 
 ```powershell
 $pairingCode = 'ONE-TIME-CODE'
-$pairingCode | ocx remote-workspace pair 'https://your-hub.example' `
+$pairingCode | orl remote-workspace pair 'https://your-hub.example' `
   --pairing-code-stdin --root (Get-Location).Path
-if ($LASTEXITCODE -eq 0) { ocx remote-workspace agent }
+if ($LASTEXITCODE -eq 0) { orl remote-workspace agent }
 ```
 
 L'exécutable OCX Bun actuel est ajouté automatiquement comme fichier unique en lecture seule
@@ -91,7 +91,7 @@ hors des chemins système, associez-la explicitement sans exposer le reste du r�
 personnel :
 
 ```bash
-printf '%s\n' 'ONE-TIME-CODE' | ocx remote-workspace pair 'https://your-hub.example' \
+printf '%s\n' 'ONE-TIME-CODE' | orl remote-workspace pair 'https://your-hub.example' \
   --pairing-code-stdin --root "$PWD" \
   --toolchain-root "$HOME/.nvm/versions/node/v24/bin"
 ```
@@ -110,7 +110,7 @@ même appareil.
 Vérifiez l'inscription locale sans afficher de secrets :
 
 ```bash
-ocx remote-workspace status
+orl remote-workspace status
 ```
 
 ## Démarrer une session de programmation distante

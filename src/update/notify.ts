@@ -262,7 +262,7 @@ export async function maybeShowUpdatePrompt(): Promise<void> {
     const choice = answer === "" ? "1" : answer;
     if (choice === "1") {
       await runUpdate();
-      console.log("\nRestart the proxy:  ocx start");
+      console.log("\nRestart the proxy:  orl start");
       process.exit(0);
     } else if (choice === "3") {
       dismissVersion(channel, latest);

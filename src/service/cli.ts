@@ -274,7 +274,7 @@ export async function serviceCommand(...args: (string | undefined)[]): Promise<v
   const backend: ServiceBackend = parsed.backend ?? (process.platform === "win32" ? readServiceBackend() : "scheduler");
   const ops = platformOps(backend);
   if (!ops) {
-    console.error("ocx service supports macOS (launchd), Windows (Task Scheduler), and Linux (systemd).");
+    console.error("orl service supports macOS (launchd), Windows (Task Scheduler), and Linux (systemd).");
     process.exit(1);
   }
   switch (command) {
@@ -388,8 +388,8 @@ export async function serviceCommand(...args: (string | undefined)[]): Promise<v
           console.error(
             `❌ service stop did not take effect: a proxy is still listening on port ${survivor.port}.`
             + "\nNative Codex was NOT restored, because doing so while the proxy is running leaves"
-            + " both pointing at each other. Check for a second service backend (`ocx service status`)"
-            + " or a manually started proxy, then re-run `ocx service stop`.",
+            + " both pointing at each other. Check for a second service backend (`orl service status`)"
+            + " or a manually started proxy, then re-run `orl service stop`.",
           );
           process.exitCode = 1;
           break;
@@ -404,7 +404,7 @@ export async function serviceCommand(...args: (string | undefined)[]): Promise<v
             console.log(`   ${describeRetainedCodexProviderTable(restore.retainedCodexProviderTable)}`);
           }
         }
-        else console.error(`⚠️ service stopped, but native Codex restore FAILED: ${restore.message}\nRun \`ocx restore\` (or check $CODEX_HOME/config.toml) before using native Codex.`);
+        else console.error(`⚠️ service stopped, but native Codex restore FAILED: ${restore.message}\nRun \`orl restore\` (or check $CODEX_HOME/config.toml) before using native Codex.`);
         if (!restore.success) process.exitCode = 1;
         // The Grok fence is the other managed config this command owns. Leaving it behind
         // pointed grok at a dead endpoint while native Codex was already restored.
@@ -446,13 +446,13 @@ export async function serviceCommand(...args: (string | undefined)[]): Promise<v
         ops.uninstall();
       } catch (err) {
         console.error(`❌ Service uninstall failed: ${err instanceof Error ? err.message : String(err)}`);
-        console.error("The service may still be installed. Check with 'ocx service status' or remove manually.");
+        console.error("The service may still be installed. Check with 'orl service status' or remove manually.");
         process.exit(1);
       }
       {
         const restore = await restoreNativeCodexAsync();
         if (!restore.success) {
-          console.error(`⚠️ native Codex restore FAILED: ${restore.message}\nRun \`ocx restore\` before using native Codex.`);
+          console.error(`⚠️ native Codex restore FAILED: ${restore.message}\nRun \`orl restore\` before using native Codex.`);
           process.exitCode = 1;
         }
         else if (restore.retainedCodexProviderTable) {
@@ -472,7 +472,7 @@ export async function serviceCommand(...args: (string | undefined)[]): Promise<v
       console.log("✅ service uninstalled.");
       break;
     default:
-      console.error("Usage: ocx service [install|repair|restart|start|stop|status|uninstall|remove|claim] [--native|--scheduler]");
+      console.error("Usage: orl service [install|repair|restart|start|stop|status|uninstall|remove|claim] [--native|--scheduler]");
       console.error("       With no subcommand, installs when absent or repairs/restarts an existing service.");
       console.error("       repair: refresh the installed backend, reloading it only when the definition changed; stale Windows tasks may request admin approval.");
       console.error("       restart: the same refresh, but always restarts the service — on macOS a healthy job is kickstarted in place.");

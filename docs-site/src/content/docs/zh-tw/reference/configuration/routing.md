@@ -15,7 +15,7 @@ description: 預設供應商選擇、模型解析順序、combo 別名、目標�
 
 ## 模型解析順序
 
-opencodex 依此順序解析請求的模型：
+OpenRelay 依此順序解析請求的模型：
 
 1. 設定中的 `policy/<id>` 或 routing-profile 別名：執行政策評估器並路由所選候選項。無法解析的 `policy/<id>` 會往下落到後續規則。
 2. 設定的 `<account-selector>/<native-openai-model>` 命名空間：透過所映射的已儲存 Codex 帳號精確路由。無效或不可用的精確目標會 fail closed。
@@ -45,7 +45,7 @@ opencodex 依此順序解析請求的模型：
 
 精確選擇繞過池指派策略與一般執行緒親和性。若映射的帳號缺失、暫停、冷卻中、不可用或需要重新認證，請求會 fail closed 而非切換帳號，且不會變更現用的池帳號。當至少設定一個合格選擇器時，Codex 目錄會隱藏裸的原生 picker 列，並為每個選擇器列出獨立的 `<selector>/<native-openai-model>` 列。裸的原生 id 保留一般的池／Direct 路由，且除非明確停用，仍留在原始 `/v1/models` 探索中。映射帳號缺失的選擇器不會被廣告。選擇器驗證、碰撞規則與隱私指引在[供應商設定](/zh-tw/reference/configuration/providers/)中說明。
 
-Codex Auth 頁面將此 picker 行為作為選擇加入功能暴露。停用它會隱藏產生的選擇器限定 picker 列並還原一般 GPT 列，但不會移除映射或變更精確 `<selector>/<model>` 路由。因此重新啟用會還原相同的公開標籤。帳號與設定變更在有界的目錄重新整理前持久化；`ocx sync` 警告僅表示 picker 目錄仍需要收斂，而非路由變更遺失。
+Codex Auth 頁面將此 picker 行為作為選擇加入功能暴露。停用它會隱藏產生的選擇器限定 picker 列並還原一般 GPT 列，但不會移除映射或變更精確 `<selector>/<model>` 路由。因此重新啟用會還原相同的公開標籤。帳號與設定變更在有界的目錄重新整理前持久化；`orl sync` 警告僅表示 picker 目錄仍需要收斂，而非路由變更遺失。
 
 ## 組合（`config.combos`）
 
@@ -127,8 +127,8 @@ CLI dry-run 接受請求證據旗標，但尚無法提供候選能力證據；�
 }
 ```
 
-CLI：`ocx route policy list [--json]`、`ocx route policy show <id> [--json]` 與
-`ocx route policy dry-run <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]`。
+CLI：`orl route policy list [--json]`、`orl route policy show <id> [--json]` 與
+`orl route policy dry-run <id> [--model-context <tokens>] [--tools] [--image] [--structured-output] [--json]`。
 Dry-run 評估候選項而不發送任何上游請求。
 
 配額證據（`optimize.quota`、`require.minQuotaHeadroom`、`unknownEvidence.quota`）來自帳號索引的 Codex 與 Anthropic 配額快取。僅當證據已識別帳號時，runtime 候選項才收到快取配額。未綁定的標準 `openai` 與 Anthropic 候選項在政策評估期間保持未知，因為池選擇、Direct 呼叫者身分、供應商輪換與執行緒親和性是在政策選擇 provider/model 之後才解析；不將行程現用帳號當作替代。
@@ -143,7 +143,7 @@ Dry-run 評估候選項而不發送任何上游請求。
 
 ### 目錄資格
 
-即使 combo 無法被列出，它仍可直接路由。`ocx sync`、`/v1/models` 與 Codex picker 僅在每個目標暴露可交集的能力時才列出它：
+即使 combo 無法被列出，它仍可直接路由。`orl sync`、`/v1/models` 與 Codex picker 僅在每個目標暴露可交集的能力時才列出它：
 
 - 正數 `contextWindow`，來自即時中繼資料、registry 提示、供應商 `modelContextWindows`／`contextWindow`、成員列的已知正數 `maxInputTokens`，或——當供應商已知且啟用但每個來源仍省略視窗時——保守的 128,000-token 後備（設定 `providerContextCaps` 時收斂）；以及
 - 非空的 `inputModalities` 交集，將省略的成員值視為 `["text"]`。
@@ -159,8 +159,8 @@ Dry-run 評估候選項而不發送任何上游請求。
 
 回傳的歷史與路由決策 payload 僅暴露遮罩的請求中繼資料（例如不透明 `apiKeyId` 標籤）。它們不包含憑證、原始 prompt body 或供應商秘密。
 
-CLI：`ocx logs explain <request-id>`、`ocx logs rebuild-index`、`ocx logs index-status`、`ocx route policy list | show | dry-run | evaluate`。
+CLI：`orl logs explain <request-id>`、`orl logs rebuild-index`、`orl logs index-status`、`orl route policy list | show | dry-run | evaluate`。
 
 ## 遷移
 
-`routingProfiles` 為可選且附加式：既有設定檔載入不變。舊 `usage.jsonl` 列（無 `routeDecision`）解析不變。歷史索引可拋棄——刪除 `routing-history.sqlite` 會在下一次查詢時從 `usage.jsonl` 自動重建；`ocx logs rebuild-index` 強制執行一次。此系統中沒有任何東西會自動調校權重、預算或候選集。
+`routingProfiles` 為可選且附加式：既有設定檔載入不變。舊 `usage.jsonl` 列（無 `routeDecision`）解析不變。歷史索引可拋棄——刪除 `routing-history.sqlite` 會在下一次查詢時從 `usage.jsonl` 自動重建；`orl logs rebuild-index` 強制執行一次。此系統中沒有任何東西會自動調校權重、預算或候選集。

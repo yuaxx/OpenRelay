@@ -4,21 +4,19 @@
  * recently-used ranking, and Edit JSON entry.
  */
 import { useMemo, useState } from "react";
-import { useT, useI18n } from "../../i18n/shared";
+import { useT, useI18n, type TFn } from "../../i18n/shared";
 import { IconAlert, IconChevron, IconRefresh } from "../../icons";
 import type { WorkspaceSections, WorkspaceItem } from "../../provider-workspace/catalog";
 import {
   accountQuotaFromReport,
-  capacityAggregationFromReport,
+  QUOTA_REPORT_MAX_AGE_MS,
   type ProviderQuotaReportView,
 } from "../../provider-workspace/report";
 import {
   attentionReasonKey,
   buildAttentionItems,
   buildMostUsedProviders,
-  formatRelativeTime,
   formatRequestCount,
-  relativeTimeLabelsFromT,
   type ProviderUsageTotals,
 } from "../../provider-workspace/usage";
 import { maxQuotaUtilisation } from "../QuotaBars";
@@ -26,10 +24,26 @@ import { ProviderIcon } from "./ProviderRail";
 import { formatProviderDisplayName } from "../../provider-icons";
 import QuotaBars from "../QuotaBars";
 import { ProviderCapacityQuota } from "./ProviderCapacityQuota";
+import { quotaOverviewReading, type QuotaOverviewAccount, type QuotaOverviewState } from "../../provider-workspace/quota-overview";
+import { AccountDetails, Badge, Button, Card } from "../ui/controls";
+
+function quotaStateLabel(state: QuotaOverviewState, t: TFn): string {
+  switch (state) {
+    case "stale": return t("startup.stale");
+    case "refreshing": return t("codexAuth.refreshingQuota");
+    case "error": return t("pws.accountQuotaUnavailable");
+    case "unsupported": return t("pws.quotaUnsupported");
+    case "missing": return t("pws.dashboard.noQuota");
+    case "ready": return "";
+  }
+}
 
 export default function ProviderOverviewDashboard({
   sections,
   quotaReports,
+  lastQuotaReadTimes = {},
+  accountRows = {},
+  accountReadFailed = {},
   usageTotals,
   usageLoading = false,
   quotasLoading = false,
@@ -39,6 +53,9 @@ export default function ProviderOverviewDashboard({
 }: {
   sections: WorkspaceSections;
   quotaReports: Record<string, ProviderQuotaReportView>;
+  lastQuotaReadTimes?: Record<string, number>;
+  accountRows?: Record<string, QuotaOverviewAccount[]>;
+  accountReadFailed?: Record<string, boolean>;
   usageTotals: Record<string, ProviderUsageTotals>;
   usageLoading?: boolean;
   quotasLoading?: boolean;
@@ -49,8 +66,11 @@ export default function ProviderOverviewDashboard({
 }) {
   const t = useT();
   const { locale } = useI18n();
-  const timeLabels = relativeTimeLabelsFromT(t);
+  const checkedAt = (timestamp: number | undefined) => timestamp !== undefined && Number.isFinite(new Date(timestamp).getTime())
+    ? new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(timestamp)
+    : null;
   const [refreshingQuotas, setRefreshingQuotas] = useState(false);
+  const [quotaNow, setQuotaNow] = useState(Date.now);
   const [refreshResult, setRefreshResult] = useState<{ ok: boolean; text: string } | null>(null);
 
   /*
@@ -81,6 +101,7 @@ export default function ProviderOverviewDashboard({
       setRefreshResult({ ok: false, text: t("codexAuth.quotaRefreshFailed") });
     } finally {
       setRefreshingQuotas(false);
+      setQuotaNow(Date.now());
     }
   };
 
@@ -101,14 +122,11 @@ export default function ProviderOverviewDashboard({
 
   /* Rate-limit rows: urgency first (highest utilisation), then name */
   const quotaProviders = useMemo(() => {
-    const result: Array<{ item: WorkspaceItem; report: ProviderQuotaReportView; urgency: number }> = [];
+    const result: Array<{ item: WorkspaceItem; report?: ProviderQuotaReportView; urgency: number }> = [];
     for (const item of allItems) {
       const report = quotaReports[item.name];
       const quota = report ? accountQuotaFromReport(report) : null;
-      const aggregation = report ? capacityAggregationFromReport(report) : null;
-      if (report && (quota || aggregation?.presentation === "coverage-only")) {
-        result.push({ item, report, urgency: quota ? maxQuotaUtilisation(quota) : -1 });
-      }
+      result.push({ item, report, urgency: quota ? maxQuotaUtilisation(quota) : -1 });
     }
     return result.sort((a, b) => b.urgency - a.urgency || a.item.name.localeCompare(b.item.name));
   }, [allItems, quotaReports]);
@@ -130,10 +148,11 @@ export default function ProviderOverviewDashboard({
   };
 
   return (
-    <div className="pws-dashboard">
+    <div className="pws-dashboard or:flex or:flex-col or:gap-6">
       <div className="pws-dashboard-header">
         <div className="pws-dashboard-header-text">
           <h2 className="pws-dashboard-title">{t("pws.dashboard.title")}</h2>
+          {onRefreshAllQuotas && <p className="pws-dashboard-subtitle muted">{t("pws.refreshProviderHint")}</p>}
         </div>
         <div className="pws-dashboard-header-actions">
           {refreshResult && (
@@ -142,26 +161,25 @@ export default function ProviderOverviewDashboard({
             </span>
           )}
           {onRefreshAllQuotas && (
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
+            <Button
+              size="sm"
               disabled={refreshingQuotas}
               onClick={() => { void refreshAllQuotas(); }}
             >
               <IconRefresh width={14} height={14} aria-hidden="true" />
               {" "}
               {refreshingQuotas ? t("codexAuth.refreshingQuota") : t("pws.refreshAllQuotas")}
-            </button>
+            </Button>
           )}
           {onEditConfig && (
-            <button type="button" className="btn btn-ghost btn-sm" onClick={onEditConfig}>
+            <Button size="sm" variant="ghost" onClick={onEditConfig}>
               {t("prov.editJson")}
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
-      <div className="pws-dashboard-summary">
+      <div className="pws-dashboard-summary or:grid or:grid-cols-3 or:gap-3">
         <SummaryCard count={readyCount} label={t("pws.status.ready")} tone="ok" />
         <SummaryCard
           count={needsAttentionCount}
@@ -205,26 +223,56 @@ export default function ProviderOverviewDashboard({
         >
           <h3 className="pws-dashboard-section-title">{t("pws.dashboard.rateLimits")}</h3>
           {quotaProviders.length > 0 ? (
-            <div className="pws-dashboard-rows">
+            <div className="pws-dashboard-rows or:grid or:grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] or:items-start or:gap-3">
               {quotaProviders.map(({ item, report }) => (
-                <button
-                  key={item.name}
-                  type="button"
-                  className="pws-dashboard-row"
-                  onClick={() => onSelectProvider(item.name)}
-                >
+                <Card key={item.name} className="pws-dashboard-quota-group">
+                <button type="button" className="pws-dashboard-row" onClick={() => onSelectProvider(item.name)}>
                   <ProviderIcon name={item.name} adapter={item.adapter} baseUrl={item.baseUrl} cls="pws-dashboard-row-icon" />
                   <div className="pws-dashboard-row-info">
                     <span className="pws-dashboard-row-name">{formatProviderDisplayName(item.name, t)}</span>
-                    <span className="pws-dashboard-row-meta muted">
-                      {t("pws.dashboard.checkedAgo", { time: formatRelativeTime(report.updatedAt, timeLabels) })}
-                    </span>
+                    <span className="pws-dashboard-row-meta muted">{(report?.updatedAt ?? lastQuotaReadTimes[item.name]) !== undefined
+                      ? t("pws.lastSuccessfulReading", { date: checkedAt(report?.updatedAt ?? lastQuotaReadTimes[item.name]) ?? "" })
+                      : t("pws.dashboard.noQuota")}</span>
+                    {!refreshingQuotas && report?.observed !== true && (report?.updatedAt ?? lastQuotaReadTimes[item.name]) !== undefined
+                      && quotaNow - (report?.updatedAt ?? lastQuotaReadTimes[item.name]) >= QUOTA_REPORT_MAX_AGE_MS
+                      && <span className="pws-dashboard-row-meta muted">{t("startup.stale")}</span>}
+                    {refreshingQuotas && <span className="pws-dashboard-row-meta muted">{t("codexAuth.refreshingQuota")}</span>}
                   </div>
                   <IconChevron className="pws-dashboard-row-chevron" aria-hidden="true" />
                   <div className="pws-dashboard-row-bars">
-                    <ProviderCapacityQuota report={report} pending={quotasLoading && !report.quota} />
+                    {report && (report.observed === true || report.updatedAt === undefined
+                      || quotaNow - report.updatedAt < QUOTA_REPORT_MAX_AGE_MS)
+                      ? <ProviderCapacityQuota report={report} pending={quotasLoading && !report.quota} />
+                      : <span className="muted">{quotasLoading ? t("codexAuth.refreshingQuota")
+                        : (report?.updatedAt ?? lastQuotaReadTimes[item.name]) !== undefined
+                          && quotaNow - (report?.updatedAt ?? lastQuotaReadTimes[item.name]) >= QUOTA_REPORT_MAX_AGE_MS
+                          ? null
+                        : accountRows[item.name]?.length && accountRows[item.name].every(row => row.reading.quotaMode === "unsupported")
+                          ? t("pws.quotaUnsupported") : t("pws.quotaUnavailable")}</span>}
                   </div>
                 </button>
+                {accountRows[item.name]?.length > 0 && <AccountDetails
+                  label={t("usage.companion.sectionAccounts")}
+                  count={accountRows[item.name].length}
+                  status={[...new Set(accountRows[item.name].map(account => quotaOverviewReading(account.reading).state))]
+                    .filter(state => state !== "ready")
+                    .map(state => <Badge key={state} tone={state === "error" ? "error" : state === "stale" ? "warn" : "neutral"}>{quotaStateLabel(state, t)}</Badge>)}
+                >
+                  {accountRows[item.name].map(account => {
+                    const reading = quotaOverviewReading(account.reading);
+                    return <div className="pws-dashboard-account" key={account.id} data-quota-state={reading.state}>
+                      <span className="pws-dashboard-row-name">{account.label}</span>
+                      <span className="pws-dashboard-row-meta muted">{reading.updatedAt
+                        ? t("pws.lastSuccessfulReading", { date: checkedAt(reading.updatedAt) ?? "" }) : null}</span>
+                      {reading.state !== "ready" && <Badge tone={reading.state === "error" ? "error" : reading.state === "stale" ? "warn" : "neutral"}>{quotaStateLabel(reading.state, t)}</Badge>}
+                      {reading.quota && <QuotaBars quota={reading.quota} threshold={80} t={t} layout="stacked" />}
+                    </div>;
+                  })}
+                </AccountDetails>}
+                {accountReadFailed[item.name] && !accountRows[item.name]?.length && (
+                  <p className="pws-dashboard-account-list muted" role="status">{t("pws.accountQuotaUnavailable")}</p>
+                )}
+                </Card>
               ))}
             </div>
           ) : quotasLoading ? (
@@ -294,9 +342,9 @@ export default function ProviderOverviewDashboard({
 
 function SummaryCard({ count, label, tone }: { count: number; label: string; tone: "ok" | "warn" | "muted" }) {
   return (
-    <div className={`pws-dashboard-card pws-dashboard-card--${tone}`}>
+    <Card className={`pws-dashboard-card pws-dashboard-card--${tone}`}>
       <span className="pws-dashboard-card-count">{count}</span>
       <span className="pws-dashboard-card-label">{label}</span>
-    </div>
+    </Card>
   );
 }

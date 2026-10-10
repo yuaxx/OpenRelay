@@ -65,7 +65,7 @@ function warnEgressWebsocketDowngradeOnce(providerName: string, egress: string):
   console.warn(
     // The name is caller-controlled and can be token-shaped, so it is redacted and JSON-escaped
     // before it reaches a log, exactly as at the management error boundary.
-    `[opencodex] provider ${JSON.stringify(redactSecretString(providerName))} declares egress ${egress}; the WebSocket upstream `
+    `[openrelay] provider ${JSON.stringify(redactSecretString(providerName))} declares egress ${egress}; the WebSocket upstream `
     + "selects its proxy from the process environment and cannot carry a per-provider route, "
     + "so these turns are served over HTTP/SSE.",
   );
@@ -334,7 +334,7 @@ export function providerFetch(
         if (!pacingWebsocketDowngradeWarned.has(providerName)
           && pacingWebsocketDowngradeWarned.size < EGRESS_DOWNGRADE_NOTICE_LIMIT) {
           pacingWebsocketDowngradeWarned.add(providerName);
-          console.warn(`[opencodex] provider ${JSON.stringify(redactSecretString(providerName))} has a request concurrency cap; serving over HTTP/SSE.`);
+          console.warn(`[openrelay] provider ${JSON.stringify(redactSecretString(providerName))} has a request concurrency cap; serving over HTTP/SSE.`);
         }
         return httpFetch(input, init);
       }

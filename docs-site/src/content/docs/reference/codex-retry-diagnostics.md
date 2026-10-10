@@ -3,7 +3,7 @@ title: Codex retry diagnostics
 description: Distinguish rate-limit advice, automatic retransmission, provider recovery, and Desktop notifications.
 ---
 
-OpenCodex's [Devin adapter](/reference/adapters/#devin) preserves a usable retry
+OpenRelay's [Devin adapter](/reference/adapters/#devin) preserves a usable retry
 hint in the error contract Codex understands. That is not a guarantee that
 Desktop displays a reconnect row, or that the provider accepts the next request.
 
@@ -53,7 +53,7 @@ The corresponding app-server
 contains `willRetry`, `threadId` and `turnId`. Observe emission, delivery to the
 matching turn, and rendering separately. A proxy `response.failed` frame is not
 itself that app-server notification. Changing this engine-side first-notification
-policy requires a Codex change; an OpenCodex error-message rewrite cannot force
+policy requires a Codex change; an OpenRelay error-message rewrite cannot force
 an event through a branch that does not emit it.
 
 ## Read-only verification

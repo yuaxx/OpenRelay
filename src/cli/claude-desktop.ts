@@ -51,7 +51,7 @@ function isFamily(value: string | undefined): value is DesktopFamily {
 
 function printDesktopHelp(): void {
   console.log(`Usage:
-  ocx claude desktop [apply] [--first-party | --gateway [--static|--hybrid|--discovery-only]]
+  orl claude desktop [apply] [--first-party | --gateway [--static|--hybrid|--discovery-only]]
       --gateway      (default) install the third-party gateway profile for the whole app
       --first-party  keep Desktop on claude.ai; route its Code tab through the local
                      intercept proxy via shared ~/.claude/settings.json env. A standalone
@@ -59,17 +59,17 @@ function printDesktopHelp(): void {
                      CLI first-party is off. For fully native shell use, set NO_PROXY='*'.
                      Account risk: Claude subscription traffic crosses local TLS interception;
                      Anthropic may suspend the account.
-  ocx claude desktop show [--json]
-  ocx claude desktop status [--json]
-  ocx claude desktop picker on|off|status|trust
-  ocx claude desktop bind <picker-model-id> <provider/model|native/slug>
+  orl claude desktop show [--json]
+  orl claude desktop status [--json]
+  orl claude desktop picker on|off|status|trust
+  orl claude desktop bind <picker-model-id> <provider/model|native/slug>
       first-party: serve a Code tab picker model (e.g. claude-sonnet-4-6) with an opencodex model;
       the picker keeps Anthropic's label, and only Claude Code traffic through the local proxy uses it
-  ocx claude desktop unbind <picker-model-id>
-  ocx claude desktop move <provider/model> <opus|fable|sonnet|haiku> [--default]
-  ocx claude desktop default <family> <provider/model|none>
-  ocx claude desktop export <path|->
-  ocx claude desktop import <path> [--apply]`);
+  orl claude desktop unbind <picker-model-id>
+  orl claude desktop move <provider/model> <opus|fable|sonnet|haiku> [--default]
+  orl claude desktop default <family> <provider/model|none>
+  orl claude desktop export <path|->
+  orl claude desktop import <path> [--apply]`);
 }
 
 export interface ApplyProfileDeps {
@@ -333,7 +333,7 @@ function unknownApplyArgsError(count: number): string {
 }
 
 /** A rejected route is not echoed: whatever sits in that position may be a misplaced credential. */
-const UNAVAILABLE_ROUTE = "현재 사용할 수 없는 모델입니다. 사용 가능한 모델은 ocx claude desktop show로 확인하세요.";
+const UNAVAILABLE_ROUTE = "현재 사용할 수 없는 모델입니다. 사용 가능한 모델은 orl claude desktop show로 확인하세요.";
 
 /** Profile files are user-chosen paths; a failure reports the operation and error code only. */
 function profileFileError(operation: "export" | "import", error: unknown): Error {
@@ -391,7 +391,7 @@ export function gatewayModeExplanation(input: {
   return [
     `Applied the gateway profile ${reason}.`,
     "First-party keeps Desktop on your claude.ai account and routes its Code tab through the local proxy. The standalone claude CLI reads the same settings env and may transit the proxy unchanged; use NO_PROXY='*' in the shell for fully native traffic:",
-    "  ocx claude desktop apply --first-party",
+    "  orl claude desktop apply --first-party",
     `Account risk: ${FIRST_PARTY_ACCOUNT_RISK.message}`,
   ];
 }
@@ -566,7 +566,7 @@ async function handleClaudeDesktopPickerCommand(
 ): Promise<number> {
   const action = argv[1];
   const rest = argv.slice(2);
-  const usage = "Usage: ocx claude desktop picker on|off|status|trust [--json]";
+  const usage = "Usage: orl claude desktop picker on|off|status|trust [--json]";
   if (!action || !["on", "off", "status", "trust"].includes(action)) throw new CliUsageError(usage);
   const wantsJson = takeJsonFlag(rest);
   if (rest.length > 0 || (action !== "status" && wantsJson)) throw new CliUsageError(usage);
@@ -685,7 +685,7 @@ async function handleClaudeDesktopPickerCommand(
       return 1;
     }
     if (isAmbiguousPickerTransport(error)) {
-      console.error("state unknown - run ocx claude desktop picker status");
+      console.error("state unknown - run orl claude desktop picker status");
       return 1;
     }
     if (localTrust) await compensateLocalPickerTrust(localTrust, deps);
@@ -722,7 +722,7 @@ export async function handleClaudeDesktopCommand(argv: string[], deps: ApplyProf
         console.error(`설정 적용 실패: ${result.reason ?? "unknown error"}`);
         if (result.warning) console.warn(result.warning);
         if (result.reason?.startsWith("gateway_")) {
-          console.error("The gateway profile could not be removed safely, so first-party mode was not applied. Turn the integration off (dashboard toggle) and retry, or keep gateway with `ocx claude desktop apply --gateway`.");
+          console.error("The gateway profile could not be removed safely, so first-party mode was not applied. Turn the integration off (dashboard toggle) and retry, or keep gateway with `orl claude desktop apply --gateway`.");
         } else if (result.reason === "foreign_env") {
           console.error(`~/.claude/settings.json already sets HTTPS_PROXY or NODE_EXTRA_CA_CERTS to a value opencodex does not own (${result.path}). Remove them or use --gateway.`);
         } else if (result.reason === "intercept_disabled") {
@@ -762,7 +762,7 @@ export async function handleClaudeDesktopCommand(argv: string[], deps: ApplyProf
     if (command === "import" && argv.includes("--apply")) assertNoClientDisconnectPending();
     if (command === "import" && argv.includes("--apply") && connection.kind !== "disconnected") {
       throw new CliUsageError(connection.kind === "connected"
-        ? "Connected Desktop apply uses the hub profile. Import on the hub, then run ocx claude desktop apply here."
+        ? "Connected Desktop apply uses the hub profile. Import on the hub, then run orl claude desktop apply here."
         : "Client connection state is invalid; refusing import --apply.");
     }
     const localView = connection.kind === "connected";
@@ -778,7 +778,7 @@ export async function handleClaudeDesktopCommand(argv: string[], deps: ApplyProf
     if (command === "status") {
       const rest = argv.slice(1);
       const wantsJson = takeJsonFlag(rest);
-      if (rest.length > 0) throw new CliUsageError("Usage: ocx claude desktop status [--json]");
+      if (rest.length > 0) throw new CliUsageError("Usage: orl claude desktop status [--json]");
       const live = await runtimeRequest<Record<string, unknown>>("/api/claude-desktop/status", {});
       if (wantsJson) console.log(JSON.stringify(live, null, 2));
       else {
@@ -793,8 +793,8 @@ export async function handleClaudeDesktopCommand(argv: string[], deps: ApplyProf
     if (command === "bind" || command === "unbind") {
       const [, pickerId, route, ...extra] = argv;
       const usage = command === "bind"
-        ? "Usage: ocx claude desktop bind <picker-model-id> <provider/model|native/slug>"
-        : "Usage: ocx claude desktop unbind <picker-model-id>";
+        ? "Usage: orl claude desktop bind <picker-model-id> <provider/model|native/slug>"
+        : "Usage: orl claude desktop unbind <picker-model-id>";
       if (!pickerId || (command === "bind" ? !route || extra.length > 0 : route !== undefined)) throw new CliUsageError(usage);
       const body = command === "bind" ? { set: { [pickerId]: route! } } : { remove: [pickerId] };
       const result = await runtimeRequest<{ modelBindings?: Record<string, string> }>("/api/claude-desktop/first-party-bindings", {
@@ -810,7 +810,7 @@ export async function handleClaudeDesktopCommand(argv: string[], deps: ApplyProf
       if (ids.length === 0) console.log("현재 연결된 피커 모델이 없습니다.");
       for (const id of ids) console.log(`  ${id} -> ${bindings[id]}`);
       if (resolveClaudeDesktopMode(config, observeClaudeDesktopMode(config)) === "gateway") {
-        console.warn("⚠️  Desktop이 gateway 모드입니다. 바인딩은 first-party 모드(ocx claude desktop apply --first-party)의 Code 탭과 claude CLI에만 적용됩니다.");
+        console.warn("⚠️  Desktop이 gateway 모드입니다. 바인딩은 first-party 모드(orl claude desktop apply --first-party)의 Code 탭과 claude CLI에만 적용됩니다.");
       }
       return 0;
     }
@@ -818,7 +818,7 @@ export async function handleClaudeDesktopCommand(argv: string[], deps: ApplyProf
     if (command === "show") {
       const rest = argv.slice(1);
       const wantsJson = takeJsonFlag(rest);
-      if (rest.length > 0) throw new CliUsageError("Usage: ocx claude desktop show [--json]");
+      if (rest.length > 0) throw new CliUsageError("Usage: orl claude desktop show [--json]");
       if (wantsJson) console.log(JSON.stringify(localView ? { ...state, scope: "local" } : state));
       else {
         for (const family of DESKTOP_FAMILIES) {
@@ -832,7 +832,7 @@ export async function handleClaudeDesktopCommand(argv: string[], deps: ApplyProf
     }
     if (command === "move") {
       const [, route, familyRaw, ...flags] = argv;
-      if (!route || !isFamily(familyRaw) || flags.some(flag => flag !== "--default")) throw new CliUsageError("Usage: ocx claude desktop move <route> <family> [--default]");
+      if (!route || !isFamily(familyRaw) || flags.some(flag => flag !== "--default")) throw new CliUsageError("Usage: orl claude desktop move <route> <family> [--default]");
       if (!state.models.some(model => model.route === route && model.available)) throw new Error(UNAVAILABLE_ROUTE);
       const profile = moveDesktopRoute(state.profile, route, familyRaw, flags.includes("--default"));
       saveLocalDesktopProfile(profile, config.claudeCode?.desktopProfile, connection, deps);
@@ -841,7 +841,7 @@ export async function handleClaudeDesktopCommand(argv: string[], deps: ApplyProf
     }
     if (command === "default") {
       const [, familyRaw, routeRaw] = argv;
-      if (!isFamily(familyRaw) || !routeRaw || argv.length !== 3) throw new CliUsageError("Usage: ocx claude desktop default <family> <route|none>");
+      if (!isFamily(familyRaw) || !routeRaw || argv.length !== 3) throw new CliUsageError("Usage: orl claude desktop default <family> <route|none>");
       const route = routeRaw === "none" ? null : routeRaw;
       if (route && !state.models.some(model => model.route === route && model.available)) throw new Error(UNAVAILABLE_ROUTE);
       const profile = setDesktopFamilyDefault(state.profile, familyRaw, route);
@@ -851,7 +851,7 @@ export async function handleClaudeDesktopCommand(argv: string[], deps: ApplyProf
     }
     if (command === "export") {
       const target = argv[1];
-      if (!target || argv.length !== 2) throw new CliUsageError("Usage: ocx claude desktop export <path|->");
+      if (!target || argv.length !== 2) throw new CliUsageError("Usage: orl claude desktop export <path|->");
       const json = JSON.stringify(state.profile, null, 2) + "\n";
       if (target === "-") process.stdout.write(json);
       else {
@@ -863,7 +863,7 @@ export async function handleClaudeDesktopCommand(argv: string[], deps: ApplyProf
     if (command === "import") {
       const source = argv[1];
       const flags = argv.slice(2);
-      if (!source || flags.some(flag => flag !== "--apply")) throw new CliUsageError("Usage: ocx claude desktop import <path> [--apply]");
+      if (!source || flags.some(flag => flag !== "--apply")) throw new CliUsageError("Usage: orl claude desktop import <path> [--apply]");
       let raw: unknown;
       try { raw = JSON.parse(readFileSync(resolve(source), "utf8")); }
       catch (error) { throw profileFileError("import", error); }

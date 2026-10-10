@@ -3,7 +3,7 @@ title: 代理 API 格式
 description: Responses、Chat Completions、Anthropic Messages、模型目錄、WebSocket、realtime 與 compaction 介面的 wire 層級參考。
 ---
 
-opencodex 以多種客戶端方言呈現一個本機代理。Codex 客戶端可說 Responses API，OpenAI 相容的 app 可說 Chat Completions，而 Claude Code 可說 Anthropic Messages，而不需要每個上游供應商實作每種格式。
+OpenRelay 以多種客戶端方言呈現一個本機代理。Codex 客戶端可說 Responses API，OpenAI 相容的 app 可說 Chat Completions，而 Claude Code 可說 Anthropic Messages，而不需要每個上游供應商實作每種格式。
 
 正常轉譯路徑為：
 
@@ -22,7 +22,7 @@ Responses 表示是橋接的中心。原生相容的路由可跳過部分轉譯�
 
 部分 xAI Chat Completions 拒絕不是以 HTTP 200 加 `finish_reason: content_filter` 回傳，而是以 HTTP 403 加上一句完全相符的拒絕語句（例如 `I can't help with that request.`）回傳。Codex 把 403 視為傳輸失敗，因此使用者回合不會被記錄，同一個請求會被重送。
 
-在非 combo 的 Responses 請求上，OpenCodex 會把這種在允許清單中的 403 改寫為 HTTP 200 的 Responses 內容，帶有 `status: "incomplete"` 與 `incomplete_details.reason: "content_filter"`。改寫同時作用於 openai-chat 轉接器路徑與 openai-responses 直通（grok-4.6 / grok-4.5 OAuth）。串流使用相同的 incomplete 邊界。空白的 403 本文仍是錯誤。訂閱、點數、權限與 `not allowed to use this model` 的 403 仍是錯誤。Combo failover 仍看到原始的 HTTP 403。
+在非 combo 的 Responses 請求上，OpenRelay 會把這種在允許清單中的 403 改寫為 HTTP 200 的 Responses 內容，帶有 `status: "incomplete"` 與 `incomplete_details.reason: "content_filter"`。改寫同時作用於 openai-chat 轉接器路徑與 openai-responses 直通（grok-4.6 / grok-4.5 OAuth）。串流使用相同的 incomplete 邊界。空白的 403 本文仍是錯誤。訂閱、點數、權限與 `not allowed to use this model` 的 403 仍是錯誤。Combo failover 仍看到原始的 HTTP 403。
 
 ## 端點概覽
 
@@ -38,7 +38,7 @@ Responses 表示是橋接的中心。原生相容的路由可跳過部分轉譯�
 
 ## `POST /v1/responses`
 
-這是原生 opencodex data-plane 結構。請求 body 必須是帶有非空 `model` 的 JSON 物件。`input` 可為字串或 Responses 項目陣列。
+這是原生 OpenRelay data-plane 結構。請求 body 必須是帶有非空 `model` 的 JSON 物件。`input` 可為字串或 Responses 項目陣列。
 
 ### 接受的請求欄位
 
@@ -63,7 +63,7 @@ Responses 表示是橋接的中心。原生相容的路由可跳過部分轉譯�
 
 在 `stream: false` 或無 `stream` 時，相同的 adapter 事件被收集為一個 Responses JSON 物件。兩種形式都保留所選模型、輸出項目、終端狀態與 usage。
 
-canonical ChatGPT Codex 路由的上游只接受 SSE，因此僅對上游請求使用 `stream: true`。OpenCodex
+canonical ChatGPT Codex 路由的上游只接受 SSE，因此僅對上游請求使用 `stream: true`。OpenRelay
 會在有界限制內驗證終端串流，再將其折疊成客戶端要求的 JSON 形式；明確的 `store` 值不會改變。
 驗證失敗時會傳回錯誤，而不會以 HTTP 200 傳回部分 JSON。限制為每個 frame 4 MiB、transcript
 與重建來源各 32 MiB、100,000 個 SSE frame，以及 10,000 個重建 output item。
@@ -209,7 +209,7 @@ thinking 重播與提示快取仍由獨立的 [#3719](https://github.com/lidge-j
 Connections > API keys 包含獨立的聽寫與即時語音區域。資料金鑰僅保留在表單記憶體中。聽寫會上傳選取的檔案；語音連線檢查不使用麥克風，而是等待工作階段確認。已設定不代表連線成功。
 
 `POST /v1/live` 接受 ChatGPT/Codex App Frameless call-creation 介面。
-`POST /v1/realtime/calls` 接受 OpenAI Realtime call-creation 介面。opencodex 選擇一個合格的 OpenAI 家族路由、為上游認證模式正規化 call-creation 請求，並中繼有界的回應。
+`POST /v1/realtime/calls` 接受 OpenAI Realtime call-creation 介面。OpenRelay 選擇一個合格的 OpenAI 家族路由、為上游認證模式正規化 call-creation 請求，並中繼有界的回應。
 
 在 call 建立後，客戶端可使用任何支援的入站形式加入 sideband WebSocket：
 
@@ -280,12 +280,12 @@ Anthropic 來源的失敗以 Anthropic 的錯誤封裝渲染，因此該方言�
 
 ## 加密內容衛生
 
-代理將真實的後端密文視為不透明。結構有效的密文被逐位元組保留：opencodex 不解密它、轉譯其內容，或為另一個供應商重新加密它。
+代理將真實的後端密文視為不透明。結構有效的密文被逐位元組保留：OpenRelay 不解密它、轉譯其內容，或為另一個供應商重新加密它。
 
-某些 agent hook 在歷史上曾將明文控制文字放入 `encrypted_content` 插槽。為相容性，代理將該明文分離為 text 部分，同時保留任何結構有效的 Fernet run 不變。若 `agent_message` 在該修復期間失去所有加密部分，它成為普通使用者訊息。若目前的 v2 task 保持真正加密但所選路由目標無法讀取原生 ChatGPT 密文，opencodex 以 `unreadable_encrypted_agent_task` 失敗，而非發送不可讀的位元組給該供應商。關於 worker task 周圍的客戶端行為，請見[子代理介面](/zh-tw/guides/sub-agent-surface/)。
+某些 agent hook 在歷史上曾將明文控制文字放入 `encrypted_content` 插槽。為相容性，代理將該明文分離為 text 部分，同時保留任何結構有效的 Fernet run 不變。若 `agent_message` 在該修復期間失去所有加密部分，它成為普通使用者訊息。若目前的 v2 task 保持真正加密但所選路由目標無法讀取原生 ChatGPT 密文，OpenRelay 以 `unreadable_encrypted_agent_task` 失敗，而非發送不可讀的位元組給該供應商。關於 worker task 周圍的客戶端行為，請見[子代理介面](/zh-tw/guides/sub-agent-surface/)。
 
 ### 在既有對話中切換供應商
 
-重放的推理項攜帶的 `encrypted_content` 只有產生它的供應商與憑證才能讀取。若 opencodex 知道該對話上一次由另一個供應商處理，它會在送出前移除這個 blob，並保留該項的摘要。若那個供應商還使用了不同的 endpoint 或憑證，該項的 `rs_…` id 也會被移除，因為它指向新目標查不到的項目。若 opencodex 無從得知，例如代理重新啟動之後，新目標會拒絕這個 blob：OpenAI 與 Azure OpenAI 回傳 `400 invalid_encrypted_content`。此時 opencodex 會去掉上一個供應商的推理狀態（blob 與 `rs_…` id）後只重送一次請求；保留 id 會導致 `Item with id 'rs_…' not found`。
+重放的推理項攜帶的 `encrypted_content` 只有產生它的供應商與憑證才能讀取。若 OpenRelay 知道該對話上一次由另一個供應商處理，它會在送出前移除這個 blob，並保留該項的摘要。若那個供應商還使用了不同的 endpoint 或憑證，該項的 `rs_…` id 也會被移除，因為它指向新目標查不到的項目。若 OpenRelay 無從得知，例如代理重新啟動之後，新目標會拒絕這個 blob：OpenAI 與 Azure OpenAI 回傳 `400 invalid_encrypted_content`。此時 OpenRelay 會去掉上一個供應商的推理狀態（blob 與 `rs_…` id）後只重送一次請求；保留 id 會導致 `Item with id 'rs_…' not found`。
 
 這項復原適用於所有使用 Responses 協定的 adapter，因此 `openai-responses` 與 `azure-openai` 的行為相同。復原成功後，該對話在同一目標上的後續輪次會在接下來五分鐘內於首次送出前移除這些狀態。重送計入請求的一般傳送預算。一般的 400 與 429 不會以這種方式重送，5xx 也不會，只有一個狹窄的例外：對於攜帶加密工具輸出的請求，回應本文恰好是該解密拒絕的 502 會得到同樣的一次重送。第二次拒絕會原樣回傳給客戶端。遇到這種情況，請在目標供應商上開始新的對話。

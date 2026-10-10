@@ -1,9 +1,9 @@
 ---
 title: Why v1 is the default sub-agent surface
-description: What the v2 encrypted-task limitation breaks, why OpenCodex now ships v1, and what to do if you still want v2.
+description: What the v2 encrypted-task limitation breaks, why OpenRelay now ships v1, and what to do if you still want v2.
 ---
 
-OpenCodex installs with the sub-agent surface set to **v1**. The Dashboard, Models and Subagents
+OpenRelay installs with the sub-agent surface set to **v1**. The Dashboard, Models and Subagents
 pages all ask you to confirm before moving to **base** or **v2**, and this page is what that
 confirmation links to. The CLI does not prompt.
 
@@ -29,13 +29,13 @@ unreadable payload would give the child an empty instruction and a confidently w
 
 ## Why it happens
 
-![Two lanes compare the same delegation. On v1 a ChatGPT parent sends a plaintext task through OpenCodex, it crosses the provider boundary, and the routed child reads it. On v2 the parent sends encrypted_content minted by the ChatGPT backend; OpenCodex cannot decrypt it, so the task stops at the provider boundary and the request fails with unreadable_encrypted_agent_task.](../../../assets/subagent-v2-encrypted-task.svg)
+![Two lanes compare the same delegation. On v1 a ChatGPT parent sends a plaintext task through OpenRelay, it crosses the provider boundary, and the routed child reads it. On v2 the parent sends encrypted_content minted by the ChatGPT backend; OpenRelay cannot decrypt it, so the task stops at the provider boundary and the request fails with unreadable_encrypted_agent_task.](../../../assets/subagent-v2-encrypted-task.svg)
 
-On v1 the parent emits the child's task as plain text. OpenCodex reads it, routes it, and the
+On v1 the parent emits the child's task as plain text. OpenRelay reads it, routes it, and the
 routed child receives something it can act on.
 
 On v2 the parent emits the task as `encrypted_content`, minted by the ChatGPT backend. The key
-stays in that backend. OpenCodex never had it, so there is nothing for a proxy to decrypt and
+stays in that backend. OpenRelay never had it, so there is nothing for a proxy to decrypt and
 nothing to rewrite — the value really is ciphertext, not plaintext behind a flag. That is why
 this is structural rather than a misconfiguration, and why no proxy-side setting can fix it.
 
@@ -63,7 +63,7 @@ Windows, macOS and Linux, and [#37197](https://github.com/openai/codex/issues/37
 states the missing piece directly — a sending-side delivery policy. Neither has a maintainer
 commitment or an ETA.
 
-OpenCodex recorded the consequence as [#92](https://github.com/lidge-jun/opencodex/issues/92),
+OpenRelay recorded the consequence as [#92](https://github.com/lidge-jun/opencodex/issues/92),
 closed as not planned: nothing in this repository can fix it, so the issue is a pointer to the
 upstream work rather than a task waiting on a maintainer here.
 
@@ -91,7 +91,7 @@ Either answer is recorded, and the notice does not come back. Dismissing it with
 leaves it for the next time you open the dashboard.
 
 Mode changes apply to **new** Codex sessions. Start a new session after choosing; if a long-running
-App host still shows the old surface, run `ocx sync` and restart that surface.
+App host still shows the old surface, run `orl sync` and restart that surface.
 
 ## If you want v2 anyway
 
@@ -125,8 +125,8 @@ Dashboard, Models and Subagents all carry the same v1/base/v2 switch, and all th
 base or v2. From the CLI:
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
+orl v2 status
+orl v2 mode v1
 ```
 
 The CLI does not prompt. It is the same setting, so choose it knowing what this page describes.

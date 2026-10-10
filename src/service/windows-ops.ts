@@ -816,7 +816,7 @@ export async function commitWindowsNativeInstall(runtime: DurableBunRuntime, dep
   try {
     await (deps.installNativeService ?? installWinswService)(defaultWinswEntry(serviceSourceDir, runtime));
   } catch (err) {
-    if (hadScheduler) console.error("⚠️  Native install failed AFTER removing the Task Scheduler backend — no service is installed now. Run `ocx service install` to restore the scheduler backend, or retry `--native`.");
+    if (hadScheduler) console.error("⚠️  Native install failed AFTER removing the Task Scheduler backend — no service is installed now. Run `orl service install` to restore the scheduler backend, or retry `--native`.");
     throw err;
   }
   if (deps.writeState) deps.writeState("native", runtime);

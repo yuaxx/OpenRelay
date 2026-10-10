@@ -4,11 +4,11 @@ description: Çoklu ajan, kombo, gözlemlenebilirlik, erişim, entegrasyon, sist
 ---
 
 Bu komutlar ajan politikasını ve yönlendirmesini denetler, canlı proxy'yi
-inceler ve desteklenen istemcileri opencodex'e bağlar.
+inceler ve desteklenen istemcileri OpenRelay'e bağlar.
 
 ## Ajan politikası
 
-### `ocx agent <status|injection|effort|subagents|fallback|sidecar> ...`
+### `orl agent <status|injection|effort|subagents|fallback|sidecar> ...`
 
 Başsız (headless) çoklu ajan kadrosunu, çaba sınırlarını, istem enjeksiyonunu,
 geri dönüşü ve sidecar ayarlarını yönetin. Geçerli politika için `status`
@@ -17,19 +17,19 @@ birbirine nasıl uyduğunu görmek için [Alt ajan
 yüzeyleri](/tr/guides/sub-agent-surface/) sayfasına bakın.
 
 ```bash
-ocx agent subagents set ark/model-a,openai/gpt-5.5
-ocx agent sidecar web --enabled off
+orl agent subagents set ark/model-a,openai/gpt-5.5
+orl agent sidecar web --enabled off
 ```
 
-`--enabled off`, kontrol panelindeki **Kapalı (Off)** satırıyla aynı anahtardır: OpenCodex
+`--enabled off`, kontrol panelindeki **Kapalı (Off)** satırıyla aynı anahtardır: OpenRelay
 sidecar'ı çalıştırmayı bırakır ve Codex entegrasyonu `~/.codex/config.toml` dosyasına
 `web_search = "disabled"` yazar; tek arama yolu olarak bir MCP arama sunucusunun kullanılmasını bu
 sağlar. `--enabled on` bu satırı yeniden kaldırır. Kaydetme anahtarı gerçekten değiştirdiğinde
 komut tetiklediği Codex tarafı yazmayı bildirir (`--json` içinde `codexWebSearch`, aksi
-halde son satırda `Codex config:`) ve yazma yapılamadığında `ocx sync` adresini gösterir.
+halde son satırda `Codex config:`) ve yazma yapılamadığında `orl sync` adresini gösterir.
 Bayrak `vision` için de çalışır.
 
-### `ocx v2 <status|on|off|mode <v1|default|v2>|threads <n>|mode-hint <text|--clear>>`
+### `orl v2 <status|on|off|mode <v1|default|v2>|threads <n>|mode-hint <text|--clear>>`
 
 Codex `multi_agent_v2` özellik bayrağını ve üç durumlu çoklu ajan yüzey modunu
 yönetin.
@@ -47,16 +47,16 @@ yönetin.
 | `mode-hint --clear` | İpucunu kaldırın, böylece çabadan türetilen politika (ultra = proaktif) devam eder. |
 
 ```bash
-ocx v2 status
-ocx v2 mode v1
-ocx v2 mode default
-ocx v2 on
-ocx v2 threads 16
-ocx v2 mode-hint "Proactive multi-agent delegation is active."
-ocx v2 mode-hint --clear
+orl v2 status
+orl v2 mode v1
+orl v2 mode default
+orl v2 on
+orl v2 threads 16
+orl v2 mode-hint "Proactive multi-agent delegation is active."
+orl v2 mode-hint --clear
 ```
 
-`mode` alt komutu, opencodex yapılandırmasına `multiAgentMode` yazar ve Codex
+`mode` alt komutu, OpenRelay yapılandırmasına `multiAgentMode` yazar ve Codex
 kataloğunu yeniden senkronize eder. Mod ve bayrak geçişleri geçerli sayısal iş
 parçacığı sınırını geçerli v1/v2 Codex anahtarları arasında taşır; başarısız bir
 geçiş orijinal `config.toml`'u geri yükler. Değişiklikler yeni Codex
@@ -73,20 +73,20 @@ yetkilendirme istemini alır. Akıl yürütme çabasının kendisini **değişti
 Eksik bir argüman veya yalnızca boşluk içeren bir değer reddedilir; yalnızca
 `--clear` ipucunu kaldırır. Alt Ajanlar kontrol panelinin Ultra modu **açık**
 anahtarının daha katı bir kapısı vardır: yerel özelliğin açık bir v2 yüzeyiyle
-(`ocx v2 mode v2`) etkinleştirilmesini gerektirir; tek başına `ocx v2 on` bu
+(`orl v2 mode v2`) etkinleştirilmesini gerektirir; tek başına `orl v2 on` bu
 kontrol paneli kapısını karşılamaz.
 
 ## Kombo yönlendirme
 
-### `ocx combo <list|show|set|remove> ...` · `ocx route combo ...`
+### `orl combo <list|show|set|remove> ...` · `orl route combo ...`
 
-Kombo yük devretme ve round-robin sanal modellerini yönetin. `ocx route combo`
+Kombo yük devretme ve round-robin sanal modellerini yönetin. `orl route combo`
 hiyerarşik takma addır; combo şu anda desteklenen yönlendirme kaynağıdır.
 Hedefler `saglayici/model[:agirlik],saglayici/model[:agirlik]` kullanır.
 
 ```bash
-ocx combo list
-ocx route combo set reliable --targets ark/model-a:2,openai/gpt-5.5
+orl combo list
+orl route combo set reliable --targets ark/model-a:2,openai/gpt-5.5
 ```
 
 `set`, `--strategy`, `--sticky`, `--effort`, `--alias`, `--rename-from`,
@@ -104,37 +104,37 @@ Yönlendirme davranışı ve yapılandırma rehberliği için
 
 ## Gözlemlenebilirlik ve hata ayıklama
 
-### `ocx observe <logs|usage|storage|memory|debug|claude-inbound|injection> ...`
+### `orl observe <logs|usage|storage|memory|debug|claude-inbound|injection> ...`
 
 Proxy isteklerini, kullanımını, depolamasını, belleğini ve hata ayıklama
 verilerini inceleyin. Doğrudan takma adlar şunlardır:
 
 | Takma ad | Eşdeğer kaynak |
 | --- | --- |
-| `ocx logs [filtreler] [--follow] [--json\|--jsonl]` | `ocx observe logs` |
-| `ocx usage [--range <today\|1d\|7d\|30d\|all>] [--surface <all\|codex\|claude\|grok>] [--provider <name>] [--model <id>] [--json]` | `ocx observe usage` |
-| `ocx storage [--json]` | `ocx observe storage` |
-| `ocx memory [--json]` | `ocx observe memory` |
+| `orl logs [filtreler] [--follow] [--json\|--jsonl]` | `orl observe logs` |
+| `orl usage [--range <today\|1d\|7d\|30d\|all>] [--surface <all\|codex\|claude\|grok>] [--provider <name>] [--model <id>] [--json]` | `orl observe usage` |
+| `orl storage [--json]` | `orl observe storage` |
+| `orl memory [--json]` | `orl observe memory` |
 
 ```bash
-ocx observe usage --range 30d --json
+orl observe usage --range 30d --json
 ```
 
 Bazı kullanım kayıtları dahil edilemiyorsa okunabilir çıktı, okunabilir satır olmadığında da uyarı gösterir. Gösterilen toplamlar yalnızca okunabilir kayıtları yansıtır. Filtreyle eşleşen okunabilir kayıt yoksa toplam satırları yerine uyarı ve yönlendirme gösterilir; atlanan kayıtlar eşleşme içerebilir. `--json`, yanıttaki `usageIncomplete` tanısını ve nedenini korur.
 
-### `ocx debug <provider|usage|injection|claude> <on|off|status|reset|logs [-f]>`
+### `orl debug <provider|usage|injection|claude> <on|off|status|reset|logs [-f]>`
 
 Çalışan proxy'nin yönetim API'si aracılığıyla çalışma zamanı hata ayıklama
 geçersiz kılmalarını okuyun veya değiştirin.
 
 ```bash
-ocx debug provider on|off|status|reset
-ocx debug provider logs [-f|--follow]
-ocx debug usage on|off|status|reset
-ocx debug usage logs [-f|--follow]
+orl debug provider on|off|status|reset
+orl debug provider logs [-f|--follow]
+orl debug usage on|off|status|reset
+orl debug usage logs [-f|--follow]
 ```
 
-Kapsam belirtilmediğinde `ocx debug` kullanımı ve proxy durdurulduğunda bir
+Kapsam belirtilmediğinde `orl debug` kullanımı ve proxy durdurulduğunda bir
 sonraki başlangıç ortamı varsayılanlarını yazdırır. Sağlayıcı hata ayıklaması
 varsayılan olarak `OCX_DEBUG=1`'den gelir (eski `OCX_DEBUG_FRAMES=1` de
 çalışır); kullanım hata ayıklaması varsayılan olarak
@@ -142,26 +142,26 @@ varsayılan olarak `OCX_DEBUG=1`'den gelir (eski `OCX_DEBUG_FRAMES=1` de
 
 ## API erişimi
 
-### `ocx access <key|endpoints|models|test> ...`
+### `orl access <key|endpoints|models|test> ...`
 
-OpenCodex erişim API anahtarlarının listesini, harici uç noktaları ve modelleri inceleyin. `ocx api-key`, `ocx access key` komut ailesinin takma adıdır.
+OpenRelay erişim API anahtarlarının listesini, harici uç noktaları ve modelleri inceleyin. `orl api-key`, `orl access key` komut ailesinin takma adıdır.
 
 Anahtar oluşturma ve anahtar yenilemeyi başlatma işlemleri, hem metin hem de JSON çıktısında yalnızca bir kez gösterilen açık metin kimlik bilgisi döndürür. Ajanlar bu adımları, ajan oturumu dışında bir insanın doğrudan kullandığı terminale bırakmalıdır. Anahtarın kendisini sohbette istemeyin; yalnızca yapılandırmanın ve bağlantı testinin tamamlandığına dair onayı ve gizli olmayan anahtar ile yenileme kimliklerini alın.
 
 ```bash
-ocx access key list --json
+orl access key list --json
 ```
 
 Yeni anahtarın yapılandırılıp doğrulanması, eski anahtarı iptal etme izni değildir. Yenilemeyi kesinleştirmek veya eski anahtarı silmek için o anahtarın iptaline yönelik ayrıca açık izin gerekir. İzin verilen işlemden sonra listeyi yeniden kontrol edin. Doğrudan API çağrılarıyla bu süreci aşmaya çalışmayın.
 
 ## İstemci entegrasyonları
 
-### `ocx integration <claude|grok> ...`
+### `orl integration <claude|grok> ...`
 
 Desteklenen Claude ve Grok entegrasyonlarını yönetin. Aşağıdaki doğrudan komut
 aileleri istemciye özgü denetimlerini ortaya çıkarır.
 
-### `ocx claude [claude argumanlari...]`
+### `orl claude [claude argumanlari...]`
 
 Proxy'nin çalıştığından emin olun, ardından `ANTHROPIC_BASE_URL`,
 `ANTHROPIC_AUTH_TOKEN`, `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ve
@@ -174,20 +174,20 @@ aktarılan `ANTHROPIC_*` değişkenleri her zaman önceliklidir.
 Claude Desktop profil komutları şunlardır:
 
 ```text
-ocx claude desktop [apply]                         Dört aileli profili kaydedin ve uygulayın
-ocx claude desktop show [--json]                   Rotaları, aileleri ve varsayılanları gösterin
-ocx claude desktop move <route> <family> [--default]
-ocx claude desktop default <family> <route|none>
-ocx claude desktop export <path|->                 Sürümlenmiş JSON dışa aktarın (`-` = stdout)
-ocx claude desktop import <path> [--apply]         JSON doğrulayın ve içe aktarın
+orl claude desktop [apply]                         Dört aileli profili kaydedin ve uygulayın
+orl claude desktop show [--json]                   Rotaları, aileleri ve varsayılanları gösterin
+orl claude desktop move <route> <family> [--default]
+orl claude desktop default <family> <route|none>
+orl claude desktop export <path|->                 Sürümlenmiş JSON dışa aktarın (`-` = stdout)
+orl claude desktop import <path> [--apply]         JSON doğrulayın ve içe aktarın
 ```
 
 Aileler `opus`, `fable`, `sonnet` ve `haiku`'dur; yeni rotalar `opus` ile
 başlar. `none` yalnızca o aile boş olduğunda geçerlidir. Eski uygulama
 bayrakları `--static`, `--hybrid` ve `--discovery-only` desteklenmeye devam
-eder. Claude Code ayarları için `ocx claude config <status|set> ...` kullanın.
+eder. Claude Code ayarları için `orl claude config <status|set> ...` kullanın.
 
-### `ocx opencode [opencode argumanlari...]`
+### `orl opencode [opencode argumanlari...]`
 
 Proxy'nin çalıştığından emin olun, ardından OpenCode'un satır içi çalışma zamanı
 katmanında (`OPENCODE_CONFIG_CONTENT`) üretilen `provider.opencodex` ve
@@ -198,13 +198,13 @@ okunabilir, ancak diskteki dosyalar asla değiştirilmez. Yönlendirilen modelle
 `opencodex/<saglayici>/<model>` olarak görünür. Daha sonra düz `opencode`
 başlatmak tam olarak eskisi gibi davranır.
 
-### `ocx grok <status|exclude|include|set|clear|apply> ...`
+### `orl grok <status|exclude|include|set|clear|apply> ...`
 
 Grok Build model çitini yönetin ve uygulayın.
 
 ## İstemci yapılandırma dışa aktarma
 
-### `ocx export --client <opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh|mcode|zcode|prime|aside|raycast|omo|cline|kilo|commandcode|droid>`
+### `orl export --client <opencode|pi|omp|hermes|openclaw|kimi|gajae|dsh|mcode|zcode|prime|aside|raycast|omo|cline|kilo|commandcode|droid>`
 
 Çalışan proxy'ye bağlı bir istemci yapılandırmasını yazdırın. Komut, `opencodex`
 sağlayıcı bloğunu — temel URL, model listesi ve istemcinin kimlik bilgisi
@@ -222,10 +222,10 @@ yalnızca Codex'in şu anda görebildiği modelleri yayınlar.
 | `--force` | `--out`'un mevcut bir dosyanın üzerine yazmasına izin verin. |
 
 ```bash
-ocx export --client opencode                     # yapılandırma artı hedef, birleştirme uyarısı ve sayılar
-ocx export --client pi --json > pi-models.json   # bir boru veya fark için JSON belgesi
-ocx export --client omp --out ./omp-models.yml    # yerel OMP YAML
-ocx export --client opencode --out ~/opencodex-opencode.json
+orl export --client opencode                     # yapılandırma artı hedef, birleştirme uyarısı ve sayılar
+orl export --client pi --json > pi-models.json   # bir boru veya fark için JSON belgesi
+orl export --client omp --out ./omp-models.yml    # yerel OMP YAML
+orl export --client opencode --out ~/opencodex-opencode.json
 ```
 
 `--json` olmadan önce oluşturulan yapılandırma, ardından kurallı hedef yolu,
@@ -274,7 +274,7 @@ başlıkları destekler, ancak bu ilk entegrasyon kasıtlı olarak yalnızca ger
 döngü olarak kalır; uzaktan `x-opencodex-api-key` bağlantısı ertelenmiştir.
 
 :::caution[Birleştirin, asla üzerine yazmayın]
-`ocx export` asla gerçek istemci yapılandırmanızı yazmaz. Hedef elle
+`orl export` asla gerçek istemci yapılandırmanızı yazmaz. Hedef elle
 birleştirmeniz için yazdırılır ve `--out`, `--force` olmadan mevcut bir dosyanın
 üzerine yazmayı reddeder; çünkü bir yapılandırmanın üzerine yazmak içindeki
 diğer sağlayıcıları, ajanları ve MCP girdilerini yok eder.
@@ -294,25 +294,25 @@ sekmesinde işlenir; böylece CLI, API ve GUI aynı baytları kullanır.
 
 ## Çalışma zamanı ve yapılandırma
 
-### `ocx system <status|settings|startup|diagnostics|sync|codex-app-server|codex-restart|update|codex-cli-update> ...`
+### `orl system <status|settings|startup|diagnostics|sync|codex-app-server|codex-restart|update|codex-cli-update> ...`
 
 Başsız çalışma zamanı ayarlarını, başlatmayı, senkronizasyonu, tanılamayı ve
 güncellemeleri yönetin.
 
-`ocx system codex-restart --yes`, `ocx sync --restart-codex` ile aynı modül
+`orl system codex-restart --yes`, `orl sync --restart-codex` ile aynı modül
 üzerinden Codex app-server'larını yeniden başlatır ve Codex masaüstü
 uygulamasını tamamen kapatıp yeniden başlatır. Proxy'nin kendisi Codex
 uygulamasının içinde çalışıyorsa, tamamlayamayacağı bir devri vaat etmek
 yerine eyleme geçirilebilir bir iletiyle reddeder.
 
 ```bash
-ocx system settings --stream-mode eager-relay
+orl system settings --stream-mode eager-relay
 ```
 
-`ocx system update` OpenCodex'in kendisini günceller. Codex CLI için ayrı, salt okunur komutu kullanın:
+`orl system update` OpenRelay'in kendisini günceller. Codex CLI için ayrı, salt okunur komutu kullanın:
 
 ```bash
-ocx system codex-cli-update check --json
+orl system codex-cli-update check --json
 ```
 
 `check` paket kayıt defterine istek göndermez ve yapılandırmada belirtilen kurulum adayına ilişkin provenance kanıtını, maskelenmiş yürütülebilir dosya konumu ve sahiplik kanıtı dâhil, sınırlı biçimde inceler. Yayımlanmış başlatıcıdan gelen güvenilir bağlam aday anlık görüntüsünü doğrular; Codex'in başarıyla çalıştırıldığını doğrulamaz. Bu tek seferlik komut Codex'i hiçbir zaman çalıştırmadığından, ortamdan ve kalıcı kayıtlardan gelen adaylar yalnızca raporlanır (`managed: false`, genellikle `selection_unattested`). JSON çıktısında `candidateAvailable`, `candidateVersion` ve `candidateSource` alanları bulunur; `selectionAttested` değeri ise `false` kalır. Yapılandırmada belirtilen kurulum adayını incelemek için yayımlanmış başlatıcıdan gelen güvenilir bağlam gerekir; Bun ile veya kaynak koddan doğrudan başlatıldığında bu kanıt bulunmadığından ortamdaki ve kalıcı kayıtlardaki aday durumu yok sayılır ve POSIX sistemlerinde `candidate_unavailable` bildirilebilir. Windows'ta bu ilk parça, aday veya yapılandırma yollarında hiçbir dosya sistemi G/Ç işlemi yapmaz. Yalnızca güvenilir başlatıcının yakaladığı mutlak bir ortam adayı sözcüksel olarak uygulama paketi ya da sürüm yöneticisi etiketi alabilir; diğer tüm Windows adayları kapalı başarısızlıkla reddedilir. Bu parça kalıcı seçim durumunu hiç okumadığından, ortam adayı yakalanmamış olan Windows çalıştırmaları `candidate_unavailable` yerine `windows_inspection_deferred` bildirir: komut bir Codex CLI'nin kurulu olup olmadığını gözlemleyemez, bu yüzden aday bulunmadığını iddia etmek yerine incelemenin ertelendiğini bildirir. Komut Codex veya bir paket yöneticisi çalıştırmaz, shim'i onarmaz, yapılandırmaya ya da önbellek durumuna yazmaz, hiçbir süreci durdurmaz ve hiçbir şey kurmaz. Uygulamayla birlikte paketlenmiş adaylar, tanınan sürüm yöneticisi yollarında bulunan adaylar, doğrulanmamış bağımsız adaylar ve belirsiz shim durumları `unmanaged` veya `unknown` olarak raporlanır; hiçbir zaman `managed` olarak sınıflandırılmaz.
@@ -322,21 +322,21 @@ Windows üzerinde `CODEX_CLI_PATH=codex` gibi yalın bir komut, uzak yol veya ay
 #### Windows x64 kurulumunu açıkça gözlemleme
 
 ```text
-ocx system codex-cli-update attest [--json]
-ocx system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
+orl system codex-cli-update attest [--json]
+orl system codex-cli-update attest --candidate <absolute-path> --npm-prefix <absolute-path> --npm-cli <absolute-path> --node <absolute-path> [--json]
 ```
 
-`attest`, seçili veya açıkça belirtilen bir Windows x64 npm kurulumunu yalnızca okuyan isteğe bağlı bir işlemdir. Seçenek verilmezse komut, güvenilir başlatıcı anlık görüntüsünün belirlediği seçili adayı (yapılandırılmış `CODEX_CLI_PATH` veya yakalanan PATH üzerindeki ilk `codex`) gözlemler; opencodex sarmalayıcısı, yeniden adlandırılmış `codex.opencodex-real.cmd` npm yedeğine çözümlenir. Dört mutlak yolun tümünü sağlamak keşfi geçersiz kılar; keşif yalnızca yol önerir ve tutulan tanıtıcı gözlemi nihai otoritedir. `--candidate`, standart npm `<prefix>/codex.cmd` veya `<prefix>/node_modules/@openai/codex/bin/codex.js` yoludur. `--npm-cli`, `node_modules/npm/bin/npm-cli.js` ile bitmeli; `--node` açık bir `node.exe` belirtmelidir. Uygulama paketleri, tanınan sürüm yöneticisi yerleşimleri, npm yedeği olmayan opencodex shim’leri ve özel sarmalayıcılar reddedilir.
+`attest`, seçili veya açıkça belirtilen bir Windows x64 npm kurulumunu yalnızca okuyan isteğe bağlı bir işlemdir. Seçenek verilmezse komut, güvenilir başlatıcı anlık görüntüsünün belirlediği seçili adayı (yapılandırılmış `CODEX_CLI_PATH` veya yakalanan PATH üzerindeki ilk `codex`) gözlemler; OpenRelay sarmalayıcısı, yeniden adlandırılmış `codex.opencodex-real.cmd` npm yedeğine çözümlenir. Dört mutlak yolun tümünü sağlamak keşfi geçersiz kılar; keşif yalnızca yol önerir ve tutulan tanıtıcı gözlemi nihai otoritedir. `--candidate`, standart npm `<prefix>/codex.cmd` veya `<prefix>/node_modules/@openai/codex/bin/codex.js` yoludur. `--npm-cli`, `node_modules/npm/bin/npm-cli.js` ile bitmeli; `--node` açık bir `node.exe` belirtmelidir. Uygulama paketleri, tanınan sürüm yöneticisi yerleşimleri, npm yedeği olmayan OpenRelay shim’leri ve özel sarmalayıcılar reddedilir.
 
 Sınırlı okuma boyunca yerel tanıtıcılar üst dizinleri ve dosyaları açık tutar. Desteklenmeyen platformlar, yeniden ayrıştırma noktaları/junction, çakışan yazıcılar, güvenli olmayan yollar ve aşırı büyük dosyalar reddedilir. Sabit rapor yol içermez: `status`, `observed` veya `refused` olur ve `installationIdentityObserved` sunulur. `selectionAttested`, `managed` ve `applyAllowed` daima `false` kalır. Raporlanan ret 0 çıkış kodu üretebildiğinden `status` alanını denetleyin.
 
 Kimlik veya özet yalnızca gözlem anındaki dosyaları tanımlar; kalıcı güncelleme izni değildir. Seçilen çalışma zamanını, geçmiş yükleyiciyi, etkin npm yapılandırmasını veya araçların gerçekliğini kanıtlamaz. Verilen Node yalnızca gözlemlenir; başlatıcının onu seçeceği kanıtlanmaz. Hiçbir hedef çalıştırılmaz; kayıt deposu isteği, kurulum, yapılandırma yazımı veya süreç denetimi yapılmaz. Mevcut Windows `check`, aday veya yapılandırma dosya sistemi G/Ç işlemlerini hâlâ yapmaz.
 
-### `ocx config [show|get|set|unset|validate|export|import] ...`
+### `orl config [show|get|set|unset|validate|export|import] ...`
 
-`ocx config [show] [--json] [--source]`, çalışan bir proxy olmadan yerel yapılandırmayı gösterir. `show` atlandığında bayraklardan biri veya ikisi herhangi bir sırayla kullanılabilir. `--source`, tanılama kaynağını, hataları ve uyarıları içerir ve yalnızca görüntüleme için kabul edilir. `--json`, açıkça belirtilen bir eylemden önce gelebilir; çalıştırılan eylemi değiştirmez. Yinelenen `--json` veya `--source` bayrakları ve bilinmeyen bağımsız değişkenler reddedilir.
+`orl config [show] [--json] [--source]`, çalışan bir proxy olmadan yerel yapılandırmayı gösterir. `show` atlandığında bayraklardan biri veya ikisi herhangi bir sırayla kullanılabilir. `--source`, tanılama kaynağını, hataları ve uyarıları içerir ve yalnızca görüntüleme için kabul edilir. `--json`, açıkça belirtilen bir eylemden önce gelebilir; çalıştırılan eylemi değiştirmez. Yinelenen `--json` veya `--source` bayrakları ve bilinmeyen bağımsız değişkenler reddedilir.
 
-Doğrulanmış OpenCodex yapılandırmasını inceleyin ve güvenle değiştirin. `show`
+Doğrulanmış OpenRelay yapılandırmasını inceleyin ve güvenle değiştirin. `show`
 ve `get` sırları maskeler. İçe aktarma yazmadan önce doğrular ve `--yes`
 gerektirir.
 
@@ -344,7 +344,7 @@ gerektirir.
 
 The Subagents page offers **Force all subagents onto one model**, off by default. Select an exposed roster-style id, such as `combo/tev-auto`, then enable the switch. The roster is offered first; unavailable saved roster entries cannot be force targets.
 
-`ocx agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `ocx agent subagents force -` clears it. `ocx agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
+`orl agent subagents force combo/tev-auto` sets `claudeCode.subagentModelForce`; `orl agent subagents force -` clears it. `orl agent status` reports the setting. `GET /api/subagent-models` returns `force`, `forceAvailable`, and `forceStatus`; `PUT` accepts `{ "force": "combo/tev-auto" }` or `{ "force": null }` without changing the roster. Omitting `force` leaves it unchanged. Invalid or unexposed targets are rejected on write; stale targets are reported and skipped at launch.
 
 This takes effect on the **next routed `ocx claude` launch**, injecting `CLAUDE_CODE_SUBAGENT_MODEL` as an explicit proxy alias (with `[1m]` only for an authoritative million-token window; native Claude targets use a reversible native alias) and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`. Each nonempty shell-exported variable independently wins. Native launches inject neither variable; plain `claude` is not affected. No plugin files or `settings.json` are modified by this setting.
 

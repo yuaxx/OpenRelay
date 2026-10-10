@@ -6,13 +6,13 @@ export function modelSelectionNextSteps(provider: string, afterLogin = false) {
     afterLogin,
     requiresRunningProxy: true,
     commands: {
-      list: `ocx models live --provider ${name}`,
-      enable: 'ocx models enable "<model-id-from-list>"',
-      disable: 'ocx models disable "<model-id-from-list>"',
-      enableNative: 'ocx models enable "<model-id-from-list>" --native',
-      disableNative: 'ocx models disable "<model-id-from-list>" --native',
-      enableAll: `ocx models provider ${name} on`,
-      disableAll: `ocx models provider ${name} off`,
+      list: `orl models live --provider ${name}`,
+      enable: 'orl models enable "<model-id-from-list>"',
+      disable: 'orl models disable "<model-id-from-list>"',
+      enableNative: 'orl models enable "<model-id-from-list>" --native',
+      disableNative: 'orl models disable "<model-id-from-list>" --native',
+      enableAll: `orl models provider ${name} on`,
+      disableAll: `orl models provider ${name} off`,
     },
   };
 }
@@ -21,10 +21,10 @@ export function modelSelectionGuidance(provider: string, afterLogin = false): st
   const next = modelSelectionNextSteps(provider, afterLogin);
   return [
     afterLogin ? "After login completes, manage model switches with:" : "Manage model switches (the provider stays active):",
-    "  Start the proxy first if needed: ocx start",
+    "  Start the proxy first if needed: orl start",
     "  Replace <model-id-from-list> with an exact ID printed by the list command.",
     "  For rows marked native, use the --native variants (including IDs containing /).",
     ...Object.values(next.commands).map(command => `  ${command}`),
-    "  If initial discovery is still pending, check the provider connection and retry: ocx sync",
+    "  If initial discovery is still pending, check the provider connection and retry: orl sync",
   ];
 }

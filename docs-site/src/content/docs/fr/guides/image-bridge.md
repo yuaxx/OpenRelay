@@ -17,7 +17,7 @@ générer des images.
   par défaut afin d'éviter des frais xAI inattendus — voir [Configuration](#configuration) ci-dessous).
 - Configurez un fournisseur `xai` avec une **clé API**. Le pont envoie systématiquement les requêtes au
   point de terminaison Images xAI du registre (`https://api.x.ai/v1`) ; tout remplacement de `baseUrl`
-  configuré est ignoré pour les appels d'images. OAuth ou `ocx login xai` seul n'active **pas** le pont
+  configuré est ignoré pour les appels d'images. OAuth ou `orl login xai` seul n'active **pas** le pont
   (le transport OAuth de la CLI Grok est destiné aux conversations et n'est pas utilisé pour `/images/*`).
 
   ```json
@@ -73,11 +73,11 @@ est sélectionné. Il n'intercepte **pas** l'outil `image_gen` intégré à Code
 requête POST à `/v1/images/generations` (ou `/images/edits`) ; ce parcours est traité séparément dans
 [Intégration de Codex](/fr/guides/codex-integration/#génération-dimages-intégrée-image_gen).
 
-1. Lorsqu'une requête Responses répertorie `image_generation` dans `tools`, OpenCodex le détecte pendant le
+1. Lorsqu'une requête Responses répertorie `image_generation` dans `tools`, OpenRelay le détecte pendant le
    prétraitement de la requête.
 2. L'outil hébergé est remplacé par un **outil de fonction synthétique** que le modèle routé peut appeler
    normalement : le modèle voit un outil exécutable plutôt qu'un outil hébergé opaque qu'il ne peut exécuter.
-3. Lorsque le modèle appelle cet outil, OpenCodex intercepte l'appel et envoie l'invite à l'API de génération
+3. Lorsque le modèle appelle cet outil, OpenRelay intercepte l'appel et envoie l'invite à l'API de génération
    d'images de xAI.
 4. Les images générées sont enregistrées dans `~/.opencodex/artifacts/`, puis leur **chemin de fichier local**
    est renvoyé au modèle comme résultat de l'outil.

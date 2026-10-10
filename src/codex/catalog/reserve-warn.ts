@@ -88,7 +88,7 @@ export function warnReserveSuppressedOnce(reason: ReserveCatalogSuppressionReaso
   warnedReserveSuppression.add(reason);
   const text = SUPPRESSION_TEXT[reason];
   console.warn(
-    `[opencodex] catalog sync: authless Codex Desktop routing is on, but the Luna Reserve row `
+    `[openrelay] catalog sync: authless Codex Desktop routing is on, but the Luna Reserve row `
       + `(<selector>/${NATIVE_RESERVE_MODEL}) is not being written because ${text.cause}. `
       + `The Reserve projection is account-qualified and needs a selector for the main Codex `
       + `account. ${text.action}`,

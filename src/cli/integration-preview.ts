@@ -13,10 +13,10 @@ import {
 import { decodeIntegrationPlan, FILE_INTEGRATION_CLIENTS, INTEGRATION_STATES, INTEGRATION_REFUSAL_REASONS } from "./integration-plan-dto";
 
 const USAGE = `Usage:
-  ocx integration client preview --client ID --operation <apply|overwrite|disable> [--profile N] [--json]
-  ocx integration client restore --op ID --preview [--client aside --profile N] [--confirm-drift] [--json]
-  ocx integration client <enable|disable> --client ID [--profile N] [--overwrite-conflict] [--plan-fingerprint TOKEN] [--json]
-  ocx integration client restore --op ID [--client aside --profile N] [--confirm-drift] [--plan-fingerprint TOKEN] [--json]
+  orl integration client preview --client ID --operation <apply|overwrite|disable> [--profile N] [--json]
+  orl integration client restore --op ID --preview [--client aside --profile N] [--confirm-drift] [--json]
+  orl integration client <enable|disable> --client ID [--profile N] [--overwrite-conflict] [--plan-fingerprint TOKEN] [--json]
+  orl integration client restore --op ID [--client aside --profile N] [--confirm-drift] [--plan-fingerprint TOKEN] [--json]
   Droid apply/overwrite: [--reasoning-default MODEL=EFFORT ... | --clear-reasoning-defaults]`;
 
 type Intent = {
@@ -149,7 +149,7 @@ const REFUSAL_GUIDANCE: Readonly<Record<string, string>> = {
 function refusalGuidance(plan: IntegrationMutationPlan): string {
   if (plan.supersededReason === "missing-store" && plan.missingStoreDocument !== undefined) {
     return `The provider store this client reads is missing. Create it containing \`${plan.missingStoreDocument}\` `
-      + `(its path is supersededBy in \`ocx integration client status --client ${plan.clientId}\`), then apply again.`;
+      + `(its path is supersededBy in \`orl integration client status --client ${plan.clientId}\`), then apply again.`;
   }
   return REFUSAL_GUIDANCE[plan.refusalReason!]!;
 }
@@ -169,7 +169,7 @@ function reportError(error: unknown): number {
     const stopped = error.status === 503 && error.body === null && error.message.startsWith("Proxy is not running");
     console.error(stale ? "Error: Integration preview is stale. Run the explicit preview again and review its changes before retrying."
       : unavailable ? "Error: Integration preview is unavailable. Load the model catalog, then run the preview again."
-      : stopped ? "Error: Proxy is not running. Start the intended proxy with: ocx start. No request was sent."
+      : stopped ? "Error: Proxy is not running. Start the intended proxy with: orl start. No request was sent."
       : error.status === 404 ? "Error: Integration operation or profile was not found. Inspect integration history and the selected profile."
       : error.status === 409 ? "Error: Integration change was refused. Inspect integration status and preview before retrying."
       : error.status === 503 ? "Error: Management API is unavailable. Check the proxy and run this command on its management host."

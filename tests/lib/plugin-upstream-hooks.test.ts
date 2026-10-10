@@ -72,7 +72,7 @@ test("a throwing rewriter logs only a bounded category", () => {
   } finally {
     console.error = originalError;
   }
-  expect(lines).toEqual(["[opencodex] plugin upstream rewriter disabled: plugin_exception"]);
+  expect(lines).toEqual(["[openrelay] plugin upstream rewriter disabled: plugin_exception"]);
   expect(lines.join(" ")).not.toContain(marker);
 });
 

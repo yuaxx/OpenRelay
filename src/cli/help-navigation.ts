@@ -1,4 +1,5 @@
 import { findCommand } from "./registry";
+import { CLI_HEADING, CLI_COMPATIBILITY, CLI_NAME } from "../lib/brand";
 
 // Presentation owns selection/order only; names and summaries belong to registry.
 const ACTION_GROUPS = [
@@ -21,7 +22,7 @@ function publicCommand(name: string) {
 
 function actionLines(name: string): string[] {
   const entry = publicCommand(name);
-  const prefix = `  ocx ${entry.name}`.padEnd(16);
+  const prefix = `  orl ${entry.name}`.padEnd(16);
   const lines: string[] = [];
   let line = prefix;
   for (const word of entry.summary.split(/\s+/)) {
@@ -36,15 +37,15 @@ function actionLines(name: string): string[] {
 }
 
 export function renderRootHelp(): string {
-  const lines = ["opencodex (ocx) — Universal provider proxy for Codex", "Usage: ocx <command> [options]"];
+  const lines = [`${CLI_HEADING} — Universal provider proxy for Codex`, `Usage: ${CLI_NAME} <command> [options]`, CLI_COMPATIBILITY];
   for (const group of ACTION_GROUPS) {
     lines.push("", `${group.title}:`, ...group.commands.flatMap(actionLines));
   }
   lines.push("", "Explore:");
   for (const group of FAMILY_GROUPS) lines.push(`  ${group.map(name => publicCommand(name).name).join("  ")}`);
   lines.push("", "More help:",
-    "  ocx help <command>       Command usage and declared topics",
-    "  ocx help --all           Complete command reference",
-    "  ocx capabilities --json  Declared capabilities for scripts");
+    "  orl help <command>       Command usage and declared topics",
+    "  orl help --all           Complete command reference",
+    "  orl capabilities --json  Declared capabilities for scripts");
   return lines.join("\n");
 }

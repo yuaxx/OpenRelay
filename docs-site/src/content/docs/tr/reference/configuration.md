@@ -1,9 +1,9 @@
 ---
 title: Yapılandırma Referansı
-description: opencodex'in yapılandırmayı nerede sakladığı, düzenlemelerin nasıl uygulandığı ve her yapılandırma alanına bağlantılar.
+description: OpenRelay'in yapılandırmayı nerede sakladığı, düzenlemelerin nasıl uygulandığı ve her yapılandırma alanına bağlantılar.
 ---
 
-opencodex kalıcı yapılandırmasını `$OPENCODEX_HOME/config.json` içinde saklar,
+OpenRelay kalıcı yapılandırmasını `$OPENCODEX_HOME/config.json` içinde saklar,
 normalde `~/.opencodex/config.json` konumundadır. Windows'ta varsayılan
 `%USERPROFILE%\.opencodex\config.json`'dır.
 
@@ -13,7 +13,7 @@ Göreve uygun düzenleme kanalını seçin:
 
 - **Kontrol Paneli:** rehberli sağlayıcı, model, ajan, erişim ve depolama
   ayarları için web kullanıcı arayüzünü kullanın.
-- **CLI:** `ocx init` başlangıç dosyasını oluştururken `ocx provider`, `ocx
+- **CLI:** `orl init` başlangıç dosyasını oluştururken `orl provider`, `ocx
   models`, `ocx combo`, `ocx agent` ve `ocx config` gibi komutlar sahip
   oldukları ayarları günceller veya inceler.
 - **Dosya:** özel bir kullanıcı arayüzü veya CLI komutu olmayan alanlar için
@@ -28,7 +28,7 @@ yeniden yazabilir. Canlı kaydetmeler, bu yolların açık çakışma korumasın
 olduğu harici olarak düzenlenmiş `claudeCode` ve dinleyici bağlama alanlarını
 birleştirir, ancak bu koruma her alt ağacı kapsamaz.
 
-Dosya ayrıştırılamazsa opencodex dosyayı `config.json.invalid-<zaman-damgasi>`
+Dosya ayrıştırılamazsa OpenRelay dosyayı `config.json.invalid-<zaman-damgasi>`
 olarak yedekler, konsolda uyarır ve varsayılanlarla başlar. Eksik bir dosya da
 yeni yükleme varsayılanını kullanır: bir `openai` iletme sağlayıcısı.
 
@@ -69,9 +69,9 @@ Hesap kimlikleri ve e-postaları da gizli kalmalıdır; desteklendiğinde genel
 seçici takma adlarını kullanın.
 
 :::note[Atomik yazmalar]
-opencodex, yönetilen `config.toml` ve `opencodex-catalog.json` dosyalarını
+OpenRelay, yönetilen `config.toml` ve `opencodex-catalog.json` dosyalarını
 geçici bir dosya ve ardından yeniden adlandırma (`atomicWriteFile`) yoluyla
-yazar. Bu, `ocx stop` ve proxy kapatma işleyicisi gibi eşzamanlı yazıcılar
+yazar. Bu, `orl stop` ve proxy kapatma işleyicisi gibi eşzamanlı yazıcılar
 Codex'i aynı anda geri yüklediğinde kısmi dosyaları önler.
 :::
 

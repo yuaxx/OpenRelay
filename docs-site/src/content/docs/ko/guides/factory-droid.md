@@ -1,11 +1,11 @@
 ---
 title: Factory Droid 브리지
-description: 로컬 Responses 호환 브리지를 통해 Factory Droid 모델을 opencodex에 연결합니다.
+description: 로컬 Responses 호환 브리지를 통해 Factory Droid 모델을 OpenRelay에 연결합니다.
 ---
 
 Factory Droid는 에이전트 런타임이며, 문서화된 OpenAI 호환 추론 엔드포인트가 아닙니다. 내부
 Factory LLM URL을 사용자 지정 프로바이더로 등록했을 때 `403 Forbidden`이 발생한다면,
-opencodex 어댑터나 프로바이더 헤더만 바꿔도 그 비공개 경로가 지원되는 공개 API로 바뀌지는
+OpenRelay 어댑터나 프로바이더 헤더만 바꿔도 그 비공개 경로가 지원되는 공개 API로 바뀌지는
 않습니다.
 
 검증된 연결 구조는 다음과 같습니다.
@@ -18,7 +18,7 @@ opencodex 어댑터나 프로바이더 헤더만 바꿔도 그 비공개 경로�
   -> Factory 계정과 선택 모델
 ```
 
-이 구조에서는 Factory 자격 증명을 공식 Droid 클라이언트 안에 유지합니다. OpenCodex에는 별도의
+이 구조에서는 Factory 자격 증명을 공식 Droid 클라이언트 안에 유지합니다. OpenRelay에는 별도의
 로컬 전용 브리지 토큰만 전달합니다.
 
 ## 실패 원인과 수정 방법
@@ -29,7 +29,7 @@ opencodex 어댑터나 프로바이더 헤더만 바꿔도 그 비공개 경로�
 | `/models/models`에서 `404` | 프로바이더 Base URL에 `/models`가 이미 포함됨 | `baseUrl`에는 API 루트만 사용하고 검색 경로는 넣지 않음 |
 | 모델 검색 실패 | 브리지가 완전한 실시간 카탈로그를 제공하지 않음 | `liveModels: false`와 정적 `models` 목록 사용 |
 | 루프백 프로바이더 거부 | 사설 네트워크 접근은 기본적으로 차단됨 | 루프백 브리지에만 `allowPrivateNetwork: true` 설정 |
-| `${DROID_BRIDGE_TOKEN}`을 찾지 못함 | opencodex 서비스 환경에 변수가 없음 | 대화형 셸이 아니라 서비스 프로세스에 변수 주입 |
+| `${DROID_BRIDGE_TOKEN}`을 찾지 못함 | OpenRelay 서비스 환경에 변수가 없음 | 대화형 셸이 아니라 서비스 프로세스에 변수 주입 |
 | `OutputTextDelta without active item` | 출력 item과 content part를 열기 전에 text delta를 보냄 | Responses SSE 수명주기 전체를 순서대로 전송 |
 
 따라서 같은 Factory 자격 증명으로 `droid exec`는 성공하지만, 문서화되지 않은 LLM URL 직접
@@ -110,12 +110,12 @@ response.completed
 브리지를 `0.0.0.0`에 노출하지 말고, Factory 자격 증명을 브리지 bearer 토큰으로 재사용하지
 마세요.
 
-## OpenCodex 프로바이더 설정
+## OpenRelay 프로바이더 설정
 
 명시적인 프로바이더 ID `droid`로 사용자 지정 프로바이더를 생성합니다.
 
 ```bash
-ocx provider add droid \
+orl provider add droid \
   --adapter openai-responses \
   --base-url http://127.0.0.1:11435/v1 \
   --default-model glm-5.2 \
@@ -147,8 +147,8 @@ Factory 추론 전용 헤더를 추가하지 않습니다.
 동기화하고 재시작합니다.
 
 ```bash
-ocx sync --restart-codex
-ocx doctor
+orl sync --restart-codex
+orl doctor
 ```
 
 `--restart-codex`는 일치하는 app-server를 재시작하고 Codex 데스크톱 앱을 완전히 종료한 뒤 다시
@@ -161,8 +161,8 @@ ocx doctor
 
 ```bash
 curl -fsS http://127.0.0.1:11435/healthz
-ocx doctor
-ocx access test droid/glm-5.2 --protocol responses
+orl doctor
+orl access test droid/glm-5.2 --protocol responses
 ```
 
 프로바이더 행이나 모델 선택기 표시는 카탈로그 노출만 증명합니다. Responses probe가
@@ -175,4 +175,4 @@ ocx access test droid/glm-5.2 --protocol responses
 정의를 모두 제거하는 범용 플래그가 없습니다. 최소 브리지는 위 계약에 따라 해당 요청을 `400`으로
 거부해야 합니다. 도구 정의, 도구 호출과 결과, 권한, 취소, 풍부한 Droid 이벤트를 처리하려면
 Factory stream JSON-RPC 모드 또는 공식 Droid SDK를 사용하는 상태 유지 브리지가 필요합니다.
-`ocx access test` 성공을 Codex 에이전트나 도구 경로 성공으로 간주하지 마세요.
+`orl access test` 성공을 Codex 에이전트나 도구 경로 성공으로 간주하지 마세요.

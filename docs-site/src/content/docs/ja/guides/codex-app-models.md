@@ -1,14 +1,14 @@
 ---
 title: Codex App モデル ピッカー
-description: opencodex モデルが、共有 Codex カタログを通じて Codex App、Codex CLI、Codex TUI にどのように表示されるか。
+description: OpenRelay モデルが、共有 Codex カタログを通じて Codex App、Codex CLI、Codex TUI にどのように表示されるか。
 ---
 
-opencodex は Codex アプリにパッチを適用しません。Codex CLI/TUI と同じ Codex 設定とモデル
+OpenRelay は Codex アプリにパッチを適用しません。Codex CLI/TUI と同じ Codex 設定とモデル
 カタログを書き込みます。app-server はその共有状態を読み取りますが、一部の Codex Desktop
 リリースは renderer 側で追加の remote allowlist を適用し、routed row を picker から除外する
 ことがあります。明示的な `nativeAlias: true` combo が、この上流不具合向けの互換モードです。
 
-OpenAI エントリには、ネイティブ Codex ログインと、名前空間付きの `openai-apikey/<model>` API キーという 2 つの資格情報ルートがあります。`codexAccountMode` だけを Pool と Direct の間で変更しても、ピッカー ID は変わりません。ただし、`codexAccountPickerEnabled` によって account-qualified picker 行が有効で、`codexAccountNamespaces` に対象アカウントが存在する selector がある場合、opencodex は対応するアカウントごとに `<selector>/<native-openai-model>` 行を追加し、ピッカーでは bare native 行を非表示にします。Selector 名はユーザーが決める公開ラベルであり、組み込みのアカウント role の意味はありません。`selector` 付きの行を選択すると、対応付けられたアカウントだけが使用され、アクティブな Pool アカウントは変更されません。対象を利用できない場合、別のアカウントへ切り替えずにリクエストが失敗します。詳しくは [Codex アカウントの明示的な selector](/reference/configuration/routing/#exact-codex-account-selectors) を参照してください。
+OpenAI エントリには、ネイティブ Codex ログインと、名前空間付きの `openai-apikey/<model>` API キーという 2 つの資格情報ルートがあります。`codexAccountMode` だけを Pool と Direct の間で変更しても、ピッカー ID は変わりません。ただし、`codexAccountPickerEnabled` によって account-qualified picker 行が有効で、`codexAccountNamespaces` に対象アカウントが存在する selector がある場合、OpenRelay は対応するアカウントごとに `<selector>/<native-openai-model>` 行を追加し、ピッカーでは bare native 行を非表示にします。Selector 名はユーザーが決める公開ラベルであり、組み込みのアカウント role の意味はありません。`selector` 付きの行を選択すると、対応付けられたアカウントだけが使用され、アクティブな Pool アカウントは変更されません。対象を利用できない場合、別のアカウントへ切り替えずにリクエストが失敗します。詳しくは [Codex アカウントの明示的な selector](/reference/configuration/routing/#exact-codex-account-selectors) を参照してください。
 
 `codexAccountNamespaces` map が空の場合、account-qualified picker 行は off です。空でない map で `codexAccountPickerEnabled` を省略すると、後方互換性のため有効として扱われます。`false` にすると、mapping を削除せず、明示的な `<selector>/<native-openai-model>` routing も無効にせずに、生成された qualified 行を非表示にして picker の bare native 行を復元します。
 
@@ -32,11 +32,11 @@ cp ~/.opencodex/config.json.pre-openai-tiers-v2.bak ~/.opencodex/config.json
 
 ## 統合パス
 
-`ocx init`、`ocx start`、および `ocx sync` は、共有 Codex 設定とカタログをプロキシに接続します。設定の挿入、カタログの同期、シム、WebSocket フォールバック、および復元の仕組みについては、[Codexの統合](/guides/codex-integration/) を参照してください。
+`orl init`、`orl start`、および `orl sync` は、共有 Codex 設定とカタログをプロキシに接続します。設定の挿入、カタログの同期、シム、WebSocket フォールバック、および復元の仕組みについては、[Codexの統合](/guides/codex-integration/) を参照してください。
 
 ## 配線されたモデルが表示される理由
 
-Codex のモデル ピッカーは、Codex の形をしたカタログ エントリを想定しています。 opencodex は、ネイティブ Codex モデル テンプレートを複製し、ルーティングされたモデル ID を置き換えることによって、ルーティングされたエントリを構築します。
+Codex のモデル ピッカーは、Codex の形をしたカタログ エントリを想定しています。 OpenRelay は、ネイティブ Codex モデル テンプレートを複製し、ルーティングされたモデル ID を置き換えることによって、ルーティングされたエントリを構築します。
 
 ```text
 slug = "anthropic/claude-sonnet-..."
@@ -44,11 +44,11 @@ display_name = "anthropic/claude-sonnet-..."
 visibility = "list"
 ```
 
-クローンは、推論レベル、シェル タイプ、API サポート フラグ、基本命令などの厳密なパーサー フィールドを保持します。次に、opencodex は、OpenAI サービス層メタデータなど、ルートが尊重できないネイティブのみの機能を削除します。
+クローンは、推論レベル、シェル タイプ、API サポート フラグ、基本命令などの厳密なパーサー フィールドを保持します。次に、OpenRelay は、OpenAI サービス層メタデータなど、ルートが尊重できないネイティブのみの機能を削除します。
 
 ## 現在の安定したモデルの範囲
 
-ネイティブ フォールバック セットには、`gpt-5.5` および GPT-5.6 Sol/Terra/Luna が含まれます。 GPT-5.5 ファミリの場合、opencodex は、インストールされている Codex カタログの豊富なライブ エントリを保存し、欠落しているエントリのみを合成します。バンドルされたアップストリーム スナップショットは GPT-5.6 でのみ使用され、古いテンプレートの近似値の代わりに実際のモデルごとの ID とメタデータが提供されます。
+ネイティブ フォールバック セットには、`gpt-5.5` および GPT-5.6 Sol/Terra/Luna が含まれます。 GPT-5.5 ファミリの場合、OpenRelay は、インストールされている Codex カタログの豊富なライブ エントリを保存し、欠落しているエントリのみを合成します。バンドルされたアップストリーム スナップショットは GPT-5.6 でのみ使用され、古いテンプレートの近似値の代わりに実際のモデルごとの ID とメタデータが提供されます。
 
 |ルート |ピッカー ID とカタログのメタデータ |
 | --- | --- |
@@ -100,17 +100,17 @@ service_tier = "fast"
 fast_mode = true
 ```
 
-ただし、モデル カタログとランタイム リクエスト層 ID は `priority` を使用します。opencodex はその分割を保持します。ネイティブ OpenAI パススルー モデルは高速サポートを維持します。ルーティングされたプロバイダーはケイパビリティでゲートされ、`supportsServiceTier: false` と宣言された場合のみ `service_tier` が削除されます (レジストリは正規 OpenAI を `true`、DeepSeek と Volcengine Ark を `false` に分類します)。未分類のカスタム ゲートウェイは呼び出し元の値をそのまま保持し、注入もされません。そのため、受け入れられない場所で高速オプションがアドバタイズされることはなく、カスタム ゲートウェイは `true` で明示的にオプトインできます。
+ただし、モデル カタログとランタイム リクエスト層 ID は `priority` を使用します。OpenRelay はその分割を保持します。ネイティブ OpenAI パススルー モデルは高速サポートを維持します。ルーティングされたプロバイダーはケイパビリティでゲートされ、`supportsServiceTier: false` と宣言された場合のみ `service_tier` が削除されます (レジストリは正規 OpenAI を `true`、DeepSeek と Volcengine Ark を `false` に分類します)。未分類のカスタム ゲートウェイは呼び出し元の値をそのまま保持し、注入もされません。そのため、受け入れられない場所で高速オプションがアドバタイズされることはなく、カスタム ゲートウェイは `true` で明示的にオプトインできます。
 
 ## サブエージェントの選択
 
-Codex は、ピッカーに表示されるカタログ エントリを `priority` の昇順で並べ替え、最初の 5 つを `spawn_agent` モデル オーバーライドとしてアドバタイズします。ダッシュボードの Subagents ページでは、bare native id または routed `provider/model` id を最大 5 つ選択して保存できます。手動で設定した `subagentModels` は account-qualified `<selector>/<native-openai-model>` id も受け付けますが、ダッシュボードにはこれらの exact id が表示されません。ページを保存すると、リストはダッシュボードに表示される選択肢で置き換えられます。opencodex は選択順に低いカタログ priority を割り当てます。account-qualified picker 行が有効な場合、bare native の選択は selector-qualified グループに展開されます。他のモデルは引き続き正確な ID で呼び出すことができます。
+Codex は、ピッカーに表示されるカタログ エントリを `priority` の昇順で並べ替え、最初の 5 つを `spawn_agent` モデル オーバーライドとしてアドバタイズします。ダッシュボードの Subagents ページでは、bare native id または routed `provider/model` id を最大 5 つ選択して保存できます。手動で設定した `subagentModels` は account-qualified `<selector>/<native-openai-model>` id も受け付けますが、ダッシュボードにはこれらの exact id が表示されません。ページを保存すると、リストはダッシュボードに表示される選択肢で置き換えられます。OpenRelay は選択順に低いカタログ priority を割り当てます。account-qualified picker 行が有効な場合、bare native の選択は selector-qualified グループに展開されます。他のモデルは引き続き正確な ID で呼び出すことができます。
 
 注目モデルのリストは、ダッシュボードの **サブエージェント委任** の選択とは別のものです。 Codex が提供するものを最初にオーバーライドするものを制御します。モデルを選択したり、委任をトリガーしたりすることはありません。
 
 ## Desktop リモートサーバー
 
-Codex Desktop のリモートサーバーモードでは、クライアント自身の `available_models` 許可リストでピッカーがフィルタリングされます(リモートの `use_hidden_models` 設定が有効な場合)。ルーティングされたカタログエントリは引き続きロードされ提供されます。`model/list` はそれらを返し、バンドルされた CLI も読み取れますが、Desktop レンダラーは表示前にこのネイティブのみの許可リストにないものを破棄します。opencodex はこのリストに介入できません。上流のバグは [openai/codex#19694](https://github.com/openai/codex/issues/19694) で追跡されています。
+Codex Desktop のリモートサーバーモードでは、クライアント自身の `available_models` 許可リストでピッカーがフィルタリングされます(リモートの `use_hidden_models` 設定が有効な場合)。ルーティングされたカタログエントリは引き続きロードされ提供されます。`model/list` はそれらを返し、バンドルされた CLI も読み取れますが、Desktop レンダラーは表示前にこのネイティブのみの許可リストにないものを破棄します。OpenRelay はこのリストに介入できません。上流のバグは [openai/codex#19694](https://github.com/openai/codex/issues/19694) で追跡されています。
 
 Desktop が許可リストの制御を提供するまでは:
 
@@ -120,9 +120,9 @@ Desktop が許可リストの制御を提供するまでは:
 ## モデルの状態を更新しています
 ## ネイティブクォータのフォールバック制限
 
-Codex アプリがネイティブの 5 時間クォータを使い切ると、リザーブのフォールバックモデルに切り替わり、ピッカーの他の行がグレーアウトすることがあります。[#2813](https://github.com/lidge-jun/opencodex/issues/2813) で報告されたこの制御は、opencodex がルーティングした行も隠します。これらは無関係なプロバイダー資格情報を使い、ChatGPT のクォータを一切消費しません。
+Codex アプリがネイティブの 5 時間クォータを使い切ると、リザーブのフォールバックモデルに切り替わり、ピッカーの他の行がグレーアウトすることがあります。[#2813](https://github.com/lidge-jun/opencodex/issues/2813) で報告されたこの制御は、OpenRelay がルーティングした行も隠します。これらは無関係なプロバイダー資格情報を使い、ChatGPT のクォータを一切消費しません。
 
-この制御はリクエストがプロキシに届く前にクライアント側で適用されるため、opencodex では解除できません。ルーティング行は `visibility: "list"` で書き込まれ、カタログのフィルタリングは `disabledModels` と各プロバイダーの `selectedModels` だけを参照し、クォータ値はルーティング行の可視性に一切関与しません。
+この制御はリクエストがプロキシに届く前にクライアント側で適用されるため、OpenRelay では解除できません。ルーティング行は `visibility: "list"` で書き込まれ、カタログのフィルタリングは `disabledModels` と各プロバイダーの `selectedModels` だけを参照し、クォータ値はルーティング行の可視性に一切関与しません。
 
 ルーティングモデルを明示的に選ぶ経路はピッカーを通りません。`config.toml` でモデルを指定します。
 
@@ -133,16 +133,16 @@ model = "anthropic/claude-sonnet-5"
 または直接送信します。
 
 ```bash
-ocx access test anthropic/claude-sonnet-5 --protocol responses
+orl access test anthropic/claude-sonnet-5 --protocol responses
 ```
 
-どちらの経路も **リクエストがプロキシに届いた後は** 正しくルーティングされ、これはテストで確認済みです。ただし Codex デスクトップアプリは、リザーブモード中は設定したモデルを送りません。アプリは自身の `wham/usage` ポーリング（`luna_reserve` アップセルと許可状態の `gpt-reserve` 追加上限）でリザーブを判定し、リクエストが出る前にモデル設定を `gpt-reserve` に強制するため、`config.toml` 経路はアプリ内で上書きされます。ウィンドウがリセットされるまでは `ocx access test`、プロキシ経由の Claude Code（`ocx claude`）、または直接の `/v1` クライアントを使ってください。[Codex リザーブモード中のルーティングモデル](/guides/codex-integration/#routed-models-during-codex-reserve-mode) も参照してください。
+どちらの経路も **リクエストがプロキシに届いた後は** 正しくルーティングされ、これはテストで確認済みです。ただし Codex デスクトップアプリは、リザーブモード中は設定したモデルを送りません。アプリは自身の `wham/usage` ポーリング（`luna_reserve` アップセルと許可状態の `gpt-reserve` 追加上限）でリザーブを判定し、リクエストが出る前にモデル設定を `gpt-reserve` に強制するため、`config.toml` 経路はアプリ内で上書きされます。ウィンドウがリセットされるまでは `orl access test`、プロキシ経由の Claude Code（`orl claude`）、または直接の `/v1` クライアントを使ってください。[Codex リザーブモード中のルーティングモデル](/guides/codex-integration/#routed-models-during-codex-reserve-mode) も参照してください。
 
 
 ピッカーに古いエントリがまだ表示されている場合は、カタログを更新し、ターゲットの Codex サーフェスを再起動します。
 
 ```bash
-ocx sync
+orl sync
 ```
 
-opencodex は、カタログの可視性、優先度、またはメタデータが変更されるたびに、意図的に古いキャッシュ ラッパーで `models_cache.json` を書き換えるため、次回の Codex モデルの更新で新しいカタログが読み取られます。
+OpenRelay は、カタログの可視性、優先度、またはメタデータが変更されるたびに、意図的に古いキャッシュ ラッパーで `models_cache.json` を書き換えるため、次回の Codex モデルの更新で新しいカタログが読み取られます。

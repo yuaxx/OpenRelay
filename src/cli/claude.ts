@@ -535,10 +535,10 @@ export async function ensureProxyForClaude(deps: ClaudeProxyEnsureDeps = {}): Pr
 }
 
 export const CLAUDE_NATIVE_ROUTING_OFF =
-  "ℹ️ Claude Code routing is disabled in OpenCodex. Launching Claude Code natively. Enable Claude routing to use the proxy again.";
+  "ℹ️ Claude Code routing is disabled in OpenRelay. Launching Claude Code natively. Enable Claude routing to use the proxy again.";
 
 export const CLAUDE_NATIVE_LIVE_DISABLED =
-  "ℹ️ The running OpenCodex proxy has Claude Code routing disabled. Launching Claude Code natively. Restart the service after enabling routing.";
+  "ℹ️ The running OpenRelay proxy has Claude Code routing disabled. Launching Claude Code natively. Restart the service after enabling routing.";
 
 export type ClaudeLaunchPlan =
   | { kind: "routed" }
@@ -734,7 +734,7 @@ export function shouldAllowRootSkipPermissions(
 
 export function rootSkipPermissionsNotice(env: ClaudeLaunchEnv): string {
   if (env.IS_SANDBOX === "1") {
-    return "⚠ Root --dangerously-skip-permissions requested: OpenCodex set IS_SANDBOX=1 to bypass Claude Code's root guard. OpenCodex did not create an OS sandbox; prefer running as a non-root user.";
+    return "⚠ Root --dangerously-skip-permissions requested: OpenRelay set IS_SANDBOX=1 to bypass Claude Code's root guard. OpenRelay did not create an OS sandbox; prefer running as a non-root user.";
   }
   return `⚠ Root --dangerously-skip-permissions requested: preserving user IS_SANDBOX=${env.IS_SANDBOX}; Claude Code's root guard remains in control.`;
 }

@@ -17,9 +17,9 @@ import { runCatalogAction } from "./catalog-command-result";
 import { serializeManagementJson } from "./json-input";
 
 const USAGE = `Usage:
-  ocx combo [list] [--json]
-  ocx combo show <id> [--json]
-  ocx combo set <id> [--targets <provider/model[:weight],...> | --targets-file <FILE|->]
+  orl combo [list] [--json]
+  orl combo show <id> [--json]
+  orl combo set <id> [--targets <provider/model[:weight],...> | --targets-file <FILE|->]
       [--strategy <failover|round-robin|random|least-used|reset-window|jev>] [--sticky <1-100|->]
       [--effort <low|medium|high|xhigh|max|ultra|->] [--effort-mode <fallback|force|->]
       (force overrides valid client effort and can increase cost/latency) [--alias <name|->]
@@ -28,12 +28,12 @@ const USAGE = `Usage:
       [--decision-provider <provider|-> | --decision-model <route|->] [--decision-timeout <ms|->]
       (jev only; the provider must be a configured jev-decision row)
       [--rename-from <id>] [--json]
-  ocx combo stats <id> [--range <7d|30d|all>] [--json]
-  ocx combo remove <id> --yes [--json]
-  ocx combo test [--combo <id>] [--decision-provider <provider|jev> | --decision-model <route>]
+  orl combo stats <id> [--range <7d|30d|all>] [--json]
+  orl combo remove <id> --yes [--json]
+  orl combo test [--combo <id>] [--decision-provider <provider|jev> | --decision-model <route>]
       [--decision-timeout <ms>] [--json]
       (one synthetic decision probe through the decision method; may spend a decision call)
-  ocx combo discover [--query <text>] [--json]`;
+  orl combo discover [--query <text>] [--json]`;
 
 type ComboRow = Record<string, unknown> & { id?: string; model?: string; strategy?: string };
 

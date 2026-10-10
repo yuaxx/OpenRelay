@@ -4,7 +4,7 @@ import type { CursorLocalInstallerHint } from "../integrations/cursor-local-inst
 import { runCatalogAction } from "./catalog-command-result";
 import { CliUsageError, printData, runtimeRequest, takeFlag, type RuntimeApiDeps } from "./runtime-api";
 
-const USAGE = "Usage: ocx integration native cursor [status|local-installer] [--json]";
+const USAGE = "Usage: orl integration native cursor [status|local-installer] [--json]";
 const GUIDE_URL = "https://lidge-jun.github.io/opencodex/guides/cursor-private-inference/";
 const PLACEHOLDER = "opencodex-loopback";
 
@@ -98,7 +98,7 @@ export async function handleCursorIntegrationCommand(argv: string[], deps: Runti
         `Models: ${result.models.length}`,
         ...result.models.map(model => `${model.id}: reasoning ${model.reasoning?.join(", ") ?? "not advertised"}`),
         `Guide: ${result.guideUrl}`,
-        ...(!result.privateInference.installed ? ["Next: ocx integration native cursor local-installer"] : []),
+        ...(!result.privateInference.installed ? ["Next: orl integration native cursor local-installer"] : []),
       ]);
     }
     return 0;

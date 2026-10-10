@@ -1,10 +1,10 @@
 ---
 title: Composer Usage-Gate Fallback
-description: Queue text to an existing Codex thread on demand, without changing OpenCodex routing or desktop authentication, while preserving server-side quotas.
+description: Queue text to an existing Codex thread on demand, without changing OpenRelay routing or desktop authentication, while preserving server-side quotas.
 ---
 
 A desktop **composer-only** usage gate can prevent new input even when a thread's configured
-OpenCodex route has available capacity. On a compatible installation, `codex queue` submits
+OpenRelay route has available capacity. On a compatible installation, `codex queue` submits
 through Codex's native app-server queue without using that input box. It does not patch the app,
 intercept TLS, install a certificate, or change authentication.
 
@@ -25,7 +25,7 @@ not a way to restore an already exhausted account. This helper neither disables 
 changes which provider a thread uses. Do not change quota responses or turn off the guard to
 make a queued native-account request execute.
 
-## OpenCodex integration and ownership
+## OpenRelay integration and ownership
 
 Keep the existing [Codex integration](/guides/codex-integration) and
 [model routing](/guides/model-routing) configuration. The path is:
@@ -37,9 +37,9 @@ helper -> native Codex queue -> the selected thread's app-server
 
 The helpers do not implement another provider router. They send only the target and text, not
 model, account, service-tier, approval, sandbox or base-URL overrides. A built-in `openai`
-provider routed to OpenCodex and a custom `opencodex` provider keep their existing configuration.
+provider routed to OpenRelay and a custom `opencodex` provider keep their existing configuration.
 Pool/Direct selection, account bindings, provider credentials and admission checks remain owned
-by OpenCodex and the serving daemon. Queue acceptance alone does not prove a provider was called.
+by OpenRelay and the serving daemon. Queue acceptance alone does not prove a provider was called.
 
 Use the **same `CODEX_HOME` and compatible CLI/app-server** as the desktop installation.
 `CODEX_HOME` defaults to `~/.codex`; another home can discover another daemon and thread store.
@@ -48,12 +48,12 @@ variables and both applications' configuration files unchanged. On PowerShell, n
 inherit the shell's filesystem location, including when `CODEX_HOME` is relative.
 
 The proxy must already be running and the target thread must already use the intended route.
-The helper does not start/sync/reconfigure OpenCodex, re-enable a disabled integration, or
+The helper does not start/sync/reconfigure OpenRelay, re-enable a disabled integration, or
 silently replace a direct OpenAI route. It does not require toggling `codexDesktopAuthless`.
-A remote OpenCodex provider URL is not the same thing as a remote Codex app-server: these helpers
+A remote OpenRelay provider URL is not the same thing as a remote Codex app-server: these helpers
 use local daemon discovery, not automatic routing to a conversation on another computer.
 
-These are **on-demand repository helpers**, not an installed `ocx queue` command or a dashboard
+These are **on-demand repository helpers**, not an installed `orl queue` command or a dashboard
 control. The npm package's file allowlist does not include `scripts/`; use a matching repository
 checkout or the native `codex queue` command. This narrow fallback avoids adding a second
 transport, persistent listener, account-state cache or usage-limit monitor to OpenCodex.
@@ -61,7 +61,7 @@ transport, persistent listener, account-state cache or usage-limit monitor to Op
 ## On/off and normal-usage behavior
 
 There is **no persistent enable/disable switch**: running the helper is the opt-in for one
-submission. Merely installing/updating OpenCodex or keeping the scripts on disk does not run them.
+submission. Merely installing/updating OpenRelay or keeping the scripts on disk does not run them.
 
 | Situation | What this fallback does |
 | --- | --- |
@@ -72,8 +72,8 @@ submission. Merely installing/updating OpenCodex or keeping the scripts on disk 
 | `-DryRun` / `--dry-run` | Selects a target and probes CLI help, but never submits text or checks account quota, daemon health or provider availability. |
 | The usage gate later lifts | Use the normal composer again. There is no helper-specific setting to revert. |
 
-To stop using the fallback, stop invoking it. Do **not** run `ocx restore` or disable the Codex
-integration just to turn this helper off; that changes the normal OpenCodex routing too.
+To stop using the fallback, stop invoking it. Do **not** run `orl restore` or disable the Codex
+integration just to turn this helper off; that changes the normal OpenRelay routing too.
 If you independently scheduled the command, disable that external schedule. Already accepted
 queue items belong to Codex and may still execute: removing the script, exiting its process or
 recovering quota does not cancel them. Inspect/remove unwanted items through the normal queue
@@ -202,5 +202,5 @@ They use fake native CLIs and temporary homes, never real accounts or model requ
 **Codex queue helpers** workflow runs these tests on Windows PowerShell 5.1 and PowerShell 7,
 macOS system Bash, and Linux Bash; a missing required shell fails instead of silently skipping.
 Configuration-preservation fixtures cover built-in/custom provider settings and both usage-state
-values, not live OpenCodex routing. Validate real Desktop dispatch, provider success and
+values, not live OpenRelay routing. Validate real Desktop dispatch, provider success and
 remote-control continuity separately on supported installations.

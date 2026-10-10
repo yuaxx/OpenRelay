@@ -525,7 +525,7 @@ export async function multiAgentGuidanceText(
         : soleBarePreferred;
 
     if (isInjectionDebugEnabled() && effective.excluded.length > 0) {
-      injectionDebugLog(`[opencodex] multi-agent guidance excluded: ${effective.excluded
+      injectionDebugLog(`[openrelay] multi-agent guidance excluded: ${effective.excluded
         .map(item => `${item.configured}:${item.reason}`)
         .join(", ")}`);
     }

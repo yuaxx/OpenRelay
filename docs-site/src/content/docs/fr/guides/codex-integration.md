@@ -1,9 +1,9 @@
 ---
 title: Intégration à Codex
-description: Comment opencodex s'intègre à Codex, synchronise le catalogue de modèles, installe des intercepteurs et restaure proprement la configuration d'origine.
+description: Comment OpenRelay s'intègre à Codex, synchronise le catalogue de modèles, installe des intercepteurs et restaure proprement la configuration d'origine.
 ---
 
-opencodex fait passer Codex par le proxy en modifiant deux éléments lus par Codex : sa configuration
+OpenRelay fait passer Codex par le proxy en modifiant deux éléments lus par Codex : sa configuration
 (`$CODEX_HOME/config.toml`, par défaut `~/.codex/config.toml`) et son catalogue de modèles. Chaque modification
 est idempotente et réversible.
 
@@ -15,13 +15,13 @@ Ces routes ne se rabattent jamais l'une sur l'autre. Les configurations v1 distr
 
 ## Injection de configuration
 
-`ocx init`, `ocx start` et `ocx sync` appellent l'injecteur. Sur la liaison de bouclage par défaut, il conserve
-l'identifiant du fournisseur `openai` intégré à Codex et fait pointer ce fournisseur vers opencodex :
+`orl init`, `orl start` et `orl sync` appellent l'injecteur. Sur la liaison de bouclage par défaut, il conserve
+l'identifiant du fournisseur `openai` intégré à Codex et fait pointer ce fournisseur vers OpenRelay :
 
 ```toml
 # root keys, before the first table
 model_catalog_json = "/absolute/path/to/opencodex-catalog.json"
-# Auto-injected by opencodex (undo: ocx restore)
+# Auto-injected by opencodex (undo: orl restore)
 openai_base_url = "http://127.0.0.1:10100/v1"
 
 # only when fastMode is set; unset adds no [features] table
@@ -42,7 +42,7 @@ Le proxy écoute sur le port `10100` par défaut et sert `POST /v1/responses`,
 L'outil `image_gen` intégré à Codex ne passe pas par `/v1/responses` : l'extension codex-rs envoie directement
 une requête POST à `{base_url}/images/generations` (ou à `/images/edits` lorsque des images de référence sont
 jointes), avec la même authentification Bearer ChatGPT que pour le chat. Comme le `base_url` injecté pointe vers
-opencodex, le proxy relaie ces appels au service OpenAI en amont.
+OpenRelay, le proxy relaie ces appels au service OpenAI en amont.
 
 Ce mécanisme est distinct de l'[Image Bridge](/fr/guides/image-bridge/), qui ne s'active que lorsqu'un tour
 **Responses** déclare l'outil hébergé `image_generation` alors qu'un modèle autre qu'OpenAI est sélectionné.
@@ -62,7 +62,7 @@ Les appels autonomes `/images/generations` n'entrent jamais dans ce pont.
   configuré, `/v1/images/generations` — mais pas `/images/edits` — se rabat sur le point de terminaison
   Antigravity **Cloud Code Assist** avec le modèle `gemini-3.1-flash-image`. Ce repli se déclenche aussi après
   un échec de résolution de l'authentification OpenAI, par exemple en cas d'identifiant ChatGPT absent ou expiré,
-  et pas seulement lorsqu'aucun candidat OpenAI n'est configuré. Il nécessite `ocx login google-antigravity` ;
+  et pas seulement lorsqu'aucun candidat OpenAI n'est configuré. Il nécessite `orl login google-antigravity` ;
   le jeton OAuth n'est envoyé qu'à l'hôte de registre CCA épinglé, jamais à une substitution `baseUrl` de la
   configuration. La réponse conserve la forme `{created, data:[{b64_json}]}` attendue par Codex.
 - **Aucun des deux :** le proxy renvoie une erreur explicite plutôt qu'une erreur 404 générique. Les fournisseurs
@@ -71,9 +71,9 @@ Les appels autonomes `/images/generations` n'entrent jamais dans ce pont.
   (`[features] image_generation = false` dans `config.toml`).
 
 La déclaration de l'outil accompagne toujours la requête Responses du modèle. Pour les fournisseurs Responses à
-clé API, opencodex convertit l'espace de noms privé `image_gen` de Codex en un alias accepté en amont,
+clé API, OpenRelay convertit l'espace de noms privé `image_gen` de Codex en un alias accepté en amont,
 `image_gen__<inner-name>` (par exemple `image_gen__imagegen`). Lorsque cet alias exploitable remplace la
-déclaration du client, opencodex retire toute déclaration hébergée `image_generation` en double. Il remappe
+déclaration du client, OpenRelay retire toute déclaration hébergée `image_generation` en double. Il remappe
 l'appel de fonction vers l'espace de noms explicite `image_gen` avant que Codex ne le reçoive, puis réencode
 l'appel natif lorsque l'historique est rejoué ultérieurement en amont. La génération d'images côté client reste
 ainsi appelable sur les services compatibles avec l'API publique qui réservent cet espace de noms ou refusent
@@ -119,7 +119,7 @@ model_provider = "opencodex"
 model_catalog_json = "/absolute/path/to/opencodex-catalog.json"
 
 # appended at the end of the file
-# Auto-injected by opencodex (undo: ocx restore)
+# Auto-injected by opencodex (undo: orl restore)
 [model_providers.opencodex]
 name = "OpenCodex Proxy"
 base_url = "http://your-host:10100/v1"
@@ -129,7 +129,7 @@ env_key = "OPENCODEX_API_AUTH_TOKEN"
 # supports_websockets = true   # only when config.websockets is true
 ```
 
-Lorsque OpenCodex gère le routage, les deux modes écrivent `$CODEX_HOME/opencodex.config.toml` comme
+Lorsque OpenRelay gère le routage, les deux modes écrivent `$CODEX_HOME/opencodex.config.toml` comme
 configuration de référence et de repli. Sur l'interface de bouclage, ce fichier contient les clés racine que
 vous pouvez fusionner manuellement si l'injection automatique a été supprimée ; hors bouclage, il contient la
 forme avec fournisseur dédié. Le mode de fournisseur externe laisse ce profil intact.
@@ -143,7 +143,7 @@ synchronisation met le catalogue à jour, mais signale que le routage n'a pas é
 
 ## Catalogue de modèles partagé
 
-La CLI, la TUI, l'application et le SDK Codex utilisent tous le même répertoire personnel Codex. opencodex le
+La CLI, la TUI, l'application et le SDK Codex utilisent tous le même répertoire personnel Codex. OpenRelay le
 détermine à partir de `CODEX_HOME`, avec `~/.codex` comme valeur de repli, et gère les fichiers suivants :
 
 ```text
@@ -154,32 +154,32 @@ $CODEX_HOME/models_cache.json
 ```
 
 Sous WSL, si `CODEX_HOME` n'est pas défini et que le répertoire `~/.codex` côté Linux est absent ou ne contient aucun état Codex
-(`config.toml`, `auth.json`, `sessions`, `history.jsonl`), opencodex
+(`config.toml`, `auth.json`, `sessions`, `history.jsonl`), OpenRelay
 recherche également un unique répertoire personnel de Codex Desktop pour Windows à l'emplacement
 `/mnt/c/Users/*/.codex/config.toml`. S'il trouve exactement un candidat, il utilise ce répertoire afin que le
 mode app-server sous WSL et Codex Desktop sous Windows partagent les mêmes fichiers de configuration et
 d'authentification. Définissez explicitement `CODEX_HOME` pour désactiver cette détection.
 
 Codex peut conserver l'état de ses fils dans un répertoire SQLite distinct. Pour les opérations d'historique,
-OpenCodex applique le même ordre de priorité que Codex : la clé racine `sqlite_home` de `config.toml`, puis
+OpenRelay applique le même ordre de priorité que Codex : la clé racine `sqlite_home` de `config.toml`, puis
 `CODEX_SQLITE_HOME`, puis le répertoire `CODEX_HOME` effectif. Les chemins SQLite relatifs sont résolus depuis
 le répertoire de travail courant. Lorsqu'une valeur explicite de `CODEX_SQLITE_HOME` est présente pendant
 l'installation ou la réparation du service, le lanceur persistant enregistre son chemin absolu au moment de
 l'installation, afin que le proxy d'arrière-plan continue d'utiliser la même base de données. Si `config.toml`
-ou sa clé racine `sqlite_home` est absent, OpenCodex poursuit avec les valeurs de repli de l'environnement et du
+ou sa clé racine `sqlite_home` est absent, OpenRelay poursuit avec les valeurs de repli de l'environnement et du
 répertoire personnel. Si le fichier est illisible ou impossible à analyser, ou si la clé existe mais est vide ou
 n'est pas une chaîne, la résolution du répertoire SQLite s'arrête afin de ne pas risquer d'effectuer des
 opérations d'historique sur une autre base de données.
 
 Sous Windows, un shell Orca peut définir à la fois `CODEX_HOME` et `ORCA_CODEX_HOME` sur le répertoire personnel
 de l'environnement d'exécution intégré à Orca, alors que l'application ChatGPT/Codex continue de lire
-`%USERPROFILE%\\.codex`. `ocx status` et `ocx doctor` signalent précisément cette divergence et affichent des
+`%USERPROFILE%\\.codex`. `orl status` et `orl doctor` signalent précisément cette divergence et affichent des
 chemins cibles expurgés. Si le service d'arrière-plan a été installé depuis ce shell Orca, désinstallez-le
 d'abord depuis le shell d'origine. Définissez ensuite `CODEX_HOME` sur le répertoire de l'application, supprimez
 `ORCA_CODEX_HOME`, relancez la synchronisation ou la restauration, puis réinstallez le service.
 
 En mode fournisseur dédié, `requires_openai_auth = true` maintient les surfaces de l'application et de la TUI
-Codex soumises à un compte, comme dans Codex natif. opencodex sert également `/v1/responses` par WebSocket. Le
+Codex soumises à un compte, comme dans Codex natif. OpenRelay sert également `/v1/responses` par WebSocket. Le
 fournisseur dédié n'annonce `supports_websockets = true` que lorsque `"websockets": true`. Sur l'interface de
 bouclage, le fournisseur intégré de Codex peut tenter WebSocket en premier ; si cette fonction est désactivée,
 le proxy renvoie `426` et Codex se rabat sur HTTP/SSE.
@@ -190,7 +190,7 @@ La configuration de bouclage par défaut conserve l'étiquette du fournisseur na
 nouveaux fils ; la reprise normale de l'historique ne nécessite donc aucun remappage. La synchronisation et la
 restauration n'appliquent qu'un manifeste de sauvegarde correspondant et rétablissent exactement le fournisseur,
 la source et l'indicateur d'événement d'origine. Une ligne `opencodex` sans manifeste reste inchangée ; utilisez
-`ocx recover-history --legacy-openai --yes` uniquement pour forcer explicitement ce réétiquetage hérité. Cette commande
+`orl recover-history --legacy-openai --yes` uniquement pour forcer explicitement ce réétiquetage hérité. Cette commande
 est volontairement large : elle réétiquette en `openai` chaque fil contenant un message utilisateur et actuellement
 marqué `opencodex`, normalise `exec` en `cli` et active l'indicateur d'événement — y compris l'historique légitime
 d'un fournisseur dédié. Sauvegardez l'état et ne l'utilisez que si vous souhaitez cette portée complète. Hors bouclage,
@@ -201,7 +201,7 @@ modifier l'historique.
 ## Synchronisation du catalogue de modèles
 
 Codex affiche les modèles provenant d'un catalogue sur disque — par défaut
-`$CODEX_HOME/opencodex-catalog.json`. Au démarrage et lors de `ocx sync`, opencodex :
+`$CODEX_HOME/opencodex-catalog.json`. Au démarrage et lors de `orl sync`, OpenRelay :
 
 1. **Sauvegarde** une fois le catalogue d'origine dans `~/.opencodex/catalog-backup.json`, afin que la mise en
    avant des modèles soit réversible.
@@ -225,12 +225,12 @@ plafonnées avant l'envoi de la requête en amont.
 
 Les lignes non natives du catalogue routé utilisent `tool_mode: "code_mode_only"`. Codex peut ainsi exposer son
 point d'entrée officiel `exec` et les outils MCP imbriqués, notamment Browser et Computer Use, tandis
-qu'opencodex ne route que l'appel de fonction ordinaire du modèle. L'exécution des outils, les autorisations et
-les confirmations restent locales à Codex ; opencodex n'implémente pas un second navigateur ni un second
+qu'OpenRelay ne route que l'appel de fonction ordinaire du modèle. L'exécution des outils, les autorisations et
+les confirmations restent locales à Codex ; OpenRelay n'implémente pas un second navigateur ni un second
 exécuteur de contrôle du bureau.
 
 Pour les fournisseurs Responses à clé qui n'acceptent pas la grammaire de l'outil personnalisé `exec` de Codex,
-opencodex encode cette déclaration et son historique sous forme d'outil de fonction en amont, puis restaure le
+OpenRelay encode cette déclaration et son historique sous forme d'outil de fonction en amont, puis restaure le
 cycle de vie diffusé de l'appel de fonction en `custom_tool_call` avant que Codex ne le reçoive. Le routage natif
 par transfert OpenAI et l'outil personnalisé `apply_patch`, qui est pris en charge, restent inchangés.
 
@@ -239,14 +239,14 @@ outils auxiliaires imbriqués : `tools.apply_patch` prend une seule chaîne qui 
 par les lignes de marqueur de patch seules, sans habillage ; l'isolate ne dispose pas de `import`,
 et les commandes longues sont interrogées via `write_stdin`. Lorsqu'un résultat exec en mode code
 sur le chemin natif Responses routé, Kiro ou Cursor contient encore l'un des messages d'échec de
-l'hôte, opencodex ajoute une indication d'une ligne qui nomme la règle. Cette modification ne
+l'hôte, OpenRelay ajoute une indication d'une ligne qui nomme la règle. Cette modification ne
 réécrit ni le code du modèle ni le texte de son patch.
 
 Le fournisseur sélectionné doit prendre en charge les appels de fonctions ou d'outils. Un fournisseur purement
 textuel dépourvu de cette prise en charge ne peut pas utiliser `exec`, Browser ni Computer Use. Les lignes
 OpenAI natives conservent leur mode d'outil en amont.
 
-Après toute modification de ces métadonnées par `ocx sync`, redémarrez l'application Codex et ouvrez une nouvelle
+Après toute modification de ces métadonnées par `orl sync`, redémarrez l'application Codex et ouvrez une nouvelle
 tâche. Les processus app-server et les tâches existants peuvent conserver le catalogue et le plan d'outils
 chargés au démarrage.
 
@@ -260,7 +260,7 @@ d'alias, le fournisseur et les noms commerciaux natifs d'OpenAI restent inchang�
 Ajoutez un nom d'affichage depuis la CLI ; si le proxy est actif, il synchronise immédiatement le catalogue :
 
 ```bash
-ocx models add deepseek deepseek-v4 --display-name "DeepSeek V4" --context-window 128000
+orl models add deepseek deepseek-v4 --display-name "DeepSeek V4" --context-window 128000
 ```
 
 Les clients Codex distants peuvent récupérer le même catalogue généré avec une clé ordinaire du plan de données — le même identifiant que celui utilisé pour `/v1/responses`, et non un jeton de gestion ou d'administration :
@@ -271,7 +271,7 @@ tmp="$(mktemp "${dest}.XXXXXX")"
 curl -fsS -H "x-opencodex-api-key: $OPENCODEX_API_AUTH_TOKEN" \
   "https://proxy.example.com/v1/catalog" > "$tmp" \
   && mv "$tmp" "$dest"
-ocx sync-cache
+orl sync-cache
 ```
 
 La réponse contient le document `opencodex-catalog.json` brut, sans identifiants de fournisseur. Lorsqu'il est
@@ -284,31 +284,31 @@ est refusé, car il entrerait en collision avec le séparateur des identifiants 
 
 `GET /v1/catalog` existe pour que la lecture d'une liste de modèles ne coûte pas un jeton d'administration. La route est en lecture seule (`GET` et `HEAD`), accepte `x-opencodex-api-key`, un jeton bearer ou `x-api-key`, et renvoie exactement les mêmes octets que la route de gestion. Les réponses portent un `ETag` fort — renvoyez-le dans `If-None-Match` pour revalider et obtenir un `304` — et `Cache-Control: private, no-cache`. Une clé du plan de données admise ici n'obtient **rien** sur le plan de gestion : `/api/catalog` et toutes les routes `/api/*` exigent toujours le jeton d'administration ou une session du tableau de bord.
 
-Le nom d'affichage sert **uniquement à l'affichage et reste stable entre les régénérations**. À chaque `ocx sync`
-et à chaque actualisation du catalogue, opencodex reconstruit les entrées routées depuis `config.json`, y compris
+Le nom d'affichage sert **uniquement à l'affichage et reste stable entre les régénérations**. À chaque `orl sync`
+et à chaque actualisation du catalogue, OpenRelay reconstruit les entrées routées depuis `config.json`, y compris
 `customModels` ; le nom configuré est donc réappliqué au lieu de revenir à l'identifiant de routage. Un service
 géré tente également cette synchronisation peu après le démarrage du proxy. Si cette tentative au démarrage
 échoue, par exemple lors d'une connexion hors ligne, le catalogue déjà enregistré est conservé et le prochain
-`ocx sync` réussi réapplique le nom configuré. Les véritables noms natifs du service en amont, par exemple
+`orl sync` réussi réapplique le nom configuré. Les véritables noms natifs du service en amont, par exemple
 `gpt-5.6-sol` → "GPT-5.6-Sol", proviennent de l'instantané amont épinglé et ne sont jamais remplacés par un nom
 d'affichage personnalisé.
 
 ### Gestionnaires de fournisseurs externes
 
-Si `config.toml` sélectionne déjà un fournisseur autre que `openai` ou `opencodex`, OpenCodex ne modifie pas le
+Si `config.toml` sélectionne déjà un fournisseur autre que `openai` ou `opencodex`, OpenRelay ne modifie pas le
 fichier. Il ignore également l'écriture des profils, l'actualisation du catalogue et du cache, ainsi que la
 restauration immédiate ou en arrière-plan des métadonnées de l'historique Codex. Les outils qui gèrent un fournisseur personnalisé
 étiquettent souvent les sessions existantes avec son identifiant ; remplacer l'identifiant actif peut faire
 disparaître ces sessions pourtant intactes de la vue d'historique de Codex. La même protection s'applique à un
 fournisseur externe sélectionné par un ancien profil racine.
 
-Confiez la configuration des fournisseurs Codex à un seul outil. Pour placer OpenCodex derrière un gestionnaire
+Confiez la configuration des fournisseurs Codex à un seul outil. Pour placer OpenRelay derrière un gestionnaire
 de fournisseurs existant, faites pointer ce fournisseur vers `http://127.0.0.1:10100/v1` avec un transfert
 direct Responses — `wire_api = "responses"` dans le TOML Codex — et non avec une traduction Chat Completions.
 Lorsque l'authentification de l'API du proxy est activée, transmettez aussi l'en-tête `x-opencodex-api-key`
-depuis `OPENCODEX_API_AUTH_TOKEN`, comme dans la configuration hors bouclage ci-dessus. Pour autoriser OpenCodex
+depuis `OPENCODEX_API_AUTH_TOKEN`, comme dans la configuration hors bouclage ci-dessus. Pour autoriser OpenRelay
 à injecter directement le routage, rétablissez d'abord le fournisseur `openai` intégré de Codex, supprimez toute
-clé racine `openai_base_url` appartenant à l'utilisateur, puis relancez `ocx start`.
+clé racine `openai_base_url` appartenant à l'utilisateur, puis relancez `orl start`.
 
 ### Dépannage du catalogue
 
@@ -332,23 +332,23 @@ S'il manque un modèle dans Codex, ou si l'ordre ou la visibilité du catalogue 
 4. **Cursor `GetUsableModels`** — l'adaptateur Cursor découvre les modèles par son appel RPC protobuf
    `GetUsableModels`, et non par `/models` ; une modification côté Cursor peut donc changer les identifiants visibles
    indépendamment des autres fournisseurs.
-5. **Cache et `ocx sync`** — les catalogues en direct sont mis en cache pendant environ cinq minutes (`modelCacheTtlMs`,
-   par défaut `300000`). Exécutez `ocx sync` pour forcer une nouvelle récupération et réécrire le catalogue immédiatement.
+5. **Cache et `orl sync`** — les catalogues en direct sont mis en cache pendant environ cinq minutes (`modelCacheTtlMs`,
+   par défaut `300000`). Exécutez `orl sync` pour forcer une nouvelle récupération et réécrire le catalogue immédiatement.
 6. **Processus Codex `app-server` actif** — réécrire le catalogue sur disque ne suffit pas tant qu'un processus
    Codex `app-server` de longue durée — Codex Desktop ou hôte d'arrière-plan de la CLI — conserve l'ancienne
-   liste en mémoire. `ocx sync` et `ocx sync-cache` émettent un avertissement lorsqu'ils détectent ces processus.
-   `ocx sync --restart-codex` les redémarre et quitte puis relance entièrement l'application Codex Desktop sous
+   liste en mémoire. `orl sync` et `orl sync-cache` émettent un avertissement lorsqu'ils détectent ces processus.
+   `orl sync --restart-codex` les redémarre et quitte puis relance entièrement l'application Codex Desktop sous
    macOS, Linux et Windows, afin que le sélecteur relise le catalogue. Pour laisser l'application Desktop ouverte,
    passez `--restart-app-server-only` ou arrêtez vous-même les processus `app-server` concernés.
 
 :::caution[Autres processus d'écriture locaux]
 Les écritures du catalogue (`opencodex-catalog.json`, `config.toml`) sont atomiques **au sein** d'opencodex.
-Cette garantie évite les fichiers partiellement écrits lorsque deux processus appartenant à opencodex entrent
+Cette garantie évite les fichiers partiellement écrits lorsque deux processus appartenant à OpenRelay entrent
 en concurrence ; elle n'empêche **pas** un autre processus local, un observateur de fichiers ou un agent de
 synchronisation de modifier la visibilité ou l'ordre du catalogue après l'écriture d'opencodex. Codex conserve
 un fichier `models_cache.json` distinct et peut l'actualiser indépendamment, ce qui modifie la liste visible sans
 réécrire `opencodex-catalog.json`. Si la visibilité des modèles change de façon inattendue pendant l'exécution du
-proxy, arrêtez ou reconfigurez les autres processus d'écriture, puis exécutez `ocx sync`. Il s'agit d'un risque
+proxy, arrêtez ou reconfigurez les autres processus d'écriture, puis exécutez `orl sync`. Il s'agit d'un risque
 lié à un processus d'écriture externe, et non d'un défaut confirmé d'opencodex.
 :::
 
@@ -356,17 +356,17 @@ lié à un processus d'écriture externe, et non d'un défaut confirmé d'openco
 
 Si Codex réessaye puis échoue avec une erreur comme
 `stream disconnected before completion: error sending request for url (http://127.0.0.1:10100/v1/responses)`
-— ou si Claude Code signale un échec de connexion comparable — le proxy opencodex n'est pas actif : aucun
+— ou si Claude Code signale un échec de connexion comparable — le proxy OpenRelay n'est pas actif : aucun
 processus n'écoute sur le port configuré, et le client affiche donc lui-même cette erreur de connexion brute.
 Redémarrez le proxy :
 
 ```bash
-ocx start              # foreground
-ocx service install    # persistent: auto-starts on login and respawns on crash
+orl start              # foreground
+orl service install    # persistent: auto-starts on login and respawns on crash
 ```
 
-`ocx status` indique si le proxy est actif et affiche la même suggestion de redémarrage lorsqu'il ne l'est pas ;
-`ocx doctor` évalue la sûreté du redémarrage — couverture par le service ou l'intercepteur.
+`orl status` indique si le proxy est actif et affiche la même suggestion de redémarrage lorsqu'il ne l'est pas ;
+`orl doctor` évalue la sûreté du redémarrage — couverture par le service ou l'intercepteur.
 
 ## Le sélecteur de sous-agents
 
@@ -381,7 +381,7 @@ L’ajout ou la réauthentification vérifie normalement le compte avant son enr
 
 Si la lecture authentifiée des quotas avec le nouveau jeton OAuth confirme un quota de 5 heures, hebdomadaire ou mensuel épuisé, le compte est enregistré sans appel au modèle et affiche **Validation en attente**. Il reste exclu du routage après un redémarrage ou un renouvellement du jeton. Après récupération du quota, actualisez les quotas : une lecture récente et complète avec de la capacité disponible permet une petite requête de validation. Seule sa réussite active le compte. Tout échec conserve la restriction. Les lectures passives ne déclenchent pas cette requête. Un quota inconnu à l’inscription conserve la vérification habituelle.
 
-`ocx account refresh openai` et `ocx account list openai --quota --refresh` consultent uniquement les quotas. La validation du modèle consomme du quota et nécessite une session humaine du tableau de bord : après récupération, ouvrez `ocx gui` et cliquez sur **Refresh quotas**. Sur un hôte sans interface graphique, accédez à son tableau de bord depuis votre navigateur ; le jeton administrateur seul n’autorise pas la validation. Un compte en pause peut être validé sans être repris ni sélectionné. Les erreurs d’autorisation restent visibles jusqu’à une validation ou une réauthentification réussie.
+`orl account refresh openai` et `orl account list openai --quota --refresh` consultent uniquement les quotas. La validation du modèle consomme du quota et nécessite une session humaine du tableau de bord : après récupération, ouvrez `orl gui` et cliquez sur **Refresh quotas**. Sur un hôte sans interface graphique, accédez à son tableau de bord depuis votre navigateur ; le jeton administrateur seul n’autorise pas la validation. Un compte en pause peut être validé sans être repris ni sélectionné. Les erreurs d’autorisation restent visibles jusqu’à une validation ou une réauthentification réussie.
 
 Dans **Codex Set → Multi-auth**, activez le commutateur **Crédits Codex** dans l’en-tête **Codex Auth** pour afficher la dernière observation de chaque compte principal et du pool juste sous Week. Désactivé par défaut, il est enregistré dans `showCodexCredits`. Le solde utilise le format numérique local ; les mentions illimité ou plafond de dépassement atteint apparaissent si elles sont signalées. Sans plafond total fourni, la barre indique la disponibilité et non un pourcentage. Le commutateur ne contrôle que l’affichage ; une nouvelle connexion attend sa propre observation.
 
@@ -398,7 +398,7 @@ Un renouvellement du compte principal qui n'aboutit pas répond toujours `503` a
 `codexPool.excludedPlans` liste les clés de forfait que la sélection automatique du pool ignore, comparées sans tenir compte de la casse au forfait enregistré sur chaque compte. Absent par défaut : une installation existante effectue exactement la même rotation qu'avant.
 
 ```bash
-ocx config set codexPool '{"excludedPlans":["free"]}'
+orl config set codexPool '{"excludedPlans":["free"]}'
 ```
 
 C'est une politique de sélection, pas un blocage. Un compte écarté conserve ses identifiants, son historique de quota et son affinité de thread, reste visible dans la liste des comptes et demeure joignable par sélection explicite comme `work/gpt-5.5`. Seule la rotation automatique cesse de le choisir, y compris lorsqu'il est déjà le compte actif ou déjà lié à un thread — l'état exact que laisse un abonnement expiré.
@@ -406,25 +406,25 @@ C'est une politique de sélection, pas un blocage. Un compte écarté conserve s
 Le compte Codex principal reste exempt de l’exclusion par forfait : le routage en mode sélection seule ne lit pas ses identifiants natifs protégés. Si tous les comptes éligibles du pool sont exclus, la sélection automatique ne renvoie aucun compte. Les routes désignant explicitement un compte restent disponibles, avec les contrôles de pause, d’authentification et de droits du modèle. La carte et le CLI affichent le forfait exclu séparément de l’état des identifiants. Il n’existe pas de réglage `minimumPlan`, faute d’ordre total des forfaits.
 ## Restauration de Codex natif
 
-`ocx stop` arrête le proxy et le service d'arrière-plan installé, puis tente de restaurer Codex natif. OpenCodex retire les éléments de routage dont il peut vérifier la propriété et signale une restauration incomplète si les fichiers de configuration ne peuvent pas être récupérés en toute sécurité.
+`orl stop` arrête le proxy et le service d'arrière-plan installé, puis tente de restaurer Codex natif. OpenRelay retire les éléments de routage dont il peut vérifier la propriété et signale une restauration incomplète si les fichiers de configuration ne peuvent pas être récupérés en toute sécurité.
 
 Si la configuration ou le profil actuel diffère de l'original sauvegardé et que le journal ne contient pas le hash de l'état injecté de ce fichier, la récupération automatique conserve les deux fichiers et le journal sans les modifier. Un fichier déjà identique à son original n'est pas réécrit. La réinjection d'une configuration routée refuse aussi cet état incertain ; une configuration native peut créer un nouvel instantané. Voir les [règles de récupération](/guides/codex-integration/#recovery-without-injection-hashes).
 
 ```bash
-ocx stop       # stop the proxy + service, restore native Codex
-ocx restore    # restore without stopping  (alias: ocx eject)
-ocx restore back # point plain Codex at the running proxy again
+orl stop       # stop the proxy + service, restore native Codex
+orl restore    # restore without stopping  (alias: orl eject)
+orl restore back # point plain Codex at the running proxy again
 ```
 
-Lorsque opencodex s'exécute comme [service d'arrière-plan géré](/fr/reference/cli/lifecycle/#ocx-service-installrepairrestartstartstopstatusuninstallremove), il définit
+Lorsque OpenRelay s'exécute comme [service d'arrière-plan géré](/fr/reference/cli/lifecycle/#ocx-service-installrepairrestartstartstopstatusuninstallremove), il définit
 `OCX_SERVICE=1` afin qu'un redémarrage déclenché par le service ne modifie **pas** sans cesse la configuration
-Codex. Seule l'exécution explicite de `ocx stop` ou `ocx service stop` restaure Codex natif.
+Codex. Seule l'exécution explicite de `orl stop` ou `orl service stop` restaure Codex natif.
 
 ## Refus de sécurité pour l’historique paginé
 
-Une transition de fournisseur peut renvoyer `history_paginated_requires_native_writer` si le stockage concerné prend en charge la pagination, même pour ses lignes legacy. Cette raison ne refuse plus la configuration Codex, le profil de référence ni le catalogue de modèles. `ocx sync` et `ocx start` écrivent toujours ces fichiers et définissent `model_catalog_json`, afin que le sélecteur de modèles Codex continue d’afficher tous les modèles routés par OpenCodex. Seule cette raison interrompt le réétiquetage de l’historique des conversations, car Codex attribue les numéros d’historique paginé dans son propre processus d’écriture et aucune nouvelle tentative n’y change rien. Toute autre raison de contrôle préalable de l’historique — une base d’état illisible, un historique dont l’identité a changé, ou un contrôle préalable qui n’a pas pu s’exécuter — refuse encore toute la transition et l’annule, car ces cas peuvent réussir plus tard. Dans cet état, OpenCodex ne modifie jamais les fichiers d’historique paginé ni les lignes de conversation. Les conversations existantes conservent le fournisseur déjà associé et ne sont pas migrées ; les nouvelles conversations passent par le proxy. Lorsque le réétiquetage est interrompu, une table `[model_providers.opencodex]` déjà présente dans le répertoire d’accueil est conservée plutôt que retirée, y compris sous la forme root-override (loopback), afin que les conversations dont les lignes sont étiquetées `opencodex` gardent un identifiant de fournisseur qui existe encore. Le CLI affiche `Codex resume history: left to Codex's native writer (history_paginated_requires_native_writer)`. `ocx restore`, `ocx stop` et `ocx uninstall` ne refusent plus sur `history_paginated_requires_native_writer`. Ils retirent toutes les clés de routage racine d'OpenCodex et conservent la définition `[model_providers.opencodex]` sur le disque : les conversations dont les lignes nomment encore ce fournisseur restent résolubles, tandis que `codex` seul cesse de pointer vers le proxy. Le résultat est signalé comme une restauration partielle qui nomme les lignes conservées, et `ocx restore --remove-codex-provider-table` les supprime aussi, après quoi ces conversations ne s'ouvrent plus. Par ailleurs, activer l'intégration sous sa forme table de fournisseur sur un répertoire d'accueil dont les conversations marquées `openai` ont déjà été paginées par Codex était auparavant refusé d'emblée avec `history_paginated_openai_requires_native_writer` : rien n'était écrit et l'intégration restait désactivée. OpenCodex termine désormais cette transition en conservant la redéfinition racine gérée `openai_base_url` à côté de la table `[model_providers.opencodex]`. Codex fusionne cette redéfinition avec son fournisseur `openai` intégré, donc ces conversations continuent d'atteindre le proxy sans être réétiquetées, et aucun octet d'historique ni ligne de conversation n'est modifié. Seule une forme de routage exigeant l'en-tête d'admission `x-opencodex-api-key` refuse encore, car le fournisseur intégré de Codex ne peut pas porter cet en-tête ; son message nomme les deux réglages qui résolvent la situation — router Codex par l'écouteur loopback pour conserver la redéfinition, ou mettre `syncResumeHistory` à `false` en acceptant que ces conversations reprennent sur le point de terminaison OpenAI propre à Codex.
+Une transition de fournisseur peut renvoyer `history_paginated_requires_native_writer` si le stockage concerné prend en charge la pagination, même pour ses lignes legacy. Cette raison ne refuse plus la configuration Codex, le profil de référence ni le catalogue de modèles. `orl sync` et `orl start` écrivent toujours ces fichiers et définissent `model_catalog_json`, afin que le sélecteur de modèles Codex continue d’afficher tous les modèles routés par OpenCodex. Seule cette raison interrompt le réétiquetage de l’historique des conversations, car Codex attribue les numéros d’historique paginé dans son propre processus d’écriture et aucune nouvelle tentative n’y change rien. Toute autre raison de contrôle préalable de l’historique — une base d’état illisible, un historique dont l’identité a changé, ou un contrôle préalable qui n’a pas pu s’exécuter — refuse encore toute la transition et l’annule, car ces cas peuvent réussir plus tard. Dans cet état, OpenRelay ne modifie jamais les fichiers d’historique paginé ni les lignes de conversation. Les conversations existantes conservent le fournisseur déjà associé et ne sont pas migrées ; les nouvelles conversations passent par le proxy. Lorsque le réétiquetage est interrompu, une table `[model_providers.opencodex]` déjà présente dans le répertoire d’accueil est conservée plutôt que retirée, y compris sous la forme root-override (loopback), afin que les conversations dont les lignes sont étiquetées `opencodex` gardent un identifiant de fournisseur qui existe encore. Le CLI affiche `Codex resume history: left to Codex's native writer (history_paginated_requires_native_writer)`. `orl restore`, `orl stop` et `orl uninstall` ne refusent plus sur `history_paginated_requires_native_writer`. Ils retirent toutes les clés de routage racine d'OpenRelay et conservent la définition `[model_providers.opencodex]` sur le disque : les conversations dont les lignes nomment encore ce fournisseur restent résolubles, tandis que `codex` seul cesse de pointer vers le proxy. Le résultat est signalé comme une restauration partielle qui nomme les lignes conservées, et `orl restore --remove-codex-provider-table` les supprime aussi, après quoi ces conversations ne s'ouvrent plus. Par ailleurs, activer l'intégration sous sa forme table de fournisseur sur un répertoire d'accueil dont les conversations marquées `openai` ont déjà été paginées par Codex était auparavant refusé d'emblée avec `history_paginated_openai_requires_native_writer` : rien n'était écrit et l'intégration restait désactivée. OpenRelay termine désormais cette transition en conservant la redéfinition racine gérée `openai_base_url` à côté de la table `[model_providers.opencodex]`. Codex fusionne cette redéfinition avec son fournisseur `openai` intégré, donc ces conversations continuent d'atteindre le proxy sans être réétiquetées, et aucun octet d'historique ni ligne de conversation n'est modifié. Seule une forme de routage exigeant l'en-tête d'admission `x-opencodex-api-key` refuse encore, car le fournisseur intégré de Codex ne peut pas porter cet en-tête ; son message nomme les deux réglages qui résolvent la situation — router Codex par l'écouteur loopback pour conserver la redéfinition, ou mettre `syncResumeHistory` à `false` en acceptant que ces conversations reprennent sur le point de terminaison OpenAI propre à Codex.
 
-Lors du retour au mode de remplacement de l’URL racine, OpenCodex conserve la définition `[model_providers.opencodex]` existante avant de valider la configuration, même si la vérification préalable de l’historique réussit. Les anciennes conversations `opencodex` peuvent ainsi toujours retrouver leur fournisseur si Codex migre l’historique après cette validation ou pendant le démarrage du traitement en arrière-plan. Les nouvelles conversations utilisent le fournisseur racine sélectionné ; la restauration explicite conserve ses contrôles de suppression distincts.
+Lors du retour au mode de remplacement de l’URL racine, OpenRelay conserve la définition `[model_providers.opencodex]` existante avant de valider la configuration, même si la vérification préalable de l’historique réussit. Les anciennes conversations `opencodex` peuvent ainsi toujours retrouver leur fournisseur si Codex migre l’historique après cette validation ou pendant le démarrage du traitement en arrière-plan. Les nouvelles conversations utilisent le fournisseur racine sélectionné ; la restauration explicite conserve ses contrôles de suppression distincts.
 
 Ne réécrivez pas un historique paginé actif ni une ligne de conversation pour forcer une migration. Fermez la conversation avant toute récupération et signalez l’erreur exacte et les versions sans publier de données privées. Une sauvegarde ou le succès d’un script ne prouve pas le rétablissement de l’affichage : vérifiez la conversation après réouverture de Codex.
 

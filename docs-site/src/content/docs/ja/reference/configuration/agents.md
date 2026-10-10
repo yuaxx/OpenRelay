@@ -3,18 +3,18 @@ title: エージェント構成
 description: マルチエージェント サーフェス、委任ガイダンス、優先モデル、フォールバック チェーン、ネイティブとデフォルトの同期、およびエフォート キャップ。
 ---
 
-エージェント設定は、どの Codex コラボレーション サーフェスをアドバタイズするか、および opencodex が委任された作業をどのようにガイド、ルーティング、制限するかを制御します。
+エージェント設定は、どの Codex コラボレーション サーフェスをアドバタイズするか、および OpenRelay が委任された作業をどのようにガイド、ルーティング、制限するかを制御します。
 
 ## エージェントフィールド
 
 |フィールド |タイプ |デフォルト |意味 |
 | --- | --- | --- | --- |
 | `multiAgentMode?` | `"v1" \| "default" \| "v2"` | `"default"` | `v1` はすべてのカタログ モデルを v1 としてスタンプします。 `v2` はすべてのモデルを v2 としてスタンプします。 `default` はアップストリーム ピン (Sol/Terra v2、Luna v1) を復元し、それ以外の場合はネイティブの `multi_agent_v2` フラグに従います。新しいセッションに適用されます。 |
-| `subagentModels?` | `string[]` | `gpt-6-astra`、`gpt-6.1-sol`、`gpt-6-luna` |最大 5 つの bare native id、account-qualified `<selector>/<native-openai-model>` id、または routed `provider/model` id をサブエージェント ピッカーで優先表示します。Subagents ページで選べるのは bare native id と routed id だけで、保存時には exact account-qualified の選択が除外されます。exact の選択には `ocx agent subagents set` を使用するか、設定を直接編集してください。[Astra への一度限りの移行](/reference/configuration/agents/#astra-roster-upgrade)後は、明示的な空リストも保持されます。 |
+| `subagentModels?` | `string[]` | `gpt-6-astra`、`gpt-6.1-sol`、`gpt-6-luna` |最大 5 つの bare native id、account-qualified `<selector>/<native-openai-model>` id、または routed `provider/model` id をサブエージェント ピッカーで優先表示します。Subagents ページで選べるのは bare native id と routed id だけで、保存時には exact account-qualified の選択が除外されます。exact の選択には `orl agent subagents set` を使用するか、設定を直接編集してください。[Astra への一度限りの移行](/reference/configuration/agents/#astra-roster-upgrade)後は、明示的な空リストも保持されます。 |
 | `injectionModel?` | `string` | — |プロキシ作成の v2 委任ガイダンスで使用される、優先されるネイティブまたはルーティングされたサブエージェント モデル。 |
 | `injectionEffort?` | `string` | — |優先努力 (`low` ～ `ultra`)。`injectionModel` でのみ意味があります。 |
 | `injectionPrompt?` | `string` | — | 組み込みの v2 ガイダンス本文を置き換えます。`{{model}}`、`{{effort}}`、`{{roster}}`、`{{fallback}}`をサポートします。`injectionModel` が設定されていればカスタムプロンプトが生成されます。 |
-| `multiAgentGuidanceEnabled?` | `boolean` | `true` | opencodex が作成した v1/v2 開発者ガイダンスのみを制御します。ネイティブ エージェントのデフォルト、ツール、ルーティング、ロスター、またはエフォート キャップは変更されません。 |
+| `multiAgentGuidanceEnabled?` | `boolean` | `true` | OpenRelay が作成した v1/v2 開発者ガイダンスのみを制御します。ネイティブ エージェントのデフォルト、ツール、ルーティング、ロスター、またはエフォート キャップは変更されません。 |
 | `syncCodexSubagentDefaults?` | `boolean` | `false` |同期/再起動中に、Codex のネイティブ デフォルトとして `injectionModel` およびオプションの `injectionEffort` を書き込むようにオプトインします。 `injectionModel`が必要です。 |
 | `subagentModelFallback?` | `string[]` | `[]` |生成された子ターンの優先順位付きグローバル フォールバック モデル。 |
 | `subagentModelFallbackByModel?` | `Record<string, string[]>` | `{}` | 要求されたプライマリ モデル id をキーとするモデル単位のフォールバックチェーン。ロール単位のフォールバックメタデータの推奨場所です。Codex の agent TOML に `model_fallback` を書くと Codex 0.146+ がロールをスキップします（#1190）。 |
@@ -22,7 +22,7 @@ description: マルチエージェント サーフェス、委任ガイダンス
 | `effortCap?` | `string` | — | v2 のメイン ターンとマークされた子ターンの条件を満たすためのハード シーリング。 `low` ～ `ultra` を受け入れます。 |
 | `subagentEffortCap?` | `string` | — |スポーンされた子のターンのみの追加の上限。両方の上限が適用される場合は、低い方が優先されます。 |
 
-ダッシュボードまたは `ocx v2 status|on|off|mode <v1|default|v2>|threads <n>` でサーフェスを管理します。モードの変更は新しいセッションに適用されます。 `maxConcurrentThreadsPerSession` は `PUT /api/v2` フィールドであり、`config.json` キーではありません。 `ocx v2 threads <n>` は、v2 が有効になった後、Codex の `$CODEX_HOME/config.toml` の `[features.multi_agent_v2]` の下に `max_concurrent_threads_per_session` を書き込みます。
+ダッシュボードまたは `orl v2 status|on|off|mode <v1|default|v2>|threads <n>` でサーフェスを管理します。モードの変更は新しいセッションに適用されます。 `maxConcurrentThreadsPerSession` は `PUT /api/v2` フィールドであり、`config.json` キーではありません。 `orl v2 threads <n>` は、v2 が有効になった後、Codex の `$CODEX_HOME/config.toml` の `[features.multi_agent_v2]` の下に `max_concurrent_threads_per_session` を書き込みます。
 
 管理 API は、`GET`/`PUT /api/v2`、`/api/injection-model`、`/api/effort-caps`、`/api/subagent-models`、および `/api/subagent-model-fallback` を公開します。インジェクションモデルの更新は部分的です。カスタム プロンプトは、その API の `prompt` フィールドです。
 
@@ -32,7 +32,7 @@ Subagents → 詳細設定の **常時プロアクティブ委任**（旧 **Ultr
 
 `GET` と `PUT /api/v2` は、追加で `multiAgentModeHintRecommendation: { text, revision }` を返します。ダッシュボードはプリセットの有効化と復元にサーバー提供のテキストを使い、固定文へのフォールバックは行いません。旧サーバーが推奨値を返さない場合や値の形式が不正な場合、プリセットの適用と復元は利用できませんが、既存のカスタムヒントの編集と削除は引き続き利用できます。プリセットの復元はローカルの下書きだけを変更し、保存操作で確定します。
 
-設定の読み取り、無関係な更新、アップグレードでは、保存済みのヒントは移行されません。ヒントを明示的に更新し、その本文が既知の旧 OpenCodex プリセット2種類のいずれかとバイト単位で完全一致する場合に限り、現在の推奨文に置き換わります。それ以外の有効なカスタムテキストは、空白だけが異なるものも含め、バイト単位で保持されます。既存の v2 有効化、機能サポート確認、ヒント削除の規則は変わらず、変更は新しい Codex セッションに適用されます。
+設定の読み取り、無関係な更新、アップグレードでは、保存済みのヒントは移行されません。ヒントを明示的に更新し、その本文が既知の旧 OpenRelay プリセット2種類のいずれかとバイト単位で完全一致する場合に限り、現在の推奨文に置き換わります。それ以外の有効なカスタムテキストは、空白だけが異なるものも含め、バイト単位で保持されます。既存の v2 有効化、機能サポート確認、ヒント削除の規則は変わらず、変更は新しい Codex セッションに適用されます。
 
 ## ロスターとガイダンス
 
@@ -58,12 +58,12 @@ V1 ガイダンスは、`max` または `ultra` でのみプロアクティブ �
 2. `subagentModelFallbackByModel` によるモデル単位のチェーン（プライマリ モデルがキー）;それから
 3. グローバル `subagentModelFallback` エントリ。
 
-ロール単位のフォールバックチェーンは opencodex 構成に置く必要があります。`model_fallback` を
+ロール単位のフォールバックチェーンは OpenRelay 構成に置く必要があります。`model_fallback` を
 `$CODEX_HOME/agents/*.toml` に書くと、Codex 0.146+ が未知フィールドとしてロールファイル全体を
 拒否し、ロールをスキップします（#1190）。TOML 内のレガシー `model_fallback` 行は後方互換性の
-ために引き続き読み取られますが、`ocx doctor` がそれをフラグ付けします。
+ために引き続き読み取られますが、`orl doctor` がそれをフラグ付けします。
 
-opencodex は、無効、ルーティング不能、異常、冷却期間、またはクォータしきい値の候補をスキップします。可用性スナップショットは `subagentModelFallbackPollMs` に対してキャッシュされます。暗号化された子タスクでは、チェーンを正規のネイティブ ChatGPT ターゲットと、`allowEncryptedV2AgentTasks: true` で明示的に信頼された直接のキー認証 Responses ルートに制限します。暗号化されたペイロードを処理できる対象がない場合、読み取り不可能な暗号文を別の場所へ送らず、リクエストは失敗します。コンボはまず利用可能な正規ネイティブ対象を試し、選択できるネイティブ対象がない場合、またはネイティブ対象への試行を使い切った場合に `agentTaskRecovery` が有効なら、暗号化された `NEW_TASK` をルーティングされたコンボ送信の前に一度だけ復旧します。コンボの復旧は spawn された子ターンにのみ適用され、直接ルーティングされる経路はスレッド途中のモデル切り替えも復旧します。
+OpenRelay は、無効、ルーティング不能、異常、冷却期間、またはクォータしきい値の候補をスキップします。可用性スナップショットは `subagentModelFallbackPollMs` に対してキャッシュされます。暗号化された子タスクでは、チェーンを正規のネイティブ ChatGPT ターゲットと、`allowEncryptedV2AgentTasks: true` で明示的に信頼された直接のキー認証 Responses ルートに制限します。暗号化されたペイロードを処理できる対象がない場合、読み取り不可能な暗号文を別の場所へ送らず、リクエストは失敗します。コンボはまず利用可能な正規ネイティブ対象を試し、選択できるネイティブ対象がない場合、またはネイティブ対象への試行を使い切った場合に `agentTaskRecovery` が有効なら、暗号化された `NEW_TASK` をルーティングされたコンボ送信の前に一度だけ復旧します。コンボの復旧は spawn された子ターンにのみ適用され、直接ルーティングされる経路はスレッド途中のモデル切り替えも復旧します。
 
 ```json
 {
@@ -85,7 +85,7 @@ opencodex は、無効、ルーティング不能、異常、冷却期間、ま�
 
 キャップは v2 コラボレーション機能にのみ適用されます。メイン ターンは、そのツールが v2 を公開するときに資格を持ちますが、子ターンは、リーフ ツールがコラボレーションを公開しなくなった場合でも、`x-codex-turn-metadata` に正確な codex-rs `x-openai-subagent: collab_spawn` または `"subagent_kind": "thread_spawn"` マーカーが含まれるときに資格を持ちます。 V1 メイン ターン、`multiAgentMode: "v1"`、圧縮、レビュー、およびメモリ統合ターンはバイパス キャップです。
 
-キャップは労力を軽減するだけです。これらは、キャップまたはキャップの下で宣伝されている最も高い段にスナップします。モデルにエフォート制御がない場合、またはサポートされているラングフィットがない場合、opencodex はエフォートを削除し、プロバイダーのデフォルトを適用します。 `max` および `ultra` が受け入れられますが、ダッシュボードでは `low` から `xhigh` が提供されます。
+キャップは労力を軽減するだけです。これらは、キャップまたはキャップの下で宣伝されている最も高い段にスナップします。モデルにエフォート制御がない場合、またはサポートされているラングフィットがない場合、OpenRelay はエフォートを削除し、プロバイダーのデフォルトを適用します。 `max` および `ultra` が受け入れられますが、ダッシュボードでは `low` から `xhigh` が提供されます。
 
 モデルの effort pin がなくても、対象のネイティブ Chat Completions ターンには設定された上限が適用されます。pin を適用した場合、または上限で値を変更した場合にプロバイダーの送信値へ変換し、どちらも起きない呼び出し元の値は元の表記を維持します。
 

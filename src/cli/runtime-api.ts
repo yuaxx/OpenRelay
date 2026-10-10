@@ -37,7 +37,7 @@ export class CliUsageError extends Error {
   }
 }
 
-export const PROXY_NOT_RUNNING_MESSAGE = "Proxy is not running. Start the intended proxy with: ocx start. No request was sent.";
+export const PROXY_NOT_RUNNING_MESSAGE = "Proxy is not running. Start the intended proxy with: orl start. No request was sent.";
 
 export class RuntimeApiError extends Error {
   constructor(
@@ -71,7 +71,7 @@ function clientRoleManagementRefusal(port: number): string {
   return [
     `The opencodex listener on port ${port} is running in the client role. It serves only the machine routes (/api/machine/*), so this machine has no management API to call.`,
     "Custom-model edits and other management changes are made on the hub this machine is connected to: run the command there, or use the hub dashboard (the dashboard on this machine relays to it when the connection uses the relay transport).",
-    "To change this machine's own configuration instead: edit customModels in config.json, then run: ocx sync",
+    "To change this machine's own configuration instead: edit customModels in config.json, then run: orl sync",
   ].join("\n");
 }
 
@@ -95,14 +95,14 @@ function stringField(record: Record<string, unknown>, key: string): string | und
 
 function integrationRecoveryMessage(reason: string | undefined): string | undefined {
   switch (reason) {
-    case "not_installed": return "The client is not installed. Run: ocx integration client status.";
-    case "non_loopback": return "The integration requires a loopback destination. Run: ocx integration client status.";
-    case "drift_requires_confirm": return "The client configuration changed. Run `ocx integration client status` before explicitly confirming restore.";
-    case "snapshot_expired": return "The recovery snapshot expired. Run `ocx integration client status` before creating a new change.";
-    case "superseded_store": return "The client uses a different configuration store. Run `ocx integration client status`, then disable and enable the selected client.";
-    case "unsafe": return "The client config path is unsafe to edit (for example a link or a competing file). Run `ocx integration client status` to see the affected path.";
-    case "conflict": return "The client config no longer matches the recorded ownership. Run `ocx integration client status`; add --overwrite-conflict to enable only if replacing it is intended.";
-    case "write_failed": return "The client config write failed. Run `ocx integration client status` before retrying.";
+    case "not_installed": return "The client is not installed. Run: orl integration client status.";
+    case "non_loopback": return "The integration requires a loopback destination. Run: orl integration client status.";
+    case "drift_requires_confirm": return "The client configuration changed. Run `orl integration client status` before explicitly confirming restore.";
+    case "snapshot_expired": return "The recovery snapshot expired. Run `orl integration client status` before creating a new change.";
+    case "superseded_store": return "The client uses a different configuration store. Run `orl integration client status`, then disable and enable the selected client.";
+    case "unsafe": return "The client config path is unsafe to edit (for example a link or a competing file). Run `orl integration client status` to see the affected path.";
+    case "conflict": return "The client config no longer matches the recorded ownership. Run `orl integration client status`; add --overwrite-conflict to enable only if replacing it is intended.";
+    case "write_failed": return "The client config write failed. Run `orl integration client status` before retrying.";
     default: return undefined;
   }
 }

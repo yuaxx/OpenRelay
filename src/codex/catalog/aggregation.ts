@@ -296,7 +296,7 @@ export function enforceCatalogSlugUniqueness(models: RawEntry[], warn: boolean):
       ? `; divergent content on: ${[...divergentSlugs].slice(0, 5).map(safeCatalogWarningLabel).join(", ")}${divergentSlugs.size > 5 ? ", …" : ""}`
       : "";
     console.warn(
-      `[opencodex] catalog sync dropped ${models.length - deduped.length} duplicate slug row(s), keeping the first occurrence of each slug (#4730)${divergentNote}.`,
+      `[openrelay] catalog sync dropped ${models.length - deduped.length} duplicate slug row(s), keeping the first occurrence of each slug (#4730)${divergentNote}.`,
     );
   }
   return deduped;
@@ -359,7 +359,7 @@ export function buildComboCatalogOmission(
     id,
     targets,
     reason,
-    message: `[opencodex] Combo "${safeCatalogWarningLabel(id)}" is omitted from the catalog because ${comboCatalogOmissionDetail(reason)}: ${targets.join(", ")}.`,
+    message: `[openrelay] Combo "${safeCatalogWarningLabel(id)}" is omitted from the catalog because ${comboCatalogOmissionDetail(reason)}: ${targets.join(", ")}.`,
   };
 }
 
@@ -451,7 +451,7 @@ export function warnComboMasqueradeCollisionOnce(slug: string): void {
   if (comboMasqueradeCollisionWarnings.has(slug)) return;
   comboMasqueradeCollisionWarnings.add(slug);
   console.warn(
-    `[opencodex] combo alias collision on "${safeCatalogWarningLabel(slug)}": the combo wins and the shadowed provider model is omitted from the catalog.`,
+    `[openrelay] combo alias collision on "${safeCatalogWarningLabel(slug)}": the combo wins and the shadowed provider model is omitted from the catalog.`,
   );
 }
 
@@ -460,7 +460,7 @@ export function warnComboUnrestorableShadowOnce(slug: string): void {
   if (comboUnrestorableShadowWarnings.has(key)) return;
   comboUnrestorableShadowWarnings.add(key);
   console.warn(
-    `[opencodex] combo alias collision on "${safeCatalogWarningLabel(slug)}": the existing user-managed or foreign catalog row is retained because no pristine backup can restore it. Rename the combo alias to expose both models.`,
+    `[openrelay] combo alias collision on "${safeCatalogWarningLabel(slug)}": the existing user-managed or foreign catalog row is retained because no pristine backup can restore it. Rename the combo alias to expose both models.`,
   );
 }
 
@@ -469,7 +469,7 @@ export function warnAccountSelectorShadowedProviderOnce(slug: string): void {
   if (accountSelectorShadowCollisionWarnings.has(slug)) return;
   accountSelectorShadowCollisionWarnings.add(slug);
   console.warn(
-    `[opencodex] account selector collision on "${safeCatalogWarningLabel(slug)}": the account-bound native model wins and the shadowed provider model is omitted from the catalog. Rename the provider or account selector.`,
+    `[openrelay] account selector collision on "${safeCatalogWarningLabel(slug)}": the account-bound native model wins and the shadowed provider model is omitted from the catalog. Rename the provider or account selector.`,
   );
 }
 
@@ -496,7 +496,7 @@ export function resolveSlugAliasCollisions(goModels: CatalogModel[]): Set<Catalo
     if (!slugAliasCollisionWarnings.has(key)) {
       slugAliasCollisionWarnings.add(key);
       console.warn(
-        `[opencodex] slug alias collision on "${key}": multiple native ids encode to the same Codex-facing slug; `
+        `[openrelay] slug alias collision on "${key}": multiple native ids encode to the same Codex-facing slug; `
         + "the plain-hyphen native id is cataloged, the slash id remains callable via its raw selector.",
       );
     }

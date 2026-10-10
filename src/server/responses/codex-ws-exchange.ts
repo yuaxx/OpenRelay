@@ -154,6 +154,7 @@ export function codexWsExchange(options: ExchangeOptions): Promise<Response> {
       correlation?.finish();
       detachOwner();
       detachSteering();
+      nativeControl?.rtk?.dispose();
       ws.removeEventListener("open", onOpen);
       ws.removeEventListener("message", onMessage);
       ws.removeEventListener("close", onClose);
@@ -373,7 +374,7 @@ export function codexWsExchange(options: ExchangeOptions): Promise<Response> {
                   ? mergeSteeringContinuation(continuationBase, frame)
                   : { ...continuationBase, input: frame.input, previous_response_id: frame.previous_response_id };
               }
-              const text = JSON.stringify(outgoing);
+              const text = JSON.stringify(nativeControl.rtk?.prepare(outgoing, frame) ?? outgoing);
               nativeControl.assertOutboundFrame?.(text);
               if (codexWsCreateFrameExceedsLimit(text)) {
                 throw new Error("Native steering frame exceeds the transport byte limit");
@@ -474,6 +475,13 @@ export function codexWsExchange(options: ExchangeOptions): Promise<Response> {
       }
       const normalized = normalizeResponsesWsRelayEvent(text);
       if (!normalized) return;
+      if (nativeControl?.rtk) {
+        const restored = nativeControl.rtk.observe(normalized.payload);
+        if (restored !== normalized.payload) {
+          normalized.payload = restored;
+          normalized.text = JSON.stringify(restored);
+        }
+      }
       const { type } = normalized;
       let relayText = normalized.text;
       let controlFrame = false;

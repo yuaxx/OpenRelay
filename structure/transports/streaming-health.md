@@ -440,6 +440,8 @@ continuation history. The existing numeric usage observer excludes inject events
 including echoed failed tool outputs, from log samples. All private bodies and
 timers are disposed on teardown.
 
+Opt-in RTK prepares shortened wire copies of paired terminal results at the native exchange, restoring exact result echoes to originals before control validation and replay observation; see [RTK](rtk.md#transport-and-replay). Native channel identity, acknowledgement, continuation and delivery-unknown rules stay unchanged.
+
 Limits: 32 pending submissions including the on-wire frame, 8 MiB queued frame
 bytes, 1,024 function identities / 256 KiB identity bytes, 128 response IDs and a
 32 MiB replay journal. An on-wire injection has an absolute 90-second acknowledgement

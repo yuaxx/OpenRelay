@@ -123,16 +123,16 @@ Codex 会分层组装提示词：它自己的基础指令、你的项目文档�
 
 ### 如果已有其他东西替换了你的基础提示词
 
-如果 `model_instructions_file` 指向的文件不是 opencodex 写入的，选择器会拒绝操作，并告知
+如果 `model_instructions_file` 指向的文件不是 OpenRelay 写入的，选择器会拒绝操作，并告知
 该键指向何处。它不会静默地把你或其他工具设置的键改指到别处。请先自行清除该值，再在此处选择。
 
 这与导入 `developer_instructions` 的原则相同：面板报告它发现的内容，由你来决定。
 
 切换会应用于新启动的会话，与此页面上的其他所有更改一样。
 
-## 在 opencodex 外部写入的指令
+## 在 OpenRelay 外部写入的指令
 
-如果 `developer_instructions` 已经存在，且不是由 opencodex 写入，面板不会覆盖它。
+如果 `developer_instructions` 已经存在，且不是由 OpenRelay 写入，面板不会覆盖它。
 面板会改为提供将文本导入为一层的选项：你会先看到现有值，在确认之前不会写入任何内容。
 
 ## 内容不同步时
@@ -147,12 +147,12 @@ Codex 会分层组装提示词：它自己的基础指令、你的项目文档�
 
 ## 此页面读取什么，又不读取什么
 
-opencodex 只读取一个配置文件——你的 `config.toml`。Codex 会从多个层解析设置，因此这里的值
+OpenRelay 只读取一个配置文件——你的 `config.toml`。Codex 会从多个层解析设置，因此这里的值
 表示的是你的文件所写的内容，不一定是 Codex 最终计算出的值。
 
 ## 此页面写入的键
 
-这些键位于 Codex 的 `config.toml` 中，而不是 opencodex 自身的配置。
+这些键位于 Codex 的 `config.toml` 中，而不是 OpenRelay 自身的配置。
 
 | 键 | 默认值 | 层 |
 |---|---|---|
@@ -164,6 +164,6 @@ opencodex 只读取一个配置文件——你的 `config.toml`。Codex 会从�
 | `developer_instructions` | 未设置 | 按顺序连接的自定义层 |
 | `model_instructions_file` | 未设置 | 基础提示词，在选择了变体时 |
 
-写入采用逐行编辑，你的注释和格式会保留；opencodex 无法识别的键会原样保留，而不会被删除。
+写入采用逐行编辑，你的注释和格式会保留；OpenRelay 无法识别的键会原样保留，而不会被删除。
 
 缺失的键按默认值读取，而不是按 `false`。面板显示文件中实际存在的值，并在键未设置时说明这一点。

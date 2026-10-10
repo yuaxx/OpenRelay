@@ -1,24 +1,24 @@
 ---
 title: Installation
-description: Install the opencodex (ocx) proxy, its prerequisites, and verify it runs.
+description: Install the OpenRelay (ocx) proxy, its prerequisites, and verify it runs.
 ---
 
-opencodex installs two equivalent command names, `ocx` and `opencodex`. Both launch the same small
+OpenRelay installs two equivalent command names, `ocx` and `opencodex`. Both launch the same small
 local HTTP server (built on Bun). Model requests go to the provider selected by routing; optional
 vision and web-search sidecars can also use your ChatGPT login when a routed model needs them.
 
 ## Desktop terminal command
 
-A stable OpenCodex Desktop install configures `ocx` for new terminals when the app starts. Open a new terminal and run `ocx status` or `ocx doctor` to inspect the first executable on PATH. On macOS and Linux deb installs, a managed block at the end of zsh, bash and fish startup files puts `~/.opencodex-desktop/bin` first on PATH and uses the Desktop-owned shim. Windows puts the bundled `ocx.exe` install directory first in the user `Path`. Existing terminals, aliases, shell caches and later PATH changes can still select another command; a conflicting Windows system PATH entry can also win. Use the app’s Terminal command settings to repair, disable or remove this configuration. AppImage is excluded.
+A stable OpenRelay Desktop install configures `ocx` for new terminals when the app starts. Open a new terminal and run `orl status` or `orl doctor` to inspect the first executable on PATH. On macOS and Linux deb installs, a managed block at the end of zsh, bash and fish startup files puts `~/.opencodex-desktop/bin` first on PATH and uses the Desktop-owned shim. Windows puts the bundled `ocx.exe` install directory first in the user `Path`. Existing terminals, aliases, shell caches and later PATH changes can still select another command; a conflicting Windows system PATH entry can also win. Use the app’s Terminal command settings to repair, disable or remove this configuration. AppImage is excluded.
 
-On macOS and Linux, a current npm/pnpm package launcher that still runs delegates eligible commands to the Desktop CLI when its record is enabled and passes ownership, permission and file-safety checks. Windows has no package-launcher handoff: new terminals select the Desktop `ocx.exe` through user `Path` order. A `record-unsafe` error means the record or its directory failed a safety check. Open OpenCodex Desktop to repair the terminal command, or use `OCX_NO_DESKTOP_HANDOFF=1` for a package invocation on macOS/Linux. Package update/removal and internal inspection keep their existing path. `OCX_NO_DESKTOP_HANDOFF=1` suppresses that package handoff for one invocation; it does not change a direct Desktop shim or PATH configuration.
+On macOS and Linux, a current npm/pnpm package launcher that still runs delegates eligible commands to the Desktop CLI when its record is enabled and passes ownership, permission and file-safety checks. Windows has no package-launcher handoff: new terminals select the Desktop `ocx.exe` through user `Path` order. A `record-unsafe` error means the record or its directory failed a safety check. Open OpenRelay Desktop to repair the terminal command, or use `OCX_NO_DESKTOP_HANDOFF=1` for a package invocation on macOS/Linux. Package update/removal and internal inspection keep their existing path. `OCX_NO_DESKTOP_HANDOFF=1` suppresses that package handoff for one invocation; it does not change a direct Desktop shim or PATH configuration.
 
 ## Prerequisites
 
 | Requirement | Why |
 | --- | --- |
 | **[Node](https://nodejs.org) ≥ 18** | `ocx` runs on the Bun runtime, but the runtime is bundled automatically by the npm or pnpm install — you do **not** need to install Bun yourself. |
-| **[OpenAI Codex](https://openai.com/codex)** (CLI, App, or SDK) | The client opencodex sits in front of. opencodex writes to `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`). |
+| **[OpenAI Codex](https://openai.com/codex)** (CLI, App, or SDK) | The client OpenRelay sits in front of. OpenRelay writes to `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`). |
 | A provider account or API key | Anthropic, xAI, Kimi, Ollama Cloud, OpenRouter, an OpenAI-compatible endpoint, or your ChatGPT login. |
 
 ## Install
@@ -64,20 +64,20 @@ sudo npm install -g --allow-scripts=bun @bitkyc08/opencodex
 Verify both command aliases are on your `PATH`:
 
 ```bash
-ocx --version
+orl --version
 opencodex --version
 ```
 
 Before start, stop, restart, service, or an update handled by the Bun CLI, a brief stderr
 notice can identify a CLI/proxy version mismatch. It is advisory and preserves the command's
 exit code; JSON and help output do not trigger it. npm/pnpm updates handled by the Node launcher
-before the Bun CLI starts do not emit this notice. `ocx status`, `ocx doctor`, and `ocx resolve`
+before the Bun CLI starts do not emit this notice. `orl status`, `orl doctor`, and `orl resolve`
 already report version skew through their diagnostics.
 
 If you install the background service from a shell using fnm, nvm, mise, asdf, or volta,
-OpenCodex leaves shell-local multishell directories out of the service PATH. On Linux it
+OpenRelay leaves shell-local multishell directories out of the service PATH. On Linux it
 selects a durable `ocx` launcher when available; otherwise it uses the package's Bun
-runtime. Run `ocx service repair` after an older service was installed from a temporary
+runtime. Run `orl service repair` after an older service was installed from a temporary
 multishell directory. On macOS, repair reloads launchd when it changes the saved plist.
 
 ## Standalone binary (no npm)
@@ -87,8 +87,8 @@ targets. It includes the Bun runtime and dashboard, so npm, Node, and a separate
 are not required. Download the archive for your platform, extract it, and run:
 
 ```bash
-./ocx --version
-./ocx start
+./orl --version
+./orl start
 ```
 
 The extracted `gui/dist` and `keyring` directories must stay beside the binary. The first serves
@@ -99,16 +99,16 @@ the dashboard; the second carries the platform-native OS credential-store bindin
 The stable `latest` channel already includes GPT-5.6 Sol/Terra/Luna catalog support for ChatGPT,
 OpenAI API-key, OpenRouter, and experimental Cursor routes. Upstream access is still account-gated;
 the catalog entries do not grant access by themselves. Use the preview channel only to test
-unreleased opencodex builds:
+unreleased OpenRelay builds:
 
 ```bash
 npm install -g @bitkyc08/opencodex@preview
-ocx update --tag preview
+orl update --tag preview
 ```
 
 ## Run from source
 
-To hack on opencodex itself:
+To hack on OpenRelay itself:
 
 ```bash
 git clone https://github.com/lidge-jun/opencodex.git
@@ -125,7 +125,7 @@ has produced `gui/dist`. While hacking on the dashboard, run the frontend separa
 
 ## What gets created
 
-opencodex state lives under `$OPENCODEX_HOME` (default `~/.opencodex`). Codex integration files live
+OpenRelay state lives under `$OPENCODEX_HOME` (default `~/.opencodex`). Codex integration files live
 under `$CODEX_HOME` (default `~/.codex`).
 
 | Path | Purpose |
@@ -133,15 +133,15 @@ under `$CODEX_HOME` (default `~/.codex`).
 | `$OPENCODEX_HOME/config.json` | Your providers, default provider, port, and options. |
 | `$OPENCODEX_HOME/ocx.pid` | PID of the running proxy (single-instance guard). |
 | `$OPENCODEX_HOME/runtime-port.json` | The live PID, hostname, and port — including an OS-assigned port when `config.port` is `0`. |
-| `$OPENCODEX_HOME/auth.json` | Stored OAuth credentials (when you `ocx login`). |
-| `$OPENCODEX_HOME/catalog-backup*.json` | Codex model catalog backups made before opencodex edits it. |
-| `$CODEX_HOME/config.toml` | On loopback, opencodex adds a marker-owned root `openai_base_url`; non-loopback binds use `model_provider = "opencodex"` plus `[model_providers.opencodex]` so Codex can send the API-auth header. |
+| `$OPENCODEX_HOME/auth.json` | Stored OAuth credentials (when you `orl login`). |
+| `$OPENCODEX_HOME/catalog-backup*.json` | Codex model catalog backups made before OpenRelay edits it. |
+| `$CODEX_HOME/config.toml` | On loopback, OpenRelay adds a marker-owned root `openai_base_url`; non-loopback binds use `model_provider = "opencodex"` plus `[model_providers.opencodex]` so Codex can send the API-auth header. |
 | `$CODEX_HOME/opencodex.config.toml` | Fallback/reference profile written alongside the main Codex config. |
 | `$CODEX_HOME/opencodex-catalog.json` | Synced native and routed model catalog used by Codex. |
 
 :::note
-opencodex never deletes your Codex config. Every injection is reversible — `ocx stop`, `ocx restore`,
-or `ocx eject` strip exactly the lines opencodex added and restore native Codex.
+OpenRelay never deletes your Codex config. Every injection is reversible — `orl stop`, `orl restore`,
+or `orl eject` strip exactly the lines OpenRelay added and restore native Codex.
 :::
 
 ## Next

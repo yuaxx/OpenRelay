@@ -14,8 +14,8 @@ import {
   takeFlag, takeOptionWithSyntax, type RuntimeApiDeps,
 } from "./runtime-api";
 
-const ORDER_USAGE = "Usage: ocx models order status|reset|set (--models CSV | --mode default|alphabetical|provider|most-used) [--json]";
-const DISPLAY_USAGE = "Usage: ocx models display-name PROVIDER/MODEL (--set TEXT | --clear) [--json]";
+const ORDER_USAGE = "Usage: orl models order status|reset|set (--models CSV | --mode default|alphabetical|provider|most-used) [--json]";
+const DISPLAY_USAGE = "Usage: orl models display-name PROVIDER/MODEL (--set TEXT | --clear) [--json]";
 const SETTINGS = "/api/subagent-models";
 function record(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -46,7 +46,7 @@ function snapshot(settings: PickerOrderSettings, identities: PickerModelIdentity
 }
 function assertRouted(settings: PickerOrderSettings): void {
   if (settings.pickerOrder.some(id => !id.includes("/"))) {
-    throw new CliUsageError("Saved order includes native models. Run ocx models order reset before replacing it.");
+    throw new CliUsageError("Saved order includes native models. Run orl models order reset before replacing it.");
   }
   if (settings.pickerAvailable.length === 0) throw new CliUsageError("No routed picker candidates are available.");
 }

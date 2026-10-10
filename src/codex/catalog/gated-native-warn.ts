@@ -50,7 +50,7 @@ export function warnGatedNativeSuppressedOnce(slug: string, reason: string): voi
   if (warnedGatedNativeSuppression.has(signature)) return;
   warnedGatedNativeSuppression.add(signature);
   console.warn(
-    `[opencodex] catalog sync: ${slug} is not being offered because ${reason}. `
+    `[openrelay] catalog sync: ${slug} is not being offered because ${reason}. `
       + "Sign in again to restore it.",
   );
 }

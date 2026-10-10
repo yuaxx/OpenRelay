@@ -3,7 +3,7 @@ title: Configuration du fournisseur
 description: Entrées du fournisseur, authentification, points de terminaison, catalogues de modèles, quotas, limites de contexte et options spécifiques au fournisseur.
 ---
 
-Un fournisseur indique à opencodex où se trouve un modèle, quel adaptateur de protocole il utilise et comment les requêtes sont
+Un fournisseur indique à OpenRelay où se trouve un modèle, quel adaptateur de protocole il utilise et comment les requêtes sont
 authentifiées.
 
 ## Sélection des modèles à l’inscription
@@ -13,13 +13,13 @@ Une nouvelle connexion sans OAuth attend une liste de modèles fiable avant de l
 Cette règle ne s’applique qu’à l’inscription d’un nouveau fournisseur. Les mises à jour, reconnexions et remplacements de clé préservent les choix existants. Après l’initialisation, activez les modèles souhaités dans Models ou avec les commandes ci-dessous. La politique distincte concernant les nouveaux modèles reste inchangée. Remplacez `<model-id>` par un ID de la liste.
 
 ```sh
-ocx models live --provider openrouter
-ocx models enable '<model-id>'
-ocx models disable '<model-id>'
-ocx models provider openrouter on
+orl models live --provider openrouter
+orl models enable '<model-id>'
+orl models disable '<model-id>'
+orl models provider openrouter on
 ```
 
-Après une inscription ou une connexion OAuth dans l’interface, une boîte de dialogue permet d’ouvrir Models. La CLI affiche les commandes de gestion des modèles, aussi présentes dans les étapes suivantes du JSON. `--no-wait` indique une connexion en attente, pas terminée. Lancez le proxy avec `ocx start` avant les commandes de modèles en direct.
+Après une inscription ou une connexion OAuth dans l’interface, une boîte de dialogue permet d’ouvrir Models. La CLI affiche les commandes de gestion des modèles, aussi présentes dans les étapes suivantes du JSON. `--no-wait` indique une connexion en attente, pas terminée. Lancez le proxy avec `orl start` avant les commandes de modèles en direct.
 
 ## Champs de premier niveau liés aux fournisseurs
 
@@ -36,7 +36,7 @@ Après une inscription ou une connexion OAuth dans l’interface, une boîte de 
 | `codexAccountNamespaces?` | `Record<string, string>` | — | Mappage facultatif d’un sélecteur de modèle public arbitraire vers une cible de compte Codex stockée. Lorsque les lignes du sélecteur qualifié par compte sont activées, chaque sélecteur dont la cible est présente ajoute des lignes `<selector>/<native-openai-model>` distinctes au sélecteur Codex ; chaque ligne utilise uniquement ce compte. Dès qu'un sélecteur est actif, les lignes natives non qualifiées sont masquées dans le sélecteur, mais leurs identifiants restent routables et figurent toujours dans la réponse brute de `/v1/models`, sauf désactivation explicite. |
 | `codexAccountPickerEnabled?` | `boolean` | désactivé lorsque la carte est vide | Contrôle si les mappages `codexAccountNamespaces` éligibles génèrent des lignes de sélecteur Codex qualifiées pour le compte. `true` permet aux lignes mappées d'apparaître. Si elle est omise avec une carte non vide, elle est traitée comme activée pour des raisons de compatibilité ascendante ; si la carte est vide, elle est éteinte. `false` masque les lignes générées et restaure les lignes nues du sélecteur natif sans supprimer les mappages ni désactiver le routage exact `<selector>/<native-openai-model>`. |
 | `activeCodexAccountId?` | `string` | — | Compte de pool sélectionné manuellement pour la prochaine demande. La sélection efface l'affinité des threads ; les demandes en cours conservent les informations d’identification capturées. |
-| `codexAccountPriorities?` | `Record<string, number>` | — | Ordre de sélection par compte pour le pool Codex : identifiant de compte → entier de `-100` à `100`, **les valeurs élevées sont prioritaires**, une valeur absente équivaut à `0`. Cette limite porte sur le classement, et non sur l'admissibilité : la sélection retient, parmi les comptes déjà admissibles, le niveau prioritaire le plus élevé qui dispose encore d'une marge de quota, puis `accountPoolStrategy` choisit un compte dans ce niveau. Un niveau est ignoré uniquement lorsque chacun de ses membres atteint son propre seuil effectif non nul (valeur spécifique au compte ou seuil global), est en temporisation, est temporairement évité, est suspendu ou doit être réauthentifié ; un quota inconnu ne suffit jamais à considérer un niveau comme épuisé. L'ordre ne rend jamais admissible un compte qui ne l'est pas et ne réaffecte jamais une tâche déjà liée à un compte. Le compte principal `__main__` participe selon les mêmes règles ; la connexion Codex Desktop peut ainsi être configurée pour être utilisée en dernier. Sans entrée, le pool se comporte exactement comme auparavant. Un mappage mal formé est ignoré avec un avertissement dans la console : l'ordre est désactivé et la configuration n'est pas réparée. Ce champ est géré par `ocx account priority` et la page Codex Auth. |
+| `codexAccountPriorities?` | `Record<string, number>` | — | Ordre de sélection par compte pour le pool Codex : identifiant de compte → entier de `-100` à `100`, **les valeurs élevées sont prioritaires**, une valeur absente équivaut à `0`. Cette limite porte sur le classement, et non sur l'admissibilité : la sélection retient, parmi les comptes déjà admissibles, le niveau prioritaire le plus élevé qui dispose encore d'une marge de quota, puis `accountPoolStrategy` choisit un compte dans ce niveau. Un niveau est ignoré uniquement lorsque chacun de ses membres atteint son propre seuil effectif non nul (valeur spécifique au compte ou seuil global), est en temporisation, est temporairement évité, est suspendu ou doit être réauthentifié ; un quota inconnu ne suffit jamais à considérer un niveau comme épuisé. L'ordre ne rend jamais admissible un compte qui ne l'est pas et ne réaffecte jamais une tâche déjà liée à un compte. Le compte principal `__main__` participe selon les mêmes règles ; la connexion Codex Desktop peut ainsi être configurée pour être utilisée en dernier. Sans entrée, le pool se comporte exactement comme auparavant. Un mappage mal formé est ignoré avec un avertissement dans la console : l'ordre est désactivé et la configuration n'est pas réparée. Ce champ est géré par `orl account priority` et la page Codex Auth. |
 | `activeCodexAccountPinned?` | `string` | — | Identifiant du compte du dernier opérateur sélectionné manuellement. Lorsqu'il est défini, un niveau `codexAccountPriorities` supérieur ne peut pas le préempter jusqu'à ce que la broche soit libérée par drainage, exclusion, suppression ou un failover/promotion explicite. Un mouvement circulaire ordinaire à l’intérieur du niveau plafonné ne le libère pas. L'écriture d'une entrée `codexAccountPriorities` libère également le pin, donc un pin créé avant qu'un ordre n'existe ne peut pas surpasser un ensemble par la suite. `GET /api/codex-auth/active` indique à la fois si le compte effectif est épinglé (`pinned`) et le compte portant le plafond (`pinnedAccountId`). |
 | `autoSwitchThreshold?` | `number` | `80` | Seuil d'utilisation pour la commutation proactive. `quota` peut réévaluer les requêtes non liées lors de leur prochaine requête. Les tâches liées conservent leur compte au-delà du seuil par défaut (`pool.cacheAffinity`) jusqu'à ce que ce compte soit épuisé ou ne puisse plus servir, et ne basculent alors que vers un compte dont l'utilisation est strictement inférieure et qui dispose d'une véritable marge de quota. Définissez `pool.cacheAffinity: false` pour réévaluer aussi les tâches liées à ce seuil. `fill-first` ne l'utilise que comme seuil d'évacuation pour l'affectation des requêtes non liées ; la sélection `round-robin` normale ne l'utilise pas. Le score retient la plus élevée des fenêtres de quota connues sur 5 heures, une semaine ou 30 jours. `0` désactive uniquement la commutation proactive fondée sur l'utilisation, pas l'affectation des requêtes non liées ni la récupération après incident. |
 | `codexAccountAutoSwitchThresholds?` | `Record<string, number>` | — | Seuils par compte remplaçant `autoSwitchThreshold` : identifiant → entier de `0` à `100`. Une entrée absente hérite du seuil global ; `0` désactive uniquement les déplacements fondés sur l’utilisation depuis ce compte. Le compte principal `__main__` est pris en charge. La carte du compte dans Codex Auth gère cette valeur. Activer la valeur spécifique au compte copie le seuil global actuel dans une valeur fixe. Cette valeur, y compris `0`, reste prioritaire après toute modification du seuil global. La désactiver envoie `threshold: null`, supprime l'entrée et rétablit l'héritage du seuil global actuel et de ses modifications futures. |
@@ -54,7 +54,7 @@ Après une inscription ou une connexion OAuth dans l’interface, une boîte de 
 
 Pour ces stratégies, le seuil effectif de chaque compte est son entrée `codexAccountAutoSwitchThresholds` si elle existe, sinon le seuil global `autoSwitchThreshold`. Une valeur de zéro désactive uniquement le basculement proactif selon l'utilisation ; la liaison au démarrage, le verrouillage strict, le cooldown, les droits d'accès au modèle et la reprise après échec restent appliqués.
 
-Les noms des sélecteurs sont des étiquettes publiques choisies par l'utilisateur ; opencodex ne leur attribue aucune sémantique de rôle de compte.
+Les noms des sélecteurs sont des étiquettes publiques choisies par l'utilisateur ; OpenRelay ne leur attribue aucune sémantique de rôle de compte.
 Les clés `codexAccountNamespaces` comportent de 1 à 64 caractères. Elles commencent et se terminent par une
 lettre ou un chiffre ASCII et ne contiennent que des lettres, des chiffres, `.`, `_` ou `-`. Les noms réservés
 des objets JavaScript sont rejetés. Chaque valeur est soit l'identifiant valide d'un compte du pool (jamais la valeur interne `__main__`),
@@ -80,7 +80,7 @@ aucun repli d'identifiants entre les routes n'est effectué. Les lignes API GPT-
 Les identifiants virtuels Pro sont réécrits vers le modèle de protocole de base avec `reasoning.mode: "pro"`.
 
 `openaiProviderTierVersion: 2` marque la projection actuelle fondée sur un fournisseur unique. Avant de migrer une
-configuration v1 distribuée, opencodex crée `config.json.pre-openai-tiers-v2.bak` sans remplacer une
+configuration v1 distribuée, OpenRelay crée `config.json.pre-openai-tiers-v2.bak` sans remplacer une
 sauvegarde dont le contenu diffère, puis réécrit en identifiants sans préfixe les identifiants sélectionnés connus de l'ancien espace de noms.
 
 ## Entrées de fournisseur (`OcxProviderConfig`)
@@ -168,7 +168,7 @@ sauvegarde dont le contenu diffère, puis réécrit en identifiants sans préfix
 La création et le remplacement d’un fournisseur (`POST /api/providers`) valident `responsesPath` et `chatCompletionsPath` avant de modifier la configuration en mémoire ou sur disque. `PATCH /api/providers?name=<provider>` fusionne le corps de la requête avec le fournisseur enregistré ; les mises à jour qui touchent des champs autres que `disabled` — à l’exception des mises à jour portant uniquement sur `requestPacing` — valident de la même manière les chemins du fournisseur fusionné avant l’enregistrement, et un chemin conservé invalide renvoie `400` sans modifier la configuration. Les mêmes règles de chemin s’appliquent au chargement d’un fichier de configuration.
 
 Les fournisseurs à clé API peuvent détenir une clé littérale ou une référence à une variable d'environnement. Les fournisseurs OAuth utilisent le
-magasin d'identifiants alimenté par `ocx login` ; le comportement de lancement de Claude Code avec abonnement est
+magasin d'identifiants alimenté par `orl login` ; le comportement de lancement de Claude Code avec abonnement est
 configuré sous [`claudeCode.authMode`](/fr/reference/configuration/server/#claude-code-claudecode).
 
 ### Ce qu'une sauvegarde de fournisseur conserve
@@ -188,11 +188,11 @@ La destination est l'adaptateur, l'URL de base (schéma et hôte comparés sans 
 ## Sécurité des connexions sortantes de diagnostic des fournisseurs
 
 Les tests de connexion du tableau de bord et la découverte dynamique des modèles utilisent un transport borné, limité aux requêtes GET. Sans
-proxy sortant, opencodex résout le nom d'hôte une seule fois et se connecte exclusivement à l'adresse ainsi validée.
+proxy sortant, OpenRelay résout le nom d'hôte une seule fois et se connecte exclusivement à l'adresse ainsi validée.
 HTTPS conserve l'hôte d'origine, le SNI et la vérification du certificat ; la configuration du fournisseur ne peut pas désactiver
 ces contrôles.
 
-Ces opérations utilisent le [fetch sortant configuré du serveur](/fr/reference/configuration/server/). Un proxy SOCKS5 du serveur — défini avec `config.proxy` ou hérité d'un `ALL_PROXY` SOCKS5 — utilise le tunnel intégré d'OpenCodex lorsque la cible ne correspond pas à `NO_PROXY`. `HTTP_PROXY` et `HTTPS_PROXY` conservent le traitement HTTP(S) natif de Bun, tandis qu'un `ALL_PROXY` non SOCKS n'est pas une route du fetch HTTP natif. Les vérifications de l'URL et de l'adresse littérale sont toujours exécutées, mais le proxy sélectionné choisit la route finale, la réponse DNS et l'homologue ; opencodex ne peut donc ni épingler ni vérifier cet homologue. Il s'agit d'une limitation de sécurité explicite.
+Ces opérations utilisent le [fetch sortant configuré du serveur](/fr/reference/configuration/server/). Un proxy SOCKS5 du serveur — défini avec `config.proxy` ou hérité d'un `ALL_PROXY` SOCKS5 — utilise le tunnel intégré d'OpenRelay lorsque la cible ne correspond pas à `NO_PROXY`. `HTTP_PROXY` et `HTTPS_PROXY` conservent le traitement HTTP(S) natif de Bun, tandis qu'un `ALL_PROXY` non SOCKS n'est pas une route du fetch HTTP natif. Les vérifications de l'URL et de l'adresse littérale sont toujours exécutées, mais le proxy sélectionné choisit la route finale, la réponse DNS et l'homologue ; OpenRelay ne peut donc ni épingler ni vérifier cet homologue. Il s'agit d'une limitation de sécurité explicite.
 
 Les destinations privées ou locales nécessitent `allowPrivateNetwork: true` et, lorsqu'un proxy sortant est actif,
 une entrée `NO_PROXY` correspondante. Le bouclage est ajouté automatiquement ; indiquez explicitement chaque hôte du réseau local, car
@@ -216,7 +216,7 @@ compte préservent et relisent le contexte de la conversation, mais la réutilis
 comptes n'est pas garantie et le cache peut devoir être réchauffé.
 
 Lors d'un **401/403**, la connexion de l'application efface l'affinité de ce compte, locale au processus, et impose une réauthentification.
-Lors d'un **429**, opencodex respecte `Retry-After`, place le compte en temporisation, efface l'affinité et peut
+Lors d'un **429**, OpenRelay respecte `Retry-After`, place le compte en temporisation, efface l'affinité et peut
 réacheminer la requête vers un autre compte admissible du pool. Ces transitions après échec restent actives avec
 `autoSwitchThreshold: 0` ; ce paramètre désactive uniquement la commutation proactive basée sur l’utilisation.
 
@@ -253,14 +253,14 @@ Seul un 429 confirmant le rejet d'un quota partagé de cinq heures ou hebdomadai
 
 :::caution[Expérimental]
 Laissez cette option désactivée, sauf si vous comprenez les risques liés aux règles d'Anthropic concernant les comptes. En cas de doute,
-préférez le changement manuel avec `ocx account use anthropic <id>`.
+préférez le changement manuel avec `orl account use anthropic <id>`.
 :::
 
 ### Anthropic · Pool 2 (`anthropic2`)
 
 `anthropic2` (« Anthropic · Pool 2 ») est un second fournisseur OAuth Anthropic intégré, doté de son propre pool de comptes. Il utilise la même implémentation Anthropic que `anthropic` : même flux de connexion, même format de requête, mêmes Messages natifs et pont Responses, mêmes métadonnées de modèles. Seuls les comptes et le pool qui les entoure sont séparés. Le préfixe du modèle choisit le pool : `anthropic/claude-sonnet-5` utilise le pool principal et `anthropic2/claude-sonnet-5` le Pool 2.
 
-Le Pool 2 reste inactif tant que vous ne l'ajoutez pas. Connectez-vous avec `ocx login anthropic2` ou ajoutez **Anthropic · Pool 2** dans la page Fournisseurs du tableau de bord. Une première connexion réussie crée `providers.anthropic2` avec le marqueur `"anthropicOAuthInstance": "anthropic2"`. Le Pool 2 ne devient jamais le fournisseur par défaut : les noms de modèles `claude-*` sans préfixe, le modèle par défaut et le transfert d'appelant de Claude Code continuent de se résoudre vers `anthropic`. Une entrée `anthropic2` non marquée que vous avez créée vous-même garde sa signification personnalisée ; la connexion refuse la collision de noms et ne réécrit ni l'entrée ni vos identifiants.
+Le Pool 2 reste inactif tant que vous ne l'ajoutez pas. Connectez-vous avec `orl login anthropic2` ou ajoutez **Anthropic · Pool 2** dans la page Fournisseurs du tableau de bord. Une première connexion réussie crée `providers.anthropic2` avec le marqueur `"anthropicOAuthInstance": "anthropic2"`. Le Pool 2 ne devient jamais le fournisseur par défaut : les noms de modèles `claude-*` sans préfixe, le modèle par défaut et le transfert d'appelant de Claude Code continuent de se résoudre vers `anthropic`. Une entrée `anthropic2` non marquée que vous avez créée vous-même garde sa signification personnalisée ; la connexion refuse la collision de noms et ne réécrit ni l'entrée ni vos identifiants.
 
 Le Pool 2 lit ses réglages de pool dans sa propre entrée de fournisseur. Les clés, valeurs par défaut et comportements sont ceux de `anthropicAccountPool` au niveau racine, décrit ci-dessus, et rien n'est hérité du pool principal. `providers.anthropic.anthropicAccountPool`, ou ce champ sur tout autre fournisseur, est rejeté.
 
@@ -279,7 +279,7 @@ Le Pool 2 lit ses réglages de pool dans sa propre entrée de fournisseur. Les c
 }
 ```
 
-Les deux pools sont isolés dans opencodex :
+Les deux pools sont isolés dans OpenRelay :
 
 - **Identifiants :** les comptes du Pool 2 sont stockés sous leur propre clé `anthropic2` dans le magasin d'identifiants protégé. Une connexion dont le jeton ou le compte Anthropic vérifié est déjà stocké dans l'autre pool est rejetée.
 - **Réglages et état d'exécution :** sélection, affinité de session, temporisations, pauses, routes de modèles et seuils par compte appartiennent à un seul pool. `fallback: true` sur une route n'élargit qu'au sein du même pool.
@@ -291,7 +291,7 @@ Cette séparation est une frontière de routage interne à opencodex. Elle ne ch
 
 Les comptes du Pool 2 s'ajoutent uniquement par OAuth dans le navigateur. Contrairement à `anthropic`, le Pool 2 n'importe, n'adopte et ne réécrit jamais de jeton de la CLI Claude Code ; cette différence est voulue. Le Pool 2 démarre vide, et une requête Pool 2 sans compte Pool 2 utilisable échoue avec une erreur d'authentification au lieu d'emprunter un identifiant du pool principal ou de Claude Code.
 
-Les commandes de compte et les API de gestion désignent le pool par son nom : `ocx account pool anthropic2 …`, `ocx account auto-switch anthropic2 …`, `ocx account routes anthropic2 …` et `ocx account anthropic-reset-grants --provider anthropic2`. Les points de terminaison des réglages de pool et des octrois de réinitialisation acceptent `provider: "anthropic2"` ; sans ce champ, le pool principal reste utilisé.
+Les commandes de compte et les API de gestion désignent le pool par son nom : `orl account pool anthropic2 …`, `orl account auto-switch anthropic2 …`, `orl account routes anthropic2 …` et `orl account anthropic-reset-grants --provider anthropic2`. Les points de terminaison des réglages de pool et des octrois de réinitialisation acceptent `provider: "anthropic2"` ; sans ce champ, le pool principal reste utilisé.
 
 #### Choix du pool des assistants (`anthropicInstance`)
 
@@ -350,7 +350,7 @@ prime sur la valeur `baseUrl` configurée. Quatre types d'entrée conservent l'U
 Les adaptateurs peuvent ensuite ajuster l'URL résolue. Kiro, par exemple, suit la région API des identifiants importés
 pour construire l'adresse canonique `runtime.{region}.kiro.dev`. Consultez [Adaptateurs](/fr/reference/adapters/).
 
-Lorsque le routage ignore `baseUrl`, opencodex consigne le point de terminaison du registre et uniquement l'origine configurée ;
+Lorsque le routage ignore `baseUrl`, OpenRelay consigne le point de terminaison du registre et uniquement l'origine configurée ;
 un chemin configuré peut lui-même contenir un identifiant. Supprimez l'URL inutilisée ou choisissez l'entrée de fournisseur
 correspondant à la région prévue. `alibaba-token-plan` est épinglé à Pékin, tandis que
 `alibaba-token-plan-intl` couvre les paramètres internationaux.
@@ -379,7 +379,7 @@ ordinaires ou avec état afin que le transfert reste strictement identique, octe
 
 ## Fournisseur Cursor (`adapter: "cursor"`)
 
-Le pont Cursor est expérimental. Après `ocx login cursor`, ajoutez ou modifiez `providers.cursor`.
+Le pont Cursor est expérimental. Après `orl login cursor`, ajoutez ou modifiez `providers.cursor`.
 L'échelle d'optimisation du routeur Cursor est exposée sous forme d'identifiants Codex distincts, car le sélecteur ne peut pas afficher
 les paramètres de modèle propres à Cursor :
 
@@ -446,7 +446,7 @@ acceptez le contournement des autorisations Codex et de la sémantique du bac à
 
 Grok 4.7 propose le mode Fast sur OAuth, avec `low` / `medium` / `high` / `xhigh` et une fenêtre de 500 000 jetons. Son [tarif xAI](https://docs.x.ai/developers/models/grok-4.7) standard par million de jetons est de 2,00 $ en entrée, 0,50 $ en entrée mise en cache et 6,00 $ en sortie ; à partir de 200 000 jetons de contexte, les tarifs sont de 4,00 $ / 1,00 $ / 12,00 $.
 
-Sans configuration explicite de `fastWire` pour le fournisseur, une clé API opencodex limitée par `allowedModels` doit autoriser `xai/grok-4.7-build-fast` (ou son identifiant sans préfixe) pour les requêtes Fast via OAuth. Autoriser uniquement `xai/grok-4.7` ne donne pas accès à cette variante Fast. Une clé limitée au modèle Fast peut utiliser cette variante ; les requêtes ordinaires ou Fast désactivé exigent toujours `xai/grok-4.7`. Si un `fastWire` explicite est configuré, autorisez le modèle réellement envoyé : par exemple, un wire de type `service-tier` conserve `xai/grok-4.7` et exige la permission pour ce modèle. Les restrictions de fournisseur restent applicables.
+Sans configuration explicite de `fastWire` pour le fournisseur, une clé API OpenRelay limitée par `allowedModels` doit autoriser `xai/grok-4.7-build-fast` (ou son identifiant sans préfixe) pour les requêtes Fast via OAuth. Autoriser uniquement `xai/grok-4.7` ne donne pas accès à cette variante Fast. Une clé limitée au modèle Fast peut utiliser cette variante ; les requêtes ordinaires ou Fast désactivé exigent toujours `xai/grok-4.7`. Si un `fastWire` explicite est configuré, autorisez le modèle réellement envoyé : par exemple, un wire de type `service-tier` conserve `xai/grok-4.7` et exige la permission pour ce modèle. Les restrictions de fournisseur restent applicables.
 
 ## Routage des fournisseurs OpenRouter
 
@@ -521,7 +521,7 @@ routage dynamique par défaut.
 Les clés de modèle sont les sélecteurs de modèle publics de Vercel, sans le préfixe externe du fournisseur OpenCodex.
 La sélection de `vercel-ai-gateway/zai-glm-5.2` restaure l'identifiant natif `zai/glm-5.2` avant d'appliquer la règle du
 modèle. Le même mappage s'applique à un sélecteur natif `vercel/<model-id>` : utilisez le sélecteur encodé
-`vercel-ai-gateway/vercel-<model-id>` dans OpenCodex et conservez `vercel/<model-id>` comme clé de modèle.
+`vercel-ai-gateway/vercel-<model-id>` dans OpenRelay et conservez `vercel/<model-id>` comme clé de modèle.
 
 ## Listes autorisées de modèles statiques
 
