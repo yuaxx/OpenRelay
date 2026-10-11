@@ -27,7 +27,7 @@ import type { ManagingCliObservation, ManagingCliRole } from "./ownership-compat
 export const CLAIM_SCHEMA = "ocx-service-claim/1";
 
 const CLAIM_USAGE = [
-  "Usage: ocx service claim --owner <cli|desktop> --install-id <id>",
+  "Usage: orl service claim --owner <cli|desktop> --install-id <id>",
   "    (--expect-none | --expect-owner <cli|desktop> --expect-install-id <id> --expect-generation <n>)",
   "    --expect-revision <n> --expect-compatibility-token <hex> [--json]",
 ].join("\n");

@@ -509,7 +509,7 @@ function Update-TrayState {
   $origin = "http://$($target.host):$($script:port)"
   try { $health = Read-JsonUrl "$origin/healthz" } catch { }
   $pidMatches = $null -eq $target.pid -or [int]$target.pid -eq [int]$health.pid
-  $script:online = $null -ne $health -and $health.status -eq "ok" -and $health.service -eq "opencodex" -and [int]$health.port -eq $script:port -and $pidMatches
+  $script:online = $null -ne $health -and $health.status -eq "ok" -and ($health.service -eq "openrelay" -or $health.service -eq "opencodex" -or $health.legacyService -eq "opencodex") -and [int]$health.port -eq $script:port -and $pidMatches
   $script:proxyPid = if ($script:online) { [int]$health.pid } else { $null }
   $cameOnline = $script:online -and -not $script:wasOnline
   $script:wasOnline = $script:online

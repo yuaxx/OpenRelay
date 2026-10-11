@@ -237,7 +237,7 @@ export function probeHostname(hostname: string | undefined): string {
  */
 export function isOpencodexHealthz(body: HealthzIdentity | null): boolean {
   if (!body) return false;
-  if (body.service === "opencodex") return true;
+  if (body.service === "openrelay" || body.service === "opencodex" || (body as { legacyService?: unknown }).legacyService === "opencodex") return true;
   if (body.service !== undefined) return false;
   return body.status === "ok" && typeof body.version === "string" && typeof body.uptime === "number";
 }
@@ -247,7 +247,7 @@ export function isOpencodexHealthz(body: HealthzIdentity | null): boolean {
  * what the listener CLAIMS, and whoever holds the port can claim it. Callers must attest it.
  */
 export function isPackageTreeFencedHealthz(body: HealthzIdentity | null | undefined): boolean {
-  if (!body || body.service !== "opencodex" || body.status !== "restart_required") return false;
+  if (!body || (body.service !== "openrelay" && body.service !== "opencodex" && (body as { legacyService?: unknown }).legacyService !== "opencodex") || body.status !== "restart_required") return false;
   const error = body.error as { code?: unknown } | null | undefined;
   return typeof error === "object" && error !== null && error.code === "package_tree_changed"
     && typeof body.pid === "number" && Number.isSafeInteger(body.pid) && body.pid > 0;
@@ -669,7 +669,7 @@ export function validateReadyzBody(
 ): ReadinessProbeResult | null {
   if (!body || typeof body !== "object") return null;
   const b = body as ReadyzBody;
-  if (b.service !== "opencodex") return null;
+  if (b.service !== "openrelay" && b.service !== "opencodex" && (b as { legacyService?: unknown }).legacyService !== "opencodex") return null;
   if (typeof b.version !== "string" || b.version.length === 0) return null;
   if (typeof b.uptime !== "number" || !Number.isFinite(b.uptime) || b.uptime < 0) return null;
   if (typeof b.pid !== "number" || !Number.isInteger(b.pid) || b.pid <= 0) return null;

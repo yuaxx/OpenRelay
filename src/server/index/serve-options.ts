@@ -396,7 +396,8 @@ export function createServeOptions(ctx: ServeOptionsContext) {
         const response = fencedHealth || readyzPath !== undefined
           ? jsonResponse({
               status: "restart_required",
-              service: "opencodex",
+              service: "openrelay",
+              legacyService: "opencodex",
               version: VERSION,
               uptime: process.uptime(),
               pid: process.pid,
@@ -610,7 +611,8 @@ export function createServeOptions(ctx: ServeOptionsContext) {
         const healthPort = ctx.server.port ?? listenPort;
         const response = jsonResponse({
           status: "ok",
-          service: "opencodex",
+          service: "openrelay",
+          legacyService: "opencodex",
           version: VERSION,
           uptime: process.uptime(),
           pid: process.pid,
@@ -646,7 +648,8 @@ export function createServeOptions(ctx: ServeOptionsContext) {
         // keep polling instead of promoting a proxy that is draining.
         const status = isDraining() ? "pending" : readinessGate.getStatus();
         const body = {
-          service: "opencodex",
+          service: "openrelay",
+          legacyService: "opencodex",
           version: VERSION,
           uptime: process.uptime(),
           pid: process.pid,

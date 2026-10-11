@@ -472,7 +472,7 @@ function startServerWithSpendLedgerOwner(port: number | undefined, deps: StartSe
   // (#1102), because shared public `config` could echo a rebinding origin on loopback.
   function drainingResponse(req: Request, policy: RequestPolicyView): Response {
     return withCors(new Response(JSON.stringify({
-      error: { type: "server_error", code: "server_restarting", message: "OpenCodex is restarting; retry this request." },
+      error: { type: "server_error", code: "server_restarting", message: "OpenRelay is restarting; retry this request." },
     }), {
       status: 503,
       headers: { "Content-Type": "application/json", "Retry-After": "5" },

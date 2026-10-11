@@ -479,7 +479,7 @@ export async function registerFreshWindowsSchedulerTask(
     !windowsTaskRegistrationHealthy(expectedXml)
     || !windowsTaskRegistrationOwnedByAttempt(expectedXml, attemptNonce)
   ) {
-    throw new Error("The staged Task Scheduler registration failed OpenCodex ownership or shape validation.");
+    throw new Error("The staged Task Scheduler registration failed OpenRelay ownership or shape validation.");
   }
   try {
     (deps.create ?? schtasks)(args);
@@ -546,7 +546,7 @@ export async function registerFreshWindowsSchedulerTask(
   ) {
     const rollback = await rollbackTask();
     throw new Error(
-      "Task Scheduler registration was created but failed the OpenCodex action/trigger or attempt-ownership verification."
+      "Task Scheduler registration was created but failed the OpenRelay action/trigger or attempt-ownership verification."
       + (rollback ? ` Cleanup also failed: ${rollback}` : " The invalid registration was rolled back."),
     );
   }

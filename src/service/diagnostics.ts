@@ -34,15 +34,15 @@ export function bakedServicePathsDiagnostic(platform: NodeJS.Platform = process.
     // install that handed the service token and proxy environment to a mutable PATH shim,
     // so it is stale whether or not the file it names still exists.
     if (platform === "darwin") {
-      return "STALE mutable launchd launcher — run 'ocx service repair' to re-bake trusted package paths";
+      return "STALE mutable launchd launcher — run 'orl service repair' to re-bake trusted package paths";
     }
     if (existsSync(state.launcherPath)) return null;
-    return `STALE baked paths (missing: ${state.launcherPath}) — run 'ocx service repair' to re-bake`;
+    return `STALE baked paths (missing: ${state.launcherPath}) — run 'orl service repair' to re-bake`;
   }
   if (!state?.bunPath || !state?.cliPath) return null;
   const missing = [state.bunPath, state.cliPath].filter(path => !existsSync(path));
   if (missing.length === 0) return null;
-  return `STALE baked paths (missing: ${missing.join(", ")}) — run 'ocx service repair' to re-bake`;
+  return `STALE baked paths (missing: ${missing.join(", ")}) — run 'orl service repair' to re-bake`;
 }
 
 export function serviceDiagnosticsSummary(): string {
@@ -150,9 +150,9 @@ export function deriveWindowsServiceDiagnostic(inputs: WindowsServiceDiagnosticI
       ? schedulerEnabled && schedulerAssetsHealthy
       : inputs.nativeStatus === "started" || inputs.nativeStatus === "stopped");
   const detail = conflict
-    ? "CONFLICT: Task Scheduler and native WinSW are both present — run 'ocx service uninstall' then reinstall one"
+    ? "CONFLICT: Task Scheduler and native WinSW are both present — run 'orl service uninstall' then reinstall one"
     : stale
-      ? "stale or missing service assets — run 'ocx service repair'"
+      ? "stale or missing service assets — run 'orl service repair'"
       : schedulerInstalled
         ? schedulerEnabled ? "Task Scheduler enabled" : "Task Scheduler disabled"
         : nativeInstalled
@@ -336,7 +336,7 @@ export async function serviceStatusReport(
     : null);
   const staleLine = stalePlist && stalePlist.loaded && !stalePlist.matchesPlist
     ? "   launchd is running an OLDER plist than the one on disk.\n"
-      + `   Fix:    launchctl bootout gui/$(id -u)/${LABEL} && ocx service repair\n`
+      + `   Fix:    launchctl bootout gui/$(id -u)/${LABEL} && orl service repair\n`
     : "";
 
   return `⚠️  ${diag.summary}\n`
@@ -344,5 +344,5 @@ export async function serviceStatusReport(
     + staleLine
     + `   Log:    ${serviceLogPath()}\n`
     + `   Repair: ${serviceRepairCommand()}\n`
-    + "   Meanwhile: ocx start           (serves in the foreground)";
+    + "   Meanwhile: orl start           (serves in the foreground)";
 }

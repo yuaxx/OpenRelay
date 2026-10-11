@@ -169,7 +169,7 @@ const commandRunners: Record<string, CommandRunner> = {
       };
       const live = await deps.findLiveProxy();
       if (!live) {
-        return emitBack(false, "No running proxy found. Run 'orl start' — it injects opencodex automatically.", 1);
+        return emitBack(false, "No running proxy found. Run 'orl start' — it injects OpenRelay automatically.", 1);
       }
       const desired = setIntegrationEnabled("codex", true);
       if (!desired.ok) {
@@ -190,7 +190,7 @@ const commandRunners: Record<string, CommandRunner> = {
         );
       }
       if (!synced.ok) {
-        return emitBack(false, "Plain `codex` was not switched back to opencodex. Fix the reported Codex config issue and retry.", 1);
+        return emitBack(false, "Plain `codex` was not switched back to OpenRelay. Fix the reported Codex config issue and retry.", 1);
       }
       const target = collectOrcaCodexHomeDiagnostic();
       return emitBack(true, `Plain \`codex\` now routes through OpenRelay in ${target.effectiveCodexHome} (undo with: orl restore).`, 0);

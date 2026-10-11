@@ -131,27 +131,27 @@ export function formatWindowsSchedulerServiceStatus(
 ): string {
   if (task.status === "present") {
     if (proxy.status === "running") {
-      return `✅ service installed (Task Scheduler); OpenCodex proxy running on port ${proxy.port}.`;
+      return `✅ service installed (Task Scheduler); OpenRelay proxy running on port ${proxy.port}.`;
     }
     if (proxy.status === "not-running") {
-      return "⚠️  service installed (Task Scheduler); OpenCodex proxy not running.";
+      return "⚠️  service installed (Task Scheduler); OpenRelay proxy not running.";
     }
-    return "⚠️  service installed (Task Scheduler); OpenCodex proxy status unknown.";
+    return "⚠️  service installed (Task Scheduler); OpenRelay proxy status unknown.";
   }
   if (task.status === "absent") {
     if (proxy.status === "running") {
-      return `❌ service not installed (Task Scheduler); OpenCodex proxy is running independently on port ${proxy.port}.`;
+      return `❌ service not installed (Task Scheduler); OpenRelay proxy is running independently on port ${proxy.port}.`;
     }
     if (proxy.status === "unknown") {
-      return "❌ service not installed (Task Scheduler); OpenCodex proxy status unknown.";
+      return "❌ service not installed (Task Scheduler); OpenRelay proxy status unknown.";
     }
     return "❌ service not installed (Task Scheduler).";
   }
   if (proxy.status === "running") {
-    return `⚠️  Task Scheduler registration unknown; OpenCodex proxy running on port ${proxy.port}.`;
+    return `⚠️  Task Scheduler registration unknown; OpenRelay proxy running on port ${proxy.port}.`;
   }
   if (proxy.status === "not-running") {
-    return "⚠️  service status unknown (Task Scheduler query failed); OpenCodex proxy not running.";
+    return "⚠️  service status unknown (Task Scheduler query failed); OpenRelay proxy not running.";
   }
   return "⚠️  service status unknown (Task Scheduler and proxy checks failed).";
 }
@@ -294,7 +294,7 @@ export function evaluateWindowsSchedulerInstallVerification(inputs: {
             ? "Task Scheduler registration is present but unhealthy."
             : "Task Scheduler task is present but its XML could not be read.")
           : nativeStatusUnknown
-            ? "The Task Scheduler task was created, but OpenCodex could not verify that the native WinSW service is absent."
+            ? "The Task Scheduler task was created, but OpenRelay could not verify that the native WinSW service is absent."
             : "ok";
   return {
     taskInstalled: inputs.taskInstalled,
@@ -453,7 +453,7 @@ async function reconcileUnknownElevatedOutcome(exitCode: number): Promise<void> 
   const parts = [
     "The elevated Task Scheduler operation returned an unknown result.",
     `Exit code: ${exitCode}.`,
-    "OpenCodex could not prove whether task creation completed, so installation state was not written.",
+    "OpenRelay could not prove whether task creation completed, so installation state was not written.",
   ];
   if (probe.status === "unknown") {
     parts.push(`Task Scheduler presence could not be verified: ${probe.detail}`);
@@ -461,7 +461,7 @@ async function reconcileUnknownElevatedOutcome(exitCode: number): Promise<void> 
     throwPartialInstall(parts);
   }
   if (probe.status === "absent") {
-    parts.push("No OpenCodex Task Scheduler task was found after the elevated operation.");
+    parts.push("No OpenRelay Task Scheduler task was found after the elevated operation.");
     throwPartialInstall(parts);
   }
   parts.push("A Task Scheduler task is present; attempting cleanup.");

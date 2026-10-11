@@ -63,7 +63,7 @@ async function health(argv: string[], deps: RuntimeApiDeps): Promise<number> {
       return number;
     };
     if (!value || Array.isArray(raw) || !ledger || Array.isArray(value.spendLedger)
-      || value.status !== "ok" || value.service !== "opencodex"
+      || value.status !== "ok" || (value.service !== "openrelay" && value.service !== "opencodex" && (value as { legacyService?: unknown }).legacyService !== "opencodex")
       || typeof value.version !== "string" || !value.version.trim()
       || typeof value.uptime !== "number" || !Number.isFinite(value.uptime) || value.uptime < 0
       || typeof value.pid !== "number" || !Number.isSafeInteger(value.pid) || value.pid <= 0
@@ -71,7 +71,7 @@ async function health(argv: string[], deps: RuntimeApiDeps): Promise<number> {
       || typeof ledger.initialized !== "boolean" || typeof ledger.configured !== "boolean"
       || typeof ledger.degraded !== "boolean") throw new Error("Invalid system health response");
     const result = {
-      status: "ok", service: "opencodex", version: value.version, uptime: value.uptime, pid: value.pid,
+      status: "ok", service: (value.service === "openrelay" ? "openrelay" : "opencodex"), version: value.version, uptime: value.uptime, pid: value.pid,
       spendLedger: {
         ownership: ledger.ownership, initialized: ledger.initialized, configured: ledger.configured,
         degraded: ledger.degraded, persistFailures: counter(ledger.persistFailures), corruptRecords: counter(ledger.corruptRecords),

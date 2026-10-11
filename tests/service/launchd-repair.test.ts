@@ -1234,7 +1234,7 @@ describe("service outcome reporting after a failed operation (#4914)", () => {
     // gets its checkmark, and a registered-but-silent service still gets the warning that
     // registration is not serving.
     const ok = await capture("repaired", true);
-    expect(ok.out).toContain("✅ opencodex service repaired and serving on port 10100.");
+    expect(ok.out).toContain("✅ OpenRelay service repaired and serving on port 10100.");
     expect(ok.err).toBe("");
 
     const silent = await capture("repaired", false);

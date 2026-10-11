@@ -216,7 +216,7 @@ export async function reportServiceServing(
     return;
   }
   if (serving.ok) {
-    console.log(`✅ opencodex service ${verb} and serving on port ${serving.port}.`);
+    console.log(`✅ OpenRelay service ${verb} and serving on port ${serving.port}.`);
     return;
   }
   console.error(
@@ -237,7 +237,7 @@ export async function reportServiceServing(
  * scheduler definition needs no elevation; a stale definition can be re-registered and prompt.
  */
 export function serviceRepairCommand(): string {
-  return "ocx service repair";
+  return "orl service repair";
 }
 
 /**

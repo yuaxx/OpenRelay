@@ -8,8 +8,8 @@ export type SupervisionLatch = ReturnType<typeof createSupervisionLatch>;
 export function desktopServiceRefusal(evidence: DesktopSupervision, blocked: boolean): string | null {
   if (!blocked) return null;
   const runtime = evidence.kind === "desktop" ? ` (pid ${evidence.runtimePid}, ${evidence.app})` : "";
-  return `OpenCodex Desktop supervises the running proxy${runtime}. `
-    + "Quit OpenCodex, then rerun 'ocx service install' to move startup management to this CLI.";
+  return `OpenRelay Desktop supervises the running proxy${runtime}. `
+    + "Quit OpenRelay, then rerun 'orl service install' to move startup management to this CLI.";
 }
 
 export function assertNoDesktopSupervision(

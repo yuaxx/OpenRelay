@@ -68,7 +68,7 @@ export async function maybeNoticeVersionSkew(
     if (!skew.skewed) return;
     printed = true;
     (io.warn ?? console.error)(`orl ${cliVersion} does not match the running proxy ${identity.version}. `
-      + "Check which opencodex installation you meant to use (`orl status` shows both).");
+      + "Check which OpenRelay installation you meant to use (`orl status` shows both).");
   } catch {
     // Best-effort diagnostics must not fail a lifecycle command or change its exit code.
   } finally {

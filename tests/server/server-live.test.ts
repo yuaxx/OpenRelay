@@ -1424,14 +1424,16 @@ describe("GET /readyz", () => {
       expect(healthzRes.status).toBe(200);
       const healthzBody = (await healthzRes.json()) as { status: string; service: string; pid: number };
       expect(healthzBody.status).toBe("ok");
-      expect(healthzBody.service).toBe("opencodex");
+      expect(["openrelay", "opencodex"]).toContain(healthzBody.service);
+      expect((healthzBody as Record<string, unknown>).legacyService).toBe("opencodex");
 
       // Readiness is pending right after bind: 503 + Retry-After, sanitized body.
       const readyzRes = await fetch(new URL("/readyz", base));
       expect(readyzRes.status).toBe(503);
       expect(readyzRes.headers.get("retry-after")).toBe("1");
       const readyzBody = (await readyzRes.json()) as Record<string, unknown>;
-      expect(readyzBody.service).toBe("opencodex");
+      expect(["openrelay", "opencodex"]).toContain(readyzBody.service as string);
+      expect(readyzBody.legacyService).toBe("opencodex");
       expect(readyzBody.status).toBe("pending");
       expect(typeof readyzBody.version).toBe("string");
       expect(typeof readyzBody.uptime).toBe("number");
@@ -1440,7 +1442,7 @@ describe("GET /readyz", () => {
       expectReadyProtocolMetadata(readyzBody, new URL(base).origin);
       // Sanitization: the body must never carry sync diagnostics, paths, or warnings.
       expect(Object.keys(readyzBody).sort()).toEqual([
-        "managementUrl", "minimumClientProtocol", "pid", "port", "protocol", "service", "status", "uptime", "version",
+        "legacyService", "managementUrl", "minimumClientProtocol", "pid", "port", "protocol", "service", "status", "uptime", "version",
       ]);
       expect(JSON.stringify(readyzBody)).not.toContain("warning");
       expect(JSON.stringify(readyzBody)).not.toContain("path");
@@ -1490,7 +1492,7 @@ describe("GET /readyz", () => {
       expect(res.headers.get("retry-after")).toBeNull();
       const body = (await res.json()) as { status: string; service: string };
       expect(body.status).toBe("ready");
-      expect(body.service).toBe("opencodex");
+      expect(["openrelay", "opencodex"]).toContain(body.service);
     } finally {
       await server.stop(true);
     }
@@ -1563,7 +1565,7 @@ describe("GET /readyz", () => {
       // Pending → 503, but it answered (did NOT demand auth → would be 401).
       expect([200, 503]).toContain(res.status);
       const body = (await res.json()) as { service?: string };
-      expect(body.service).toBe("opencodex");
+      expect(["openrelay", "opencodex"]).toContain(body.service);
     } finally {
       await server.stop(true);
     }

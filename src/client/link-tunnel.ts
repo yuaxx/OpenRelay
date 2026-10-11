@@ -530,7 +530,7 @@ async function isOpencodexReadiness(response: Response, signal: AbortSignal): Pr
     const { bytes, oversized } = await readBoundedResponseBytes(response, { maxBytes: PROBE_BODY_MAX_BYTES, signal });
     if (oversized) return false;
     const body = JSON.parse(new TextDecoder().decode(bytes)) as unknown;
-    return typeof body === "object" && body !== null && (body as { service?: unknown }).service === "opencodex";
+    return typeof body === "object" && body !== null && ((body as { service?: unknown }).service === "openrelay" || (body as { service?: unknown }).service === "opencodex" || (body as { legacyService?: unknown }).legacyService === "opencodex");
   } catch {
     return false;
   }

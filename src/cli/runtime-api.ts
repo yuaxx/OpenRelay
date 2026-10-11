@@ -69,7 +69,7 @@ export class RuntimeApiError extends Error {
  */
 function clientRoleManagementRefusal(port: number): string {
   return [
-    `The opencodex listener on port ${port} is running in the client role. It serves only the machine routes (/api/machine/*), so this machine has no management API to call.`,
+    `The OpenRelay listener on port ${port} is running in the client role. It serves only the machine routes (/api/machine/*), so this machine has no management API to call.`,
     "Custom-model edits and other management changes are made on the hub this machine is connected to: run the command there, or use the hub dashboard (the dashboard on this machine relays to it when the connection uses the relay transport).",
     "To change this machine's own configuration instead: edit customModels in config.json, then run: orl sync",
   ].join("\n");
@@ -145,7 +145,7 @@ function responseMessage(body: unknown, status: number, integrationRoute = false
     const method = stringField(record, "method");
     const path = stringField(record, "path");
     if (method && path) {
-      return `This opencodex listener does not serve ${method.slice(0, 16)} ${path.slice(0, 200)}, so the request was refused before any handler ran (it is not a missing record). Check that the command is pointed at a proxy that serves the management API.`;
+      return `This OpenRelay listener does not serve ${method.slice(0, 16)} ${path.slice(0, 200)}, so the request was refused before any handler ran (it is not a missing record). Check that the command is pointed at a proxy that serves the management API.`;
     }
   }
   let primary: string | undefined;

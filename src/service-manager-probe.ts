@@ -1070,7 +1070,7 @@ function walkWindowsChain(
 
   const launchShape = wrapperLaunchShape(wrapperBody);
   if (launchShape === null) {
-    return unknown(`the launcher wrapper does not look like a generated opencodex service wrapper: ${wrapperPath}`);
+    return unknown(`the launcher wrapper does not look like a generated OpenRelay service wrapper: ${wrapperPath}`);
   }
   if (typeof launchShape !== "string") {
     const executable = launchShape.standaloneBun;

@@ -129,14 +129,14 @@ export function assessServiceTakeoverCompatibility(
   if (present.length === 0) return {
     kind: "blocked",
     reason: "managing-cli-unobserved",
-    detail: "no managing OpenCodex CLI installation was observed",
+    detail: "no managing OpenRelay CLI installation was observed",
     minimumCliVersion: SERVICE_OWNERSHIP_MINIMUM_CLI_VERSION,
   };
   const unsupported = present.find(([, manager]) => !versionSupportsOwnership(manager.version));
   if (unsupported) return {
     kind: "blocked",
     reason: "managing-cli-unsupported",
-    detail: `${unsupported[0]} uses OpenCodex ${unsupported[1].version}; ${SERVICE_OWNERSHIP_MINIMUM_CLI_VERSION} or later is required`,
+    detail: `${unsupported[0]} uses OpenRelay ${unsupported[1].version}; ${SERVICE_OWNERSHIP_MINIMUM_CLI_VERSION} or later is required`,
     minimumCliVersion: SERVICE_OWNERSHIP_MINIMUM_CLI_VERSION,
   };
   if (input.managers["service-registration"].status === "observed"

@@ -197,7 +197,7 @@ describe("probeWindowsSchedulerTask", () => {
       { status: "running", port: 10100 },
     );
 
-    expect(result).toBe("✅ service installed (Task Scheduler); OpenCodex proxy running on port 10100.");
+    expect(result).toBe("✅ service installed (Task Scheduler); OpenRelay proxy running on port 10100.");
     expect(result).not.toContain("����");
     expect(result).not.toContain("�۾�");
   });
@@ -244,17 +244,17 @@ describe("probeWindowsSchedulerTask", () => {
 describe("formatWindowsSchedulerServiceStatus", () => {
   test("reports task and identity-checked proxy state independently", () => {
     expect(formatWindowsSchedulerServiceStatus({ status: "present" }, { status: "not-running" }))
-      .toBe("⚠️  service installed (Task Scheduler); OpenCodex proxy not running.");
+      .toBe("⚠️  service installed (Task Scheduler); OpenRelay proxy not running.");
     expect(formatWindowsSchedulerServiceStatus({ status: "present" }, { status: "unknown" }))
-      .toBe("⚠️  service installed (Task Scheduler); OpenCodex proxy status unknown.");
+      .toBe("⚠️  service installed (Task Scheduler); OpenRelay proxy status unknown.");
     expect(formatWindowsSchedulerServiceStatus({ status: "absent" }, { status: "running", port: 3593 }))
-      .toBe("❌ service not installed (Task Scheduler); OpenCodex proxy is running independently on port 3593.");
+      .toBe("❌ service not installed (Task Scheduler); OpenRelay proxy is running independently on port 3593.");
     expect(formatWindowsSchedulerServiceStatus({ status: "absent" }, { status: "not-running" }))
       .toBe("❌ service not installed (Task Scheduler).");
     expect(formatWindowsSchedulerServiceStatus({ status: "unknown", detail: "����" }, { status: "running", port: 10100 }))
-      .toBe("⚠️  Task Scheduler registration unknown; OpenCodex proxy running on port 10100.");
+      .toBe("⚠️  Task Scheduler registration unknown; OpenRelay proxy running on port 10100.");
     expect(formatWindowsSchedulerServiceStatus({ status: "unknown", detail: "����" }, { status: "not-running" }))
-      .toBe("⚠️  service status unknown (Task Scheduler query failed); OpenCodex proxy not running.");
+      .toBe("⚠️  service status unknown (Task Scheduler query failed); OpenRelay proxy not running.");
   });
 
   test("keeps scheduler and runtime probe failures locale-independent", async () => {

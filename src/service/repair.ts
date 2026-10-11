@@ -87,7 +87,7 @@ export function foreignServiceOwnerRefusal(ownership: ServiceOwnership, action =
   return `Background service ${action} stopped: the desktop app owns the runtime `
     + `(install ${ownership.installId}, consent generation ${ownership.consentGeneration}).\n`
     + "The service registration was left exactly as it is — not re-enabled, not rewritten and not restarted.\n"
-    + "Quit the desktop app and run 'ocx service install' to hand the runtime back to this CLI.";
+    + "Quit the desktop app and run 'orl service install' to hand the runtime back to this CLI.";
 }
 
 /**
@@ -101,7 +101,7 @@ export function unknownServiceOwnerRefusal(reason: string, action = "repair"): s
   return `Background service ${action} stopped: ${reason}, so the runtime's recorded owner could `
     + "not be determined.\n"
     + "The service registration was left exactly as it is — not re-enabled, not rewritten and not restarted.\n"
-    + "Repair the service-state file or its permissions, then run 'ocx service install' to take the runtime back.";
+    + "Repair the service-state file or its permissions, then run 'orl service install' to take the runtime back.";
 }
 
 async function assertSchedulerSnapshotBeforeStart(
@@ -166,11 +166,11 @@ export async function repairService(deps: RepairServiceDeps = {}): Promise<void>
   if (diag.conflict) {
     throw new Error(
       "Cannot repair while Task Scheduler and native WinSW are both present. "
-        + "Run 'ocx service uninstall' then reinstall one backend with 'ocx service install'.",
+        + "Run 'orl service uninstall' then reinstall one backend with 'orl service install'.",
     );
   }
   if (!diag.installed) {
-    throw new Error("Background service is not installed. Run 'ocx service install' first.");
+    throw new Error("Background service is not installed. Run 'orl service install' first.");
   }
 
   // Before anything is asserted, written, stopped or started. A repair that has already

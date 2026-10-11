@@ -137,7 +137,7 @@ export function planServiceCommand(
     return { ok: false, message: `Unknown service option: ${parsed.invalid.join(" ")}` };
   }
   if (parsed.backend && parsed.sub !== "install") {
-    return { ok: false, message: "--native/--scheduler apply to `ocx service install` only; other subcommands use the installed backend." };
+    return { ok: false, message: "--native/--scheduler apply to `orl service install` only; other subcommands use the installed backend." };
   }
   if (parsed.backend === "native" && (options.platform ?? process.platform) !== "win32") {
     return { ok: false, message: "--native (WinSW) is Windows-only." };
@@ -151,7 +151,7 @@ export function planServiceCommand(
       const suffix = probe.detail ? ` (${probe.detail})` : "";
       return {
         ok: false,
-        message: `Could not safely determine whether the service is installed${suffix}. Run 'ocx service status' and retry; use explicit 'ocx service install' only after confirming it is absent.`,
+        message: `Could not safely determine whether the service is installed${suffix}. Run 'orl service status' and retry; use explicit 'orl service install' only after confirming it is absent.`,
       };
     }
     installed = probe.state === "installed";

@@ -62,7 +62,7 @@ export function assertServiceEnvironmentMatchesInstall(deps: CodexHomeDeps = {})
   if (!servicePathMatchesInstall(state.opencodexHome, actualOpenCodexHome, deps)) {
     throw new ServiceOwnershipError(
       `Service was installed with OPENCODEX_HOME=${state.opencodexHome}, but current OPENCODEX_HOME=${currentOpenCodexHome()}. ` +
-        "Run the service command from the same OpenCodex home so service state and secrets match.",
+        "Run the service command from the same OpenRelay home so service state and secrets match.",
     );
   }
   if (state.codexSqliteHome !== undefined) {
@@ -87,7 +87,7 @@ export function assertServiceEnvironmentMatchesInstall(deps: CodexHomeDeps = {})
 export function serviceRetryCommand(
   diag: Pick<ServiceDiagnostic, "installed" | "conflict"> = diagnoseService(),
 ): string {
-  return diag.installed && !diag.conflict ? "ocx service repair" : "ocx service install";
+  return diag.installed && !diag.conflict ? "orl service repair" : "orl service install";
 }
 
 /**
@@ -124,9 +124,9 @@ export function assertNotAdminToken(
     throw new Error(
       `${serviceApiTokenFilePath()} holds a management (admin) token, not a data-plane token. `
         + "The service exports that file as the data-plane secret, which fences the whole management "
-        + "API closed and makes every ocx management command fail with 503, so the hub crash-loops at "
+        + "API closed and makes every orl management command fail with 503, so the hub crash-loops at "
         + `boot. Delete the file (rm ${serviceApiTokenFilePath()}), then rerun \`ocx service repair\` `
-        + "(or `ocx service install` when the service is not installed yet): a fresh owner-only "
+        + "(or `orl service install` when the service is not installed yet): a fresh owner-only "
         + "data-plane token is generated and nothing needs to be exported by hand.",
     );
   }

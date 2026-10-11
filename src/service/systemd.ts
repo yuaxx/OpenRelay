@@ -84,7 +84,7 @@ export function buildUnit(
   ].filter((line): line is string => Boolean(line)).join("\n");
   const command = `${launcher ? buildServiceLauncherShellCommand(launcher) : buildServiceShellCommand(bun, cli)} >> ${shellQuote(log)} 2>&1`;
   return `[Unit]
-Description=OpenCodex Proxy Server
+Description=OpenRelay Proxy Server
 After=network-online.target
 Wants=network-online.target
 
@@ -184,7 +184,7 @@ export function systemdNeedsDaemonReload(deps: { show?: () => string } = {}): bo
 export function startSystemd(): void {
   ensureUserBusEnv();
   if (!existsSync(unitPath())) {
-    console.error(`opencodex service is not installed: ${unitPath()}`);
+    console.error(`OpenRelay service is not installed: ${unitPath()}`);
     console.error("Run `orl service install` first to create and enable the systemd user unit.");
     process.exit(1);
   }

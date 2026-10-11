@@ -1,5 +1,4 @@
 import { spawnSync } from "node:child_process";
-
 /**
  * Is something still answering `/healthz` as an opencodex proxy on this endpoint?
  *
@@ -60,7 +59,7 @@ export function probeProxyLiveness(port, hostname = "127.0.0.1", timeoutMs = 150
     "      // that happens to expose /healthz must not be read as our proxy, and a",
     "      // pre-identity build of ours must not be read as foreign.",
     "      const isOpencodex = parsed && typeof parsed === 'object'",
-    "        && (parsed.service === 'opencodex'",
+    "&& (parsed.service === 'openrelay' || parsed.service === 'opencodex' || parsed.legacyService === 'opencodex'",
     "          || (parsed.service === undefined",
     "            && parsed.status === 'ok'",
     "            && typeof parsed.version === 'string'",

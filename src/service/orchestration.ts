@@ -380,7 +380,7 @@ export async function installFreshWindowsSchedulerSafely(
     const ownershipRecorded = recordOwnership();
     if (!ownershipRecorded && configRootWasAbsent) {
       throw new Error(
-        "The fresh OpenCodex config root could not be claimed for safe uninstall; "
+        "The fresh OpenRelay config root could not be claimed for safe uninstall; "
         + "aborting before service-manager cleanup or asset publication.",
       );
     }
@@ -408,7 +408,7 @@ export async function installFreshWindowsSchedulerSafely(
     if (started) {
       throw new Error(
         `${detail}\nThe scheduler task started, but install state was not published. `
-        + "The task was left in place; inspect `ocx service status` before retrying.",
+        + "The task was left in place; inspect `orl service status` before retrying.",
       );
     }
     throw error;

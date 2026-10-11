@@ -1310,11 +1310,11 @@ describe("Windows service task", () => {
 
       expectTextToContainPath(script, serviceLogPath());
       expect(script).toContain('set "OCX_SERVICE_LOG=');
-      expect(script).toContain("opencodex service wrapper start");
+      expect(script).toContain("openrelay service wrapper start");
       expect(script).toContain('echo bun="%OCX_BUN%"');
       expect(script).toContain('echo bun_source="');
       expect(script).toContain('echo cli="%OCX_CLI%"');
-      expect(script).toContain('echo opencodex_home="%OPENCODEX_HOME%"');
+      expect(script).toContain('echo openrelay_home="%OPENCODEX_HOME%"');
       expect(script).toContain('echo codex_home="%CODEX_HOME%"');
       expect(script).toContain('set "CODEX_SQLITE_HOME=C:\\codex-sqlite-home"');
       expect(script).toContain('echo token_file="%OCX_API_TOKEN_FILE%"');
@@ -3620,13 +3620,13 @@ describe("auth preflight retry command (260804 #970 follow-up)", () => {
   // the fix reverted — a guard that cannot fail is worse than no guard.
   test("serviceRetryCommand picks the command that can actually succeed", () => {
     // Registered and healthy enough to refresh in place: repair, no elevation needed.
-    expect(serviceRetryCommand({ installed: true, conflict: false })).toBe("ocx service repair");
+    expect(serviceRetryCommand({ installed: true, conflict: false })).toBe("orl service repair");
     // Nothing registered: repairService() would refuse, so install is the only option.
-    expect(serviceRetryCommand({ installed: false, conflict: false })).toBe("ocx service install");
+    expect(serviceRetryCommand({ installed: false, conflict: false })).toBe("orl service install");
     // Task Scheduler AND WinSW both present: repairService() refuses this outright
     // (see the conflict guard in repairService), and installWindows removes the native
     // backend first, so install is the valid recovery.
-    expect(serviceRetryCommand({ installed: true, conflict: true })).toBe("ocx service install");
+    expect(serviceRetryCommand({ installed: true, conflict: true })).toBe("orl service install");
   });
 });
 
@@ -3867,8 +3867,8 @@ describe("service serving confirmation", () => {
       });
       expect(out).toContain("no proxy is answering on port 10100");
       // Registered but not serving: repair refreshes it without demanding elevation.
-      expect(out).toContain("ocx service repair");
-      expect(out).toContain("ocx start");
+      expect(out).toContain("orl service repair");
+      expect(out).toContain("orl start");
     });
 
     // The injected seam must win on every platform: the default is darwin-gated,

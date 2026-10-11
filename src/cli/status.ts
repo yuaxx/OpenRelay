@@ -723,7 +723,7 @@ export function missingCodexCatalogLines(missingCatalogPath: string | null): str
   return [
     "⚠️  Codex is pointed at a model catalog that is no longer on disk, so Codex cannot load its config:",
     `   ${missingCatalogPath}`,
-    "   Regenerate it with 'orl start', or remove opencodex from Codex with 'orl restore'.",
+    "   Regenerate it with 'orl start', or remove OpenRelay from Codex with 'orl restore'.",
   ];
 }
 

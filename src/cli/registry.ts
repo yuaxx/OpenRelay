@@ -237,7 +237,7 @@ export const CLI_COMMANDS: CliCommandEntry[] = [
   {
     name: "gui",
     usage: "orl gui [pair --origin <browser-origin> [--json]]",
-    summary: "Open the opencodex dashboard or create a secret single-use remote pairing grant.",
+    summary: "Open the OpenRelay dashboard or create a secret single-use remote pairing grant.",
     details: [
       "Pairing requires an explicit allowed --origin; there is no localhost or config-derived default.",
       "The printed grant is secret, single-use, short-lived, and must not be persisted.",
@@ -601,7 +601,7 @@ export const CLI_COMMANDS: CliCommandEntry[] = [
       "enable manages ~/.zcode/v2/provider_config.json with schemaVersion 1; if the store is absent, it writes the legacy provider.opencodex block into ~/.zcode/v2/config.json.",
       "A surviving owned legacy block prevents switching stores. Run `orl zcode disable` before enabling the current store. Unknown store schemas are refused.",
       "ZCode reads its config at startup — restart ZCode after enable/disable.",
-      "Select OpenCodex Proxy/<provider>/<model> from ZCode's model picker.",
+      "Select OpenRelay Proxy/<provider>/<model> from ZCode's model picker.",
     ],
   },
   {
